@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 class AuthenticationModel extends FlutterFlowModel<AuthenticationWidget> {
   ///  State fields for stateful widgets in this page.
 
+  bool isBusinessOwner = false;
   // Model for AuthTab.
   late AuthTabModel authTabModel1;
   // Model for AuthTab.

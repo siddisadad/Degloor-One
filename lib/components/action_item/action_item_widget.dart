@@ -15,6 +15,8 @@ class ActionItemWidget extends StatefulWidget {
     Color? statusText,
     String? subtitle,
     String? title,
+    this.onApprove,
+    this.onReject,
   })  : this.statusBg = statusBg ?? const Color(0xFFFFF3E0),
         this.statusLabel = statusLabel ?? 'PENDING',
         this.statusText = statusText ?? const Color(0xFFE65100),
@@ -27,6 +29,8 @@ class ActionItemWidget extends StatefulWidget {
   final Color statusText;
   final String subtitle;
   final String title;
+  final Future Function()? onApprove;
+  final Future Function()? onReject;
 
   @override
   State<ActionItemWidget> createState() => _ActionItemWidgetState();
@@ -214,8 +218,10 @@ class _ActionItemWidgetState extends State<ActionItemWidget> {
                               color: FlutterFlowTheme.of(context).success,
                               size: 20.0,
                             ),
-                            onPressed: () {
-                              print('IconButton pressed ...');
+                            onPressed: () async {
+                              if (widget.onApprove != null) {
+                                await widget.onApprove!();
+                              }
                             },
                           ),
                           FlutterFlowIconButton(
@@ -227,8 +233,10 @@ class _ActionItemWidgetState extends State<ActionItemWidget> {
                               color: FlutterFlowTheme.of(context).error,
                               size: 20.0,
                             ),
-                            onPressed: () {
-                              print('IconButton pressed ...');
+                            onPressed: () async {
+                              if (widget.onReject != null) {
+                                await widget.onReject!();
+                              }
                             },
                           ),
                         ].divide(SizedBox(width: 4.0)),

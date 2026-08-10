@@ -9,6 +9,8 @@ import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/form_field_controller.dart';
+import '/auth/supabase_auth/auth_util.dart';
+import '/backend/supabase/database/database.dart';
 import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -172,7 +174,10 @@ class _BusinessRegistrationWidgetState
                               trailingIconPresent: false,
                               hint: 'e.g., Maharashtra Hardware & Steel',
                               value: '',
-                              onChange: '',
+                              onChange: (val) {
+                                _model.textFieldModel1.inputTextController
+                                    ?.text = val;
+                              },
                               onSubmit: '',
                               variant: 'outlined',
                               error: false,
@@ -195,7 +200,10 @@ class _BusinessRegistrationWidgetState
                               trailingIconPresent: false,
                               hint: 'Full legal name of proprietor',
                               value: '',
-                              onChange: '',
+                              onChange: (val) {
+                                _model.textFieldModel2.inputTextController
+                                    ?.text = val;
+                              },
                               onSubmit: '',
                               variant: 'outlined',
                               error: false,
@@ -295,7 +303,10 @@ class _BusinessRegistrationWidgetState
                               hint:
                                   'Briefly describe your products or services...',
                               value: '',
-                              onChange: '',
+                              onChange: (val) {
+                                _model.textFieldModel3.inputTextController
+                                    ?.text = val;
+                              },
                               onSubmit: '',
                               variant: 'outlined',
                               error: false,
@@ -333,7 +344,10 @@ class _BusinessRegistrationWidgetState
                               trailingIconPresent: false,
                               hint: '+91 98765 43210',
                               value: '',
-                              onChange: '',
+                              onChange: (val) {
+                                _model.textFieldModel4.inputTextController
+                                    ?.text = val;
+                              },
                               onSubmit: '',
                               variant: 'outlined',
                               error: false,
@@ -356,7 +370,10 @@ class _BusinessRegistrationWidgetState
                               trailingIconPresent: false,
                               hint: 'For customer enquiries',
                               value: '',
-                              onChange: '',
+                              onChange: (val) {
+                                _model.textFieldModel5.inputTextController
+                                    ?.text = val;
+                              },
                               onSubmit: '',
                               variant: 'outlined',
                               error: false,
@@ -404,7 +421,10 @@ class _BusinessRegistrationWidgetState
                               trailingIconPresent: false,
                               hint: 'Shop No., Building Name, Main Road...',
                               value: '',
-                              onChange: '',
+                              onChange: (val) {
+                                _model.textFieldModel6.inputTextController
+                                    ?.text = val;
+                              },
                               onSubmit: '',
                               variant: 'outlined',
                               error: false,
@@ -429,7 +449,10 @@ class _BusinessRegistrationWidgetState
                                     trailingIconPresent: false,
                                     hint: 'Type here...',
                                     value: 'Degloor',
-                                    onChange: '',
+                                    onChange: (val) {
+                                      _model.textFieldModel7.inputTextController
+                                          ?.text = val;
+                                    },
                                     onSubmit: '',
                                     variant: 'outlined',
                                     error: false,
@@ -450,7 +473,10 @@ class _BusinessRegistrationWidgetState
                                     trailingIconPresent: false,
                                     hint: 'e.g., Shivaji Chowk',
                                     value: '',
-                                    onChange: '',
+                                    onChange: (val) {
+                                      _model.textFieldModel8.inputTextController
+                                          ?.text = val;
+                                    },
                                     onSubmit: '',
                                     variant: 'outlined',
                                     error: false,
@@ -957,6 +983,75 @@ class _BusinessRegistrationWidgetState
                                   hoverColor: Colors.transparent,
                                   highlightColor: Colors.transparent,
                                   onTap: () async {
+                                    if (currentUserUid == '') {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            'Please login to register a business',
+                                            style: TextStyle(
+                                              color:
+                                                  FlutterFlowTheme.of(context)
+                                                      .primaryText,
+                                            ),
+                                          ),
+                                          backgroundColor:
+                                              FlutterFlowTheme.of(context)
+                                                  .error,
+                                        ),
+                                      );
+                                      return;
+                                    }
+
+                                    await BusinessesTable().insert({
+                                      'owner_id': currentUserUid,
+                                      'name': _model.textFieldModel1
+                                              .inputTextController?.text ??
+                                          '',
+                                      'owner_name': _model.textFieldModel2
+                                              .inputTextController?.text ??
+                                          '',
+                                      'description': _model.textFieldModel3
+                                              .inputTextController?.text ??
+                                          '',
+                                      'phone_number': _model.textFieldModel4
+                                              .inputTextController?.text ??
+                                          '',
+                                      'whatsapp_number': _model
+                                                  .switchModel.switchValue ==
+                                              true
+                                          ? _model.textFieldModel4
+                                              .inputTextController?.text
+                                          : _model.textFieldModel5
+                                              .inputTextController?.text,
+                                      'address_text':
+                                          '${_model.textFieldModel6.inputTextController?.text}, ${_model.textFieldModel8.inputTextController?.text}, ${_model.textFieldModel7.inputTextController?.text}',
+                                      'category_id': _model.dropdownValue,
+                                      'latitude': _model
+                                          .mapGoogleMapsCenter?.latitude,
+                                      'longitude': _model
+                                          .mapGoogleMapsCenter?.longitude,
+                                      'discovery_radius':
+                                          _model.sliderModel.sliderValue ??
+                                              10.0,
+                                      'is_verified': false,
+                                    });
+
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          'Business submitted for verification!',
+                                          style: TextStyle(
+                                            color: FlutterFlowTheme.of(context)
+                                                .info,
+                                          ),
+                                        ),
+                                        backgroundColor:
+                                            FlutterFlowTheme.of(context)
+                                                .success,
+                                      ),
+                                    );
+
                                     context.goNamed(
                                         BusinessDashboardWidget.routeName);
                                   },

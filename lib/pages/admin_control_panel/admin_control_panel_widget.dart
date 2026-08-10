@@ -1,3 +1,4 @@
+import '/backend/supabase/supabase.dart';
 import '/components/action_item/action_item_widget.dart';
 import '/components/button/button_widget.dart';
 import '/components/category_chip/category_chip_widget.dart';
@@ -25,6 +26,50 @@ class _AdminControlPanelWidgetState extends State<AdminControlPanelWidget> {
   late AdminControlPanelModel _model;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
+
+  Future<List<BusinessesRow>> fetchVerificationQueue() async {
+    return await BusinessesTable().queryRows(
+      queryFn: (q) => q.eq('is_verified', false).order('created_at', ascending: false),
+    );
+  }
+
+  Future<List<ComplaintsRow>> fetchPendingComplaints() async {
+    return await ComplaintsTable().queryRows(
+      queryFn: (q) => q.eq('status', 'pending').order('created_at', ascending: false),
+    );
+  }
+
+  Future<void> _resolveComplaint(ComplaintsRow complaint) async {
+    await ComplaintsTable().update(
+      data: {'status': 'resolved'},
+      matchingRows: (q) => q.eq('id', complaint.id),
+    );
+
+    // Send notification to user
+    await NotificationsTable().insert({
+      'user_id': complaint.userId,
+      'title': 'Complaint Resolved',
+      'message': 'Your complaint regarding "${complaint.subject}" has been resolved.',
+      'type': 'complaint_resolved',
+      'is_read': false,
+    });
+
+    safeSetState(() {});
+  }
+
+  Future<List<BusinessCategoriesRow>> fetchCategories() async {
+    return await BusinessCategoriesTable().queryRows(
+      queryFn: (q) => q.order('display_order', ascending: true),
+    );
+  }
+
+  Future<int> fetchCount(bool verified) async {
+    final response = await Supabase.instance.client
+        .from('businesses')
+        .select('*', const FetchOptions(count: CountOption.exact, head: true))
+        .eq('is_verified', verified);
+    return response.count ?? 0;
+  }
 
   @override
   void initState() {
@@ -158,38 +203,45 @@ class _AdminControlPanelWidgetState extends State<AdminControlPanelWidget> {
                           ),
                         ],
                       ),
-                      Row(
-                        mainAxisSize: MainAxisSize.max,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Expanded(
-                            flex: 1,
-                            child: wrapWithModel(
-                              model: _model.statCardModel1,
-                              updateCallback: () => safeSetState(() {}),
-                              child: StatCard2Widget(
-                                label: 'Pending Claims',
-                                trend: '+3',
-                                value: '12',
-                                isPositive: false,
+                      FutureBuilder<List<int>>(
+                        future: Future.wait([fetchCount(false), fetchCount(true)]),
+                        builder: (context, snapshot) {
+                          final pendingCount = snapshot.data?[0] ?? 0;
+                          final verifiedCount = snapshot.data?[1] ?? 0;
+                          return Row(
+                            mainAxisSize: MainAxisSize.max,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Expanded(
+                                flex: 1,
+                                child: wrapWithModel(
+                                  model: _model.statCardModel1,
+                                  updateCallback: () => safeSetState(() {}),
+                                  child: StatCard2Widget(
+                                    label: 'Pending Claims',
+                                    trend: '',
+                                    value: pendingCount.toString(),
+                                    isPositive: false,
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
-                          Expanded(
-                            flex: 1,
-                            child: wrapWithModel(
-                              model: _model.statCardModel2,
-                              updateCallback: () => safeSetState(() {}),
-                              child: StatCard2Widget(
-                                label: 'Verified',
-                                trend: '+12',
-                                value: '84',
-                                isPositive: true,
+                              Expanded(
+                                flex: 1,
+                                child: wrapWithModel(
+                                  model: _model.statCardModel2,
+                                  updateCallback: () => safeSetState(() {}),
+                                  child: StatCard2Widget(
+                                    label: 'Verified',
+                                    trend: '',
+                                    value: verifiedCount.toString(),
+                                    isPositive: true,
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
-                        ].divide(SizedBox(width: 16.0)),
+                            ].divide(SizedBox(width: 16.0)),
+                          );
+                        },
                       ),
                       Column(
                         mainAxisSize: MainAxisSize.min,
@@ -238,53 +290,81 @@ class _AdminControlPanelWidgetState extends State<AdminControlPanelWidget> {
                               ),
                             ],
                           ),
-                          wrapWithModel(
-                            model: _model.actionItemModel1,
-                            updateCallback: () => safeSetState(() {}),
-                            child: ActionItemWidget(
-                              icon: Icon(
-                                Icons.store_rounded,
-                                color: FlutterFlowTheme.of(context).primary,
-                                size: 24.0,
-                              ),
-                              statusBg: Color(0xFFFFF3E0),
-                              statusLabel: 'PENDING',
-                              statusText: Color(0xFFE65100),
-                              subtitle: 'Claimed by: Rajesh K.',
-                              title: 'Kulkarni Hardware',
-                            ),
+                          FutureBuilder<List<BusinessesRow>>(
+                            future: fetchVerificationQueue(),
+                            builder: (context, snapshot) {
+                              if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                                return Center(child: Text('No pending verifications', style: FlutterFlowTheme.of(context).bodyMedium));
+                              }
+                              final businesses = snapshot.data!;
+                              return Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: businesses.map((business) => ActionItemWidget(
+                                  icon: Icon(
+                                    Icons.store_rounded,
+                                    color: FlutterFlowTheme.of(context).primary,
+                                    size: 24.0,
+                                  ),
+                                  statusBg: Color(0xFFFFF3E0),
+                                  statusLabel: 'PENDING',
+                                  statusText: Color(0xFFE65100),
+                                  subtitle: 'Owner: ${business.ownerName ?? 'Unknown'}',
+                                  title: business.name,
+                                  onApprove: () async {
+                                    await BusinessesTable().update(
+                                      data: {'is_verified': true},
+                                      matchingRows: (q) => q.eq('id', business.id),
+                                    );
+                                    safeSetState(() {});
+                                  },
+                                )).toList().divide(SizedBox(height: 16.0)),
+                              );
+                            },
                           ),
-                          wrapWithModel(
-                            model: _model.actionItemModel2,
-                            updateCallback: () => safeSetState(() {}),
-                            child: ActionItemWidget(
-                              icon: Icon(
-                                Icons.electric_bolt_rounded,
-                                color: FlutterFlowTheme.of(context).primary,
-                                size: 24.0,
-                              ),
-                              statusBg: Color(0xFFFFF3E0),
-                              statusLabel: 'PENDING',
-                              statusText: Color(0xFFE65100),
-                              subtitle: 'Claimed by: Amit S.',
-                              title: 'Shinde Electronics',
-                            ),
+                        ].divide(SizedBox(height: 16.0)),
+                      ),
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Text(
+                            'User Complaints',
+                            style: FlutterFlowTheme.of(context)
+                                .titleLarge
+                                .override(
+                                  font: GoogleFonts.inter(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  color: FlutterFlowTheme.of(context).primaryText,
+                                  fontWeight: FontWeight.bold,
+                                  lineHeight: 1.4,
+                                ),
                           ),
-                          wrapWithModel(
-                            model: _model.actionItemModel3,
-                            updateCallback: () => safeSetState(() {}),
-                            child: ActionItemWidget(
-                              icon: Icon(
-                                Icons.restaurant_rounded,
-                                color: FlutterFlowTheme.of(context).primary,
-                                size: 24.0,
-                              ),
-                              statusBg: Color(0xFFFFF3E0),
-                              statusLabel: 'PENDING',
-                              statusText: Color(0xFFE65100),
-                              subtitle: 'Claimed by: Sunil P.',
-                              title: 'Degloor Sweet House',
-                            ),
+                          FutureBuilder<List<ComplaintsRow>>(
+                            future: fetchPendingComplaints(),
+                            builder: (context, snapshot) {
+                              if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                                return Center(child: Text('No pending complaints', style: FlutterFlowTheme.of(context).bodyMedium));
+                              }
+                              final complaints = snapshot.data!;
+                              return Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: complaints.map((complaint) => ActionItemWidget(
+                                  icon: Icon(
+                                    Icons.report_problem_rounded,
+                                    color: FlutterFlowTheme.of(context).error,
+                                    size: 24.0,
+                                  ),
+                                  statusBg: Color(0xFFFFEBEE),
+                                  statusLabel: 'PENDING',
+                                  statusText: FlutterFlowTheme.of(context).error,
+                                  subtitle: complaint.description,
+                                  title: complaint.subject,
+                                  onApprove: () => _resolveComplaint(complaint),
+                                )).toList().divide(SizedBox(height: 16.0)),
+                              );
+                            },
                           ),
                         ].divide(SizedBox(height: 16.0)),
                       ),
@@ -319,130 +399,132 @@ class _AdminControlPanelWidgetState extends State<AdminControlPanelWidget> {
                                       lineHeight: 1.4,
                                     ),
                               ),
-                              wrapWithModel(
-                                model: _model.buttonModel2,
-                                updateCallback: () => safeSetState(() {}),
-                                child: ButtonWidget(
-                                  icon: Icon(
-                                    Icons.add_rounded,
-                                    color: FlutterFlowTheme.of(context)
-                                        .primaryText,
-                                    size: 24.0,
+                              InkWell(
+                                onTap: () async {
+                                  String? newCategoryName;
+                                  await showDialog(
+                                    context: context,
+                                    builder: (context) => AlertDialog(
+                                      title: Text('Add New Category'),
+                                      content: TextField(
+                                        onChanged: (val) => newCategoryName = val,
+                                        decoration: InputDecoration(hintText: "Category name"),
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () => Navigator.pop(context),
+                                          child: Text('Cancel'),
+                                        ),
+                                        TextButton(
+                                          onPressed: () async {
+                                            if (newCategoryName != null && newCategoryName!.isNotEmpty) {
+                                              await BusinessCategoriesTable().insert({
+                                                'name': newCategoryName,
+                                              });
+                                              Navigator.pop(context);
+                                              safeSetState(() {});
+                                            }
+                                          },
+                                          child: Text('Add'),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                                child: wrapWithModel(
+                                  model: _model.buttonModel2,
+                                  updateCallback: () => safeSetState(() {}),
+                                  child: ButtonWidget(
+                                    icon: Icon(
+                                      Icons.add_rounded,
+                                      color: FlutterFlowTheme.of(context)
+                                          .primaryText,
+                                      size: 24.0,
+                                    ),
+                                    iconPresent: true,
+                                    iconEndPresent: false,
+                                    content: 'Add New',
+                                    variant: 'secondary',
+                                    size: 'small',
+                                    fullWidth: false,
+                                    loading: false,
+                                    disabled: false,
                                   ),
-                                  iconPresent: true,
-                                  iconEndPresent: false,
-                                  content: 'Add New',
-                                  variant: 'secondary',
-                                  size: 'small',
-                                  fullWidth: false,
-                                  loading: false,
-                                  disabled: false,
                                 ),
                               ),
                             ],
                           ),
-                          Wrap(
-                            spacing: 8.0,
-                            runSpacing: 8.0,
-                            alignment: WrapAlignment.start,
-                            crossAxisAlignment: WrapCrossAlignment.start,
-                            direction: Axis.horizontal,
-                            runAlignment: WrapAlignment.start,
-                            verticalDirection: VerticalDirection.down,
-                            clipBehavior: Clip.none,
-                            children: [
-                              wrapWithModel(
-                                model: _model.categoryChipModel1,
-                                updateCallback: () => safeSetState(() {}),
-                                child: CategoryChipWidget(
+                          FutureBuilder<List<BusinessCategoriesRow>>(
+                            future: fetchCategories(),
+                            builder: (context, snapshot) {
+                              if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                                return Center(child: Text('No categories found', style: FlutterFlowTheme.of(context).bodyMedium));
+                              }
+                              final categories = snapshot.data!;
+                              return Wrap(
+                                spacing: 8.0,
+                                runSpacing: 8.0,
+                                alignment: WrapAlignment.start,
+                                crossAxisAlignment: WrapCrossAlignment.start,
+                                direction: Axis.horizontal,
+                                runAlignment: WrapAlignment.start,
+                                verticalDirection: VerticalDirection.down,
+                                clipBehavior: Clip.none,
+                                children: categories.map((category) => CategoryChipWidget(
                                   icon: Icon(
-                                    Icons.shopping_basket_rounded,
-                                    color: FlutterFlowTheme.of(context)
-                                        .secondaryText,
+                                    Icons.category_rounded,
+                                    color: FlutterFlowTheme.of(context).secondaryText,
                                     size: 18.0,
                                   ),
-                                  name: 'Grocery',
-                                ),
-                              ),
-                              wrapWithModel(
-                                model: _model.categoryChipModel2,
-                                updateCallback: () => safeSetState(() {}),
-                                child: CategoryChipWidget(
-                                  icon: Icon(
-                                    Icons.construction_rounded,
-                                    color: FlutterFlowTheme.of(context)
-                                        .secondaryText,
-                                    size: 18.0,
+                                  name: category.name,
+                                )).toList(),
+                              );
+                            },
+                          ),
+                        ].divide(SizedBox(height: 16.0)),
+                      ),
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Text(
+                            'User Complaints',
+                            style: FlutterFlowTheme.of(context)
+                                .titleLarge
+                                .override(
+                                  font: GoogleFonts.inter(
+                                    fontWeight: FontWeight.bold,
                                   ),
-                                  name: 'Hardware & Steel',
+                                  color: FlutterFlowTheme.of(context).primaryText,
+                                  fontWeight: FontWeight.bold,
+                                  lineHeight: 1.4,
                                 ),
-                              ),
-                              wrapWithModel(
-                                model: _model.categoryChipModel3,
-                                updateCallback: () => safeSetState(() {}),
-                                child: CategoryChipWidget(
+                          ),
+                          FutureBuilder<List<ComplaintsRow>>(
+                            future: fetchPendingComplaints(),
+                            builder: (context, snapshot) {
+                              if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                                return Center(child: Text('No pending complaints', style: FlutterFlowTheme.of(context).bodyMedium));
+                              }
+                              final complaints = snapshot.data!;
+                              return Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: complaints.map((complaint) => ActionItemWidget(
                                   icon: Icon(
-                                    Icons.medical_services_rounded,
-                                    color: FlutterFlowTheme.of(context)
-                                        .secondaryText,
-                                    size: 18.0,
+                                    Icons.report_problem_rounded,
+                                    color: FlutterFlowTheme.of(context).error,
+                                    size: 24.0,
                                   ),
-                                  name: 'Pharmacy',
-                                ),
-                              ),
-                              wrapWithModel(
-                                model: _model.categoryChipModel4,
-                                updateCallback: () => safeSetState(() {}),
-                                child: CategoryChipWidget(
-                                  icon: Icon(
-                                    Icons.school_rounded,
-                                    color: FlutterFlowTheme.of(context)
-                                        .secondaryText,
-                                    size: 18.0,
-                                  ),
-                                  name: 'Education',
-                                ),
-                              ),
-                              wrapWithModel(
-                                model: _model.categoryChipModel5,
-                                updateCallback: () => safeSetState(() {}),
-                                child: CategoryChipWidget(
-                                  icon: Icon(
-                                    Icons.directions_car_rounded,
-                                    color: FlutterFlowTheme.of(context)
-                                        .secondaryText,
-                                    size: 18.0,
-                                  ),
-                                  name: 'Auto & Services',
-                                ),
-                              ),
-                              wrapWithModel(
-                                model: _model.categoryChipModel6,
-                                updateCallback: () => safeSetState(() {}),
-                                child: CategoryChipWidget(
-                                  icon: Icon(
-                                    Icons.checkroom_rounded,
-                                    color: FlutterFlowTheme.of(context)
-                                        .secondaryText,
-                                    size: 18.0,
-                                  ),
-                                  name: 'Clothing',
-                                ),
-                              ),
-                              wrapWithModel(
-                                model: _model.categoryChipModel7,
-                                updateCallback: () => safeSetState(() {}),
-                                child: CategoryChipWidget(
-                                  icon: Icon(
-                                    Icons.local_dining_rounded,
-                                    color: FlutterFlowTheme.of(context)
-                                        .secondaryText,
-                                    size: 18.0,
-                                  ),
-                                  name: 'Food',
-                                ),
-                              ),
-                            ],
+                                  statusBg: Color(0xFFFFEBEE),
+                                  statusLabel: 'PENDING',
+                                  statusText: FlutterFlowTheme.of(context).error,
+                                  subtitle: complaint.description,
+                                  title: complaint.subject,
+                                  onApprove: () => _resolveComplaint(complaint),
+                                )).toList().divide(SizedBox(height: 16.0)),
+                              );
+                            },
                           ),
                         ].divide(SizedBox(height: 16.0)),
                       ),

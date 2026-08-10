@@ -82,8 +82,8 @@ class _LocationRadiusSelectorWidgetState
                             color: FlutterFlowTheme.of(context).primaryText,
                             size: 24.0,
                           ),
-                          onPressed: () {
-                            print('IconButton pressed ...');
+                          onPressed: () async {
+                            context.safePop();
                           },
                         ),
                         Text(
@@ -106,18 +106,23 @@ class _LocationRadiusSelectorWidgetState
                                 lineHeight: 1.4,
                               ),
                         ),
-                        wrapWithModel(
-                          model: _model.buttonModel1,
-                          updateCallback: () => safeSetState(() {}),
-                          child: ButtonWidget(
-                            iconPresent: false,
-                            iconEndPresent: false,
-                            content: 'Done',
-                            variant: 'ghost',
-                            size: 'small',
-                            fullWidth: false,
-                            loading: false,
-                            disabled: false,
+                        InkWell(
+                          onTap: () async {
+                            context.safePop();
+                          },
+                          child: wrapWithModel(
+                            model: _model.buttonModel1,
+                            updateCallback: () => safeSetState(() {}),
+                            child: ButtonWidget(
+                              iconPresent: false,
+                              iconEndPresent: false,
+                              content: 'Done',
+                              variant: 'ghost',
+                              size: 'small',
+                              fullWidth: false,
+                              loading: false,
+                              disabled: false,
+                            ),
                           ),
                         ),
                       ],
@@ -684,18 +689,23 @@ class _LocationRadiusSelectorWidgetState
                     Padding(
                       padding: EdgeInsets.all(24.0),
                       child: Container(
-                        child: wrapWithModel(
-                          model: _model.buttonModel2,
-                          updateCallback: () => safeSetState(() {}),
-                          child: ButtonWidget(
-                            iconPresent: false,
-                            iconEndPresent: false,
-                            content: 'Apply Location & Radius',
-                            variant: 'primary',
-                            size: 'large',
-                            fullWidth: true,
-                            loading: false,
-                            disabled: false,
+                        child: InkWell(
+                          onTap: () async {
+                            context.safePop();
+                          },
+                          child: wrapWithModel(
+                            model: _model.buttonModel2,
+                            updateCallback: () => safeSetState(() {}),
+                            child: ButtonWidget(
+                              iconPresent: false,
+                              iconEndPresent: false,
+                              content: 'Apply Location & Radius',
+                              variant: 'primary',
+                              size: 'large',
+                              fullWidth: true,
+                              loading: false,
+                              disabled: false,
+                            ),
                           ),
                         ),
                       ),

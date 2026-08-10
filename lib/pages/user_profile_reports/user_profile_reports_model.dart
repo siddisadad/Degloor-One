@@ -1,3 +1,4 @@
+import '/backend/supabase/supabase.dart';
 import '/components/button/button_widget.dart';
 import '/components/profile_option/profile_option_widget.dart';
 import '/components/report_item/report_item_widget.dart';
@@ -8,6 +9,10 @@ import 'package:flutter/material.dart';
 class UserProfileReportsModel
     extends FlutterFlowModel<UserProfileReportsWidget> {
   ///  State fields for stateful widgets in this page.
+
+  Future<List<UsersRow>>? userProfileFuture;
+  Future<List<OrdersRow>>? ordersFuture;
+  Future<List<ComplaintsRow>>? complaintsFuture;
 
   // Model for ProfileOption.
   late ProfileOptionModel profileOptionModel1;
@@ -29,6 +34,8 @@ class UserProfileReportsModel
   late ProfileOptionModel profileOptionModel5;
   // Model for ProfileOption.
   late ProfileOptionModel profileOptionModel6;
+  // Model for ProfileOption.
+  late ProfileOptionModel profileOptionModel7;
   // Model for Button.
   late ButtonModel buttonModel2;
 
@@ -44,6 +51,7 @@ class UserProfileReportsModel
     reportItemModel3 = createModel(context, () => ReportItemModel());
     profileOptionModel5 = createModel(context, () => ProfileOptionModel());
     profileOptionModel6 = createModel(context, () => ProfileOptionModel());
+    profileOptionModel7 = createModel(context, () => ProfileOptionModel());
     buttonModel2 = createModel(context, () => ButtonModel());
   }
 
@@ -59,6 +67,7 @@ class UserProfileReportsModel
     reportItemModel3.dispose();
     profileOptionModel5.dispose();
     profileOptionModel6.dispose();
+    profileOptionModel7.dispose();
     buttonModel2.dispose();
   }
 }

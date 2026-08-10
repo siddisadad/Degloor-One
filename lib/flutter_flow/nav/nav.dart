@@ -109,12 +109,26 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
           name: SearchResultsWidget.routeName,
           path: SearchResultsWidget.routePath,
-          builder: (context, params) => SearchResultsWidget(),
+          builder: (context, params) => SearchResultsWidget(
+            searchTerm: params.getParam<String>(
+              'searchTerm',
+              ParamType.String,
+            ),
+            categoryId: params.getParam<String>(
+              'categoryId',
+              ParamType.String,
+            ),
+          ),
         ),
         FFRoute(
           name: BusinessProfileWidget.routeName,
           path: BusinessProfileWidget.routePath,
-          builder: (context, params) => BusinessProfileWidget(),
+          builder: (context, params) => BusinessProfileWidget(
+            businessId: params.getParam<String>(
+              'businessId',
+              ParamType.String,
+            ),
+          ),
         ),
         FFRoute(
           name: BusinessRegistrationWidget.routeName,
@@ -135,6 +149,41 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           name: UserProfileReportsWidget.routeName,
           path: UserProfileReportsWidget.routePath,
           builder: (context, params) => UserProfileReportsWidget(),
+        ),
+        FFRoute(
+          name: CartWidget.routeName,
+          path: CartWidget.routePath,
+          builder: (context, params) => CartWidget(),
+        ),
+        FFRoute(
+          name: ManageCatalogueWidget.routeName,
+          path: ManageCatalogueWidget.routePath,
+          builder: (context, params) => ManageCatalogueWidget(),
+        ),
+        FFRoute(
+          name: ManageOrdersWidget.routeName,
+          path: ManageOrdersWidget.routePath,
+          builder: (context, params) => ManageOrdersWidget(),
+        ),
+        FFRoute(
+          name: ManageHoursWidget.routeName,
+          path: ManageHoursWidget.routePath,
+          builder: (context, params) => ManageHoursWidget(),
+        ),
+        FFRoute(
+          name: DeliveryDashboardWidget.routeName,
+          path: DeliveryDashboardWidget.routePath,
+          builder: (context, params) => DeliveryDashboardWidget(),
+        ),
+        FFRoute(
+          name: NotificationsWidget.routeName,
+          path: NotificationsWidget.routePath,
+          builder: (context, params) => NotificationsWidget(),
+        ),
+        FFRoute(
+          name: ServicesWidget.routeName,
+          path: ServicesWidget.routePath,
+          builder: (context, params) => ServicesWidget(),
         )
       ].map((r) => r.toRoute(appStateNotifier)).toList(),
     );

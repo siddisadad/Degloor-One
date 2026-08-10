@@ -511,6 +511,74 @@ class _BusinessDashboardWidgetState extends State<BusinessDashboardWidget> {
                               ),
                         ),
                         wrapWithModel(
+                          model: _model.actionTileModel6,
+                          updateCallback: () => safeSetState(() {}),
+                          child: InkWell(
+                            splashColor: Colors.transparent,
+                            focusColor: Colors.transparent,
+                            hoverColor: Colors.transparent,
+                            highlightColor: Colors.transparent,
+                            onTap: () async {
+                              context.pushNamed('ManageCatalogue');
+                            },
+                            child: ActionTileWidget(
+                              icon: Icon(
+                                Icons.inventory_2_rounded,
+                                color: FlutterFlowTheme.of(context).primary,
+                                size: 20.0,
+                              ),
+                              subtitle:
+                                  'Add or edit products in your digital store',
+                              title: 'Manage Catalogue',
+                            ),
+                          ),
+                        ),
+                        wrapWithModel(
+                          model: _model.actionTileModel7,
+                          updateCallback: () => safeSetState(() {}),
+                          child: InkWell(
+                            splashColor: Colors.transparent,
+                            focusColor: Colors.transparent,
+                            hoverColor: Colors.transparent,
+                            highlightColor: Colors.transparent,
+                            onTap: () async {
+                              context.pushNamed('ManageOrders');
+                            },
+                            child: ActionTileWidget(
+                              icon: Icon(
+                                Icons.shopping_bag_rounded,
+                                color: FlutterFlowTheme.of(context).primary,
+                                size: 20.0,
+                              ),
+                              subtitle: 'View and fulfill customer orders',
+                              title: 'Manage Orders',
+                            ),
+                          ),
+                        ),
+                        wrapWithModel(
+                          model: _model.actionTileModel8,
+                          updateCallback: () => safeSetState(() {}),
+                          child: InkWell(
+                            splashColor: Colors.transparent,
+                            focusColor: Colors.transparent,
+                            hoverColor: Colors.transparent,
+                            highlightColor: Colors.transparent,
+                            onTap: () async {
+                              context.pushNamed('ManageHours');
+                            },
+                            child: ActionTileWidget(
+                              icon: Icon(
+                                Icons.access_time_rounded,
+                                color: FlutterFlowTheme.of(context).primary,
+                                size: 20.0,
+                              ),
+                              subtitle:
+                                  'Set your weekly opening and closing times',
+                              title: 'Business Hours',
+                            ),
+                          ),
+                        ),
+                        wrapWithModel(
                           model: _model.actionTileModel1,
                           updateCallback: () => safeSetState(() {}),
                           child: ActionTileWidget(

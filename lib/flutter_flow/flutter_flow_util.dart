@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:collection/collection.dart';
 import 'package:from_css_color/from_css_color.dart';
-import 'dart:math' show pow, pi, sin;
+import 'dart:math' show pow, pi, sin, cos, sqrt, atan2;
 import 'package:intl/intl.dart';
 import 'package:json_path/json_path.dart';
 import 'package:timeago/timeago.dart' as timeago;
@@ -444,5 +444,29 @@ extension ListUniqueExt<T> on Iterable<T> {
 
 String getCurrentRoute(BuildContext context) =>
     context.mounted ? MyApp.of(context).getRoute() : '';
+String getSimulatedDistance(double? businessLat, double? businessLng) {
+  if (businessLat == null || businessLng == null) {
+    return '0.0 km';
+  }
+  // Reference point in Degloor (18.5522, 77.5844)
+  const double refLat = 18.5522;
+  const double refLng = 77.5844;
+
+  // Simple Haversine distance calculation
+  const double earthRadius = 6371; // in km
+  final double dLat = (businessLat - refLat) * (pi / 180);
+  final double dLng = (businessLng - refLng) * (pi / 180);
+
+  final double a = sin(dLat / 2) * sin(dLat / 2) +
+      cos(refLat * (pi / 180)) *
+          cos(businessLat * (pi / 180)) *
+          sin(dLng / 2) *
+          sin(dLng / 2);
+  final double c = 2 * atan2(sqrt(a), sqrt(1 - a));
+  final double distance = earthRadius * c;
+
+  return '${distance.toStringAsFixed(1)} km';
+}
+
 List<String> getCurrentRouteStack(BuildContext context) =>
     context.mounted ? MyApp.of(context).getRouteStack() : [];

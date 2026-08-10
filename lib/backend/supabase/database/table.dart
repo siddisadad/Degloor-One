@@ -10,29 +10,50 @@ abstract class SupabaseTable<T extends SupabaseDataRow> {
     required PostgrestTransformBuilder Function(PostgrestFilterBuilder) queryFn,
     int? limit,
   }) {
-    final select = _select();
-    var query = queryFn(select);
-    query = limit != null ? query.limit(limit) : query;
-    return query.select().then((rows) => rows.map(createRow).toList());
+    try {
+      final select = _select();
+      var query = queryFn(select);
+      query = limit != null ? query.limit(limit) : query;
+      return query.select().then((rows) => rows.map(createRow).toList());
+    } catch (e) {
+      print('Supabase queryRows error ($tableName): $e');
+      return Future.value([]);
+    }
   }
 
   Future<List<T>> querySingleRow({
     required PostgrestTransformBuilder Function(PostgrestFilterBuilder) queryFn,
-  }) =>
-      queryFn(_select())
+  }) {
+    try {
+      return queryFn(_select())
           .limit(1)
           .select()
           .maybeSingle()
-          .catchError((e) => print('Error querying row: $e'))
-          .then((r) => [if (r != null) createRow(r)]);
+          .then((r) => [if (r != null) createRow(r)])
+          .catchError((e) {
+        print('Supabase querySingleRow error ($tableName): $e');
+        return <T>[];
+      });
+    } catch (e) {
+      print('Supabase querySingleRow sync error ($tableName): $e');
+      return Future.value([]);
+    }
+  }
 
-  Future<T> insert(Map<String, dynamic> data) => SupaFlow.client
-      .from(tableName)
-      .insert(data)
-      .select()
-      .limit(1)
-      .single()
-      .then(createRow);
+  Future<T> insert(Map<String, dynamic> data) {
+    try {
+      return SupaFlow.client
+          .from(tableName)
+          .insert(data)
+          .select()
+          .limit(1)
+          .single()
+          .then(createRow);
+    } catch (e) {
+      print('Supabase insert error ($tableName): $e');
+      rethrow;
+    }
+  }
 
   Future<List<T>> update({
     required Map<String, dynamic> data,

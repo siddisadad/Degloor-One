@@ -18,8 +18,8 @@ class TextFieldWidget extends StatefulWidget {
     bool? trailingIconPresent,
     String? hint,
     String? value,
-    String? onChange,
-    String? onSubmit,
+    this.onChange,
+    this.onSubmit,
     String? variant,
     bool? error,
   })  : this.label = label ?? '',
@@ -30,8 +30,6 @@ class TextFieldWidget extends StatefulWidget {
         this.trailingIconPresent = trailingIconPresent ?? false,
         this.hint = hint ?? 'Enter 10 digit mobile number',
         this.value = value ?? '',
-        this.onChange = onChange ?? '',
-        this.onSubmit = onSubmit ?? '',
         this.variant = variant ?? 'filled',
         this.error = error ?? false;
 
@@ -45,8 +43,8 @@ class TextFieldWidget extends StatefulWidget {
   final bool trailingIconPresent;
   final String hint;
   final String value;
-  final String onChange;
-  final String onSubmit;
+  final Function(String)? onChange;
+  final Function(String)? onSubmit;
   final String variant;
   final bool error;
 
@@ -373,6 +371,8 @@ class _TextFieldWidgetState extends State<TextFieldWidget> {
                     child: TextFormField(
                       controller: _model.inputTextController,
                       focusNode: _model.inputFocusNode,
+                      onChanged: (val) => widget.onChange?.call(val),
+                      onFieldSubmitted: (val) => widget.onSubmit?.call(val),
                       obscureText: false,
                       decoration: InputDecoration(
                         isDense: true,

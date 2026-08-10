@@ -31,6 +31,8 @@ class BusinessProfileModel extends FlutterFlowModel<BusinessProfileWidget> {
   // Model for Button.
   late ButtonModel buttonModel2;
 
+  Future<List<Map<String, dynamic>>>? reviewsFuture;
+
   @override
   void initState(BuildContext context) {
     actionButtonModel1 = createModel(context, () => ActionButtonModel());

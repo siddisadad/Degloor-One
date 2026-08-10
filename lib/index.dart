@@ -17,3 +17,12 @@ export '/pages/admin_control_panel/admin_control_panel_widget.dart'
     show AdminControlPanelWidget;
 export '/pages/user_profile_reports/user_profile_reports_widget.dart'
     show UserProfileReportsWidget;
+export '/pages/cart/cart_widget.dart' show CartWidget;
+export '/pages/manage_catalogue/manage_catalogue_widget.dart'
+    show ManageCatalogueWidget;
+export '/pages/manage_orders/manage_orders_widget.dart' show ManageOrdersWidget;
+export '/pages/manage_hours/manage_hours_widget.dart' show ManageHoursWidget;
+export '/pages/delivery_dashboard/delivery_dashboard_widget.dart'
+    show DeliveryDashboardWidget;
+export '/pages/notifications/notifications_widget.dart' show NotificationsWidget;
+export '/pages/services/services_widget.dart' show ServicesWidget;

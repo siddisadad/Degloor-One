@@ -1,3 +1,4 @@
+import '/backend/supabase/supabase.dart';
 import '/components/business_card/business_card_widget.dart';
 import '/components/category_item/category_item_widget.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -6,6 +7,8 @@ import 'package:flutter/material.dart';
 
 class CustomerHomeModel extends FlutterFlowModel<CustomerHomeWidget> {
   ///  State fields for stateful widgets in this page.
+
+  Future<List<UsersRow>>? userProfileFuture;
 
   // Model for CategoryItem.
   late CategoryItemModel categoryItemModel1;

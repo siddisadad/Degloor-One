@@ -28,6 +28,12 @@ class BusinessDashboardModel extends FlutterFlowModel<BusinessDashboardWidget> {
   late ActionTileModel actionTileModel4;
   // Model for ActionTile.
   late ActionTileModel actionTileModel5;
+  // Model for ActionTile.
+  late ActionTileModel actionTileModel6;
+  // Model for ActionTile.
+  late ActionTileModel actionTileModel7;
+  // Model for ActionTile.
+  late ActionTileModel actionTileModel8;
 
   @override
   void initState(BuildContext context) {
@@ -41,6 +47,9 @@ class BusinessDashboardModel extends FlutterFlowModel<BusinessDashboardWidget> {
     actionTileModel3 = createModel(context, () => ActionTileModel());
     actionTileModel4 = createModel(context, () => ActionTileModel());
     actionTileModel5 = createModel(context, () => ActionTileModel());
+    actionTileModel6 = createModel(context, () => ActionTileModel());
+    actionTileModel7 = createModel(context, () => ActionTileModel());
+    actionTileModel8 = createModel(context, () => ActionTileModel());
   }
 
   @override
@@ -55,5 +64,8 @@ class BusinessDashboardModel extends FlutterFlowModel<BusinessDashboardWidget> {
     actionTileModel3.dispose();
     actionTileModel4.dispose();
     actionTileModel5.dispose();
+    actionTileModel6.dispose();
+    actionTileModel7.dispose();
+    actionTileModel8.dispose();
   }
 }

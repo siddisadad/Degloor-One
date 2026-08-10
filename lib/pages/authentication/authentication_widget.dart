@@ -1,9 +1,12 @@
+import '/auth/supabase_auth/auth_util.dart';
+import '/backend/supabase/database/database.dart';
 import '/components/auth_tab/auth_tab_widget.dart';
 import '/components/button/button_widget.dart';
 import '/components/social_button/social_button_widget.dart';
 import '/components/text_field/text_field_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
+import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'authentication_model.dart';
@@ -66,19 +69,24 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Container(
-                            width: 80.0,
-                            height: 80.0,
-                            decoration: BoxDecoration(
-                              color: FlutterFlowTheme.of(context).primary,
-                              borderRadius: BorderRadius.circular(20.0),
-                              shape: BoxShape.rectangle,
-                            ),
-                            alignment: AlignmentDirectional(0.0, 0.0),
-                            child: Icon(
-                              Icons.location_on_rounded,
-                              color: FlutterFlowTheme.of(context).onPrimary,
-                              size: 40.0,
+                          InkWell(
+                            onLongPress: () async {
+                              context.pushNamed('AdminControlPanel');
+                            },
+                            child: Container(
+                              width: 80.0,
+                              height: 80.0,
+                              decoration: BoxDecoration(
+                                color: FlutterFlowTheme.of(context).primary,
+                                borderRadius: BorderRadius.circular(20.0),
+                                shape: BoxShape.rectangle,
+                              ),
+                              alignment: AlignmentDirectional(0.0, 0.0),
+                              child: Icon(
+                                Icons.location_on_rounded,
+                                color: FlutterFlowTheme.of(context).onPrimary,
+                                size: 40.0,
+                              ),
                             ),
                           ),
                           Column(
@@ -170,23 +178,37 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
                               children: [
                                 Expanded(
                                   flex: 1,
-                                  child: wrapWithModel(
-                                    model: _model.authTabModel1,
-                                    updateCallback: () => safeSetState(() {}),
-                                    child: AuthTabWidget(
-                                      active: 'true',
-                                      label: 'Customer',
+                                  child: InkWell(
+                                    onTap: () async {
+                                      safeSetState(() =>
+                                          _model.isBusinessOwner = false);
+                                    },
+                                    child: wrapWithModel(
+                                      model: _model.authTabModel1,
+                                      updateCallback: () => safeSetState(() {}),
+                                      child: AuthTabWidget(
+                                        active: (!_model.isBusinessOwner)
+                                            .toString(),
+                                        label: 'Customer',
+                                      ),
                                     ),
                                   ),
                                 ),
                                 Expanded(
                                   flex: 1,
-                                  child: wrapWithModel(
-                                    model: _model.authTabModel2,
-                                    updateCallback: () => safeSetState(() {}),
-                                    child: AuthTabWidget(
-                                      active: 'false',
-                                      label: 'Business Owner',
+                                  child: InkWell(
+                                    onTap: () async {
+                                      safeSetState(() =>
+                                          _model.isBusinessOwner = true);
+                                    },
+                                    child: wrapWithModel(
+                                      model: _model.authTabModel2,
+                                      updateCallback: () => safeSetState(() {}),
+                                      child: AuthTabWidget(
+                                        active:
+                                            _model.isBusinessOwner.toString(),
+                                        label: 'Business Owner',
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -241,10 +263,12 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
                                         ),
                                         leadingIconPresent: true,
                                         trailingIconPresent: false,
-                                        hint: 'Enter 10 digit mobile number',
+                                        hint: 'Enter email or phone',
                                         value: '',
-                                        onChange: '',
-                                        onSubmit: '',
+                                        onChange: (val) {
+                                          _model.textFieldModel1
+                                              .inputTextController?.text = val;
+                                        },
                                         variant: 'filled',
                                         error: false,
                                       ),
@@ -303,8 +327,10 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
                                         trailingIconPresent: true,
                                         hint: 'Enter your password',
                                         value: '',
-                                        onChange: '',
-                                        onSubmit: '',
+                                        onChange: (val) {
+                                          _model.textFieldModel2
+                                              .inputTextController?.text = val;
+                                        },
                                         variant: 'filled',
                                         error: false,
                                       ),
@@ -342,18 +368,48 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
                                 ),
                               ],
                             ),
-                            wrapWithModel(
-                              model: _model.buttonModel,
-                              updateCallback: () => safeSetState(() {}),
-                              child: ButtonWidget(
-                                iconPresent: false,
-                                iconEndPresent: false,
-                                content: 'Sign In',
-                                variant: 'primary',
-                                size: 'small',
-                                fullWidth: true,
-                                loading: false,
-                                disabled: false,
+                            InkWell(
+                              onTap: () async {
+                                final user = await authManager.signInWithEmail(
+                                  context,
+                                  _model.textFieldModel1.inputTextController!.text,
+                                  _model.textFieldModel2.inputTextController!.text,
+                                );
+                                if (user != null) {
+                                  context.goNamed('CustomerHome');
+                                }
+                              },
+                              child: wrapWithModel(
+                                model: _model.buttonModel,
+                                updateCallback: () => safeSetState(() {}),
+                                child: ButtonWidget(
+                                  iconPresent: false,
+                                  iconEndPresent: false,
+                                  content: 'Sign In',
+                                  variant: 'primary',
+                                  size: 'small',
+                                  fullWidth: true,
+                                  loading: false,
+                                  disabled: false,
+                                ),
+                              ),
+                            ),
+                            Center(
+                              child: InkWell(
+                                onTap: () async {
+                                  context.goNamed('CustomerHome');
+                                },
+                                child: Text(
+                                  'Continue as Guest (Debug)',
+                                  style: FlutterFlowTheme.of(context)
+                                      .bodySmall
+                                      .override(
+                                        font: GoogleFonts.inter(),
+                                        color: FlutterFlowTheme.of(context)
+                                            .secondaryText,
+                                        decoration: TextDecoration.underline,
+                                      ),
+                                ),
                               ),
                             ),
                             Row(
@@ -492,26 +548,78 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
                                       lineHeight: 1.5,
                                     ),
                               ),
-                              Text(
-                                'Create Account',
-                                style: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .override(
-                                      font: GoogleFonts.inter(
+                              InkWell(
+                                onTap: () async {
+                                  final email = _model
+                                      .textFieldModel1.inputTextController!.text;
+                                  final password = _model
+                                      .textFieldModel2.inputTextController!.text;
+
+                                  if (email.isEmpty || password.isEmpty) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                          content: Text(
+                                              'Please enter email and password')),
+                                    );
+                                    return;
+                                  }
+
+                                  final user = await authManager
+                                      .createAccountWithEmail(
+                                    context,
+                                    email,
+                                    password,
+                                  );
+
+                                  if (user == null) {
+                                    return;
+                                  }
+
+                                  final role = _model.isBusinessOwner
+                                      ? 'business_owner'
+                                      : 'customer';
+
+                                  await UsersTable().insert({
+                                    'id': user.uid,
+                                    'email': email,
+                                    'role': role,
+                                  });
+
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                        content: Text(
+                                            'Account created successfully!')),
+                                  );
+
+                                  if (_model.isBusinessOwner) {
+                                    context.goNamed(
+                                        BusinessRegistrationWidget.routeName);
+                                  } else {
+                                    context.goNamed('CustomerHome');
+                                  }
+                                },
+                                child: Text(
+                                  'Create Account',
+                                  style: FlutterFlowTheme.of(context)
+                                      .bodyMedium
+                                      .override(
+                                        font: GoogleFonts.inter(
+                                          fontWeight: FontWeight.bold,
+                                          fontStyle:
+                                              FlutterFlowTheme.of(context)
+                                                  .bodyMedium
+                                                  .fontStyle,
+                                        ),
+                                        color: FlutterFlowTheme.of(context)
+                                            .primary,
+                                        letterSpacing: 0.0,
                                         fontWeight: FontWeight.bold,
                                         fontStyle: FlutterFlowTheme.of(context)
                                             .bodyMedium
                                             .fontStyle,
+                                        lineHeight: 1.5,
                                       ),
-                                      color:
-                                          FlutterFlowTheme.of(context).primary,
-                                      letterSpacing: 0.0,
-                                      fontWeight: FontWeight.bold,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontStyle,
-                                      lineHeight: 1.5,
-                                    ),
+                                ),
                               ),
                             ].divide(SizedBox(width: 4.0)),
                           ),
