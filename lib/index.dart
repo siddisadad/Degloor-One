@@ -53,3 +53,9 @@ export 'package:degloor_one/features/orders/order_success_widget.dart'
     show OrderSuccessWidget;
 export 'package:degloor_one/features/businesses/edit_business_profile_widget.dart'
     show EditBusinessProfileWidget;
+export 'package:degloor_one/features/analytics/business_analytics_widget.dart'
+    show BusinessAnalyticsWidget;
+export 'package:degloor_one/pages/jobs_marketplace/jobs_marketplace_widget.dart'
+    show JobsMarketplaceWidget;
+export 'package:degloor_one/pages/manage_jobs/manage_jobs_widget.dart'
+    show ManageJobsWidget;

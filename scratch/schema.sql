@@ -276,6 +276,32 @@ CREATE TABLE complaints (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Jobs Table
+CREATE TABLE jobs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    business_id UUID REFERENCES businesses(id) ON DELETE CASCADE,
+    poster_id UUID REFERENCES users(id) ON DELETE CASCADE, -- In case a non-business user posts (future)
+    title TEXT NOT NULL,
+    description TEXT NOT NULL,
+    category TEXT, -- e.g., 'Retail', 'Delivery', 'Kitchen'
+    job_type TEXT NOT NULL, -- 'Full-time', 'Part-time', 'Daily Wage'
+    salary_range TEXT,
+    location_text TEXT,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Job Applications Table
+CREATE TABLE job_applications (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    job_id UUID REFERENCES jobs(id) ON DELETE CASCADE,
+    applicant_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    experience_summary TEXT,
+    status TEXT DEFAULT 'applied', -- 'applied', 'shortlisted', 'interviewed', 'hired', 'rejected'
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(job_id, applicant_id)
+);
+
 -- Business Analytics Table
 CREATE TABLE business_analytics (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
