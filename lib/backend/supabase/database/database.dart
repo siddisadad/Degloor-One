@@ -25,6 +25,8 @@ export 'tables/delivery_partners_table.dart';
 export 'tables/delivery_assignments_table.dart';
 export 'tables/business_hours_table.dart';
 export 'tables/complaints_table.dart';
+export 'tables/jobs_table.dart';
+export 'tables/job_applications_table.dart';
 export 'tables/business_analytics_table.dart';
 export 'business_hours_util.dart';
 

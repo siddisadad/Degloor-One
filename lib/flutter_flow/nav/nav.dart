@@ -161,6 +161,14 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           requireAuth: true,
         ),
         FFRoute(
+          name: BusinessAnalyticsWidget.routeName,
+          path: BusinessAnalyticsWidget.routePath,
+          builder: (context, params) => BusinessAnalyticsWidget(
+            businessId: params.getParam<String>('businessId', ParamType.String)!,
+          ),
+          requireAuth: true,
+        ),
+        FFRoute(
           name: AdminControlPanelWidget.routeName,
           path: AdminControlPanelWidget.routePath,
           builder: (context, params) => AdminControlPanelWidget(),
@@ -268,6 +276,17 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           builder: (context, params) => EditBusinessProfileWidget(
             business: params.getParam<BusinessesRow>('business', ParamType.SupabaseRow)!,
           ),
+          requireAuth: true,
+        ),
+        FFRoute(
+          name: JobsMarketplaceWidget.routeName,
+          path: JobsMarketplaceWidget.routePath,
+          builder: (context, params) => JobsMarketplaceWidget(),
+        ),
+        FFRoute(
+          name: ManageJobsWidget.routeName,
+          path: ManageJobsWidget.routePath,
+          builder: (context, params) => ManageJobsWidget(),
           requireAuth: true,
         )
       ].map((r) => r.toRoute(appStateNotifier)).toList(),

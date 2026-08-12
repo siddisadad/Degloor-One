@@ -571,6 +571,27 @@ class _BusinessDashboardWidgetState extends State<BusinessDashboardWidget> {
                               ),
                         ),
                         wrapWithModel(
+                          model: _model.actionTileModel10,
+                          updateCallback: () => safeSetState(() {}),
+                          child: InkWell(
+                            onTap: () => context.pushNamed(
+                              'BusinessAnalytics',
+                              queryParameters: {
+                                'businessId': _business!.id,
+                              }.withoutNulls,
+                            ),
+                            child: ActionTileWidget(
+                              icon: Icon(
+                                Icons.analytics_rounded,
+                                color: FlutterFlowTheme.of(context).primary,
+                                size: 20.0,
+                              ),
+                              subtitle: 'Detailed engagement and visitor stats',
+                              title: 'Detailed Insights',
+                            ),
+                          ),
+                        ),
+                        wrapWithModel(
                           model: _model.actionTileModel8,
                           updateCallback: () => safeSetState(() {}),
                           child: InkWell(
@@ -617,6 +638,22 @@ class _BusinessDashboardWidgetState extends State<BusinessDashboardWidget> {
                                   ? 'You have $_pendingOrders pending orders'
                                   : 'View and track customer orders',
                               title: 'Orders',
+                            ),
+                          ),
+                        ),
+                        wrapWithModel(
+                          model: _model.actionTileModel9,
+                          updateCallback: () => safeSetState(() {}),
+                          child: InkWell(
+                            onTap: () => context.pushNamed('ManageJobs'),
+                            child: ActionTileWidget(
+                              icon: Icon(
+                                Icons.work_history_rounded,
+                                color: FlutterFlowTheme.of(context).primary,
+                                size: 20.0,
+                              ),
+                              subtitle: 'Post vacancies and view applicants',
+                              title: 'Manage Jobs',
                             ),
                           ),
                         ),

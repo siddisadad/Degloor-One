@@ -276,6 +276,21 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                         Row(
                           mainAxisSize: MainAxisSize.max,
                           children: [
+                            FlutterFlowIconButton(
+                              borderColor: Colors.transparent,
+                              borderRadius: 8.0,
+                              buttonSize: 44.0,
+                              fillColor: FlutterFlowTheme.of(context)
+                                  .secondaryBackground,
+                              icon: Icon(
+                                Icons.work_outline_rounded,
+                                color: FlutterFlowTheme.of(context).primaryText,
+                                size: 24.0,
+                              ),
+                              onPressed: () async {
+                                context.pushNamed('JobsMarketplace');
+                              },
+                            ),
                             Stack(
                               children: [
                                 FlutterFlowIconButton(
