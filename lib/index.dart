@@ -1,28 +1,55 @@
 // Export pages
-export '/pages/splash_screen/splash_screen_widget.dart' show SplashScreenWidget;
-export '/pages/authentication/authentication_widget.dart'
+export 'package:degloor_one/core/splash_screen_widget.dart' show SplashScreenWidget;
+export 'package:degloor_one/features/auth/authentication_widget.dart'
     show AuthenticationWidget;
-export '/pages/customer_home/customer_home_widget.dart' show CustomerHomeWidget;
-export '/pages/location_radius_selector/location_radius_selector_widget.dart'
+export 'package:degloor_one/features/auth/phone_auth_widget.dart' show PhoneAuthWidget;
+export 'package:degloor_one/features/auth/otp_verification_widget.dart'
+    show OtpVerificationWidget;
+export 'package:degloor_one/features/auth/initial_redirect_widget.dart'
+    show InitialRedirectWidget;
+export 'package:degloor_one/features/home/customer_home_widget.dart' show CustomerHomeWidget;
+export 'package:degloor_one/shared/location_radius_selector_widget.dart'
     show LocationRadiusSelectorWidget;
-export '/pages/search_results/search_results_widget.dart'
+export 'package:degloor_one/features/search/search_results_widget.dart'
     show SearchResultsWidget;
-export '/pages/business_profile/business_profile_widget.dart'
+export 'package:degloor_one/features/categories/categories_widget.dart'
+    show CategoriesWidget;
+export 'package:degloor_one/features/businesses/business_profile_widget.dart'
     show BusinessProfileWidget;
-export '/pages/business_registration/business_registration_widget.dart'
+export 'package:degloor_one/features/businesses/business_catalogue_widget.dart'
+    show BusinessCatalogueWidget;
+export 'package:degloor_one/features/businesses/business_registration_widget.dart'
     show BusinessRegistrationWidget;
-export '/pages/business_dashboard/business_dashboard_widget.dart'
+export 'package:degloor_one/features/businesses/business_dashboard_widget.dart'
     show BusinessDashboardWidget;
-export '/pages/admin_control_panel/admin_control_panel_widget.dart'
+export 'package:degloor_one/features/admin/admin_control_panel_widget.dart'
     show AdminControlPanelWidget;
-export '/pages/user_profile_reports/user_profile_reports_widget.dart'
+export 'package:degloor_one/features/profile/user_profile_reports_widget.dart'
     show UserProfileReportsWidget;
-export '/pages/cart/cart_widget.dart' show CartWidget;
-export '/pages/manage_catalogue/manage_catalogue_widget.dart'
+export 'package:degloor_one/features/cart/cart_widget.dart' show CartWidget;
+export 'package:degloor_one/features/catalogue/manage_catalogue_widget.dart'
     show ManageCatalogueWidget;
-export '/pages/manage_orders/manage_orders_widget.dart' show ManageOrdersWidget;
-export '/pages/manage_hours/manage_hours_widget.dart' show ManageHoursWidget;
-export '/pages/delivery_dashboard/delivery_dashboard_widget.dart'
+export 'package:degloor_one/features/orders/manage_orders_widget.dart' show ManageOrdersWidget;
+export 'package:degloor_one/features/businesses/manage_hours_widget.dart' show ManageHoursWidget;
+export 'package:degloor_one/features/delivery/delivery_dashboard_widget.dart'
     show DeliveryDashboardWidget;
-export '/pages/notifications/notifications_widget.dart' show NotificationsWidget;
-export '/pages/services/services_widget.dart' show ServicesWidget;
+export 'package:degloor_one/features/notifications/notifications_widget.dart' show NotificationsWidget;
+export 'package:degloor_one/features/services/services_widget.dart' show ServicesWidget;
+export 'package:degloor_one/features/services/service_provider_registration_widget.dart'
+    show ServiceProviderRegistrationWidget;
+export 'package:degloor_one/features/services/service_provider_profile_widget.dart'
+    show ServiceProviderProfileWidget;
+export 'package:degloor_one/features/services/manage_service_requests_widget.dart'
+    show ManageServiceRequestsWidget;
+export 'package:degloor_one/features/profile/address_list_widget.dart'
+    show AddressListWidget;
+export 'package:degloor_one/features/profile/add_address_widget.dart'
+    show AddAddressWidget;
+export 'package:degloor_one/features/orders/order_tracking_widget.dart'
+    show OrderTrackingWidget;
+export 'package:degloor_one/features/orders/customer_orders_widget.dart'
+    show CustomerOrdersWidget;
+export 'package:degloor_one/features/orders/order_success_widget.dart'
+    show OrderSuccessWidget;
+export 'package:degloor_one/features/businesses/edit_business_profile_widget.dart'
+    show EditBusinessProfileWidget;

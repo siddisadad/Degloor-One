@@ -1,0 +1,26 @@
+# Tasks
+
+- [x] **Phase 1: Database & Backend Hardening**
+    - [x] Update `schema.sql` with improved RPCs and RLS
+    - [x] Create `business_events` migration
+    - [x] Optimize search ranking in RPC
+- [x] **Phase 2: Search & Location Logic**
+    - [x] Refactor `SearchResultsWidget` to remove redundant queries
+    - [x] Refactor `CustomerHomeWidget` search logic
+    - [x] Standardize distance formatting in UI
+    - [x] Update `LocationService` with timeout and fallback
+    - [x] Set default radius to 10km and restrict options
+- [x] **Phase 3: Business Portal & Analytics**
+    - [x] Implement lightweight analytics event tracking in Flutter
+    - [x] Harden `BusinessDashboardWidget` by removing Phase 2/3 leaks
+    - [x] Audit `BusinessProfileWidget` for Phase 1 scope
+- [x] **Phase 4: Security & RLS Audit**
+    - [x] Verify business ownership security (RLS)
+    - [x] Verify review submission security (one per user/business)
+    - [x] Verify admin privilege separation
+- [/] **Phase 5: UI Consistency & Localization**
+    - [x] UI consistency pass on business cards (Standardized badges & defaults)
+    - [x] Verification of Marathi/Hindi translations
+- [ ] **Phase 6: Final Verification**
+    - [ ] Flutter analyze
+    - [ ] Manual test matrix execution

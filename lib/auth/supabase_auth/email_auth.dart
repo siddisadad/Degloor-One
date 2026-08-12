@@ -1,4 +1,4 @@
-import '/backend/supabase/supabase.dart';
+import 'package:degloor_one/backend/supabase/supabase.dart';
 
 Future<User?> emailSignInFunc(
   String email,
@@ -16,9 +16,6 @@ Future<User?> emailCreateAccountFunc(
   final AuthResponse res =
       await SupaFlow.client.auth.signUp(email: email, password: password);
 
-  // If the Supabase project is configured to not let users sign in until the
-  // email has been confirmed, the user returned in the AuthResponse still has
-  // all the user info. But since the user shouldn't be able to sign in without
-  // their email verified, return a null User.
-  return res.user?.lastSignInAt == null ? null : res.user;
+  // Return the user if the sign up was successful.
+  return res.user;
 }

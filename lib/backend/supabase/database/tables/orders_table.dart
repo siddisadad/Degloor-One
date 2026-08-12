@@ -35,6 +35,9 @@ class OrdersRow extends SupabaseDataRow {
   String? get deliveryAddressId => getField<String>('delivery_address_id');
   set deliveryAddressId(String? value) => setField<String>('delivery_address_id', value);
 
+  double? get deliveryFee => getField<double>('delivery_fee');
+  set deliveryFee(double? value) => setField<double>('delivery_fee', value);
+
   String? get paymentMethod => getField<String>('payment_method');
   set paymentMethod(String? value) => setField<String>('payment_method', value);
 

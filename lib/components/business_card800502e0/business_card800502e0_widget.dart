@@ -1,33 +1,35 @@
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
+import '/app_state.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:degloor_one/backend/whatsapp_service.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:degloor_one/backend/supabase/analytics.dart';
 import 'business_card800502e0_model.dart';
 export 'business_card800502e0_model.dart';
 
 class BusinessCard800502e0Widget extends StatefulWidget {
   const BusinessCard800502e0Widget({
     super.key,
-    String? address,
-    String? category,
-    String? distance,
-    String? imgDesc,
-    bool? isOpen,
-    bool? isVerified,
-    String? name,
-    String? rating,
-  })  : this.address = address ?? 'Main Market, Degloor',
-        this.category = category ?? 'Hardware & Steel',
-        this.distance = distance ?? '1.2',
-        this.imgDesc = imgDesc ??
-            'https://dimg.dreamflow.cloud/v1/image/hardware%20store%20exterior%20with%20tools',
-        this.isOpen = isOpen ?? true,
-        this.isVerified = isVerified ?? true,
-        this.name = name ?? 'Kamdhenu Hardware & Steel',
-        this.rating = rating ?? '4.8';
+    this.address = 'Main Market, Degloor',
+    this.category = 'Hardware & Steel',
+    this.distance = '1.2',
+    this.imgDesc = 'https://dimg.dreamflow.cloud/v1/image/hardware%20store%20exterior%20with%20tools',
+    this.isOpen = false,
+    this.isVerified = false,
+    this.name = 'Business Name',
+    this.rating = '0.0',
+    this.phoneNumber,
+    this.whatsappNumber,
+    this.latitude,
+    this.longitude,
+    this.id,
+  });
 
+  final String? id;
   final String address;
   final String category;
   final String distance;
@@ -36,6 +38,10 @@ class BusinessCard800502e0Widget extends StatefulWidget {
   final bool isVerified;
   final String name;
   final String rating;
+  final String? phoneNumber;
+  final String? whatsappNumber;
+  final double? latitude;
+  final double? longitude;
 
   @override
   State<BusinessCard800502e0Widget> createState() =>
@@ -102,6 +108,14 @@ class _BusinessCard800502e0WidgetState
                         height: 140.0,
                         fit: BoxFit.cover,
                         alignment: Alignment(0.0, 0.0),
+                        errorWidget: (context, url, error) => Container(
+                          color: FlutterFlowTheme.of(context).primaryBackground,
+                          child: Icon(
+                            Icons.image_not_supported_rounded,
+                            color: FlutterFlowTheme.of(context).secondaryText,
+                            size: 32,
+                          ),
+                        ),
                       ),
                       Align(
                         alignment: AlignmentDirectional(1.0, -1.0),
@@ -130,7 +144,7 @@ class _BusinessCard800502e0WidgetState
                                         Icon(
                                           Icons.star_rounded,
                                           color: FlutterFlowTheme.of(context)
-                                              .tertiary,
+                                              .secondary,
                                           size: 14.0,
                                         ),
                                         Text(
@@ -235,45 +249,41 @@ class _BusinessCard800502e0WidgetState
                                   ].divide(SizedBox(width: 4.0)),
                                 ),
                               ),
-                              if (valueOrDefault<bool>(
-                                widget.isOpen,
-                                true,
-                              ))
-                                Container(
-                                  decoration: BoxDecoration(
-                                    color: Color(0xFFE8F5E9),
-                                    borderRadius: BorderRadius.circular(4.0),
-                                    shape: BoxShape.rectangle,
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: (widget.isOpen
+                                          ? FlutterFlowTheme.of(context).success
+                                          : FlutterFlowTheme.of(context).error)
+                                      .withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(
+                                    FlutterFlowTheme.of(context)
+                                        .designToken
+                                        .radius
+                                        .xs,
                                   ),
-                                  child: Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
-                                        8.0, 4.0, 8.0, 4.0),
-                                    child: Container(
-                                      child: Text(
-                                        'Open',
-                                        style: FlutterFlowTheme.of(context)
-                                            .labelSmall
-                                            .override(
-                                              font: GoogleFonts.inter(
-                                                fontWeight: FontWeight.w600,
-                                                fontStyle:
-                                                    FlutterFlowTheme.of(context)
-                                                        .labelSmall
-                                                        .fontStyle,
-                                              ),
-                                              color: Color(0xFF2E7D32),
-                                              letterSpacing: 0.0,
-                                              fontWeight: FontWeight.w600,
-                                              fontStyle:
-                                                  FlutterFlowTheme.of(context)
-                                                      .labelSmall
-                                                      .fontStyle,
-                                              lineHeight: 1.2,
-                                            ),
-                                      ),
-                                    ),
+                                  shape: BoxShape.rectangle,
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsetsDirectional.fromSTEB(
+                                      8.0, 4.0, 8.0, 4.0),
+                                  child: Text(
+                                    widget.isOpen ? 'Open' : 'Closed',
+                                    style: FlutterFlowTheme.of(context)
+                                        .labelSmall
+                                        .override(
+                                          fontFamily:
+                                              FlutterFlowTheme.of(context)
+                                                  .labelSmallFamily,
+                                          color: widget.isOpen
+                                              ? FlutterFlowTheme.of(context)
+                                                  .success
+                                              : FlutterFlowTheme.of(context)
+                                                  .error,
+                                          fontWeight: FontWeight.w600,
+                                        ),
                                   ),
                                 ),
+                              ),
                             ],
                           ),
                           Text(
@@ -375,7 +385,7 @@ class _BusinessCard800502e0WidgetState
                                 children: [
                                   Text(
                                     valueOrDefault<String>(
-                                      '${widget.distance} km away',
+                                      '${widget.distance} away',
                                       '1.2 km away',
                                     ),
                                     style: FlutterFlowTheme.of(context)
@@ -400,7 +410,7 @@ class _BusinessCard800502e0WidgetState
                                         ),
                                   ),
                                   Text(
-                                    'Discovery radius: 10km',
+                                    'Discovery radius: ${FFAppState.instance.discoveryRadius.toInt()}km',
                                     style: FlutterFlowTheme.of(context)
                                         .labelSmall
                                         .override(
@@ -446,8 +456,18 @@ class _BusinessCard800502e0WidgetState
                                           FlutterFlowTheme.of(context).primary,
                                       size: 20.0,
                                     ),
-                                    onPressed: () {
-                                      print('IconButton pressed ...');
+                                    onPressed: () async {
+                                      if (widget.phoneNumber != null) {
+                                        final url = Uri.parse('tel:${widget.phoneNumber}');
+                                        if (await canLaunchUrl(url)) {
+                                          await launchUrl(url);
+                                          // Log Call Click
+                                          logBusinessEvent(
+                                            businessId: widget.id!,
+                                            eventType: BusinessAnalyticsEvents.callClick,
+                                          );
+                                        }
+                                      }
                                     },
                                   ),
                                   FlutterFlowIconButton(
@@ -461,8 +481,18 @@ class _BusinessCard800502e0WidgetState
                                           FlutterFlowTheme.of(context).success,
                                       size: 20.0,
                                     ),
-                                    onPressed: () {
-                                      print('IconButton pressed ...');
+                                    onPressed: () async {
+                                      if (widget.whatsappNumber != null) {
+                                        await WhatsAppService.launchWhatsApp(
+                                          phoneNumber: widget.whatsappNumber!,
+                                          message: 'Hello ${widget.name}, I found your shop on DEGLOOR ONE.',
+                                        );
+                                        // Log WhatsApp Click
+                                        logBusinessEvent(
+                                          businessId: widget.id!,
+                                          eventType: BusinessAnalyticsEvents.whatsappClick,
+                                        );
+                                      }
                                     },
                                   ),
                                   FlutterFlowIconButton(
@@ -476,8 +506,18 @@ class _BusinessCard800502e0WidgetState
                                           FlutterFlowTheme.of(context).primary,
                                       size: 20.0,
                                     ),
-                                    onPressed: () {
-                                      print('IconButton pressed ...');
+                                    onPressed: () async {
+                                      if (widget.latitude != null && widget.longitude != null) {
+                                        final url = Uri.parse('https://www.google.com/maps/search/?api=1&query=${widget.latitude},${widget.longitude}');
+                                        if (await canLaunchUrl(url)) {
+                                          await launchUrl(url, mode: LaunchMode.externalApplication);
+                                          // Log Directions Click
+                                          logBusinessEvent(
+                                            businessId: widget.id!,
+                                            eventType: BusinessAnalyticsEvents.directionsClick,
+                                          );
+                                        }
+                                      }
                                     },
                                   ),
                                 ].divide(SizedBox(width: 8.0)),

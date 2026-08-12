@@ -1,5 +1,5 @@
-import '/flutter_flow/flutter_flow_theme.dart';
-import '/flutter_flow/flutter_flow_util.dart';
+import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
+import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'stat_card_model.dart';
@@ -75,7 +75,7 @@ class _StatCardWidgetState extends State<StatCardWidget> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  widget.icon!,
+                  if (widget.icon != null) widget.icon!,
                   if (valueOrDefault<bool>(
                     widget.hasTrend,
                     true,

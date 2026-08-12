@@ -64,7 +64,7 @@ class FFButtonWidget extends StatefulWidget {
 
   final String text;
   final Widget? icon;
-  final IconData? iconData;
+  final dynamic iconData;
   final Function()? onPressed;
   final FFButtonOptions options;
   final bool showLoadingIndicator;
@@ -212,7 +212,7 @@ class _FFButtonWidgetState extends State<FFButtonWidget> {
     if ((widget.icon != null || widget.iconData != null) && !loading) {
       Widget icon = widget.icon ??
           FaIcon(
-            widget.iconData!,
+            widget.iconData as dynamic,
             size: widget.options.iconSize,
             color: widget.options.iconColor,
           );

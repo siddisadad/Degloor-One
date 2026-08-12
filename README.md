@@ -5,21 +5,21 @@ DEGLOOR ONE is a hyperlocal technology platform connecting customers, businesses
 ## 🚀 Key Features
 
 ### 🛒 Consumer Experience
-- **Discovery**: Dynamic search and categorization for local businesses.
+- **Discovery**: Radius-aware search and categorization for local businesses (2km - 25km).
 - **Catalogue**: Browse digital storefronts with real-time product listings.
-- **Cart & Checkout**: Integrated commerce with support for **UPI** and **Cash on Delivery**.
-- **Service Marketplace**: Find and request local service providers (Electricians, Plumbers, etc.).
-- **Reviews**: Verified rating system based on completed orders.
+- **Cart & Checkout**: Dynamic distance-based delivery fees with support for **UPI** and **Cash on Delivery**.
+- **Address Management**: Precise map-based pinning with automatic reverse geocoding.
+- **Service Marketplace**: Find and request local service providers with professional profiles.
 
 ### 🏢 Business Portal
-- **Management Dashboard**: Insights into profile views and customer engagement.
-- **Catalogue Control**: Add, edit, or remove products instantly.
-- **Order Fulfillment**: Real-time order tracking from acceptance to delivery.
+- **Real-time Dashboard**: Live insights into revenue, order volume, and customer engagement.
+- **Order Fulfillment**: Real-time order tracking using Supabase data streams.
+- **WhatsApp Integration**: One-tap communication with customers.
 
 ### 🚚 Logistics & Admin
-- **Delivery Partner Dashboard**: Manage availability and fulfill local deliveries.
-- **Admin Control Panel**: Verification queue for businesses and platform-wide category management.
-- **Notifications**: Real-time in-app alerts for all transactional events.
+- **Delivery Partner Dashboard**: Manage availability and coordinate deliveries via WhatsApp.
+- **Admin Control Panel**: Verification queue for businesses and user complaint management.
+- **Multi-language**: Full support for **English**, **Marathi**, and **Hindi**.
 
 ## 🛠 Tech Stack
 - **Frontend**: Flutter (Mobile & Web)

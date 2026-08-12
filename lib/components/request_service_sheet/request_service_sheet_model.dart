@@ -1,4 +1,4 @@
-import '/flutter_flow/flutter_flow_util.dart';
+import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'request_service_sheet_widget.dart' show RequestServiceSheetWidget;
 import 'package:flutter/material.dart';
 

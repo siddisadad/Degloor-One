@@ -12,6 +12,7 @@ import 'package:timeago/timeago.dart' as timeago;
 import 'package:url_launcher/url_launcher.dart';
 
 import '../main.dart';
+import '../app_state.dart';
 
 
 export 'lat_lng.dart';
@@ -161,13 +162,19 @@ T? castToType<T>(dynamic value) {
   }
   switch (T) {
     case double:
-      // Doubles may be stored as ints in some cases.
-      return value.toDouble() as T;
+      if (value is num) {
+        return value.toDouble() as T;
+      }
+      if (value is String) {
+        return double.tryParse(value) as T?;
+      }
+      break;
     case int:
-      // Likewise, ints may be stored as doubles. If this is the case
-      // (i.e. no decimal value), return the value as an int.
-      if (value is num && value.toInt() == value) {
+      if (value is num) {
         return value.toInt() as T;
+      }
+      if (value is String) {
+        return int.tryParse(value) as T?;
       }
       break;
     default:
@@ -444,13 +451,16 @@ extension ListUniqueExt<T> on Iterable<T> {
 
 String getCurrentRoute(BuildContext context) =>
     context.mounted ? MyApp.of(context).getRoute() : '';
-String getSimulatedDistance(double? businessLat, double? businessLng) {
+String getDistance(double? businessLat, double? businessLng) {
   if (businessLat == null || businessLng == null) {
-    return '0.0 km';
+    return '0 m';
   }
-  // Reference point in Degloor (18.5522, 77.5844)
-  const double refLat = 18.5522;
-  const double refLng = 77.5844;
+
+  final userLoc = FFAppState.instance.userLocation;
+  if (userLoc == null) return '0 m';
+
+  final double refLat = userLoc.latitude;
+  final double refLng = userLoc.longitude;
 
   // Simple Haversine distance calculation
   const double earthRadius = 6371; // in km
@@ -465,6 +475,9 @@ String getSimulatedDistance(double? businessLat, double? businessLng) {
   final double c = 2 * atan2(sqrt(a), sqrt(1 - a));
   final double distance = earthRadius * c;
 
+  if (distance < 1.0) {
+    return '${(distance * 1000).round()} m';
+  }
   return '${distance.toStringAsFixed(1)} km';
 }
 

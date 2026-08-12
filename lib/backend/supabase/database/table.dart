@@ -9,34 +9,28 @@ abstract class SupabaseTable<T extends SupabaseDataRow> {
   Future<List<T>> queryRows({
     required PostgrestTransformBuilder Function(PostgrestFilterBuilder) queryFn,
     int? limit,
-  }) {
+  }) async {
     try {
       final select = _select();
       var query = queryFn(select);
       query = limit != null ? query.limit(limit) : query;
-      return query.select().then((rows) => rows.map(createRow).toList());
+      final rows = await query.select();
+      return rows.map(createRow).toList();
     } catch (e) {
       print('Supabase queryRows error ($tableName): $e');
-      return Future.value([]);
+      rethrow;
     }
   }
 
   Future<List<T>> querySingleRow({
     required PostgrestTransformBuilder Function(PostgrestFilterBuilder) queryFn,
-  }) {
+  }) async {
     try {
-      return queryFn(_select())
-          .limit(1)
-          .select()
-          .maybeSingle()
-          .then((r) => [if (r != null) createRow(r)])
-          .catchError((e) {
-        print('Supabase querySingleRow error ($tableName): $e');
-        return <T>[];
-      });
+      final r = await queryFn(_select()).limit(1).select().maybeSingle();
+      return [if (r != null) createRow(r)];
     } catch (e) {
-      print('Supabase querySingleRow sync error ($tableName): $e');
-      return Future.value([]);
+      print('Supabase querySingleRow error ($tableName): $e');
+      rethrow;
     }
   }
 
@@ -80,6 +74,15 @@ abstract class SupabaseTable<T extends SupabaseDataRow> {
       return [];
     }
     return delete.select().then((rows) => rows.map(createRow).toList());
+  }
+
+  Stream<List<T>> stream({
+    required String primaryKey,
+    SupabaseStreamBuilder Function(SupabaseStreamFilterBuilder)? queryFn,
+  }) {
+    final builder = SupaFlow.client.from(tableName).stream(primaryKey: [primaryKey]);
+    final stream = queryFn != null ? queryFn(builder) : builder;
+    return stream.map((rows) => rows.map(createRow).toList());
   }
 }
 

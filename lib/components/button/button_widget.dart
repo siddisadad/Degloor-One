@@ -1,5 +1,5 @@
-import '/flutter_flow/flutter_flow_theme.dart';
-import '/flutter_flow/flutter_flow_util.dart';
+import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
+import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:percent_indicator/percent_indicator.dart';
@@ -19,6 +19,7 @@ class ButtonWidget extends StatefulWidget {
     bool? fullWidth,
     bool? loading,
     bool? disabled,
+    this.onTap,
   })  : this.iconPresent = iconPresent ?? false,
         this.iconEndPresent = iconEndPresent ?? false,
         this.content = content ?? 'Sign In',
@@ -38,6 +39,7 @@ class ButtonWidget extends StatefulWidget {
   final bool fullWidth;
   final bool loading;
   final bool disabled;
+  final Future<void> Function()? onTap;
 
   @override
   State<ButtonWidget> createState() => _ButtonWidgetState();
@@ -67,8 +69,10 @@ class _ButtonWidgetState extends State<ButtonWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Opacity(
-      opacity: valueOrDefault<double>(
+    return GestureDetector(
+      onTap: widget.disabled ? null : widget.onTap,
+      child: Opacity(
+        opacity: valueOrDefault<double>(
         valueOrDefault<bool>(
           widget.disabled,
           false,
@@ -77,7 +81,7 @@ class _ButtonWidgetState extends State<ButtonWidget> {
             : 1.0,
         1.0,
       ),
-      child: Container(
+        child: Container(
         decoration: BoxDecoration(
           color: valueOrDefault<Color>(
             () {
@@ -443,6 +447,7 @@ class _ButtonWidgetState extends State<ButtonWidget> {
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }

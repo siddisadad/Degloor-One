@@ -6,6 +6,28 @@ class ProductsTable extends SupabaseTable<ProductsRow> {
 
   @override
   ProductsRow createRow(Map<String, dynamic> data) => ProductsRow(data);
+
+  Future<List<ProductsRow>> searchInRadius({
+    required double latitude,
+    required double longitude,
+    required double radiusKm,
+    String? searchTerm,
+    int limit = 20,
+    int offset = 0,
+  }) async {
+    final response = await SupaFlow.client.rpc(
+      'search_products_in_radius',
+      params: {
+        'user_lat': latitude,
+        'user_lng': longitude,
+        'radius_meters': radiusKm * 1000,
+        if (searchTerm != null && searchTerm.isNotEmpty) 'search_term': searchTerm,
+        'p_limit': limit,
+        'p_offset': offset,
+      },
+    );
+    return (response as List?)?.map((e) => createRow(e)).toList() ?? [];
+  }
 }
 
 class ProductsRow extends SupabaseDataRow {
@@ -46,4 +68,7 @@ class ProductsRow extends SupabaseDataRow {
 
   DateTime get createdAt => getField<DateTime>('created_at')!;
   set createdAt(DateTime value) => setField<DateTime>('created_at', value);
+
+  double? get distanceKm => getField<double>('distance_km');
+  set distanceKm(double? value) => setField<double>('distance_km', value);
 }

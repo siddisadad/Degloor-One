@@ -1,4 +1,5 @@
-import '/flutter_flow/flutter_flow_util.dart';
+import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
+import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'photo_item_model.dart';
@@ -62,6 +63,14 @@ class _PhotoItemWidgetState extends State<PhotoItemWidget> {
               ),
               fit: BoxFit.cover,
               alignment: Alignment(0.0, 0.0),
+              errorWidget: (context, url, error) => Container(
+                color: FlutterFlowTheme.of(context).primaryBackground,
+                child: Icon(
+                  Icons.image_not_supported_rounded,
+                  color: FlutterFlowTheme.of(context).secondaryText,
+                  size: 24,
+                ),
+              ),
             ),
           ),
         ),
