@@ -1,4 +1,3 @@
-import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:flutter/material.dart';
 
