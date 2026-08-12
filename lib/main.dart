@@ -1,15 +1,24 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:degloor_one/l10n/app_localizations.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'auth/supabase_auth/supabase_user_provider.dart';
 import 'auth/supabase_auth/auth_util.dart';
 
-import '/backend/supabase/supabase.dart';
-import '/flutter_flow/flutter_flow_theme.dart';
+import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'flutter_flow/flutter_flow_util.dart';
+import 'package:degloor_one/app_state.dart';
+import 'package:provider/provider.dart';
 
+/// The entry point for the DEGLOOR ONE application.
+///
+/// This function initializes the Flutter binding, configures URL strategies,
+/// and initializes essential services like Supabase, Theme, and AppState
+/// before launching the app.
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   GoRouter.optionURLReflectsImperativeAPIs = true;
@@ -19,23 +28,35 @@ void main() async {
 
   await FlutterFlowTheme.initialize();
 
-  runApp(MyApp());
+  final appState = FFAppState.instance; // Initialize shared states
+  await appState.initializePersistedState();
+
+  runApp(ChangeNotifierProvider(
+    create: (context) => appState,
+    child: MyApp(),
+  ));
 }
 
+/// The root widget of the DEGLOOR ONE application.
+///
+/// It manages the application's lifecycle, theme mode, and routing.
 class MyApp extends StatefulWidget {
-  // This widget is the root of your application.
   @override
   State<MyApp> createState() => _MyAppState();
 
+  /// Returns the current state of [MyApp] from the given [context].
   static _MyAppState of(BuildContext context) =>
       context.findAncestorStateOfType<_MyAppState>()!;
 }
 
 class _MyAppState extends State<MyApp> {
+  /// The current theme mode of the application.
   ThemeMode _themeMode = FlutterFlowTheme.themeMode;
 
   late AppStateNotifier _appStateNotifier;
   late GoRouter _router;
+
+  /// Retrieves the URI path for a given [routeMatch] or the current configuration's last match.
   String getRoute([RouteMatch? routeMatch]) {
     final RouteMatch lastMatch =
         routeMatch ?? _router.routerDelegate.currentConfiguration.last;
@@ -45,10 +66,13 @@ class _MyAppState extends State<MyApp> {
     return matchList.uri.path;
   }
 
+  /// Returns a list of URI paths representing the current navigation stack.
   List<String> getRouteStack() =>
       _router.routerDelegate.currentConfiguration.matches
           .map((e) => getRoute(e))
           .toList();
+
+  /// A stream of the current authenticated user.
   late Stream<BaseAuthUser> userStream;
 
   @override
@@ -57,7 +81,7 @@ class _MyAppState extends State<MyApp> {
 
     _appStateNotifier = AppStateNotifier.instance;
     _router = createRouter(_appStateNotifier);
-    userStream = degloorDiscoverySupabaseUserStream()
+    userStream = degloorOneSupabaseUserStream()
       ..listen((user) {
         _appStateNotifier.update(user);
       });
@@ -68,6 +92,7 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
+  /// Updates the application's theme mode and persists the choice.
   void setThemeMode(ThemeMode mode) => safeSetState(() {
         _themeMode = mode;
         FlutterFlowTheme.saveThemeMode(mode);
@@ -75,22 +100,62 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    final appState = Provider.of<FFAppState>(context);
+
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
-      title: 'Degloor Discovery',
+      title: 'DEGLOOR ONE',
       localizationsDelegates: [
+        AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      supportedLocales: const [Locale('en', '')],
+      supportedLocales: const [
+        Locale('en', ''),
+        Locale('mr', ''),
+        Locale('hi', ''),
+      ],
+      locale: Locale(appState.locale),
       theme: ThemeData(
         brightness: Brightness.light,
-        useMaterial3: false,
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF1976D2),
+          primary: const Color(0xFF1976D2),
+          surface: Colors.white,
+          brightness: Brightness.light,
+        ),
+        textTheme: GoogleFonts.interTextTheme(),
+        appBarTheme: const AppBarTheme(
+          centerTitle: true,
+          backgroundColor: Colors.white,
+          elevation: 0,
+          titleTextStyle: TextStyle(
+            color: Color(0xFF1A1A1A),
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
       ),
       darkTheme: ThemeData(
         brightness: Brightness.dark,
-        useMaterial3: false,
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF1976D2),
+          primary: const Color(0xFF1976D2),
+          brightness: Brightness.dark,
+        ),
+        textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme),
+        appBarTheme: const AppBarTheme(
+          centerTitle: true,
+          elevation: 0,
+          titleTextStyle: TextStyle(
+            color: Color(0xFFF5F5F5),
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
       ),
       themeMode: _themeMode,
       routerConfig: _router,

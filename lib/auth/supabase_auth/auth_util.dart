@@ -1,4 +1,4 @@
-import '/backend/supabase/supabase.dart';
+import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'supabase_auth_manager.dart';
 
 export 'supabase_auth_manager.dart';
@@ -19,6 +19,17 @@ String get currentPhoneNumber => currentUser?.phoneNumber ?? '';
 String get currentJwtToken => _currentJwtToken ?? '';
 
 bool get currentUserEmailVerified => currentUser?.emailVerified ?? false;
+
+Future<String?> getCurrentUserRole() async {
+  if (!loggedIn || currentUserUid.length < 10) return null;
+  final rows = await UsersTable().queryRows(
+    queryFn: (q) => q.eq('id', currentUserUid),
+  );
+  if (rows.isNotEmpty) {
+    return rows.first.role;
+  }
+  return null;
+}
 
 /// Create a Stream that listens to the current user's JWT Token.
 String? _currentJwtToken;

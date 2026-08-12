@@ -1,4 +1,4 @@
-import '/flutter_flow/flutter_flow_util.dart';
+import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'filter_chip_widget.dart' show FilterChipWidget;
 import 'package:flutter/material.dart';
 

@@ -74,8 +74,7 @@ String? serializeParam(
         data = uploadedFileToString(param as FFUploadedFile);
       case ParamType.JSON:
         data = json.encode(param);
-
-      default:
+      case ParamType.SupabaseRow:
         data = null;
     }
     return data;
@@ -182,6 +181,7 @@ enum ParamType {
   FFPlace,
   FFUploadedFile,
   JSON,
+  SupabaseRow,
 }
 
 dynamic deserializeParam<T>(
@@ -229,8 +229,7 @@ dynamic deserializeParam<T>(
         return uploadedFileFromString(param);
       case ParamType.JSON:
         return json.decode(param);
-
-      default:
+      case ParamType.SupabaseRow:
         return null;
     }
   } catch (e) {

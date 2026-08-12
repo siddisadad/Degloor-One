@@ -31,6 +31,7 @@ abstract class BaseAuthUser {
   String? get displayName => authUserInfo.displayName;
   String? get photoUrl => authUserInfo.photoUrl;
   String? get phoneNumber => authUserInfo.phoneNumber;
+  String? get role => null;
 }
 
 BaseAuthUser? currentUser;

@@ -1,4 +1,4 @@
-import '/flutter_flow/flutter_flow_util.dart';
+import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'report_item_widget.dart' show ReportItemWidget;
 import 'package:flutter/material.dart';
 

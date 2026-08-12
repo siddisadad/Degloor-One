@@ -22,7 +22,12 @@ Future<bool> getBusinessOpenStatus(String businessId) async {
     final openTime = open.hour * 60 + open.minute;
     final closeTime = close.hour * 60 + close.minute;
 
-    return currentTime >= openTime && currentTime <= closeTime;
+    if (closeTime > openTime) {
+      return currentTime >= openTime && currentTime <= closeTime;
+    } else {
+      // Handles overnight hours (e.g., 10 PM to 2 AM)
+      return currentTime >= openTime || currentTime <= closeTime;
+    }
   } catch (e) {
     print('Error checking business open status: $e');
     return false;
@@ -39,7 +44,7 @@ Future<Map<String, bool>> getMultipleBusinessesOpenStatus(
   try {
     final hours = await BusinessHoursTable().queryRows(
       queryFn: (q) =>
-          q.in_('business_id', businessIds).eq('day_of_week', dayOfWeek),
+          q.inFilter('business_id', businessIds).eq('day_of_week', dayOfWeek),
     );
 
     final statusMap = <String, bool>{};
@@ -56,7 +61,14 @@ Future<Map<String, bool>> getMultipleBusinessesOpenStatus(
       final closeTime =
           row.closeTime!.time!.hour * 60 + row.closeTime!.time!.minute;
 
-      if (currentTime >= openTime && currentTime <= closeTime) {
+      bool isOpen = false;
+      if (closeTime > openTime) {
+        isOpen = currentTime >= openTime && currentTime <= closeTime;
+      } else {
+        isOpen = currentTime >= openTime || currentTime <= closeTime;
+      }
+
+      if (isOpen) {
         statusMap[row.businessId!] = true;
       }
     }

@@ -1,19 +1,23 @@
 import 'package:rxdart/rxdart.dart';
 
-import '/backend/supabase/supabase.dart';
+import 'package:degloor_one/backend/supabase/supabase.dart';
 import '../base_auth_user_provider.dart';
 
 export '../base_auth_user_provider.dart';
 
-class DegloorDiscoverySupabaseUser extends BaseAuthUser {
-  DegloorDiscoverySupabaseUser(this.user);
+class DegloorOneSupabaseUser extends BaseAuthUser {
+  DegloorOneSupabaseUser(this.user, [this.role]);
   User? user;
+  @override
+  String? role;
   bool get loggedIn => user != null;
 
   @override
   AuthUserInfo get authUserInfo => AuthUserInfo(
         uid: user?.id,
         email: user?.email,
+        displayName: user?.userMetadata?['full_name'],
+        photoUrl: user?.userMetadata?['avatar_url'],
         phoneNumber: user?.phone,
       );
 
@@ -56,9 +60,17 @@ class DegloorDiscoverySupabaseUser extends BaseAuthUser {
 
   @override
   Future refreshUser() async {
-    await SupaFlow.client.auth
-        .refreshSession()
-        .then((_) => user = SupaFlow.client.auth.currentUser);
+    await SupaFlow.client.auth.refreshSession().then((_) async {
+      user = SupaFlow.client.auth.currentUser;
+      if (user != null) {
+        final rows = await UsersTable().queryRows(
+          queryFn: (q) => q.eq('id', user!.id),
+        );
+        if (rows.isNotEmpty) {
+          role = rows.first.role;
+        }
+      }
+    });
   }
 }
 
@@ -66,7 +78,7 @@ class DegloorDiscoverySupabaseUser extends BaseAuthUser {
 /// [SupaFlow.client.auth.onAuthStateChange] does not yield any values until the
 /// user is already authenticated. So we add a default null user to the stream,
 /// if we need to interact with the [currentUser] before logging in.
-Stream<BaseAuthUser> degloorDiscoverySupabaseUserStream() {
+Stream<BaseAuthUser> degloorOneSupabaseUserStream() {
   final supabaseAuthStream = SupaFlow.client.auth.onAuthStateChange.debounce(
       (authState) => authState.event == AuthChangeEvent.tokenRefreshed
           ? TimerStream(authState, Duration(seconds: 1))
@@ -74,9 +86,19 @@ Stream<BaseAuthUser> degloorDiscoverySupabaseUserStream() {
   return (!loggedIn
           ? Stream<AuthState?>.value(null).concatWith([supabaseAuthStream])
           : supabaseAuthStream)
-      .map<BaseAuthUser>(
-    (authState) {
-      currentUser = DegloorDiscoverySupabaseUser(authState?.session?.user);
+      .asyncMap<BaseAuthUser>(
+    (authState) async {
+      final user = authState?.session?.user;
+      String? role;
+      if (user != null) {
+        final rows = await UsersTable().queryRows(
+          queryFn: (q) => q.eq('id', user.id),
+        );
+        if (rows.isNotEmpty) {
+          role = rows.first.role;
+        }
+      }
+      currentUser = DegloorOneSupabaseUser(user, role);
       return currentUser!;
     },
   );

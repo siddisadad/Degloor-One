@@ -1,5 +1,5 @@
-import '/flutter_flow/flutter_flow_theme.dart';
-import '/flutter_flow/flutter_flow_util.dart';
+import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
+import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'text_field_model.dart';
@@ -22,11 +22,12 @@ class TextFieldWidget extends StatefulWidget {
     this.onSubmit,
     String? variant,
     bool? error,
+    this.obscureText = false,
   })  : this.label = label ?? '',
         this.labelPresent = labelPresent ?? false,
         this.helper = helper ?? '',
         this.helperPresent = helperPresent ?? false,
-        this.leadingIconPresent = leadingIconPresent ?? true,
+        this.leadingIconPresent = leadingIconPresent ?? false,
         this.trailingIconPresent = trailingIconPresent ?? false,
         this.hint = hint ?? 'Enter 10 digit mobile number',
         this.value = value ?? '',
@@ -47,6 +48,7 @@ class TextFieldWidget extends StatefulWidget {
   final Function(String)? onSubmit;
   final String variant;
   final bool error;
+  final bool obscureText;
 
   @override
   State<TextFieldWidget> createState() => _TextFieldWidgetState();
@@ -362,9 +364,10 @@ class _TextFieldWidgetState extends State<TextFieldWidget> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   if (valueOrDefault<bool>(
-                    widget.leadingIconPresent,
-                    true,
-                  ))
+                        widget.leadingIconPresent,
+                        false,
+                      ) &&
+                      widget.leadingIcon != null)
                     widget.leadingIcon!,
                   Expanded(
                     flex: 1,
@@ -373,7 +376,7 @@ class _TextFieldWidgetState extends State<TextFieldWidget> {
                       focusNode: _model.inputFocusNode,
                       onChanged: (val) => widget.onChange?.call(val),
                       onFieldSubmitted: (val) => widget.onSubmit?.call(val),
-                      obscureText: false,
+                      obscureText: widget.obscureText,
                       decoration: InputDecoration(
                         isDense: true,
                         hintText: valueOrDefault<String>(
@@ -471,9 +474,10 @@ class _TextFieldWidgetState extends State<TextFieldWidget> {
                     ),
                   ),
                   if (valueOrDefault<bool>(
-                    widget.trailingIconPresent,
-                    false,
-                  ))
+                        widget.trailingIconPresent,
+                        false,
+                      ) &&
+                      widget.trailingIcon != null)
                     widget.trailingIcon!,
                 ],
               ),
