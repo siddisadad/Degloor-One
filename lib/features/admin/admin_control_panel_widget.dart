@@ -4,7 +4,6 @@ import 'package:degloor_one/components/action_item/action_item_widget.dart';
 import 'package:degloor_one/components/button/button_widget.dart';
 import 'package:degloor_one/components/category_chip/category_chip_widget.dart';
 import 'package:degloor_one/components/stat_card2/stat_card2_widget.dart';
-import 'package:degloor_one/flutter_flow/flutter_flow_charts.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:flutter/material.dart';
@@ -69,7 +68,7 @@ class _AdminControlPanelWidgetState extends State<AdminControlPanelWidget> {
   Future<int> fetchCount(bool verified) async {
     final response = await SupaFlow.client
         .from('businesses')
-        .select('*')
+        .select()
         .eq('is_verified', verified);
     return response.length;
   }
@@ -220,7 +219,7 @@ class _AdminControlPanelWidgetState extends State<AdminControlPanelWidget> {
                                     // Notify owner
                                     if (business.ownerId != null) {
                                       await NotificationsTable().insert({
-                                        'user_id': business.ownerId!,
+                                        'user_id': business.ownerId,
                                         'title': 'Business Verified!',
                                         'message': 'Your business "${business.name}" has been verified and is now live.',
                                         'type': 'business_verified',
@@ -334,27 +333,16 @@ class _AdminControlPanelWidgetState extends State<AdminControlPanelWidget> {
                     const SizedBox(height: 12),
                     Container(
                       height: 180,
-                      child: FlutterFlowBarChart(
-                        barData: [
-                          FFBarChartData(
-                            yData: [45, 78, 56, 89, 64, 92, 70],
-                            color: FlutterFlowTheme.of(context).primary,
-                          )
-                        ],
-                        xLabels: const ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
-                        xAxisLabelInfo: const AxisLabelInfo(
-                          showLabels: true,
-                          reservedSize: 24,
+                      decoration: BoxDecoration(
+                        color: FlutterFlowTheme.of(context).secondaryBackground,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: FlutterFlowTheme.of(context).alternate),
+                      ),
+                      child: Center(
+                        child: Text(
+                          'Live Activity Tracking Coming Soon',
+                          style: FlutterFlowTheme.of(context).bodySmall,
                         ),
-                        yAxisLabelInfo: const AxisLabelInfo(
-                          showLabels: true,
-                          reservedSize: 32,
-                        ),
-                        barWidth: 16,
-                        barBorderRadius: BorderRadius.circular(4),
-                        alignment: BarChartAlignment.spaceEvenly,
-                        chartStylingInfo: const ChartStylingInfo(showGrid: true),
-                        axisBounds: const AxisBounds(minY: 0, maxY: 100, minX: 0, maxX: 6),
                       ),
                     ),
                   ].divide(const SizedBox(height: 16)),

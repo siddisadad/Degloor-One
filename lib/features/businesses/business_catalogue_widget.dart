@@ -6,6 +6,7 @@ import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:degloor_one/core/error_handler.dart';
 import 'business_catalogue_model.dart';
 export 'business_catalogue_model.dart';
 
@@ -69,7 +70,7 @@ class _BusinessCatalogueWidgetState extends State<BusinessCatalogueWidget> with 
         }
       });
     } catch (e) {
-      print('Error fetching catalogue: $e');
+      AppLogger.error('Error fetching catalogue', e);
       setState(() => _model.isLoading = false);
     }
   }
@@ -101,7 +102,6 @@ class _BusinessCatalogueWidgetState extends State<BusinessCatalogueWidget> with 
       backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
       appBar: AppBar(
         backgroundColor: FlutterFlowTheme.of(context).secondaryBackground,
-        automaticallyImplyLeading: true,
         title: Text(
           'Products',
           style: FlutterFlowTheme.of(context).headlineSmall,

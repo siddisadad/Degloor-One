@@ -45,7 +45,7 @@ class _SplashScreenWidgetState extends State<SplashScreenWidget> {
         key: scaffoldKey,
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         body: Stack(
-          alignment: AlignmentDirectional(0.0, 0.0),
+          alignment: const AlignmentDirectional(0.0, 0.0),
           children: [
             Container(
               decoration: BoxDecoration(
@@ -54,19 +54,15 @@ class _SplashScreenWidgetState extends State<SplashScreenWidget> {
                     FlutterFlowTheme.of(context).secondaryBackground,
                     FlutterFlowTheme.of(context).primaryBackground
                   ],
-                  stops: [0.0, 1.0],
-                  center: Alignment(0.0, 0.0),
-                  radius: 0.5,
+                  stops: const [0.0, 1.0],
                 ),
-                shape: BoxShape.rectangle,
               ),
             ),
             Align(
-              alignment: AlignmentDirectional(0.0, 0.0),
+              alignment: const AlignmentDirectional(0.0, 0.0),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Container(
                     width: 120.0,
@@ -74,9 +70,8 @@ class _SplashScreenWidgetState extends State<SplashScreenWidget> {
                     decoration: BoxDecoration(
                       color: FlutterFlowTheme.of(context).primaryText,
                       borderRadius: BorderRadius.circular(24.0),
-                      shape: BoxShape.rectangle,
                     ),
-                    alignment: AlignmentDirectional(0.0, 0.0),
+                    alignment: const AlignmentDirectional(0.0, 0.0),
                     child: Icon(
                       Icons.location_on_rounded,
                       color: FlutterFlowTheme.of(context).primaryBackground,
@@ -86,7 +81,6 @@ class _SplashScreenWidgetState extends State<SplashScreenWidget> {
                   Column(
                     mainAxisSize: MainAxisSize.min,
                     mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Text(
                         'DEGLOOR ONE',
@@ -95,16 +89,8 @@ class _SplashScreenWidgetState extends State<SplashScreenWidget> {
                             .override(
                               font: GoogleFonts.inter(
                                 fontWeight: FontWeight.w800,
-                                fontStyle: FlutterFlowTheme.of(context)
-                                    .headlineLarge
-                                    .fontStyle,
                               ),
                               color: FlutterFlowTheme.of(context).primaryText,
-                              letterSpacing: 0.0,
-                              fontWeight: FontWeight.w800,
-                              fontStyle: FlutterFlowTheme.of(context)
-                                  .headlineLarge
-                                  .fontStyle,
                               lineHeight: 1.2,
                             ),
                       ),
@@ -113,163 +99,94 @@ class _SplashScreenWidgetState extends State<SplashScreenWidget> {
                         style: FlutterFlowTheme.of(context)
                             .titleMedium
                             .override(
-                              font: GoogleFonts.inter(
-                                fontWeight: FontWeight.normal,
-                                fontStyle: FlutterFlowTheme.of(context)
-                                    .titleMedium
-                                    .fontStyle,
-                              ),
+                              font: GoogleFonts.inter(),
                               color: FlutterFlowTheme.of(context).secondaryText,
-                              letterSpacing: 0.0,
-                              fontWeight: FontWeight.normal,
-                              fontStyle: FlutterFlowTheme.of(context)
-                                  .titleMedium
-                                  .fontStyle,
                               lineHeight: 1.4,
                             ),
                       ),
-                    ].divide(SizedBox(height: 16.0)),
+                    ].divide(const SizedBox(height: 16.0)),
                   ),
-                ].divide(SizedBox(height: 32.0)),
+                ].divide(const SizedBox(height: 32.0)),
               ),
             ),
             Align(
-              alignment: AlignmentDirectional(0.0, 1.0),
-              child: Container(
-                child: Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 48.0),
-                  child: Container(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        CircularPercentIndicator(
-                          percent: 0.0,
-                          radius: 12.0,
-                          lineWidth: 2.0,
-                          animation: true,
-                          animateFromLastPercent: true,
-                          progressColor: FlutterFlowTheme.of(context).primary,
-                          backgroundColor:
-                              FlutterFlowTheme.of(context).alternate,
-                        ),
-                        Container(
-                          height: 16.0,
-                        ),
-                        Row(
-                          mainAxisSize: MainAxisSize.max,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Text(
-                              'By',
-                              style: FlutterFlowTheme.of(context)
-                                  .labelSmall
-                                  .override(
-                                    font: GoogleFonts.inter(
-                                      fontWeight: FlutterFlowTheme.of(context)
-                                          .labelSmall
-                                          .fontWeight,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .labelSmall
-                                          .fontStyle,
-                                    ),
-                                    color: FlutterFlowTheme.of(context)
-                                        .onBackground,
-                                    letterSpacing: 0.0,
-                                    fontWeight: FlutterFlowTheme.of(context)
-                                        .labelSmall
-                                        .fontWeight,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .labelSmall
-                                        .fontStyle,
-                                    lineHeight: 1.2,
-                                  ),
-                            ),
-                            Text(
-                              'Deshmukh Technologies',
-                              style: FlutterFlowTheme.of(context)
-                                  .labelSmall
-                                  .override(
-                                    font: GoogleFonts.inter(
-                                      fontWeight: FontWeight.w600,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .labelSmall
-                                          .fontStyle,
-                                    ),
-                                    color: FlutterFlowTheme.of(context)
-                                        .secondaryText,
-                                    letterSpacing: 0.0,
-                                    fontWeight: FontWeight.w600,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .labelSmall
-                                        .fontStyle,
-                                    lineHeight: 1.2,
-                                  ),
-                            ),
-                          ].divide(SizedBox(width: 4.0)),
-                        ),
-                      ].divide(SizedBox(height: 8.0)),
+              alignment: const AlignmentDirectional(0.0, 1.0),
+              child: Padding(
+                padding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 48.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularPercentIndicator(
+                      radius: 12.0,
+                      lineWidth: 2.0,
+                      animation: true,
+                      animateFromLastPercent: true,
+                      progressColor: FlutterFlowTheme.of(context).primary,
+                      backgroundColor: FlutterFlowTheme.of(context).alternate,
                     ),
-                  ),
+                    const SizedBox(height: 16.0),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'By',
+                          style: FlutterFlowTheme.of(context)
+                              .labelSmall
+                              .override(
+                                font: GoogleFonts.inter(),
+                                color: FlutterFlowTheme.of(context).onBackground,
+                              ),
+                        ),
+                        Text(
+                          'Deshmukh Technologies',
+                          style: FlutterFlowTheme.of(context)
+                              .labelSmall
+                              .override(
+                                font: GoogleFonts.inter(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                color: FlutterFlowTheme.of(context).secondaryText,
+                              ),
+                        ),
+                      ].divide(const SizedBox(width: 4.0)),
+                    ),
+                  ].divide(const SizedBox(height: 8.0)),
                 ),
               ),
             ),
             Align(
-              alignment: AlignmentDirectional(1.0, -1.0),
-              child: Container(
-                child: Padding(
-                  padding: EdgeInsets.all(24.0),
-                  child: Container(
-                    child: Container(
-                      height: 34.0,
-                      decoration: BoxDecoration(
-                        color: FlutterFlowTheme.of(context).secondaryBackground,
-                        borderRadius: BorderRadius.circular(8.0),
-                        border: Border.all(
-                          color: FlutterFlowTheme.of(context).alternate,
-                          width: 1.0,
+              alignment: const AlignmentDirectional(1.0, -1.0),
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Container(
+                  height: 34.0,
+                  decoration: BoxDecoration(
+                    color: FlutterFlowTheme.of(context).secondaryBackground,
+                    borderRadius: BorderRadius.circular(8.0),
+                    border: Border.all(
+                      color: FlutterFlowTheme.of(context).alternate,
+                    ),
+                  ),
+                  alignment: const AlignmentDirectional(0.0, 0.0),
+                  child: Padding(
+                    padding: const EdgeInsetsDirectional.fromSTEB(12.0, 0.0, 12.0, 0.0),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Phase 1: DEGLOOR ONE',
+                          style: FlutterFlowTheme.of(context)
+                              .labelMedium
+                              .override(
+                                font: GoogleFonts.inter(),
+                                color: FlutterFlowTheme.of(context).secondaryText,
+                                fontSize: 14.0,
+                                lineHeight: 1.4,
+                              ),
                         ),
-                      ),
-                      alignment: AlignmentDirectional(0.0, 0.0),
-                      child: Padding(
-                        padding: EdgeInsetsDirectional.fromSTEB(
-                            12.0, 0.0, 12.0, 0.0),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Text(
-                              'Phase 1: DEGLOOR ONE',
-                              style: FlutterFlowTheme.of(context)
-                                  .labelMedium
-                                  .override(
-                                    font: GoogleFonts.inter(
-                                      fontWeight: FlutterFlowTheme.of(context)
-                                          .labelMedium
-                                          .fontWeight,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .labelMedium
-                                          .fontStyle,
-                                    ),
-                                    color: FlutterFlowTheme.of(context)
-                                        .secondaryText,
-                                    fontSize: 14.0,
-                                    letterSpacing: 0.0,
-                                    fontWeight: FlutterFlowTheme.of(context)
-                                        .labelMedium
-                                        .fontWeight,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .labelMedium
-                                        .fontStyle,
-                                    lineHeight: 1.4,
-                                  ),
-                            ),
-                          ].divide(SizedBox(width: 6.0)),
-                        ),
-                      ),
+                      ].divide(const SizedBox(width: 6.0)),
                     ),
                   ),
                 ),

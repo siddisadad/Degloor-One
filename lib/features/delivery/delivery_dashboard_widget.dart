@@ -42,7 +42,7 @@ class _DeliveryDashboardWidgetState extends State<DeliveryDashboardWidget> {
 
   void _startLocationSync(String partnerId) {
     if (_locationTimer != null) return;
-    _locationTimer = Timer.periodic(Duration(seconds: 30), (timer) async {
+    _locationTimer = Timer.periodic(const Duration(seconds: 30), (timer) async {
       await LocationService.syncPartnerLocation(partnerId);
     });
     LocationService.syncPartnerLocation(partnerId);
@@ -57,7 +57,7 @@ class _DeliveryDashboardWidgetState extends State<DeliveryDashboardWidget> {
     if (value && partner.isVerified != true) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Your account is pending verification. Please wait for admin approval.'),
+          content: const Text('Your account is pending verification. Please wait for admin approval.'),
           backgroundColor: FlutterFlowTheme.of(context).warning,
         ),
       );
@@ -82,7 +82,7 @@ class _DeliveryDashboardWidgetState extends State<DeliveryDashboardWidget> {
     if (partner.isVerified != true) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Verification Required: You cannot accept orders until your account is verified.'),
+          content: const Text('Verification Required: You cannot accept orders until your account is verified.'),
           backgroundColor: FlutterFlowTheme.of(context).error,
         ),
       );
@@ -105,7 +105,7 @@ class _DeliveryDashboardWidgetState extends State<DeliveryDashboardWidget> {
       'notes': 'Order accepted by delivery partner.',
     });
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Order accepted!')),
+      const SnackBar(content: Text('Order accepted!')),
     );
     setState(() {});
   }
@@ -141,16 +141,16 @@ class _DeliveryDashboardWidgetState extends State<DeliveryDashboardWidget> {
     final verified = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Verify Delivery'),
+        title: const Text('Verify Delivery'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Ask the customer for the 4-digit delivery OTP.'),
-            SizedBox(height: 16),
+            const Text('Ask the customer for the 4-digit delivery OTP.'),
+            const SizedBox(height: 16),
             TextField(
               controller: otpController,
               keyboardType: TextInputType.number,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Enter OTP',
                 border: OutlineInputBorder(),
               ),
@@ -161,7 +161,7 @@ class _DeliveryDashboardWidgetState extends State<DeliveryDashboardWidget> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text('Cancel'),
+            child: const Text('Cancel'),
           ),
           ElevatedButton(
             onPressed: () {
@@ -169,11 +169,11 @@ class _DeliveryDashboardWidgetState extends State<DeliveryDashboardWidget> {
                 Navigator.pop(context, true);
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Invalid OTP. Please try again.')),
+                  const SnackBar(content: Text('Invalid OTP. Please try again.')),
                 );
               }
             },
-            child: Text('Verify & Confirm'),
+            child: const Text('Verify & Confirm'),
           ),
         ],
       ),
@@ -196,7 +196,7 @@ class _DeliveryDashboardWidgetState extends State<DeliveryDashboardWidget> {
       'notes': 'Order delivered successfully after OTP verification.',
     });
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Order delivered!')),
+      const SnackBar(content: Text('Order delivered!')),
     );
     setState(() {});
   }
@@ -213,7 +213,6 @@ class _DeliveryDashboardWidgetState extends State<DeliveryDashboardWidget> {
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         appBar: AppBar(
           backgroundColor: FlutterFlowTheme.of(context).primary,
-          automaticallyImplyLeading: true,
           title: Text(
             'Delivery Dashboard',
             style: FlutterFlowTheme.of(context).headlineMedium.override(
@@ -223,12 +222,11 @@ class _DeliveryDashboardWidgetState extends State<DeliveryDashboardWidget> {
                   letterSpacing: 0.0,
                 ),
           ),
-          actions: [],
+          actions: const [],
           centerTitle: false,
           elevation: 2.0,
         ),
         body: SafeArea(
-          top: true,
           child: FutureBuilder<List<DeliveryPartnersRow>>(
             future: DeliveryPartnersTable().querySingleRow(
               queryFn: (q) => q.eq('user_id', currentUserUid),
@@ -239,7 +237,7 @@ class _DeliveryDashboardWidgetState extends State<DeliveryDashboardWidget> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text('You are not registered as a Delivery Partner.'),
+                      const Text('You are not registered as a Delivery Partner.'),
                       FFButtonWidget(
                         onPressed: () async {
                           await DeliveryPartnersTable().insert({
@@ -252,8 +250,8 @@ class _DeliveryDashboardWidgetState extends State<DeliveryDashboardWidget> {
                         text: 'Register Now',
                         options: FFButtonOptions(
                           height: 40,
-                          padding: EdgeInsetsDirectional.fromSTEB(24, 0, 24, 0),
-                          iconPadding: EdgeInsetsDirectional.fromSTEB(0, 0, 0, 0),
+                          padding: const EdgeInsetsDirectional.fromSTEB(24, 0, 24, 0),
+                          iconPadding: const EdgeInsetsDirectional.fromSTEB(0, 0, 0, 0),
                           color: FlutterFlowTheme.of(context).primary,
                           textStyle: FlutterFlowTheme.of(context).titleSmall.override(
                                 font: GoogleFonts.inter(),
@@ -261,9 +259,8 @@ class _DeliveryDashboardWidgetState extends State<DeliveryDashboardWidget> {
                                 letterSpacing: 0.0,
                               ),
                           elevation: 3,
-                          borderSide: BorderSide(
+                          borderSide: const BorderSide(
                             color: Colors.transparent,
-                            width: 1,
                           ),
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -281,7 +278,7 @@ class _DeliveryDashboardWidgetState extends State<DeliveryDashboardWidget> {
 
               return SingleChildScrollView(
                 child: Padding(
-                  padding: EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.all(16.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -307,7 +304,7 @@ class _DeliveryDashboardWidgetState extends State<DeliveryDashboardWidget> {
                                       shape: BoxShape.circle,
                                     ),
                                   ),
-                                  SizedBox(width: 6),
+                                  const SizedBox(width: 6),
                                   Text(
                                     partner.isVerified
                                         ? 'Verified Partner'
@@ -325,7 +322,7 @@ class _DeliveryDashboardWidgetState extends State<DeliveryDashboardWidget> {
                           ),
                         ],
                       ),
-                      Divider(height: 32),
+                      const Divider(height: 32),
 
                       // Active Task Section
                       Text('Active Task', style: FlutterFlowTheme.of(context).headlineSmall),
@@ -348,11 +345,11 @@ class _DeliveryDashboardWidgetState extends State<DeliveryDashboardWidget> {
                                   return Card(
                                     elevation: 4,
                                     child: Padding(
-                                      padding: EdgeInsets.all(16),
+                                      padding: const EdgeInsets.all(16),
                                       child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          Text('Order ID: ${order.id}', style: TextStyle(fontWeight: FontWeight.bold)),
+                                          Text('Order ID: ${order.id}', style: const TextStyle(fontWeight: FontWeight.bold)),
                                           Text('Total: \$${order.totalAmount}'),
                                           Text('Status: ${assignment.status}'),
                                           if (order.userId.length > 10)
@@ -366,7 +363,7 @@ class _DeliveryDashboardWidgetState extends State<DeliveryDashboardWidget> {
                                                 final user = userSnapshot.data!.first;
                                                 if (user.phoneNumber != null) {
                                                   return Padding(
-                                                    padding: EdgeInsets.only(top: 8.0),
+                                                    padding: const EdgeInsets.only(top: 8.0),
                                                     child: InkWell(
                                                       onTap: () async {
                                                         await WhatsAppService.launchWhatsApp(
@@ -374,7 +371,7 @@ class _DeliveryDashboardWidgetState extends State<DeliveryDashboardWidget> {
                                                           message: 'Hello, this is your delivery partner regarding your order #${order.id.substring(0, 8)} on DEGLOOR ONE.',
                                                         );
                                                       },
-                                                      child: Row(
+                                                      child: const Row(
                                                         children: [
                                                           Icon(Icons.chat_bubble_outline_rounded, color: Colors.green, size: 18),
                                                           SizedBox(width: 8),
@@ -388,12 +385,12 @@ class _DeliveryDashboardWidgetState extends State<DeliveryDashboardWidget> {
                                               return Container();
                                             },
                                           ),
-                                          SizedBox(height: 16),
+                                          const SizedBox(height: 16),
                                           if (assignment.status == 'assigned')
                                             FFButtonWidget(
                                               onPressed: () => _confirmPickup(assignment.id, order.id),
                                               text: 'Confirm Pickup',
-                                              options: FFButtonOptions(
+                                              options: const FFButtonOptions(
                                                 width: double.infinity,
                                                 color: Colors.blue,
                                                 textStyle: TextStyle(color: Colors.white),
@@ -403,7 +400,7 @@ class _DeliveryDashboardWidgetState extends State<DeliveryDashboardWidget> {
                                             FFButtonWidget(
                                               onPressed: () => _confirmDelivery(assignment.id, order.id),
                                               text: 'Confirm Delivery',
-                                              options: FFButtonOptions(
+                                              options: const FFButtonOptions(
                                                 width: double.infinity,
                                                 color: Colors.green,
                                                 textStyle: TextStyle(color: Colors.white),
@@ -414,15 +411,15 @@ class _DeliveryDashboardWidgetState extends State<DeliveryDashboardWidget> {
                                     ),
                                   );
                                 }
-                                return Text('Loading order details...');
+                                return const Text('Loading order details...');
                               },
                             );
                           }
-                          return Text('No active task.');
+                          return const Text('No active task.');
                         },
                       ),
 
-                      Divider(height: 32),
+                      const Divider(height: 32),
 
                       // Available Orders Section
                       Text('Available Orders', style: FlutterFlowTheme.of(context).headlineSmall),
@@ -432,14 +429,14 @@ class _DeliveryDashboardWidgetState extends State<DeliveryDashboardWidget> {
                         ),
                         builder: (context, ordersSnapshot) {
                           if (ordersSnapshot.connectionState == ConnectionState.waiting) {
-                            return CircularProgressIndicator();
+                            return const CircularProgressIndicator();
                           }
                           final orders = ordersSnapshot.data ?? [];
-                          if (orders.isEmpty) return Text('No orders available.');
+                          if (orders.isEmpty) return const Text('No orders available.');
 
                           return ListView.builder(
                             shrinkWrap: true,
-                            physics: NeverScrollableScrollPhysics(),
+                            physics: const NeverScrollableScrollPhysics(),
                             itemCount: orders.length,
                             itemBuilder: (context, index) {
                               final order = orders[index];
@@ -452,7 +449,7 @@ class _DeliveryDashboardWidgetState extends State<DeliveryDashboardWidget> {
                                     text: 'Accept',
                                     options: FFButtonOptions(
                                       color: FlutterFlowTheme.of(context).primary,
-                                      textStyle: TextStyle(color: Colors.white),
+                                      textStyle: const TextStyle(color: Colors.white),
                                     ),
                                   ),
                                 ),

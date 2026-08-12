@@ -6,6 +6,7 @@ import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:degloor_one/core/error_handler.dart';
 import 'dart:async';
 import 'package:degloor_one/features/services/manage_service_requests_model.dart';
 export 'package:degloor_one/features/services/manage_service_requests_model.dart';
@@ -30,8 +31,8 @@ class _ManageServiceRequestsWidgetState
   ServiceProvidersRow? _currentProvider;
   StreamSubscription<List<ServiceRequestsRow>>? _requestsSubscription;
   List<ServiceRequestsRow> _requests = [];
-  Map<String, String> _customerNames = {};
-  Map<String, String> _customerPhones = {};
+  final Map<String, String> _customerNames = {};
+  final Map<String, String> _customerPhones = {};
   bool _loading = true;
 
   @override
@@ -59,7 +60,7 @@ class _ManageServiceRequestsWidgetState
         setState(() => _loading = false);
       }
     } catch (e) {
-      print('Error initializing service requests: $e');
+      AppLogger.error('Error initializing service requests', e);
       setState(() => _loading = false);
     }
   }
@@ -99,7 +100,7 @@ class _ManageServiceRequestsWidgetState
             }
           }
         } catch (e) {
-          print('Error fetching customer names: $e');
+          AppLogger.error('Error fetching customer names', e);
         }
       }
 
@@ -158,7 +159,6 @@ class _ManageServiceRequestsWidgetState
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         appBar: AppBar(
           backgroundColor: FlutterFlowTheme.of(context).primary,
-          automaticallyImplyLeading: true,
           title: Text(
             'Service Requests',
             style: FlutterFlowTheme.of(context).headlineMedium.override(
@@ -167,7 +167,7 @@ class _ManageServiceRequestsWidgetState
                   fontSize: 22.0,
                 ),
           ),
-          actions: [],
+          actions: const [],
           centerTitle: false,
           elevation: 2.0,
         ),
@@ -250,7 +250,7 @@ class _ManageServiceRequestsWidgetState
                                   const SizedBox(width: 8),
                                   Text(
                                     req.scheduledAt != null
-                                        ? dateTimeFormat('MMM d, h:mm a', req.scheduledAt!)
+                                        ? dateTimeFormat('MMM d, h:mm a', req.scheduledAt)
                                         : 'Not scheduled',
                                     style: FlutterFlowTheme.of(context).bodySmall,
                                   ),

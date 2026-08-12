@@ -9,7 +9,7 @@ class JobsTable extends SupabaseTable<JobsRow> {
 }
 
 class JobsRow extends SupabaseDataRow {
-  JobsRow(Map<String, dynamic> data) : super(data);
+  JobsRow(super.data);
 
   @override
   SupabaseTable get table => JobsTable();

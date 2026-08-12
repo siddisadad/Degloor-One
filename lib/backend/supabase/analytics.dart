@@ -1,7 +1,8 @@
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/core/error_handler.dart';
 
-Future logBusinessEvent({
+Future<void> logBusinessEvent({
   required String businessId,
   required String eventType,
   Map<String, dynamic>? metadata,
@@ -14,8 +15,8 @@ Future logBusinessEvent({
       metadata: metadata,
     );
   } catch (e) {
-    // Fail silently in production to avoid interrupting UX
-    print('Analytics Error ($eventType): $e');
+    // Fail silently in production but log for debugging
+    AppLogger.error('Analytics Error ($eventType)', e);
   }
 }
 

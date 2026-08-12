@@ -3,7 +3,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class FlutterFlowIconButton extends StatefulWidget {
   const FlutterFlowIconButton({
-    Key? key,
+    super.key,
     required this.icon,
     this.borderColor,
     this.borderRadius,
@@ -19,7 +19,7 @@ class FlutterFlowIconButton extends StatefulWidget {
     this.showLoadingIndicator = false,
     this.focusBorderSide,
     this.focusBorderRadius,
-  }) : super(key: key);
+  });
 
   final Widget icon;
   final double? borderRadius;
@@ -62,7 +62,7 @@ class _FlutterFlowIconButtonState extends State<FlutterFlowIconButton> {
   void _updateIcon() {
     final isFontAwesome = widget.icon is FaIcon;
     if (isFontAwesome) {
-      FaIcon icon = widget.icon as FaIcon;
+      final FaIcon icon = widget.icon as FaIcon;
       effectiveIcon = FaIcon(
         icon.icon as dynamic,
         size: icon.size,
@@ -70,7 +70,7 @@ class _FlutterFlowIconButtonState extends State<FlutterFlowIconButton> {
       iconSize = icon.size;
       iconColor = icon.color;
     } else {
-      Icon icon = widget.icon as Icon;
+      final Icon icon = widget.icon as Icon;
       effectiveIcon = Icon(
         icon.icon,
         size: icon.size,
@@ -82,7 +82,7 @@ class _FlutterFlowIconButtonState extends State<FlutterFlowIconButton> {
 
   @override
   Widget build(BuildContext context) {
-    ButtonStyle style = ButtonStyle(
+    final ButtonStyle style = ButtonStyle(
       shape: WidgetStateProperty.resolveWith<OutlinedBorder>(
         (states) {
           if (states.contains(WidgetState.hovered)) {
@@ -160,7 +160,7 @@ class _FlutterFlowIconButtonState extends State<FlutterFlowIconButton> {
           ignoring: (widget.showLoadingIndicator && loading),
           child: IconButton(
             icon: (widget.showLoadingIndicator && loading)
-                ? Container(
+                ? SizedBox(
                     width: iconSize,
                     height: iconSize,
                     child: CircularProgressIndicator(

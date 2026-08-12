@@ -17,11 +17,11 @@ class ActionItemWidget extends StatefulWidget {
     String? title,
     this.onApprove,
     this.onReject,
-  })  : this.statusBg = statusBg ?? const Color(0xFFFFF3E0),
-        this.statusLabel = statusLabel ?? 'PENDING',
-        this.statusText = statusText ?? const Color(0xFFE65100),
-        this.subtitle = subtitle ?? 'Claimed by: Rajesh K.',
-        this.title = title ?? 'Kulkarni Hardware';
+  })  : statusBg = statusBg ?? const Color(0xFFFFF3E0),
+        statusLabel = statusLabel ?? 'PENDING',
+        statusText = statusText ?? const Color(0xFFE65100),
+        subtitle = subtitle ?? 'Claimed by: Rajesh K.',
+        title = title ?? 'Kulkarni Hardware';
 
   final Widget? icon;
   final Color statusBg;
@@ -61,191 +61,173 @@ class _ActionItemWidgetState extends State<ActionItemWidget> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 8.0),
+      padding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 8.0),
       child: Container(
-        child: Container(
-          decoration: BoxDecoration(
-            color: FlutterFlowTheme.of(context).secondaryBackground,
-            borderRadius: BorderRadius.circular(12.0),
-            shape: BoxShape.rectangle,
-            border: Border.all(
-              color: FlutterFlowTheme.of(context).alternate,
-              width: 1.0,
-            ),
+        decoration: BoxDecoration(
+          color: FlutterFlowTheme.of(context).secondaryBackground,
+          borderRadius: BorderRadius.circular(12.0),
+          border: Border.all(
+            color: FlutterFlowTheme.of(context).alternate,
           ),
-          child: Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Container(
-              child: Row(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.center,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            children: [
+              Container(
+                width: 48.0,
+                height: 48.0,
+                decoration: BoxDecoration(
+                  color: FlutterFlowTheme.of(context).primaryBackground,
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                alignment: const AlignmentDirectional(0.0, 0.0),
+                child: widget.icon,
+              ),
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      valueOrDefault<String>(
+                        widget.title,
+                        'Kulkarni Hardware',
+                      ),
+                      maxLines: 1,
+                      style: FlutterFlowTheme.of(context)
+                          .bodyLarge
+                          .override(
+                            font: GoogleFonts.inter(
+                              fontWeight: FontWeight.w600,
+                              fontStyle: FlutterFlowTheme.of(context)
+                                  .bodyLarge
+                                  .fontStyle,
+                            ),
+                            color: FlutterFlowTheme.of(context).primaryText,
+                            letterSpacing: 0.0,
+                            fontWeight: FontWeight.w600,
+                            fontStyle: FlutterFlowTheme.of(context)
+                                .bodyLarge
+                                .fontStyle,
+                            lineHeight: 1.5,
+                          ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      valueOrDefault<String>(
+                        widget.subtitle,
+                        'Claimed by: Rajesh K.',
+                      ),
+                      maxLines: 1,
+                      style: FlutterFlowTheme.of(context)
+                          .bodySmall
+                          .override(
+                            font: GoogleFonts.inter(
+                              fontWeight: FlutterFlowTheme.of(context)
+                                  .bodySmall
+                                  .fontWeight,
+                              fontStyle: FlutterFlowTheme.of(context)
+                                  .bodySmall
+                                  .fontStyle,
+                            ),
+                            color:
+                                FlutterFlowTheme.of(context).secondaryText,
+                            letterSpacing: 0.0,
+                            fontWeight: FlutterFlowTheme.of(context)
+                                .bodySmall
+                                .fontWeight,
+                            fontStyle: FlutterFlowTheme.of(context)
+                                .bodySmall
+                                .fontStyle,
+                            lineHeight: 1.5,
+                          ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ].divide(const SizedBox(height: 2.0)),
+                ),
+              ),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Container(
-                    width: 48.0,
-                    height: 48.0,
                     decoration: BoxDecoration(
-                      color: FlutterFlowTheme.of(context).primaryBackground,
-                      borderRadius: BorderRadius.circular(8.0),
-                      shape: BoxShape.rectangle,
+                      color: valueOrDefault<Color>(
+                        widget.statusBg,
+                        const Color(0xFFFFF3E0),
+                      ),
+                      borderRadius: BorderRadius.circular(9999.0),
                     ),
-                    alignment: AlignmentDirectional(0.0, 0.0),
-                    child: widget.icon!,
-                  ),
-                  Expanded(
-                    flex: 1,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          valueOrDefault<String>(
-                            widget.title,
-                            'Kulkarni Hardware',
-                          ),
-                          maxLines: 1,
-                          style: FlutterFlowTheme.of(context)
-                              .bodyLarge
-                              .override(
-                                font: GoogleFonts.inter(
-                                  fontWeight: FontWeight.w600,
-                                  fontStyle: FlutterFlowTheme.of(context)
-                                      .bodyLarge
-                                      .fontStyle,
-                                ),
-                                color: FlutterFlowTheme.of(context).primaryText,
-                                letterSpacing: 0.0,
-                                fontWeight: FontWeight.w600,
+                    child: Padding(
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          12.0, 4.0, 12.0, 4.0),
+                      child: Text(
+                        valueOrDefault<String>(
+                          widget.statusLabel,
+                          'PENDING',
+                        ),
+                        style: FlutterFlowTheme.of(context)
+                            .labelSmall
+                            .override(
+                              font: GoogleFonts.inter(
+                                fontWeight: FontWeight.bold,
                                 fontStyle: FlutterFlowTheme.of(context)
-                                    .bodyLarge
+                                    .labelSmall
                                     .fontStyle,
-                                lineHeight: 1.5,
                               ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        Text(
-                          valueOrDefault<String>(
-                            widget.subtitle,
-                            'Claimed by: Rajesh K.',
-                          ),
-                          maxLines: 1,
-                          style: FlutterFlowTheme.of(context)
-                              .bodySmall
-                              .override(
-                                font: GoogleFonts.inter(
-                                  fontWeight: FlutterFlowTheme.of(context)
-                                      .bodySmall
-                                      .fontWeight,
-                                  fontStyle: FlutterFlowTheme.of(context)
-                                      .bodySmall
-                                      .fontStyle,
-                                ),
-                                color:
-                                    FlutterFlowTheme.of(context).secondaryText,
-                                letterSpacing: 0.0,
-                                fontWeight: FlutterFlowTheme.of(context)
-                                    .bodySmall
-                                    .fontWeight,
-                                fontStyle: FlutterFlowTheme.of(context)
-                                    .bodySmall
-                                    .fontStyle,
-                                lineHeight: 1.5,
+                              color: valueOrDefault<Color>(
+                                widget.statusText,
+                                const Color(0xFFE65100),
                               ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ].divide(SizedBox(height: 2.0)),
-                    ),
-                  ),
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          color: valueOrDefault<Color>(
-                            widget.statusBg,
-                            Color(0xFFFFF3E0),
-                          ),
-                          borderRadius: BorderRadius.circular(9999.0),
-                          shape: BoxShape.rectangle,
-                        ),
-                        child: Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
-                              12.0, 4.0, 12.0, 4.0),
-                          child: Container(
-                            child: Text(
-                              valueOrDefault<String>(
-                                widget.statusLabel,
-                                'PENDING',
-                              ),
-                              style: FlutterFlowTheme.of(context)
+                              letterSpacing: 0.0,
+                              fontWeight: FontWeight.bold,
+                              fontStyle: FlutterFlowTheme.of(context)
                                   .labelSmall
-                                  .override(
-                                    font: GoogleFonts.inter(
-                                      fontWeight: FontWeight.bold,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .labelSmall
-                                          .fontStyle,
-                                    ),
-                                    color: valueOrDefault<Color>(
-                                      widget.statusText,
-                                      Color(0xFFE65100),
-                                    ),
-                                    letterSpacing: 0.0,
-                                    fontWeight: FontWeight.bold,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .labelSmall
-                                        .fontStyle,
-                                    lineHeight: 1.2,
-                                  ),
+                                  .fontStyle,
+                              lineHeight: 1.2,
                             ),
-                          ),
-                        ),
                       ),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          FlutterFlowIconButton(
-                            borderRadius: 8.0,
-                            buttonSize: 40.0,
-                            fillColor: Colors.transparent,
-                            icon: Icon(
-                              Icons.check_circle_outline_rounded,
-                              color: FlutterFlowTheme.of(context).success,
-                              size: 20.0,
-                            ),
-                            onPressed: () async {
-                              if (widget.onApprove != null) {
-                                await widget.onApprove!();
-                              }
-                            },
-                          ),
-                          FlutterFlowIconButton(
-                            borderRadius: 8.0,
-                            buttonSize: 40.0,
-                            fillColor: Colors.transparent,
-                            icon: Icon(
-                              Icons.highlight_off_rounded,
-                              color: FlutterFlowTheme.of(context).error,
-                              size: 20.0,
-                            ),
-                            onPressed: () async {
-                              if (widget.onReject != null) {
-                                await widget.onReject!();
-                              }
-                            },
-                          ),
-                        ].divide(SizedBox(width: 4.0)),
-                      ),
-                    ].divide(SizedBox(height: 8.0)),
+                    ),
                   ),
-                ].divide(SizedBox(width: 16.0)),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      FlutterFlowIconButton(
+                        borderRadius: 8.0,
+                        buttonSize: 40.0,
+                        fillColor: Colors.transparent,
+                        icon: Icon(
+                          Icons.check_circle_outline_rounded,
+                          color: FlutterFlowTheme.of(context).success,
+                          size: 20.0,
+                        ),
+                        onPressed: () async {
+                          if (widget.onApprove != null) {
+                            await widget.onApprove!();
+                          }
+                        },
+                      ),
+                      FlutterFlowIconButton(
+                        borderRadius: 8.0,
+                        buttonSize: 40.0,
+                        fillColor: Colors.transparent,
+                        icon: Icon(
+                          Icons.highlight_off_rounded,
+                          color: FlutterFlowTheme.of(context).error,
+                          size: 20.0,
+                        ),
+                        onPressed: () async {
+                          if (widget.onReject != null) {
+                            await widget.onReject!();
+                          }
+                        },
+                      ),
+                    ].divide(const SizedBox(width: 4.0)),
+                  ),
+                ].divide(const SizedBox(height: 8.0)),
               ),
-            ),
+            ].divide(const SizedBox(width: 16.0)),
           ),
         ),
       ),

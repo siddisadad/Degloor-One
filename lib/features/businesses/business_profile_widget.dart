@@ -15,6 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:collection/collection.dart';
+import 'package:degloor_one/core/error_handler.dart';
 import 'package:degloor_one/backend/supabase/analytics.dart';
 import 'business_profile_model.dart';
 export 'business_profile_model.dart';
@@ -97,7 +98,7 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
         _model.weeklyHours = hours;
       });
     } catch (e) {
-      print('Error fetching weekly hours: $e');
+      AppLogger.error('Error fetching weekly hours', e);
     }
   }
 
@@ -129,7 +130,7 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
     final currentUser = currentUserUid;
     if (currentUser == '') {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please sign in to write a review')),
+        const SnackBar(content: Text('Please sign in to write a review')),
       );
       return;
     }
@@ -141,7 +142,7 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setState) => AlertDialog(
-          title: Text('Write a Review'),
+          title: const Text('Write a Review'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -159,7 +160,7 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
               ),
               TextField(
                 controller: commentController,
-                decoration: InputDecoration(hintText: 'Enter your comment'),
+                decoration: const InputDecoration(hintText: 'Enter your comment'),
                 maxLines: 3,
               ),
             ],
@@ -167,7 +168,7 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
             ),
             ElevatedButton(
               onPressed: () async {
@@ -187,7 +188,7 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                   _model.reviewsFuture = _fetchReviews();
                 });
               },
-              child: Text('Submit'),
+              child: const Text('Submit'),
             ),
           ],
         ),
@@ -200,8 +201,8 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
     await showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Weekly Schedule'),
-        content: Container(
+        title: const Text('Weekly Schedule'),
+        content: SizedBox(
           width: double.maxFinite,
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -223,7 +224,7 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                     Text(
                       row == null || row.isClosed || row.openTime?.time == null || row.closeTime?.time == null
                           ? 'Closed'
-                          : '${dateTimeFormat('h:mm a', row.openTime!.time!)} - ${dateTimeFormat('h:mm a', row.closeTime!.time!)}',
+                          : '${dateTimeFormat('h:mm a', row.openTime!.time)} - ${dateTimeFormat('h:mm a', row.closeTime!.time)}',
                       style: TextStyle(
                         fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
                         color: row == null || row.isClosed || row.openTime?.time == null || row.closeTime?.time == null ? Colors.red : Colors.green,
@@ -238,7 +239,7 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Close'),
+            child: const Text('Close'),
           ),
         ],
       ),
@@ -249,7 +250,7 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
     final currentUser = currentUserUid;
     if (currentUser == '') {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please sign in to report a listing')),
+        const SnackBar(content: Text('Please sign in to report a listing')),
       );
       return;
     }
@@ -260,17 +261,17 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
     await showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Report Listing'),
+        title: const Text('Report Listing'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: subjectController,
-              decoration: InputDecoration(labelText: 'Subject'),
+              decoration: const InputDecoration(labelText: 'Subject'),
             ),
             TextField(
               controller: descriptionController,
-              decoration: InputDecoration(labelText: 'Description'),
+              decoration: const InputDecoration(labelText: 'Description'),
               maxLines: 3,
             ),
           ],
@@ -278,13 +279,13 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Cancel'),
+            child: const Text('Cancel'),
           ),
           ElevatedButton(
             onPressed: () async {
               if (subjectController.text.isEmpty || descriptionController.text.isEmpty) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Please fill all fields')),
+                  const SnackBar(content: Text('Please fill all fields')),
                 );
                 return;
               }
@@ -297,10 +298,10 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
               });
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Report submitted successfully')),
+                const SnackBar(content: Text('Report submitted successfully')),
               );
             },
-            child: Text('Submit'),
+            child: const Text('Submit'),
           ),
         ],
       ),
@@ -330,7 +331,7 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                   child: LinearProgressIndicator(
                     value: percent,
                     backgroundColor: FlutterFlowTheme.of(context).alternate,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.amber),
+                    valueColor: const AlwaysStoppedAnimation<Color>(Colors.amber),
                     minHeight: 8,
                     borderRadius: BorderRadius.circular(4),
                   ),
@@ -372,9 +373,9 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(Icons.cloud_off_rounded, size: 64, color: FlutterFlowTheme.of(context).secondaryText),
-                    SizedBox(height: 16),
-                    Text('Connection error. Please check your internet.'),
-                    SizedBox(height: 24),
+                    const SizedBox(height: 16),
+                    const Text('Connection error. Please check your internet.'),
+                    const SizedBox(height: 24),
                     FFButtonWidget(
                       onPressed: () => setState(() {
                         if (widget.businessId != null) {
@@ -422,26 +423,22 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
               );
             }
             return Stack(
-              alignment: AlignmentDirectional(-1.0, -1.0),
               children: [
                 SingleChildScrollView(
                   primary: false,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Container(
+                      SizedBox(
                         height: 260.0,
                         child: Stack(
-                          alignment: AlignmentDirectional(-1.0, -1.0),
                           children: [
                             CachedNetworkImage(
                               imageUrl: business.imageUrl ??
                                   'https://images.unsplash.com/photo-1534723452862-4c874018d66d?auto=format&fit=crop&w=400&h=300&q=80',
                               height: 260.0,
                               fit: BoxFit.cover,
-                              alignment: Alignment(0.0, 0.0),
                               errorWidget: (context, url, error) => Container(
                                 color: FlutterFlowTheme.of(context).primaryBackground,
                                 child: Icon(
@@ -452,7 +449,7 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                               ),
                             ),
                             Align(
-                              alignment: AlignmentDirectional(0.0, 1.0),
+                              alignment: const AlignmentDirectional(0.0, 1.0),
                               child: Container(
                                 height: 100.0,
                                 decoration: BoxDecoration(
@@ -461,23 +458,20 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                                       Colors.transparent,
                                       FlutterFlowTheme.of(context).fullContrast60
                                     ],
-                                    stops: [0.0, 1.0],
-                                    begin: AlignmentDirectional(0.0, -1.0),
-                                    end: AlignmentDirectional(0, 1.0),
+                                    stops: const [0.0, 1.0],
+                                    begin: const AlignmentDirectional(0.0, -1.0),
+                                    end: const AlignmentDirectional(0, 1.0),
                                   ),
-                                  shape: BoxShape.rectangle,
                                 ),
                               ),
                             ),
                             Align(
-                              alignment: AlignmentDirectional(0.0, -1.0),
+                              alignment: const AlignmentDirectional(0.0, -1.0),
                               child: SafeArea(
                                 child: Padding(
-                                  padding: EdgeInsets.all(24.0),
+                                  padding: const EdgeInsets.all(24.0),
                                   child: Row(
-                                    mainAxisSize: MainAxisSize.max,
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    crossAxisAlignment: CrossAxisAlignment.center,
                                     children: [
                                       FlutterFlowIconButton(
                                         borderRadius: 9999.0,
@@ -493,9 +487,6 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                                         },
                                       ),
                                       Row(
-                                        mainAxisSize: MainAxisSize.max,
-                                        mainAxisAlignment: MainAxisAlignment.start,
-                                        crossAxisAlignment: CrossAxisAlignment.center,
                                         children: [
                                           FlutterFlowIconButton(
                                             borderRadius: 9999.0,
@@ -528,10 +519,10 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                                               size: 24.0,
                                             ),
                                             onPressed: () {
-                                              print('IconButton pressed ...');
+                                              AppLogger.log('Favorite button pressed');
                                             },
                                           ),
-                                        ].divide(SizedBox(width: 8.0)),
+                                        ].divide(const SizedBox(width: 8.0)),
                                       ),
                                     ],
                                   ),
@@ -542,10 +533,9 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                         ),
                       ),
                       Padding(
-                        padding: EdgeInsets.all(24.0),
+                        padding: const EdgeInsets.all(24.0),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
-                          mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             // 1. Title & Verification Row
@@ -553,9 +543,6 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Row(
-                                  mainAxisSize: MainAxisSize.max,
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
                                     Text(
                                       business.name,
@@ -575,7 +562,7 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                                         color: FlutterFlowTheme.of(context).primary,
                                         size: 22.0,
                                       ),
-                                  ].divide(SizedBox(width: 8.0)),
+                                  ].divide(const SizedBox(width: 8.0)),
                                 ),
                                 if (business.ownerName != null && business.ownerName!.isNotEmpty)
                                   Text(
@@ -589,14 +576,8 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                             ),
                             // 2. Rating & Category Row
                             Row(
-                              mainAxisSize: MainAxisSize.max,
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 Row(
-                                  mainAxisSize: MainAxisSize.max,
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
                                     Icon(
                                       Icons.star_rounded,
@@ -619,7 +600,7 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                                         );
                                       },
                                     ),
-                                  ].divide(SizedBox(width: 4.0)),
+                                  ].divide(const SizedBox(width: 4.0)),
                                 ),
                                 Text(
                                   '•',
@@ -637,16 +618,12 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                                         lineHeight: 1.5,
                                       ),
                                 ),
-                              ].divide(SizedBox(width: 16.0)),
+                              ].divide(const SizedBox(width: 16.0)),
                             ),
                             // 3. Action Buttons Row
                             Row(
-                              mainAxisSize: MainAxisSize.max,
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 Expanded(
-                                  flex: 1,
                                   child: wrapWithModel(
                                     model: _model.actionButtonModel1,
                                     updateCallback: () => safeSetState(() {}),
@@ -681,7 +658,6 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                                   ),
                                 ),
                                 Expanded(
-                                  flex: 1,
                                   child: ActionButtonWidget(
                                     bg: const Color(0xFFE8F5E9),
                                     borderColor:
@@ -711,7 +687,6 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                                   ),
                                 ),
                                 Expanded(
-                                  flex: 1,
                                   child: wrapWithModel(
                                     model: _model.actionButtonModel3,
                                     updateCallback: () => safeSetState(() {}),
@@ -745,7 +720,7 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                                     ),
                                   ),
                                 ),
-                              ].divide(SizedBox(width: 16.0)),
+                              ].divide(const SizedBox(width: 16.0)),
                             ),
                             const SizedBox(height: 16),
                             FFButtonWidget(
@@ -755,7 +730,7 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                                   queryParameters: {
                                     'businessId': serializeParam(
                                       business.id,
-                                      ParamType.String,
+                                      ParamType.string,
                                     ),
                                   }.withoutNulls,
                                 );
@@ -784,18 +759,13 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                               decoration: BoxDecoration(
                                 color: FlutterFlowTheme.of(context).secondaryBackground,
                                 borderRadius: BorderRadius.circular(12.0),
-                                shape: BoxShape.rectangle,
                                 border: Border.all(
                                   color: FlutterFlowTheme.of(context).alternate,
-                                  width: 1.0,
                                 ),
                               ),
                               child: Padding(
-                                padding: EdgeInsets.all(16.0),
+                                padding: const EdgeInsets.all(16.0),
                                 child: Row(
-                                  mainAxisSize: MainAxisSize.max,
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
                                     Icon(
                                       Icons.schedule_rounded,
@@ -803,10 +773,8 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                                       size: 20.0,
                                     ),
                                     Expanded(
-                                      flex: 1,
                                       child: Column(
                                         mainAxisSize: MainAxisSize.min,
-                                        mainAxisAlignment: MainAxisAlignment.start,
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           Text(
@@ -847,7 +815,6 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                                             ),
                                         borderSide: BorderSide(
                                           color: FlutterFlowTheme.of(context).primary,
-                                          width: 1,
                                         ),
                                         borderRadius: BorderRadius.circular(8),
                                       ),
@@ -861,7 +828,6 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                                     ),
                                     Column(
                                       mainAxisSize: MainAxisSize.min,
-                                      mainAxisAlignment: MainAxisAlignment.start,
                                       crossAxisAlignment: CrossAxisAlignment.end,
                                       children: [
                                         Text(
@@ -884,14 +850,13 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                                         ),
                                       ],
                                     ),
-                                  ].divide(SizedBox(width: 16.0)),
+                                  ].divide(const SizedBox(width: 16.0)),
                                 ),
                               ),
                             ),
                             // 5. Location Section
                             Column(
                               mainAxisSize: MainAxisSize.min,
-                              mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
@@ -922,14 +887,13 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                                             ),
                                       ),
                                     ),
-                                  ].divide(SizedBox(width: 8.0)),
+                                  ].divide(const SizedBox(width: 8.0)),
                                 ),
-                              ].divide(SizedBox(height: 8.0)),
+                              ].divide(const SizedBox(height: 8.0)),
                             ),
                             // 6. Products & Services Section
                             Column(
                               mainAxisSize: MainAxisSize.min,
-                              mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
@@ -967,7 +931,7 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                                           onPressed: () => context.pushNamed(
                                             'BusinessCatalogue',
                                             queryParameters: {
-                                              'businessId': serializeParam(business.id, ParamType.String),
+                                              'businessId': serializeParam(business.id, ParamType.string),
                                             }.withoutNulls,
                                           ),
                                           text: 'View',
@@ -983,12 +947,11 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                                     ),
                                   ),
                                 ),
-                              ].divide(SizedBox(height: 8.0)),
+                              ].divide(const SizedBox(height: 8.0)),
                             ),
                             // 7. About Section
                             Column(
                               mainAxisSize: MainAxisSize.min,
-                              mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
@@ -1027,18 +990,15 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                                       ],
                                     ),
                                   ),
-                              ].divide(SizedBox(height: 8.0)),
+                              ].divide(const SizedBox(height: 8.0)),
                             ),
                             // 8. Reviews Section
                             Column(
                               mainAxisSize: MainAxisSize.min,
-                              mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
                                 Row(
-                                  mainAxisSize: MainAxisSize.max,
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
                                     Text(
                                       'Reviews',
@@ -1058,8 +1018,8 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                                       options: FFButtonOptions(
                                         width: 120,
                                         height: 36,
-                                        padding: EdgeInsetsDirectional.fromSTEB(0, 0, 0, 0),
-                                        iconPadding: EdgeInsetsDirectional.fromSTEB(0, 0, 0, 0),
+                                        padding: const EdgeInsetsDirectional.fromSTEB(0, 0, 0, 0),
+                                        iconPadding: const EdgeInsetsDirectional.fromSTEB(0, 0, 0, 0),
                                         color: Colors.transparent,
                                         textStyle: FlutterFlowTheme.of(context).labelLarge.override(
                                           font: GoogleFonts.inter(),
@@ -1067,9 +1027,8 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                                           fontWeight: FontWeight.w600,
                                         ),
                                         elevation: 0,
-                                        borderSide: BorderSide(
+                                        borderSide: const BorderSide(
                                           color: Colors.transparent,
-                                          width: 1,
                                         ),
                                         borderRadius: BorderRadius.circular(8),
                                       ),
@@ -1097,7 +1056,7 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                                     if (reviews.isEmpty) {
                                       return Center(
                                         child: Padding(
-                                          padding: EdgeInsets.all(16.0),
+                                          padding: const EdgeInsets.all(16.0),
                                           child: Text(
                                             'No reviews yet.',
                                             style: FlutterFlowTheme.of(context).labelMedium,
@@ -1130,9 +1089,9 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                                     );
                                   },
                                 ),
-                              ].divide(SizedBox(height: 16.0)),
+                              ].divide(const SizedBox(height: 16.0)),
                             ),
-                          ].divide(SizedBox(height: 24.0)),
+                          ].divide(const SizedBox(height: 24.0)),
                         ),
                       ),
                       Container(
@@ -1142,12 +1101,11 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                   ),
                 ),
                 Align(
-                  alignment: AlignmentDirectional(0.0, 1.0),
+                  alignment: const AlignmentDirectional(0.0, 1.0),
                   child: Container(
                     height: 80.0,
                     decoration: BoxDecoration(
                       color: FlutterFlowTheme.of(context).secondaryBackground,
-                      shape: BoxShape.rectangle,
                     ),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
@@ -1157,24 +1115,18 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                           height: 1.0,
                           decoration: BoxDecoration(
                             color: FlutterFlowTheme.of(context).alternate,
-                            shape: BoxShape.rectangle,
                           ),
                         ),
                         Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(24.0, 16.0, 24.0, 16.0),
+                          padding: const EdgeInsetsDirectional.fromSTEB(24.0, 16.0, 24.0, 16.0),
                           child: Container(
                             height: 47.0,
-                            alignment: AlignmentDirectional(0.0, 0.0),
+                            alignment: const AlignmentDirectional(0.0, 0.0),
                             child: Row(
-                              mainAxisSize: MainAxisSize.max,
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 Expanded(
-                                  flex: 1,
                                   child: Column(
                                     mainAxisSize: MainAxisSize.min,
-                                    mainAxisAlignment: MainAxisAlignment.start,
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
@@ -1223,7 +1175,7 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                                     ),
                                   ),
                                 ),
-                              ].divide(SizedBox(width: 16.0)),
+                              ].divide(const SizedBox(width: 16.0)),
                             ),
                           ),
                         ),

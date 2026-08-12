@@ -11,6 +11,7 @@ import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart' as ff_widgets;
 import 'package:degloor_one/app_state.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
+import 'package:degloor_one/core/error_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'search_results_model.dart';
@@ -48,7 +49,7 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
 
   String? _currentSearchTerm;
   String? _currentCategoryId;
-  Map<String, String> _categoryIdToName = {};
+  final Map<String, String> _categoryIdToName = {};
 
   bool _onlyVerified = false;
   bool _onlyOpen = false;
@@ -116,7 +117,7 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
         });
       } catch (e) {
         setState(() => _isLoading = false);
-        print('Search error: $e');
+        AppLogger.error('Search error', e);
       }
     } else {
       setState(() {
@@ -145,14 +146,11 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
         key: scaffoldKey,
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         body: Column(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Container(
               decoration: BoxDecoration(
                 color: FlutterFlowTheme.of(context).secondaryBackground,
-                shape: BoxShape.rectangle,
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -164,13 +162,8 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
                     child: Container(
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Row(
-                            mainAxisSize: MainAxisSize.max,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               FlutterFlowIconButton(
                                 borderRadius: 8.0,
@@ -187,7 +180,6 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
                                 },
                               ),
                               Expanded(
-                                flex: 1,
                                 child: wrapWithModel(
                                   model: _model.textFieldModel,
                                   updateCallback: () => safeSetState(() {}),
@@ -227,7 +219,7 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
                                   size: 24.0,
                                 ),
                                 onPressed: () {
-                                  print('IconButton pressed ...');
+                                  AppLogger.log('Tune button pressed');
                                 },
                               ),
                             ].divide(const SizedBox(width: 16.0)),
@@ -236,8 +228,6 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
                             scrollDirection: Axis.horizontal,
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 wrapWithModel(
                                   model: _model.filterChipModel1,
@@ -345,20 +335,17 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
                     height: 1.0,
                     decoration: BoxDecoration(
                       color: FlutterFlowTheme.of(context).alternate,
-                      shape: BoxShape.rectangle,
                     ),
                   ),
                 ],
               ),
             ),
             Expanded(
-              flex: 1,
               child: Container(
                 child: SingleChildScrollView(
                   primary: false,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Padding(
@@ -366,7 +353,6 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
                         child: Container(
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               Builder(
@@ -381,12 +367,9 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
                                     children: [
                                       if (businesses.isNotEmpty) ...[
                                         Row(
-                                          mainAxisSize: MainAxisSize.max,
                                           mainAxisAlignment:
                                               MainAxisAlignment
                                                       .spaceBetween,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
                                           children: [
                                             Text(
                                               '${businesses.length} Businesses found',
@@ -419,7 +402,7 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
                                                   'businessId':
                                                       serializeParam(
                                                     business.id,
-                                                    ParamType.String,
+                                                    ParamType.string,
                                                   ),
                                                 }.withoutNulls,
                                               );
@@ -513,10 +496,6 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
                                       alignment: const AlignmentDirectional(0.0, 0.0),
                                       child: Column(
                                         mainAxisSize: MainAxisSize.min,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
                                         children: [
                                           Icon(
                                             Icons.search_off_rounded,

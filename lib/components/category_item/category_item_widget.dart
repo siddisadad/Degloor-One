@@ -10,7 +10,7 @@ class CategoryItemWidget extends StatefulWidget {
     super.key,
     this.icon,
     String? label,
-  }) : this.label = label ?? 'Grocery';
+  }) : label = label ?? 'Grocery';
 
   final Widget? icon;
   final String label;
@@ -52,7 +52,6 @@ class _CategoryItemWidgetState extends State<CategoryItemWidget> {
         borderRadius: BorderRadius.circular(
           FlutterFlowTheme.of(context).designToken.radius.lg,
         ),
-        shape: BoxShape.rectangle,
       ),
       child: Padding(
         padding: EdgeInsets.all(
@@ -61,7 +60,6 @@ class _CategoryItemWidgetState extends State<CategoryItemWidget> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Container(
               width: 56.0,
@@ -71,14 +69,12 @@ class _CategoryItemWidgetState extends State<CategoryItemWidget> {
                 borderRadius: BorderRadius.circular(
                   FlutterFlowTheme.of(context).designToken.radius.md,
                 ),
-                shape: BoxShape.rectangle,
                 border: Border.all(
                   color: FlutterFlowTheme.of(context).alternate,
-                  width: 1.0,
                 ),
               ),
               alignment: const AlignmentDirectional(0.0, 0.0),
-              child: widget.icon!,
+              child: widget.icon,
             ),
             Text(
               valueOrDefault<String>(

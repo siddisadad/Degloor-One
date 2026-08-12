@@ -3,6 +3,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:degloor_one/app_state.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/components/location_explanation_dialog.dart';
+import 'package:degloor_one/core/error_handler.dart';
 
 class LocationService {
   static Future<void> updateCurrentLocation(BuildContext context) async {
@@ -17,6 +18,7 @@ class LocationService {
 
     permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
+      if (!context.mounted) return;
       // Show explanation dialog before requesting
       final proceed = await showModalBottomSheet<bool>(
         context: context,
@@ -42,10 +44,11 @@ class LocationService {
         position = await Geolocator.getCurrentPosition(
           locationSettings: const LocationSettings(
             accuracy: LocationAccuracy.high,
-            timeLimit: Duration(seconds: 10),
+            timeLimit: Duration(seconds: 15), // Increased from 10
           ),
         );
       } catch (e) {
+        AppLogger.error('Geolocator.getCurrentPosition failed', e);
         position = null;
       }
 
@@ -57,17 +60,16 @@ class LocationService {
           FFAppState.instance.userLocation = LatLng(pos.latitude, pos.longitude);
         });
       } else {
-        // If both fail, the UI will show "Location Required" state
-        // handled in SearchResultsWidget and CustomerHomeWidget
+        AppLogger.log('Could not determine location (position is null)');
       }
     } catch (e) {
-      // Silently fail or handle internally
+      AppLogger.error('LocationService internal error', e);
     }
   }
 
   static Future<void> syncPartnerLocation(String partnerId) async {
     try {
-      Position position = await Geolocator.getCurrentPosition(
+      final Position position = await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(accuracy: LocationAccuracy.medium),
       );
 

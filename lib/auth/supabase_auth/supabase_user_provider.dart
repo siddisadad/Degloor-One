@@ -10,6 +10,7 @@ class DegloorOneSupabaseUser extends BaseAuthUser {
   User? user;
   @override
   String? role;
+  @override
   bool get loggedIn => user != null;
 
   @override
@@ -81,7 +82,7 @@ class DegloorOneSupabaseUser extends BaseAuthUser {
 Stream<BaseAuthUser> degloorOneSupabaseUserStream() {
   final supabaseAuthStream = SupaFlow.client.auth.onAuthStateChange.debounce(
       (authState) => authState.event == AuthChangeEvent.tokenRefreshed
-          ? TimerStream(authState, Duration(seconds: 1))
+          ? TimerStream(authState, const Duration(seconds: 1))
           : Stream.value(authState));
   return (!loggedIn
           ? Stream<AuthState?>.value(null).concatWith([supabaseAuthStream])

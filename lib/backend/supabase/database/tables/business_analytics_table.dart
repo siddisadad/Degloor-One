@@ -23,7 +23,7 @@ class BusinessAnalyticsTable extends SupabaseTable<BusinessAnalyticsRow> {
 }
 
 class BusinessAnalyticsRow extends SupabaseDataRow {
-  BusinessAnalyticsRow(Map<String, dynamic> data) : super(data);
+  BusinessAnalyticsRow(super.data);
 
   @override
   SupabaseTable get table => BusinessAnalyticsTable();

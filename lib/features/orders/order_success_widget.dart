@@ -42,7 +42,6 @@ class _OrderSuccessWidgetState extends State<OrderSuccessWidget> {
       backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
       body: SafeArea(
         child: Column(
-          mainAxisSize: MainAxisSize.max,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
@@ -106,7 +105,7 @@ class _OrderSuccessWidgetState extends State<OrderSuccessWidget> {
                         context.pushNamed(
                           'OrderTracking',
                           queryParameters: {
-                            'orderId': serializeParam(widget.orderId, ParamType.String),
+                            'orderId': serializeParam(widget.orderId, ParamType.string),
                           }.withoutNulls,
                         );
                       } else {

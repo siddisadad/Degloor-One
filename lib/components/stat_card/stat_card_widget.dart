@@ -13,10 +13,10 @@ class StatCardWidget extends StatefulWidget {
     String? label,
     String? trend,
     String? value,
-  })  : this.hasTrend = hasTrend ?? true,
-        this.label = label ?? 'Profile Views',
-        this.trend = trend ?? '+12%',
-        this.value = value ?? '1,284';
+  })  : hasTrend = hasTrend ?? true,
+        label = label ?? 'Profile Views',
+        trend = trend ?? '+12%',
+        value = value ?? '1,284';
 
   final bool hasTrend;
   final Widget? icon;
@@ -56,104 +56,96 @@ class _StatCardWidgetState extends State<StatCardWidget> {
       decoration: BoxDecoration(
         color: FlutterFlowTheme.of(context).secondaryBackground,
         borderRadius: BorderRadius.circular(12.0),
-        shape: BoxShape.rectangle,
         border: Border.all(
           color: FlutterFlowTheme.of(context).alternate,
-          width: 1.0,
         ),
       ),
       child: Padding(
-        padding: EdgeInsets.all(24.0),
-        child: Container(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  if (widget.icon != null) widget.icon!,
-                  if (valueOrDefault<bool>(
-                    widget.hasTrend,
-                    true,
-                  ))
-                    Flexible(
-                      flex: 1,
-                      child: Text(
-                        valueOrDefault<String>(
-                          widget.trend,
-                          '+12%',
-                        ),
-                        maxLines: 1,
-                        style: FlutterFlowTheme.of(context).labelSmall.override(
-                              font: GoogleFonts.inter(
-                                fontWeight: FontWeight.bold,
-                                fontStyle: FlutterFlowTheme.of(context)
-                                    .labelSmall
-                                    .fontStyle,
-                              ),
-                              color: FlutterFlowTheme.of(context).success,
-                              letterSpacing: 0.0,
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                if (widget.icon != null) widget.icon!,
+                if (valueOrDefault<bool>(
+                  widget.hasTrend,
+                  true,
+                ))
+                  Flexible(
+                    child: Text(
+                      valueOrDefault<String>(
+                        widget.trend,
+                        '+12%',
+                      ),
+                      maxLines: 1,
+                      style: FlutterFlowTheme.of(context).labelSmall.override(
+                            font: GoogleFonts.inter(
                               fontWeight: FontWeight.bold,
                               fontStyle: FlutterFlowTheme.of(context)
                                   .labelSmall
                                   .fontStyle,
-                              lineHeight: 1.2,
                             ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                            color: FlutterFlowTheme.of(context).success,
+                            letterSpacing: 0.0,
+                            fontWeight: FontWeight.bold,
+                            fontStyle: FlutterFlowTheme.of(context)
+                                .labelSmall
+                                .fontStyle,
+                            lineHeight: 1.2,
+                          ),
+                      overflow: TextOverflow.ellipsis,
                     ),
-                ],
+                  ),
+              ],
+            ),
+            Container(
+              height: 4.0,
+            ),
+            Text(
+              valueOrDefault<String>(
+                widget.value,
+                '1,284',
               ),
-              Container(
-                height: 4.0,
-              ),
-              Text(
-                valueOrDefault<String>(
-                  widget.value,
-                  '1,284',
-                ),
-                style: FlutterFlowTheme.of(context).headlineMedium.override(
-                      font: GoogleFonts.inter(
-                        fontWeight: FontWeight.bold,
-                        fontStyle: FlutterFlowTheme.of(context)
-                            .headlineMedium
-                            .fontStyle,
-                      ),
-                      color: FlutterFlowTheme.of(context).primaryText,
-                      letterSpacing: 0.0,
+              style: FlutterFlowTheme.of(context).headlineMedium.override(
+                    font: GoogleFonts.inter(
                       fontWeight: FontWeight.bold,
-                      fontStyle:
-                          FlutterFlowTheme.of(context).headlineMedium.fontStyle,
-                      lineHeight: 1.3,
+                      fontStyle: FlutterFlowTheme.of(context)
+                          .headlineMedium
+                          .fontStyle,
                     ),
+                    color: FlutterFlowTheme.of(context).primaryText,
+                    letterSpacing: 0.0,
+                    fontWeight: FontWeight.bold,
+                    fontStyle:
+                        FlutterFlowTheme.of(context).headlineMedium.fontStyle,
+                    lineHeight: 1.3,
+                  ),
+            ),
+            Text(
+              valueOrDefault<String>(
+                widget.label,
+                'Profile Views',
               ),
-              Text(
-                valueOrDefault<String>(
-                  widget.label,
-                  'Profile Views',
-                ),
-                style: FlutterFlowTheme.of(context).labelMedium.override(
-                      font: GoogleFonts.inter(
-                        fontWeight:
-                            FlutterFlowTheme.of(context).labelMedium.fontWeight,
-                        fontStyle:
-                            FlutterFlowTheme.of(context).labelMedium.fontStyle,
-                      ),
-                      color: FlutterFlowTheme.of(context).secondaryText,
-                      letterSpacing: 0.0,
+              style: FlutterFlowTheme.of(context).labelMedium.override(
+                    font: GoogleFonts.inter(
                       fontWeight:
                           FlutterFlowTheme.of(context).labelMedium.fontWeight,
                       fontStyle:
                           FlutterFlowTheme.of(context).labelMedium.fontStyle,
-                      lineHeight: 1.4,
                     ),
-              ),
-            ].divide(SizedBox(height: 4.0)),
-          ),
+                    color: FlutterFlowTheme.of(context).secondaryText,
+                    letterSpacing: 0.0,
+                    fontWeight:
+                        FlutterFlowTheme.of(context).labelMedium.fontWeight,
+                    fontStyle:
+                        FlutterFlowTheme.of(context).labelMedium.fontStyle,
+                    lineHeight: 1.4,
+                  ),
+            ),
+          ].divide(const SizedBox(height: 4.0)),
         ),
       ),
     );

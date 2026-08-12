@@ -3,7 +3,6 @@ import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/l10n/app_localizations.dart';
 import 'package:degloor_one/app_state.dart';
 import 'package:degloor_one/components/button/button_widget.dart';
-
 import 'package:degloor_one/components/profile_option/profile_option_widget.dart';
 import 'package:degloor_one/components/report_item/report_item_widget.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
@@ -26,7 +25,6 @@ class UserProfileReportsWidget extends StatefulWidget {
 
 class _UserProfileReportsWidgetState extends State<UserProfileReportsWidget> {
   late UserProfileReportsModel _model;
-
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
@@ -48,7 +46,6 @@ class _UserProfileReportsWidgetState extends State<UserProfileReportsWidget> {
   @override
   void dispose() {
     _model.dispose();
-
     super.dispose();
   }
 
@@ -62,697 +59,399 @@ class _UserProfileReportsWidgetState extends State<UserProfileReportsWidget> {
       child: Scaffold(
         key: scaffoldKey,
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-        body: SingleChildScrollView(
-          primary: false,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Padding(
-                padding: EdgeInsets.all(24.0),
-                child: Container(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      FutureBuilder<List<UsersRow>>(
-                        future: _model.userProfileFuture,
-                        builder: (context, snapshot) {
-                          final userRow = snapshot.data?.firstOrNull;
-                          final fullName = userRow?.fullName ?? 'User Name';
-                          final initials = fullName
-                              .split(' ')
-                              .take(2)
-                              .map((e) => e.isNotEmpty ? e[0] : '')
-                              .join()
-                              .toUpperCase();
+        body: SafeArea(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // User Profile Section
+                  FutureBuilder<List<UsersRow>>(
+                    future: _model.userProfileFuture,
+                    builder: (context, snapshot) {
+                      final userRow = snapshot.data?.firstOrNull;
+                      final fullName = userRow?.fullName ?? 'User Name';
+                      final initials = fullName
+                          .split(' ')
+                          .take(2)
+                          .map((e) => e.isNotEmpty ? e[0] : '')
+                          .join()
+                          .toUpperCase();
 
-                          return Row(
-                            mainAxisSize: MainAxisSize.max,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.center,
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Column(
-                                mainAxisSize: MainAxisSize.min,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    fullName,
-                                    style: FlutterFlowTheme.of(context)
-                                        .headlineMedium
-                                        .override(
-                                          font: GoogleFonts.inter(
-                                            fontWeight: FontWeight.w800,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .headlineMedium
-                                                    .fontStyle,
-                                          ),
-                                          color: FlutterFlowTheme.of(context)
-                                              .primaryText,
-                                          letterSpacing: 0.0,
-                                          fontWeight: FontWeight.w800,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .headlineMedium
-                                                  .fontStyle,
-                                          lineHeight: 1.3,
-                                        ),
-                                  ),
-                                  Text(
-                                    'Manage your profile and reports',
-                                    style: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .override(
-                                          font: GoogleFonts.inter(
-                                            fontWeight:
-                                                FlutterFlowTheme.of(context)
-                                                    .bodyMedium
-                                                    .fontWeight,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .bodyMedium
-                                                    .fontStyle,
-                                          ),
-                                          color: FlutterFlowTheme.of(context)
-                                              .secondaryText,
-                                          letterSpacing: 0.0,
-                                          fontWeight:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodyMedium
-                                                  .fontWeight,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodyMedium
-                                                  .fontStyle,
-                                          lineHeight: 1.5,
-                                        ),
-                                  ),
-                                ].divide(SizedBox(height: 4.0)),
-                              ),
-                              Container(
-                                width: 48.0,
-                                height: 48.0,
-                                decoration: BoxDecoration(
-                                  color: FlutterFlowTheme.of(context).primary,
-                                  shape: BoxShape.circle,
-                                ),
-                                alignment: AlignmentDirectional(0.0, 0.0),
-                                child: Text(
-                                  initials.isEmpty ? 'U' : initials,
-                                  textAlign: TextAlign.center,
-                                  maxLines: 1,
-                                  style: FlutterFlowTheme.of(context)
-                                      .labelMedium
-                                      .override(
-                                        font: GoogleFonts.inter(
-                                          fontWeight: FontWeight.w600,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .labelMedium
-                                                  .fontStyle,
-                                        ),
-                                        color: FlutterFlowTheme.of(context)
-                                            .onPrimary,
-                                        fontSize: 18.24,
-                                        letterSpacing: 0.0,
-                                        fontWeight: FontWeight.w600,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .labelMedium
-                                            .fontStyle,
-                                        lineHeight: 1.4,
+                              Text(
+                                fullName,
+                                style: FlutterFlowTheme.of(context)
+                                    .headlineMedium
+                                    .override(
+                                      font: GoogleFonts.inter(
+                                        fontWeight: FontWeight.w800,
                                       ),
-                                  overflow: TextOverflow.clip,
-                                ),
+                                      color: FlutterFlowTheme.of(context)
+                                          .primaryText,
+                                      lineHeight: 1.3,
+                                    ),
+                              ),
+                              Text(
+                                'Manage your profile and reports',
+                                style: FlutterFlowTheme.of(context)
+                                    .bodyMedium
+                                    .override(
+                                      font: GoogleFonts.inter(),
+                                      color: FlutterFlowTheme.of(context)
+                                          .secondaryText,
+                                      lineHeight: 1.5,
+                                    ),
                               ),
                             ],
-                          );
-                        },
+                          ),
+                          Container(
+                            width: 48.0,
+                            height: 48.0,
+                            decoration: BoxDecoration(
+                              color: FlutterFlowTheme.of(context).primary,
+                              shape: BoxShape.circle,
+                            ),
+                            alignment: const AlignmentDirectional(0.0, 0.0),
+                            child: Text(
+                              initials.isEmpty ? 'U' : initials,
+                              textAlign: TextAlign.center,
+                              style: FlutterFlowTheme.of(context)
+                                  .labelMedium
+                                  .override(
+                                    font: GoogleFonts.inter(
+                                        fontWeight: FontWeight.w600),
+                                    color:
+                                        FlutterFlowTheme.of(context).onPrimary,
+                                    fontSize: 18.0,
+                                  ),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+
+                  // Stats Section
+                  FutureBuilder<List<ComplaintsRow>>(
+                    future: _model.complaintsFuture,
+                    builder: (context, snapshot) {
+                      final complaints = snapshot.data ?? [];
+                      final resolvedCount = complaints
+                          .where((c) => c.status == 'resolved')
+                          .length;
+                      return Row(
+                        children: [
+                          Expanded(
+                            child: _buildStatCard(
+                              context,
+                              '${complaints.length}',
+                              'Reports',
+                              FlutterFlowTheme.of(context).primaryText,
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: _buildStatCard(
+                              context,
+                              '$resolvedCount',
+                              'Resolved',
+                              FlutterFlowTheme.of(context).success,
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+
+                  // Quick Links
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _buildOption(
+                        context,
+                        _model.profileOptionModel1,
+                        Icons.shopping_bag_rounded,
+                        'My Orders',
+                        onTap: () => context.pushNamed('CustomerOrders'),
+                      ),
+                      _buildOption(
+                        context,
+                        _model.profileOptionModel2,
+                        Icons.shopping_cart_rounded,
+                        'My Cart',
+                        onTap: () => context.pushNamed('Cart'),
+                      ),
+                    ].divide(const SizedBox(height: 12)),
+                  ),
+
+                  // Settings Section
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        AppLocalizations.of(context)!.savedLocations,
+                        style:
+                            FlutterFlowTheme.of(context).titleMedium.override(
+                                  font: GoogleFonts.inter(
+                                      fontWeight: FontWeight.bold),
+                                ),
+                      ),
+                      _buildOption(
+                        context,
+                        _model.profileOptionModel3,
+                        Icons.person_outline_rounded,
+                        'Personal Information',
+                        subtitle: 'Name, Email, Phone number',
+                      ),
+                      _buildOption(
+                        context,
+                        _model.profileOptionModel4,
+                        Icons.location_on_outlined,
+                        'Saved Locations',
+                        subtitle: 'Home, Work, Other places',
+                        onTap: () => context.pushNamed('AddressList'),
+                      ),
+                      _buildOption(
+                        context,
+                        _model.profileOptionModel5,
+                        Icons.notifications_none_rounded,
+                        'Notifications',
+                        subtitle: 'Alerts, Business updates',
+                      ),
+                      _buildOption(
+                        context,
+                        _model.profileOptionModel6,
+                        Icons.security_rounded,
+                        'Privacy & Security',
+                        subtitle: 'Password, Data usage',
+                      ),
+                      _buildOption(
+                        context,
+                        _model.profileOptionModel7,
+                        Icons.language_rounded,
+                        'Change Language',
+                        subtitle: 'English, मराठी, हिन्दी',
+                        onTap: () => _showLanguageSelector(context),
+                      ),
+                    ].divide(const SizedBox(height: 16.0)),
+                  ),
+
+                  // Reports List
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'My Reports',
+                            style: FlutterFlowTheme.of(context)
+                                .titleMedium
+                                .override(
+                                  font: GoogleFonts.inter(
+                                      fontWeight: FontWeight.bold),
+                                ),
+                          ),
+                          wrapWithModel(
+                            model: _model.buttonModel1,
+                            updateCallback: () => setState(() {}),
+                            child: const ButtonWidget(
+                              icon: Icon(Icons.add_rounded, size: 24.0),
+                              iconPresent: true,
+                              content: 'New Report',
+                              variant: 'ghost',
+                              size: 'small',
+                            ),
+                          ),
+                        ],
                       ),
                       FutureBuilder<List<ComplaintsRow>>(
                         future: _model.complaintsFuture,
                         builder: (context, snapshot) {
-                          final complaints = snapshot.data ?? [];
-                          final resolvedCount = complaints.where((c) => c.status == 'resolved').length;
-                          return Row(
-                            mainAxisSize: MainAxisSize.max,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Expanded(
-                                flex: 1,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: FlutterFlowTheme.of(context)
-                                        .secondaryBackground,
-                                    borderRadius: BorderRadius.circular(12.0),
-                                    shape: BoxShape.rectangle,
-                                    border: Border.all(
-                                      color: FlutterFlowTheme.of(context).alternate,
-                                      width: 1.0,
-                                    ),
-                                  ),
-                                  child: Padding(
-                                    padding: EdgeInsets.all(16.0),
-                                    child: Container(
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        mainAxisAlignment: MainAxisAlignment.start,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            '${complaints.length}',
-                                            style: FlutterFlowTheme.of(context)
-                                                .titleLarge
-                                                .override(
-                                                  font: GoogleFonts.inter(
-                                                    fontWeight: FontWeight.bold,
-                                                    fontStyle:
-                                                        FlutterFlowTheme.of(context)
-                                                            .titleLarge
-                                                            .fontStyle,
-                                                  ),
-                                                  color:
-                                                      FlutterFlowTheme.of(context)
-                                                          .primaryText,
-                                                  letterSpacing: 0.0,
-                                                  fontWeight: FontWeight.bold,
-                                                  fontStyle:
-                                                      FlutterFlowTheme.of(context)
-                                                          .titleLarge
-                                                          .fontStyle,
-                                                  lineHeight: 1.4,
-                                                ),
-                                          ),
-                                          Text(
-                                            'Reports',
-                                            style: FlutterFlowTheme.of(context)
-                                                .labelSmall
-                                                .override(
-                                                  font: GoogleFonts.inter(
-                                                    fontWeight:
-                                                        FlutterFlowTheme.of(context)
-                                                            .labelSmall
-                                                            .fontWeight,
-                                                    fontStyle:
-                                                        FlutterFlowTheme.of(context)
-                                                            .labelSmall
-                                                            .fontStyle,
-                                                  ),
-                                                  color:
-                                                      FlutterFlowTheme.of(context)
-                                                          .secondaryText,
-                                                  letterSpacing: 0.0,
-                                                  fontWeight:
-                                                      FlutterFlowTheme.of(context)
-                                                          .labelSmall
-                                                          .fontWeight,
-                                                  fontStyle:
-                                                      FlutterFlowTheme.of(context)
-                                                          .labelSmall
-                                                          .fontStyle,
-                                                  lineHeight: 1.2,
-                                                ),
-                                          ),
-                                        ].divide(SizedBox(height: 4.0)),
-                                      ),
-                                    ),
-                                  ),
+                          if (!snapshot.hasData) {
+                            return const Center(
+                                child: CircularProgressIndicator());
+                          }
+                          final complaints = snapshot.data!;
+                          if (complaints.isEmpty) {
+                            return Text(
+                              'No reports filed yet.',
+                              style: FlutterFlowTheme.of(context).labelSmall,
+                            );
+                          }
+                          return Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: complaints.map((complaint) {
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 12.0),
+                                child: ReportItemWidget(
+                                  businessName: complaint.subject,
+                                  date: dateTimeFormat(
+                                      'MMM d, yyyy', complaint.createdAt),
+                                  reason: complaint.description,
+                                  status: complaint.status,
                                 ),
-                              ),
-                              Expanded(
-                                flex: 1,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: FlutterFlowTheme.of(context)
-                                        .secondaryBackground,
-                                    borderRadius: BorderRadius.circular(12.0),
-                                    shape: BoxShape.rectangle,
-                                    border: Border.all(
-                                      color: FlutterFlowTheme.of(context).alternate,
-                                      width: 1.0,
-                                    ),
-                                  ),
-                                  child: Padding(
-                                    padding: EdgeInsets.all(16.0),
-                                    child: Container(
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        mainAxisAlignment: MainAxisAlignment.start,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            '$resolvedCount',
-                                            style: FlutterFlowTheme.of(context)
-                                                .titleLarge
-                                                .override(
-                                                  font: GoogleFonts.inter(
-                                                    fontWeight: FontWeight.bold,
-                                                    fontStyle:
-                                                        FlutterFlowTheme.of(context)
-                                                            .titleLarge
-                                                            .fontStyle,
-                                                  ),
-                                                  color:
-                                                      FlutterFlowTheme.of(context)
-                                                          .success,
-                                                  letterSpacing: 0.0,
-                                                  fontWeight: FontWeight.bold,
-                                                  fontStyle:
-                                                      FlutterFlowTheme.of(context)
-                                                          .titleLarge
-                                                          .fontStyle,
-                                                  lineHeight: 1.4,
-                                                ),
-                                          ),
-                                          Text(
-                                            'Resolved',
-                                            style: FlutterFlowTheme.of(context)
-                                                .labelSmall
-                                                .override(
-                                                  font: GoogleFonts.inter(
-                                                    fontWeight:
-                                                        FlutterFlowTheme.of(context)
-                                                            .labelSmall
-                                                            .fontWeight,
-                                                    fontStyle:
-                                                        FlutterFlowTheme.of(context)
-                                                            .labelSmall
-                                                            .fontStyle,
-                                                  ),
-                                                  color:
-                                                      FlutterFlowTheme.of(context)
-                                                          .secondaryText,
-                                                  letterSpacing: 0.0,
-                                                  fontWeight:
-                                                      FlutterFlowTheme.of(context)
-                                                          .labelSmall
-                                                          .fontWeight,
-                                                  fontStyle:
-                                                      FlutterFlowTheme.of(context)
-                                                          .labelSmall
-                                                          .fontStyle,
-                                                  lineHeight: 1.2,
-                                                ),
-                                          ),
-                                        ].divide(SizedBox(height: 4.0)),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ].divide(SizedBox(width: 16.0)),
+                              );
+                            }).toList(),
                           );
                         },
                       ),
-                      Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          InkWell(
-                            onTap: () => context.pushNamed('CustomerOrders'),
-                            child: wrapWithModel(
-                              model: _model.profileOptionModel1,
-                              updateCallback: () => safeSetState(() {}),
-                              child: ProfileOptionWidget(
-                                icon: Icon(
-                                  Icons.shopping_bag_rounded,
-                                  color: FlutterFlowTheme.of(context).primary,
-                                  size: 24,
-                                ),
-                                title: 'My Orders',
-                              ),
-                            ),
-                          ),
-                          InkWell(
-                            onTap: () => context.pushNamed('Cart'),
-                            child: wrapWithModel(
-                              model: _model.profileOptionModel2,
-                              updateCallback: () => safeSetState(() {}),
-                              child: ProfileOptionWidget(
-                                icon: Icon(
-                                  Icons.shopping_cart_rounded,
-                                  color: FlutterFlowTheme.of(context).primary,
-                                  size: 24,
-                                ),
-                                title: 'My Cart',
-                              ),
-                            ),
-                          ),
-                        ].divide(const SizedBox(height: 12)),
-                      ),
-                      Column(
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Text(
-                            AppLocalizations.of(context)!.savedLocations,
-                            style: FlutterFlowTheme.of(context)
-                                .titleMedium
-                                .override(
-                                  font: GoogleFonts.inter(
-                                    fontWeight: FontWeight.bold,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .titleMedium
-                                        .fontStyle,
-                                  ),
-                                  color:
-                                      FlutterFlowTheme.of(context).primaryText,
-                                  letterSpacing: 0.0,
-                                  fontWeight: FontWeight.bold,
-                                  fontStyle: FlutterFlowTheme.of(context)
-                                      .titleMedium
-                                      .fontStyle,
-                                  lineHeight: 1.4,
-                                ),
-                          ),
-                          InkWell(
-                            onTap: () async {
-                              context.pushNamed('CustomerOrders');
-                            },
-                            child: wrapWithModel(
-                              model: _model.profileOptionModel1,
-                              updateCallback: () => safeSetState(() {}),
-                              child: ProfileOptionWidget(
-                                icon: Icon(
-                                  Icons.shopping_bag_rounded,
-                                  color: FlutterFlowTheme.of(context).primary,
-                                  size: 20.0,
-                                ),
-                                subtitle: 'History and active orders',
-                                title: 'My Orders',
-                              ),
-                            ),
-                          ),
-                          InkWell(
-                            onTap: () async {
-                              print('Personal Information clicked');
-                            },
-                            child: wrapWithModel(
-                              model: _model.profileOptionModel1,
-                              updateCallback: () => safeSetState(() {}),
-                              child: ProfileOptionWidget(
-                                icon: Icon(
-                                  Icons.person_outline_rounded,
-                                  color:
-                                      FlutterFlowTheme.of(context).primaryText,
-                                  size: 20.0,
-                                ),
-                                subtitle: 'Name, Email, Phone number',
-                                title: 'Personal Information',
-                              ),
-                            ),
-                          ),
-                          InkWell(
-                            onTap: () async {
-                              context.pushNamed('AddressList');
-                            },
-                            child: wrapWithModel(
-                              model: _model.profileOptionModel2,
-                              updateCallback: () => safeSetState(() {}),
-                              child: ProfileOptionWidget(
-                                icon: Icon(
-                                  Icons.location_on_outlined,
-                                  color:
-                                      FlutterFlowTheme.of(context).primaryText,
-                                  size: 20.0,
-                                ),
-                                subtitle: 'Home, Work, Other places',
-                                title: 'Saved Locations',
-                              ),
-                            ),
-                          ),
-                          wrapWithModel(
-                            model: _model.profileOptionModel3,
-                            updateCallback: () => safeSetState(() {}),
-                            child: ProfileOptionWidget(
-                              icon: Icon(
-                                Icons.notifications_none_rounded,
-                                color: FlutterFlowTheme.of(context).primaryText,
-                                size: 20.0,
-                              ),
-                              subtitle: 'Alerts, Business updates',
-                              title: 'Notifications',
-                            ),
-                          ),
-                          wrapWithModel(
-                            model: _model.profileOptionModel4,
-                            updateCallback: () => safeSetState(() {}),
-                            child: ProfileOptionWidget(
-                              icon: Icon(
-                                Icons.security_rounded,
-                                color: FlutterFlowTheme.of(context).primaryText,
-                                size: 20.0,
-                              ),
-                              subtitle: 'Password, Data usage',
-                              title: 'Privacy & Security',
-                            ),
-                          ),
+                    ].divide(const SizedBox(height: 16.0)),
+                  ),
 
-                          InkWell(
-                            onTap: () async {
-                              await showModalBottomSheet(
-                                context: context,
-                                builder: (context) => Container(
-                                  padding: const EdgeInsets.all(24.0),
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        'Select Language / भाषा निवडा',
-                                        style: FlutterFlowTheme.of(context).headlineSmall,
-                                      ),
-                                      const SizedBox(height: 16),
-                                      ListTile(
-                                        title: const Text('English'),
-                                        onTap: () {
-                                          FFAppState.instance.locale = 'en';
-                                          Navigator.pop(context);
-                                        },
-                                        trailing: FFAppState.instance.locale == 'en' ? Icon(Icons.check, color: FlutterFlowTheme.of(context).primary) : null,
-                                      ),
-                                      ListTile(
-                                        title: const Text('मराठी (Marathi)'),
-                                        onTap: () {
-                                          FFAppState.instance.locale = 'mr';
-                                          Navigator.pop(context);
-                                        },
-                                        trailing: FFAppState.instance.locale == 'mr' ? Icon(Icons.check, color: FlutterFlowTheme.of(context).primary) : null,
-                                      ),
-                                      ListTile(
-                                        title: const Text('हिन्दी (Hindi)'),
-                                        onTap: () {
-                                          FFAppState.instance.locale = 'hi';
-                                          Navigator.pop(context);
-                                        },
-                                        trailing: FFAppState.instance.locale == 'hi' ? Icon(Icons.check, color: FlutterFlowTheme.of(context).primary) : null,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
-                            child: wrapWithModel(
-                              model: _model.profileOptionModel1,
-                              updateCallback: () => safeSetState(() {}),
-                              child: ProfileOptionWidget(
-                                icon: Icon(
-                                  Icons.language_rounded,
-                                  color: FlutterFlowTheme.of(context).primaryText,
-                                  size: 20.0,
-                                ),
-                                subtitle: 'English, मराठी, हिन्दी',
-                                title: 'Change Language',
-                              ),
-                            ),
-                          ),
-                        ].divide(SizedBox(height: 16.0)),
-                      ),
-                      Column(
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Row(
-                            mainAxisSize: MainAxisSize.max,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Text(
-                                'My Reports',
-                                style: FlutterFlowTheme.of(context)
-                                    .titleMedium
-                                    .override(
-                                      font: GoogleFonts.inter(
-                                        fontWeight: FontWeight.bold,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .titleMedium
-                                            .fontStyle,
-                                      ),
-                                      color: FlutterFlowTheme.of(context)
-                                          .primaryText,
-                                      letterSpacing: 0.0,
-                                      fontWeight: FontWeight.bold,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .titleMedium
-                                          .fontStyle,
-                                      lineHeight: 1.4,
-                                    ),
-                              ),
-                              wrapWithModel(
-                                model: _model.buttonModel1,
-                                updateCallback: () => safeSetState(() {}),
-                                child: ButtonWidget(
-                                  icon: Icon(
-                                    Icons.add_rounded,
-                                    color: FlutterFlowTheme.of(context)
-                                        .primaryText,
-                                    size: 24.0,
-                                  ),
-                                  iconPresent: true,
-                                  iconEndPresent: false,
-                                  content: 'New Report',
-                                  variant: 'ghost',
-                                  size: 'small',
-                                  fullWidth: false,
-                                  loading: false,
-                                  disabled: false,
-                                ),
-                              ),
-                            ],
-                          ),
-                          FutureBuilder<List<ComplaintsRow>>(
-                            future: _model.complaintsFuture,
-                            builder: (context, snapshot) {
-                              if (!snapshot.hasData) {
-                                return Center(child: CircularProgressIndicator());
-                              }
-                              final complaints = snapshot.data!;
-                              if (complaints.isEmpty) {
-                                return Text(
-                                  'No reports filed yet.',
-                                  style: FlutterFlowTheme.of(context).labelSmall,
-                                );
-                              }
-                              return Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: complaints.map((complaint) {
-                                  return Padding(
-                                    padding: EdgeInsets.only(bottom: 12.0),
-                                    child: ReportItemWidget(
-                                      businessName: complaint.subject,
-                                      date: dateTimeFormat('MMM d, yyyy', complaint.createdAt),
-                                      reason: complaint.description,
-                                      status: complaint.status,
-                                    ),
-                                  );
-                                }).toList(),
-                              );
-                            },
-                          ),
-                        ].divide(SizedBox(height: 16.0)),
-                      ),
-                      Column(
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Text(
-                            'Support',
-                            style: FlutterFlowTheme.of(context)
-                                .titleMedium
-                                .override(
+                  // Support & Sign Out
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        'Support',
+                        style:
+                            FlutterFlowTheme.of(context).titleMedium.override(
                                   font: GoogleFonts.inter(
-                                    fontWeight: FontWeight.bold,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .titleMedium
-                                        .fontStyle,
-                                  ),
-                                  color:
-                                      FlutterFlowTheme.of(context).primaryText,
-                                  letterSpacing: 0.0,
-                                  fontWeight: FontWeight.bold,
-                                  fontStyle: FlutterFlowTheme.of(context)
-                                      .titleMedium
-                                      .fontStyle,
-                                  lineHeight: 1.4,
+                                      fontWeight: FontWeight.bold),
                                 ),
-                          ),
-                          wrapWithModel(
-                            model: _model.profileOptionModel5,
-                            updateCallback: () => safeSetState(() {}),
-                            child: ProfileOptionWidget(
-                              icon: Icon(
-                                Icons.help_outline_rounded,
-                                color: FlutterFlowTheme.of(context).primaryText,
-                                size: 20.0,
-                              ),
-                              subtitle: 'FAQ and contact support',
-                              title: 'Help Center',
-                            ),
-                          ),
-                          wrapWithModel(
-                            model: _model.profileOptionModel6,
-                            updateCallback: () => safeSetState(() {}),
-                            child: ProfileOptionWidget(
-                              icon: Icon(
-                                Icons.description_outlined,
-                                color: FlutterFlowTheme.of(context).primaryText,
-                                size: 20.0,
-                              ),
-                              subtitle: 'Legal and usage agreements',
-                              title: 'Terms of Service',
-                            ),
-                          ),
-                        ].divide(SizedBox(height: 16.0)),
                       ),
-                      Padding(
-                        padding: EdgeInsetsDirectional.fromSTEB(
-                            0.0, 24.0, 0.0, 40.0),
-                        child: Container(
-                          child: Container(
-                            child: InkWell(
-                              onTap: () async {
-                                await authManager.signOut();
-                                context.goNamed('Authentication');
-                              },
-                              child: wrapWithModel(
-                                model: _model.buttonModel2,
-                                updateCallback: () => safeSetState(() {}),
-                                child: ButtonWidget(
-                                  icon: Icon(
-                                    Icons.logout_rounded,
-                                    color: FlutterFlowTheme.of(context)
-                                        .primaryText,
-                                    size: 24.0,
-                                  ),
-                                  iconPresent: true,
-                                  iconEndPresent: false,
-                                  content: 'Sign Out',
-                                  variant: 'outline',
-                                  size: 'small',
-                                  fullWidth: true,
-                                  loading: false,
-                                  disabled: false,
-                                ),
-                              ),
+                      _buildOption(
+                        context,
+                        _model.profileOptionModel8,
+                        Icons.help_outline_rounded,
+                        'Help Center',
+                        subtitle: 'FAQ and contact support',
+                      ),
+                      _buildOption(
+                        context,
+                        _model.profileOptionModel9,
+                        Icons.description_outlined,
+                        'Terms of Service',
+                        subtitle: 'Legal and usage agreements',
+                      ),
+                      const SizedBox(height: 24),
+                      InkWell(
+                        onTap: () async {
+                          await authManager.signOut();
+                          if (context.mounted) context.goNamed('Authentication');
+                        },
+                        child: wrapWithModel(
+                          model: _model.buttonModel2,
+                          updateCallback: () => setState(() {}),
+                          child: ButtonWidget(
+                            icon: Icon(
+                              Icons.logout_rounded,
+                              color: FlutterFlowTheme.of(context).error,
+                              size: 24.0,
                             ),
+                            iconPresent: true,
+                            content: 'Sign Out',
+                            variant: 'outline',
+                            size: 'large',
+                            fullWidth: true,
                           ),
                         ),
                       ),
-                    ].divide(SizedBox(height: 24.0)),
+                    ].divide(const SizedBox(height: 16.0)),
                   ),
-                ),
+                ].divide(const SizedBox(height: 32.0)),
               ),
-            ],
+            ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildStatCard(
+      BuildContext context, String value, String label, Color color) {
+    return Container(
+      decoration: BoxDecoration(
+        color: FlutterFlowTheme.of(context).secondaryBackground,
+        borderRadius: BorderRadius.circular(12.0),
+        border: Border.all(color: FlutterFlowTheme.of(context).alternate),
+      ),
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            value,
+            style: FlutterFlowTheme.of(context).titleLarge.override(
+                  font: GoogleFonts.inter(fontWeight: FontWeight.bold),
+                  color: color,
+                ),
+          ),
+          Text(
+            label,
+            style: FlutterFlowTheme.of(context).labelSmall.override(
+                  font: GoogleFonts.inter(),
+                  color: FlutterFlowTheme.of(context).secondaryText,
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOption(BuildContext context, ProfileOptionModel model,
+      IconData icon, String title,
+      {String? subtitle, VoidCallback? onTap}) {
+    return InkWell(
+      onTap: onTap,
+      child: wrapWithModel(
+        model: model,
+        updateCallback: () => setState(() {}),
+        child: ProfileOptionWidget(
+          icon: Icon(icon,
+              color: FlutterFlowTheme.of(context).primaryText, size: 24),
+          title: title,
+          subtitle: subtitle,
+        ),
+      ),
+    );
+  }
+
+  void _showLanguageSelector(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('Select Language / भाषा निवडा',
+                style: FlutterFlowTheme.of(context).headlineSmall),
+            const SizedBox(height: 16),
+            _buildLangItem(context, 'English', 'en'),
+            _buildLangItem(context, 'मराठी (Marathi)', 'mr'),
+            _buildLangItem(context, 'हिन्दी (Hindi)', 'hi'),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLangItem(BuildContext context, String label, String code) {
+    final isSelected = FFAppState.instance.locale == code;
+    return ListTile(
+      title: Text(label),
+      onTap: () {
+        FFAppState.instance.locale = code;
+        Navigator.pop(context);
+        setState(() {});
+      },
+      trailing: isSelected
+          ? Icon(Icons.check, color: FlutterFlowTheme.of(context).primary)
+          : null,
     );
   }
 }

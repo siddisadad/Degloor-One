@@ -5,6 +5,7 @@ import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:degloor_one/core/error_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'business_analytics_model.dart';
 export 'business_analytics_model.dart';
@@ -41,7 +42,6 @@ class _BusinessAnalyticsWidgetState extends State<BusinessAnalyticsWidget>
     _model.tabBarController = TabController(
       vsync: this,
       length: 3,
-      initialIndex: 0,
     )..addListener(() {
         if (_model.tabBarController!.indexIsChanging) return;
         int period = 7;
@@ -71,7 +71,7 @@ class _BusinessAnalyticsWidgetState extends State<BusinessAnalyticsWidget>
 
       var query = SupaFlow.client
           .from('business_analytics')
-          .select('*')
+          .select()
           .eq('business_id', widget.businessId);
 
       if (startDate != null) {
@@ -87,7 +87,7 @@ class _BusinessAnalyticsWidgetState extends State<BusinessAnalyticsWidget>
         _isLoading = false;
       });
     } catch (e) {
-      print('Error fetching analytics: $e');
+      AppLogger.error('Error fetching analytics', e);
       if (mounted) {
         safeSetState(() => _isLoading = false);
       }
@@ -141,12 +141,11 @@ class _BusinessAnalyticsWidgetState extends State<BusinessAnalyticsWidget>
                   color: FlutterFlowTheme.of(context).primaryText,
                 ),
           ),
-          actions: [],
+          actions: const [],
           centerTitle: false,
           elevation: 0.0,
         ),
         body: SafeArea(
-          top: true,
           child: Column(
             children: [
               Container(
@@ -298,7 +297,6 @@ class _BusinessAnalyticsWidgetState extends State<BusinessAnalyticsWidget>
             );
           }).toList(),
           titlesData: FlTitlesData(
-            show: true,
             bottomTitles: AxisTitles(
               sideTitles: SideTitles(
                 showTitles: true,
@@ -326,11 +324,10 @@ class _BusinessAnalyticsWidgetState extends State<BusinessAnalyticsWidget>
                 },
               ),
             ),
-            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            topTitles: const AxisTitles(),
+            rightTitles: const AxisTitles(),
           ),
           gridData: FlGridData(
-            show: true,
             drawVerticalLine: false,
             getDrawingHorizontalLine: (value) => FlLine(
               color: FlutterFlowTheme.of(context).alternate,

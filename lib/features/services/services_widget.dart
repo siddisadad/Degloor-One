@@ -89,7 +89,6 @@ class _ServicesWidgetState extends State<ServicesWidget> {
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         appBar: AppBar(
           backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-          automaticallyImplyLeading: true,
           title: Text(
             'Find local services',
             style: FlutterFlowTheme.of(context).headlineMedium.override(
@@ -99,18 +98,16 @@ class _ServicesWidgetState extends State<ServicesWidget> {
                   letterSpacing: 0.0,
                 ),
           ),
-          actions: [],
+          actions: const [],
           centerTitle: false,
           elevation: 0.0,
         ),
         body: SafeArea(
-          top: true,
           child: Column(
-            mainAxisSize: MainAxisSize.max,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(16.0, 12.0, 16.0, 12.0),
+                padding: const EdgeInsetsDirectional.fromSTEB(16.0, 12.0, 16.0, 12.0),
                 child: Text(
                   'Categories',
                   style: FlutterFlowTheme.of(context).titleMedium.override(
@@ -119,20 +116,20 @@ class _ServicesWidgetState extends State<ServicesWidget> {
                       ),
                 ),
               ),
-              Container(
+              SizedBox(
                 height: 100.0,
                 child: FutureBuilder<List<ServiceCategoriesRow>>(
                   future: _model.categoriesFuture,
                   builder: (context, snapshot) {
                     if (!snapshot.hasData) {
-                      return Center(child: CircularProgressIndicator());
+                      return const Center(child: CircularProgressIndicator());
                     }
                     final categories = snapshot.data!;
                     return ListView.separated(
-                      padding: EdgeInsets.symmetric(horizontal: 16.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       scrollDirection: Axis.horizontal,
                       itemCount: categories.length,
-                      separatorBuilder: (context, index) => SizedBox(width: 12.0),
+                      separatorBuilder: (context, index) => const SizedBox(width: 12.0),
                       itemBuilder: (context, index) {
                         final category = categories[index];
                         final isSelected = _model.selectedCategoryId == category.id;
@@ -164,7 +161,7 @@ class _ServicesWidgetState extends State<ServicesWidget> {
                 ),
               ),
               Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(16.0, 16.0, 16.0, 12.0),
+                padding: const EdgeInsetsDirectional.fromSTEB(16.0, 16.0, 16.0, 12.0),
                 child: Text(
                   'Service Providers',
                   style: FlutterFlowTheme.of(context).titleMedium.override(
@@ -178,16 +175,16 @@ class _ServicesWidgetState extends State<ServicesWidget> {
                   future: _model.providersFuture,
                   builder: (context, snapshot) {
                     if (!snapshot.hasData) {
-                      return Center(child: CircularProgressIndicator());
+                      return const Center(child: CircularProgressIndicator());
                     }
                     final providers = snapshot.data!;
                     if (providers.isEmpty) {
-                      return Center(child: Text('No providers found in this category.'));
+                      return const Center(child: Text('No providers found in this category.'));
                     }
                     return ListView.separated(
-                      padding: EdgeInsets.symmetric(horizontal: 16.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       itemCount: providers.length,
-                      separatorBuilder: (context, index) => SizedBox(height: 12.0),
+                      separatorBuilder: (context, index) => const SizedBox(height: 12.0),
                       itemBuilder: (context, index) {
                         final provider = providers[index];
                         final user = provider['users'];
@@ -199,7 +196,7 @@ class _ServicesWidgetState extends State<ServicesWidget> {
                             queryParameters: {
                               'providerId': serializeParam(
                                 provider['id'],
-                                ParamType.String,
+                                ParamType.string,
                               ),
                             }.withoutNulls,
                           ),

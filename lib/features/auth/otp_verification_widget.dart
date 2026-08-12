@@ -11,11 +11,9 @@ class OtpVerificationWidget extends StatefulWidget {
   const OtpVerificationWidget({
     super.key,
     required this.phone,
-    required this.role,
   });
 
   final String phone;
-  final String role;
 
   static String routeName = 'OtpVerification';
   static String routePath = '/otpVerification';
@@ -53,7 +51,6 @@ class _OtpVerificationWidgetState extends State<OtpVerificationWidget> {
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
-          automaticallyImplyLeading: true,
           elevation: 0,
           leading: FlutterFlowIconButton(
             borderColor: Colors.transparent,
@@ -71,7 +68,6 @@ class _OtpVerificationWidgetState extends State<OtpVerificationWidget> {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24.0),
             child: Column(
-              mainAxisSize: MainAxisSize.max,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 20),
@@ -173,7 +169,6 @@ class _OtpVerificationWidgetState extends State<OtpVerificationWidget> {
         context: context,
         phoneNumber: widget.phone,
         smsCode: code,
-        role: widget.role,
       );
       if (user != null && mounted) {
         context.goNamed('_initialize');

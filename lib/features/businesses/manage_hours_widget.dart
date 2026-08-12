@@ -6,6 +6,7 @@ import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:degloor_one/core/error_handler.dart';
 import 'manage_hours_model.dart';
 export 'manage_hours_model.dart';
 
@@ -90,7 +91,7 @@ class _ManageHoursWidgetState extends State<ManageHoursWidget> {
         }
       }
     } catch (e) {
-      print('Error fetching business hours: $e');
+      AppLogger.error('Error fetching business hours', e);
       if (mounted) {
         setState(() => _loading = false);
       }
@@ -128,15 +129,15 @@ class _ManageHoursWidgetState extends State<ManageHoursWidget> {
       }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Business hours updated successfully')),
+          const SnackBar(content: Text('Business hours updated successfully')),
         );
       }
       _fetchData(); // Refresh to get IDs for new rows
     } catch (e) {
-      print('Error saving hours: $e');
+      AppLogger.error('Error saving hours', e);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to update business hours')),
+          const SnackBar(content: Text('Failed to update business hours')),
         );
         setState(() => _loading = false);
       }
@@ -147,7 +148,7 @@ class _ManageHoursWidgetState extends State<ManageHoursWidget> {
     final row = _hours[dayIndex];
     final initialPostgresTime = isOpenTime ? row.openTime : row.closeTime;
 
-    TimeOfDay initialTime = TimeOfDay(hour: 9, minute: 0);
+    TimeOfDay initialTime = const TimeOfDay(hour: 9, minute: 0);
     if (initialPostgresTime?.time != null) {
       initialTime = TimeOfDay.fromDateTime(initialPostgresTime!.time!);
     }
@@ -212,15 +213,15 @@ class _ManageHoursWidgetState extends State<ManageHoursWidget> {
           ),
           actions: [
             Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(0.0, 8.0, 16.0, 8.0),
+              padding: const EdgeInsetsDirectional.fromSTEB(0.0, 8.0, 16.0, 8.0),
               child: FFButtonWidget(
                 onPressed: _loading ? null : _saveHours,
                 text: 'Save',
                 options: FFButtonOptions(
                   width: 80.0,
                   height: 40.0,
-                  padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-                  iconPadding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                  padding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                  iconPadding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
                   color: FlutterFlowTheme.of(context).primary,
                   textStyle: FlutterFlowTheme.of(context).titleSmall.override(
                         font: GoogleFonts.inter(),
@@ -229,9 +230,8 @@ class _ManageHoursWidgetState extends State<ManageHoursWidget> {
                         letterSpacing: 0.0,
                       ),
                   elevation: 2.0,
-                  borderSide: BorderSide(
+                  borderSide: const BorderSide(
                     color: Colors.transparent,
-                    width: 1.0,
                   ),
                   borderRadius: BorderRadius.circular(8.0),
                 ),
@@ -242,25 +242,25 @@ class _ManageHoursWidgetState extends State<ManageHoursWidget> {
           elevation: 0.0,
         ),
         body: _loading
-            ? Center(child: CircularProgressIndicator())
+            ? const Center(child: CircularProgressIndicator())
             : _business == null
-                ? Center(child: Text('No business found for this account.'))
+                ? const Center(child: Text('No business found for this account.'))
                 : SingleChildScrollView(
                     child: Padding(
-                      padding: EdgeInsets.all(16.0),
+                      padding: const EdgeInsets.all(16.0),
                       child: Column(
                         children: [
                           Text(
                             'Set your opening and closing times for each day of the week.',
                             style: FlutterFlowTheme.of(context).labelMedium,
                           ),
-                          SizedBox(height: 16.0),
+                          const SizedBox(height: 16.0),
                           ListView.separated(
                             shrinkWrap: true,
-                            physics: NeverScrollableScrollPhysics(),
+                            physics: const NeverScrollableScrollPhysics(),
                             itemCount: 7,
                             separatorBuilder: (context, index) =>
-                                SizedBox(height: 12.0),
+                                const SizedBox(height: 12.0),
                             itemBuilder: (context, index) {
                               final row = _hours[index];
                               return Container(
@@ -273,7 +273,7 @@ class _ManageHoursWidgetState extends State<ManageHoursWidget> {
                                   ),
                                 ),
                                 child: Padding(
-                                  padding: EdgeInsets.all(16.0),
+                                  padding: const EdgeInsets.all(16.0),
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
@@ -315,7 +315,7 @@ class _ManageHoursWidgetState extends State<ManageHoursWidget> {
                                       ),
                                       if (!row.isClosed)
                                         Padding(
-                                          padding: EdgeInsets.only(top: 8.0),
+                                          padding: const EdgeInsets.only(top: 8.0),
                                           child: Row(
                                             children: [
                                               Expanded(
@@ -323,7 +323,7 @@ class _ManageHoursWidgetState extends State<ManageHoursWidget> {
                                                   onTap: () =>
                                                       _selectTime(index, true),
                                                   child: Container(
-                                                    padding: EdgeInsets.all(12.0),
+                                                    padding: const EdgeInsets.all(12.0),
                                                     decoration: BoxDecoration(
                                                       border: Border.all(
                                                           color:
@@ -355,13 +355,13 @@ class _ManageHoursWidgetState extends State<ManageHoursWidget> {
                                                   ),
                                                 ),
                                               ),
-                                              SizedBox(width: 16.0),
+                                              const SizedBox(width: 16.0),
                                               Expanded(
                                                 child: InkWell(
                                                   onTap: () =>
                                                       _selectTime(index, false),
                                                   child: Container(
-                                                    padding: EdgeInsets.all(12.0),
+                                                    padding: const EdgeInsets.all(12.0),
                                                     decoration: BoxDecoration(
                                                       border: Border.all(
                                                           color:

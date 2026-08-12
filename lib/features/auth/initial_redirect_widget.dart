@@ -5,6 +5,8 @@ import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/backend/location_service.dart';
 import 'package:degloor_one/backend/supabase/database/database.dart';
 
+import 'package:degloor_one/core/error_handler.dart';
+
 class InitialRedirectWidget extends StatefulWidget {
   const InitialRedirectWidget({super.key});
 
@@ -16,11 +18,25 @@ class InitialRedirectWidget extends StatefulWidget {
 }
 
 class _InitialRedirectWidgetState extends State<InitialRedirectWidget> {
+  String? _errorMessage;
+
   @override
   void initState() {
     super.initState();
+    _startInitialization();
+  }
+
+  void _startInitialization() {
+    setState(() => _errorMessage = null);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await LocationService.updateCurrentLocation(context);
+      try {
+        // Increased timeout to 8 seconds to allow for permission dialog interaction
+        await LocationService.updateCurrentLocation(context).timeout(
+          const Duration(seconds: 8),
+        );
+      } catch (e) {
+        AppLogger.error('Location update timed out or failed', e);
+      }
       if (mounted) {
         _handleRedirect();
       }
@@ -28,20 +44,21 @@ class _InitialRedirectWidgetState extends State<InitialRedirectWidget> {
   }
 
   Future<void> _handleRedirect() async {
-    if (!loggedIn) {
-      context.goNamed('Authentication');
-      return;
-    }
+    try {
+      if (!loggedIn) {
+        context.goNamed('Authentication');
+        return;
+      }
 
-    // Always fetch latest role from DB to handle role updates (e.g. after registration)
-    String? role = await getCurrentUserRole();
-    if (!mounted) return;
+      // Always fetch latest role from DB to handle role updates (e.g. after registration)
+      // Added timeout to prevent hanging on poor connection
+      final String? role = await getCurrentUserRole().timeout(const Duration(seconds: 10));
+      if (!mounted) return;
 
-    if (role == 'business_owner') {
-      try {
+      if (role == 'business_owner') {
         final businesses = await BusinessesTable().querySingleRow(
           queryFn: (q) => q.eq('owner_id', currentUserUid),
-        );
+        ).timeout(const Duration(seconds: 10));
         if (!mounted) return;
 
         if (businesses.isEmpty) {
@@ -49,15 +66,16 @@ class _InitialRedirectWidgetState extends State<InitialRedirectWidget> {
         } else {
           context.goNamed('BusinessDashboard');
         }
-      } catch (e) {
-        print('Error checking business status: $e');
-        // Fallback to dashboard if query fails, or stay on loading
-        if (mounted) context.goNamed('BusinessDashboard');
+      } else if (role == 'admin') {
+        context.goNamed('AdminControlPanel');
+      } else {
+        context.goNamed('CustomerHome');
       }
-    } else if (role == 'admin') {
-      context.goNamed('AdminControlPanel');
-    } else {
-      context.goNamed('CustomerHome');
+    } catch (e) {
+      AppLogger.error('Redirection error', e);
+      if (mounted) {
+        setState(() => _errorMessage = 'Failed to load user profile. Please check your connection.');
+      }
     }
   }
 
@@ -65,8 +83,30 @@ class _InitialRedirectWidgetState extends State<InitialRedirectWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-      body: const Center(
-        child: CircularProgressIndicator(),
+      body: Center(
+        child: _errorMessage != null
+            ? Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.error_outline_rounded,
+                        color: FlutterFlowTheme.of(context).error, size: 48),
+                    const SizedBox(height: 16),
+                    Text(
+                      _errorMessage!,
+                      textAlign: TextAlign.center,
+                      style: FlutterFlowTheme.of(context).bodyMedium,
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton(
+                      onPressed: _startInitialization,
+                      child: const Text('Retry'),
+                    ),
+                  ],
+                ),
+              )
+            : const CircularProgressIndicator(),
       ),
     );
   }

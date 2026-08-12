@@ -6,6 +6,7 @@ import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:degloor_one/core/error_handler.dart';
 import 'dart:async';
 import 'manage_orders_model.dart';
 export 'manage_orders_model.dart';
@@ -26,8 +27,8 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   List<OrdersRow> _orders = [];
-  Map<String, String> _customerNames = {};
-  Map<String, String> _customerPhones = {};
+  final Map<String, String> _customerNames = {};
+  final Map<String, String> _customerPhones = {};
   bool _loading = true;
   BusinessesRow? _business;
   StreamSubscription<List<OrdersRow>>? _ordersSubscription;
@@ -59,7 +60,7 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
         setState(() => _loading = false);
       }
     } catch (e) {
-      print('Error fetching business: $e');
+      AppLogger.error('Error fetching business', e);
       setState(() => _loading = false);
     }
   }
@@ -98,7 +99,7 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
             }
           }
         } catch (e) {
-          print('Error fetching customer names: $e');
+          AppLogger.error('Error fetching customer names', e);
         }
       }
 
@@ -211,7 +212,6 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         appBar: AppBar(
           backgroundColor: FlutterFlowTheme.of(context).primary,
-          automaticallyImplyLeading: true,
           title: Text(
             'Manage Orders',
             style: FlutterFlowTheme.of(context).headlineMedium.override(
@@ -220,21 +220,19 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
                   fontSize: 22.0,
                 ),
           ),
-          actions: [],
+          actions: const [],
           centerTitle: false,
           elevation: 2.0,
         ),
         body: SafeArea(
-          top: true,
           child: Padding(
-            padding: EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(16.0),
             child: Column(
-              mainAxisSize: MainAxisSize.max,
               children: [
                 if (_business == null && !_loading)
                   Center(
                     child: Padding(
-                      padding: EdgeInsets.all(24.0),
+                      padding: const EdgeInsets.all(24.0),
                       child: Text(
                         'No business found for this account. Please register your business first.',
                         textAlign: TextAlign.center,
@@ -243,7 +241,7 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
                     ),
                   )
                 else if (_loading && _orders.isEmpty)
-                  Center(child: CircularProgressIndicator())
+                  const Center(child: CircularProgressIndicator())
                 else if (_orders.isEmpty)
                   Expanded(
                     child: Center(
@@ -257,7 +255,7 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
                   Expanded(
                     child: ListView.separated(
                       itemCount: _orders.length,
-                      separatorBuilder: (context, index) => SizedBox(height: 12.0),
+                      separatorBuilder: (context, index) => const SizedBox(height: 12.0),
                       itemBuilder: (context, index) {
                         final order = _orders[index];
                         final customerName = _customerNames[order.userId] ?? 'Loading...';
@@ -270,7 +268,7 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
                             borderRadius: BorderRadius.circular(12.0),
                           ),
                           child: Padding(
-                            padding: EdgeInsets.all(16.0),
+                            padding: const EdgeInsets.all(16.0),
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -286,7 +284,7 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
                                           ),
                                     ),
                                     Container(
-                                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                       decoration: BoxDecoration(
                                         color: _getStatusColor(order.status).withValues(alpha: 0.1),
                                         borderRadius: BorderRadius.circular(8),
@@ -302,7 +300,7 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
                                     ),
                                   ],
                                 ),
-                                Divider(height: 24),
+                                const Divider(height: 24),
                                 _buildInfoRow(
                                   'Customer',
                                   customerName,
@@ -311,7 +309,7 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
                                 ),
                                 _buildInfoRow('Total Amount', '₹${order.totalAmount.toStringAsFixed(2)}'),
                                 _buildInfoRow('Date', dateTimeFormat('MMM d, y HH:mm', order.createdAt)),
-                                SizedBox(height: 16),
+                                const SizedBox(height: 16),
                                 if (order.status != 'delivered' && order.status != 'cancelled')
                                   Wrap(
                                     spacing: 8.0,
@@ -346,16 +344,16 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
                                             final confirm = await showDialog<bool>(
                                               context: context,
                                               builder: (context) => AlertDialog(
-                                                title: Text('Cancel Order'),
-                                                content: Text('Are you sure you want to cancel this order?'),
+                                                title: const Text('Cancel Order'),
+                                                content: const Text('Are you sure you want to cancel this order?'),
                                                 actions: [
                                                   TextButton(
                                                     onPressed: () => Navigator.pop(context, false),
-                                                    child: Text('No'),
+                                                    child: const Text('No'),
                                                   ),
                                                   TextButton(
                                                     onPressed: () => Navigator.pop(context, true),
-                                                    child: Text('Yes, Cancel'),
+                                                    child: const Text('Yes, Cancel'),
                                                   ),
                                                 ],
                                               ),
@@ -386,7 +384,7 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
 
   Widget _buildInfoRow(String label, String value, {String? phoneNumber, String? orderId}) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 2.0),
+      padding: const EdgeInsets.symmetric(vertical: 2.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -399,7 +397,7 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
               )),
               if (phoneNumber != null)
                 Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(8, 0, 0, 0),
+                  padding: const EdgeInsetsDirectional.fromSTEB(8, 0, 0, 0),
                   child: InkWell(
                     onTap: () async {
                       await WhatsAppService.launchWhatsApp(
@@ -442,12 +440,12 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setState) => AlertDialog(
-          title: Text('Verify Delivery OTP'),
+          title: const Text('Verify Delivery OTP'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('Ask the customer for the 4-digit OTP shown on their tracking screen.'),
-              SizedBox(height: 16),
+              const Text('Ask the customer for the 4-digit OTP shown on their tracking screen.'),
+              const SizedBox(height: 16),
               TextField(
                 controller: otpController,
                 keyboardType: TextInputType.number,
@@ -465,7 +463,7 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
             ),
             ElevatedButton(
               onPressed: () {
@@ -475,7 +473,7 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
                   setState(() => isError = true);
                 }
               },
-              child: Text('Verify & Deliver'),
+              child: const Text('Verify & Deliver'),
             ),
           ],
         ),
@@ -486,7 +484,7 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
   FFButtonOptions _buttonOptions(BuildContext context, Color color) {
     return FFButtonOptions(
       height: 36.0,
-      padding: EdgeInsets.symmetric(horizontal: 16.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
       iconPadding: EdgeInsets.zero,
       color: color,
       textStyle: FlutterFlowTheme.of(context).titleSmall.override(

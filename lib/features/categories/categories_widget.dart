@@ -103,17 +103,16 @@ class _CategoriesWidgetState extends State<CategoriesWidget> {
                   fontSize: 22.0,
                 ),
           ),
-          actions: [],
+          actions: const [],
           centerTitle: false,
           elevation: 0.0,
         ),
         body: SafeArea(
-          top: true,
           child: FutureBuilder<List<BusinessCategoriesRow>>(
             future: _categoriesFuture,
             builder: (context, snapshot) {
               if (snapshot.hasError) {
-                return Center(child: Text('Error loading categories'));
+                return const Center(child: Text('Error loading categories'));
               }
               if (!snapshot.hasData) {
                 return Center(
@@ -124,8 +123,8 @@ class _CategoriesWidgetState extends State<CategoriesWidget> {
               }
               final categories = snapshot.data!;
               return GridView.builder(
-                padding: EdgeInsets.all(24.0),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                padding: const EdgeInsets.all(24.0),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 3,
                   crossAxisSpacing: 16.0,
                   mainAxisSpacing: 24.0,
@@ -141,7 +140,7 @@ class _CategoriesWidgetState extends State<CategoriesWidget> {
                         queryParameters: {
                           'categoryId': serializeParam(
                             category.id,
-                            ParamType.String,
+                            ParamType.string,
                           ),
                         }.withoutNulls,
                       );
@@ -163,7 +162,7 @@ class _CategoriesWidgetState extends State<CategoriesWidget> {
                             child: getIconFromData(category.iconName),
                           ),
                         ),
-                        SizedBox(height: 8),
+                        const SizedBox(height: 8),
                         Text(
                           category.name,
                           textAlign: TextAlign.center,

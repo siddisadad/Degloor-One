@@ -75,7 +75,6 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         appBar: AppBar(
           backgroundColor: FlutterFlowTheme.of(context).primary,
-          automaticallyImplyLeading: true,
           title: Text(
             'Track Order',
             style: FlutterFlowTheme.of(context).headlineMedium.override(
@@ -84,7 +83,7 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
                   fontSize: 22.0,
                 ),
           ),
-          actions: [],
+          actions: const [],
           centerTitle: false,
           elevation: 2.0,
         ),
@@ -95,7 +94,7 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
           ),
           builder: (context, snapshot) {
             if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return Center(child: CircularProgressIndicator());
+              return const Center(child: CircularProgressIndicator());
             }
 
             final order = snapshot.data!.first;
@@ -254,7 +253,7 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
       decoration: BoxDecoration(
         color: FlutterFlowTheme.of(context).primary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: FlutterFlowTheme.of(context).primary, width: 1),
+        border: Border.all(color: FlutterFlowTheme.of(context).primary),
       ),
       child: Column(
         children: [
@@ -336,7 +335,7 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
                             CircleAvatar(
                               backgroundColor:
                                   FlutterFlowTheme.of(context).primary,
-                              child: Icon(Icons.delivery_dining_rounded,
+                              child: const Icon(Icons.delivery_dining_rounded,
                                   color: Colors.white),
                             ),
                             const SizedBox(width: 16),
@@ -384,7 +383,7 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
                                     size: 16,
                                     color:
                                         FlutterFlowTheme.of(context).primary),
-                                SizedBox(width: 8),
+                                const SizedBox(width: 8),
                                 Text(
                                   'Partner is active and tracking.',
                                   style: FlutterFlowTheme.of(context)

@@ -21,7 +21,6 @@ class _PhoneAuthWidgetState extends State<PhoneAuthWidget> {
   late PhoneAuthModel _model;
   final scaffoldKey = GlobalKey<ScaffoldState>();
   bool _isLoading = false;
-  bool _isBusinessOwner = false;
 
   @override
   void initState() {
@@ -47,7 +46,6 @@ class _PhoneAuthWidgetState extends State<PhoneAuthWidget> {
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
-          automaticallyImplyLeading: true,
           elevation: 0,
           leading: FlutterFlowIconButton(
             borderColor: Colors.transparent,
@@ -65,7 +63,6 @@ class _PhoneAuthWidgetState extends State<PhoneAuthWidget> {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24.0),
             child: Column(
-              mainAxisSize: MainAxisSize.max,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 20),
@@ -85,25 +82,6 @@ class _PhoneAuthWidgetState extends State<PhoneAuthWidget> {
                       ),
                 ),
                 const SizedBox(height: 40),
-                // Role Toggle
-                Container(
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color: FlutterFlowTheme.of(context).secondaryBackground,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    children: [
-                      _buildTab('Customer', !_isBusinessOwner, () {
-                        setState(() => _isBusinessOwner = false);
-                      }),
-                      _buildTab('Owner', _isBusinessOwner, () {
-                        setState(() => _isBusinessOwner = true);
-                      }),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 32),
                 TextFormField(
                   controller: _model.textController,
                   focusNode: _model.textFieldFocusNode,
@@ -157,35 +135,26 @@ class _PhoneAuthWidgetState extends State<PhoneAuthWidget> {
     );
   }
 
-  Widget _buildTab(String label, bool isSelected, VoidCallback onTap) {
-    return Expanded(
-      child: InkWell(
-        onTap: onTap,
-        child: Container(
-          decoration: BoxDecoration(
-            color: isSelected ? FlutterFlowTheme.of(context).primary : Colors.transparent,
-            borderRadius: BorderRadius.circular(10),
-          ),
-          alignment: Alignment.center,
-          child: Text(
-            label,
-            style: TextStyle(
-              color: isSelected ? Colors.white : FlutterFlowTheme.of(context).secondaryText,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   Future<void> _handleSendOtp() async {
-    final phone = _model.textController.text.trim();
+    String phone = _model.textController.text.trim();
     if (phone.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please enter your phone number')),
       );
       return;
+    }
+
+    // Normalize phone number: remove all non-digit characters except '+'
+    // and ensure it starts with '+'
+    phone = phone.replaceAll(RegExp(r'[^\d+]'), '');
+    if (!phone.startsWith('+')) {
+      // Default to +91 if no country code provided and it's a 10-digit number
+      if (phone.length == 10) {
+        phone = '+91$phone';
+      } else {
+        // Just prepend + if it's missing but might have country code (e.g. 91...)
+        phone = '+$phone';
+      }
     }
 
     setState(() => _isLoading = true);
@@ -198,7 +167,6 @@ class _PhoneAuthWidgetState extends State<PhoneAuthWidget> {
             'OtpVerification',
             queryParameters: {
               'phone': phone,
-              'role': _isBusinessOwner ? 'business_owner' : 'customer',
             },
           );
         },

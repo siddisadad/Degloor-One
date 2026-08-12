@@ -4,6 +4,7 @@ import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:degloor_one/core/error_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'cart_model.dart';
 export 'cart_model.dart';
@@ -61,7 +62,7 @@ class _CartWidgetState extends State<CartWidget> {
         _model.cartItemsFuture = Future.value(List<Map<String, dynamic>>.from(items));
       });
     } catch (e) {
-      print('Error fetching cart: $e');
+      AppLogger.error('Error fetching cart', e);
     }
   }
 
@@ -94,38 +95,53 @@ class _CartWidgetState extends State<CartWidget> {
 
     setState(() => _model.isPlacingOrder = true);
     try {
-      // 1. Create Order
-      final order = await OrdersTable().insert({
-        'user_id': currentUserUid,
-        'business_id': _model.currentCart!.businessId,
-        'total_amount': total,
-        'status': 'pending',
-        'payment_status': 'unpaid',
-        'delivery_address_id': _model.selectedAddress!.id,
-        'payment_method': 'COD',
-        'created_at': DateTime.now().toIso8601String(),
-      });
-
-      // 2. Create Order Items
-      for (var item in items) {
+      // Use secure RPC for order placement and inventory management
+      final List<Map<String, dynamic>> rpcItems = items.map((item) {
         final product = item['products'] as Map<String, dynamic>;
-        await OrderItemsTable().insert({
-          'order_id': order.id,
+        return {
           'product_id': product['id'],
           'quantity': item['quantity'],
-          'price_at_purchase': (product['price'] as num).toDouble(),
-        });
+          'price': (product['price'] as num).toDouble(),
+        };
+      }).toList();
+
+      final response = await SupaFlow.client.rpc(
+        'place_order',
+        params: {
+          'p_business_id': _model.currentCart!.businessId,
+          'p_total_amount': total,
+          'p_delivery_address_id': _model.selectedAddress!.id,
+          'p_payment_method': 'COD',
+          'p_items': rpcItems,
+        },
+      );
+
+      if (response == null) {
+        throw Exception('Failed to place order (no response from server)');
       }
 
-      // 3. Clear Cart
-      await CartsTable().delete(matchingRows: (q) => q.eq('id', _model.currentCart!.id));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Order placed successfully!'),
+          backgroundColor: Colors.green,
+        ),
+      );
 
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Order placed successfully!'), backgroundColor: Colors.green));
-
-      // Navigate to order success or tracking
-      context.goNamed('CustomerHome');
+      // Navigate to order success
+      context.goNamed(
+        'OrderSuccess',
+        queryParameters: {
+          'orderId': serializeParam(response, ParamType.string),
+        }.withoutNulls,
+      );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to place order: $e'), backgroundColor: Colors.red));
+      AppLogger.error('Failed to place order', e);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to place order: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
     } finally {
       setState(() => _model.isPlacingOrder = false);
     }
@@ -144,7 +160,6 @@ class _CartWidgetState extends State<CartWidget> {
       backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
       appBar: AppBar(
         backgroundColor: FlutterFlowTheme.of(context).secondaryBackground,
-        automaticallyImplyLeading: true,
         title: Text('Your Cart', style: FlutterFlowTheme.of(context).headlineSmall),
         elevation: 0,
       ),
@@ -253,7 +268,7 @@ class _CartWidgetState extends State<CartWidget> {
               Container(
                 decoration: BoxDecoration(
                   color: FlutterFlowTheme.of(context).secondaryBackground,
-                  boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, -5))],
+                  boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, -5))],
                   borderRadius: const BorderRadius.only(topLeft: Radius.circular(24), topRight: Radius.circular(24)),
                 ),
                 child: Padding(

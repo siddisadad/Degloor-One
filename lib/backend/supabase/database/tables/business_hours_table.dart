@@ -9,7 +9,7 @@ class BusinessHoursTable extends SupabaseTable<BusinessHoursRow> {
 }
 
 class BusinessHoursRow extends SupabaseDataRow {
-  BusinessHoursRow(Map<String, dynamic> data) : super(data);
+  BusinessHoursRow(super.data);
 
   @override
   SupabaseTable get table => BusinessHoursTable();

@@ -1,4 +1,5 @@
 import 'database.dart';
+import 'package:degloor_one/core/error_handler.dart';
 
 abstract class SupabaseTable<T extends SupabaseDataRow> {
   String get tableName;
@@ -17,7 +18,7 @@ abstract class SupabaseTable<T extends SupabaseDataRow> {
       final rows = await query.select();
       return rows.map(createRow).toList();
     } catch (e) {
-      print('Supabase queryRows error ($tableName): $e');
+      AppLogger.error('Supabase queryRows error ($tableName)', e);
       rethrow;
     }
   }
@@ -29,7 +30,7 @@ abstract class SupabaseTable<T extends SupabaseDataRow> {
       final r = await queryFn(_select()).limit(1).select().maybeSingle();
       return [if (r != null) createRow(r)];
     } catch (e) {
-      print('Supabase querySingleRow error ($tableName): $e');
+      AppLogger.error('Supabase querySingleRow error ($tableName)', e);
       rethrow;
     }
   }
@@ -44,7 +45,7 @@ abstract class SupabaseTable<T extends SupabaseDataRow> {
           .single()
           .then(createRow);
     } catch (e) {
-      print('Supabase insert error ($tableName): $e');
+      AppLogger.error('Supabase insert error ($tableName)', e);
       rethrow;
     }
   }

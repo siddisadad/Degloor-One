@@ -125,17 +125,15 @@ class _EditBusinessProfileWidgetState extends State<EditBusinessProfileWidget> {
                   fontSize: 22.0,
                 ),
           ),
-          actions: [],
+          actions: const [],
           centerTitle: false,
           elevation: 0.0,
         ),
         body: SafeArea(
-          top: true,
           child: SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.all(24.0),
               child: Column(
-                mainAxisSize: MainAxisSize.max,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   wrapWithModel(
@@ -194,7 +192,7 @@ class _EditBusinessProfileWidgetState extends State<EditBusinessProfileWidget> {
                   wrapWithModel(
                     model: _model.switchModel,
                     updateCallback: () => setState(() {}),
-                    child: SwitchComponentWidget(
+                    child: const SwitchComponentWidget(
                       label: 'WhatsApp same as mobile',
                       labelPresent: true,
                     ),

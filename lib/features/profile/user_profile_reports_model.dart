@@ -21,6 +21,18 @@ class UserProfileReportsModel
   late ProfileOptionModel profileOptionModel3;
   // Model for ProfileOption.
   late ProfileOptionModel profileOptionModel4;
+  // Model for ProfileOption.
+  late ProfileOptionModel profileOptionModel5;
+  // Model for ProfileOption.
+  late ProfileOptionModel profileOptionModel6;
+  // Model for ProfileOption.
+  late ProfileOptionModel profileOptionModel7;
+  // Model for ProfileOption.
+  late ProfileOptionModel profileOptionModel8;
+  // Model for ProfileOption.
+  late ProfileOptionModel profileOptionModel9;
+  // Model for ProfileOption.
+  late ProfileOptionModel profileOptionModel10;
   // Model for Button.
   late ButtonModel buttonModel1;
   // Model for ReportItem.
@@ -29,12 +41,6 @@ class UserProfileReportsModel
   late ReportItemModel reportItemModel2;
   // Model for ReportItem.
   late ReportItemModel reportItemModel3;
-  // Model for ProfileOption.
-  late ProfileOptionModel profileOptionModel5;
-  // Model for ProfileOption.
-  late ProfileOptionModel profileOptionModel6;
-  // Model for ProfileOption.
-  late ProfileOptionModel profileOptionModel7;
   // Model for Button.
   late ButtonModel buttonModel2;
 
@@ -44,13 +50,16 @@ class UserProfileReportsModel
     profileOptionModel2 = createModel(context, () => ProfileOptionModel());
     profileOptionModel3 = createModel(context, () => ProfileOptionModel());
     profileOptionModel4 = createModel(context, () => ProfileOptionModel());
+    profileOptionModel5 = createModel(context, () => ProfileOptionModel());
+    profileOptionModel6 = createModel(context, () => ProfileOptionModel());
+    profileOptionModel7 = createModel(context, () => ProfileOptionModel());
+    profileOptionModel8 = createModel(context, () => ProfileOptionModel());
+    profileOptionModel9 = createModel(context, () => ProfileOptionModel());
+    profileOptionModel10 = createModel(context, () => ProfileOptionModel());
     buttonModel1 = createModel(context, () => ButtonModel());
     reportItemModel1 = createModel(context, () => ReportItemModel());
     reportItemModel2 = createModel(context, () => ReportItemModel());
     reportItemModel3 = createModel(context, () => ReportItemModel());
-    profileOptionModel5 = createModel(context, () => ProfileOptionModel());
-    profileOptionModel6 = createModel(context, () => ProfileOptionModel());
-    profileOptionModel7 = createModel(context, () => ProfileOptionModel());
     buttonModel2 = createModel(context, () => ButtonModel());
   }
 
@@ -60,13 +69,16 @@ class UserProfileReportsModel
     profileOptionModel2.dispose();
     profileOptionModel3.dispose();
     profileOptionModel4.dispose();
+    profileOptionModel5.dispose();
+    profileOptionModel6.dispose();
+    profileOptionModel7.dispose();
+    profileOptionModel8.dispose();
+    profileOptionModel9.dispose();
+    profileOptionModel10.dispose();
     buttonModel1.dispose();
     reportItemModel1.dispose();
     reportItemModel2.dispose();
     reportItemModel3.dispose();
-    profileOptionModel5.dispose();
-    profileOptionModel6.dispose();
-    profileOptionModel7.dispose();
     buttonModel2.dispose();
   }
 }

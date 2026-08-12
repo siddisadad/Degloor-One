@@ -33,7 +33,7 @@ void main() async {
 
   runApp(ChangeNotifierProvider(
     create: (context) => appState,
-    child: MyApp(),
+    child: const MyApp(),
   ));
 }
 
@@ -41,6 +41,8 @@ void main() async {
 ///
 /// It manages the application's lifecycle, theme mode, and routing.
 class MyApp extends StatefulWidget {
+  const MyApp({super.key});
+
   @override
   State<MyApp> createState() => _MyAppState();
 
@@ -87,7 +89,7 @@ class _MyAppState extends State<MyApp> {
       });
     jwtTokenStream.listen((_) {});
     Future.delayed(
-      Duration(milliseconds: 1000),
+      const Duration(milliseconds: 1000),
       () => _appStateNotifier.stopShowingSplashImage(),
     );
   }
@@ -105,7 +107,7 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       title: 'DEGLOOR ONE',
-      localizationsDelegates: [
+      localizationsDelegates: const [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
@@ -124,7 +126,6 @@ class _MyAppState extends State<MyApp> {
           seedColor: const Color(0xFF1976D2),
           primary: const Color(0xFF1976D2),
           surface: Colors.white,
-          brightness: Brightness.light,
         ),
         textTheme: GoogleFonts.interTextTheme(),
         appBarTheme: const AppBarTheme(

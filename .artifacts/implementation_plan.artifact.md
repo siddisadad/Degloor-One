@@ -1,22 +1,24 @@
-# Fix Lint Warnings (Invalid Null-Aware Operator)
+# Business Dashboard Data Integration & Linking
 
-This plan fixes 4 lint warnings identified by `flutter analyze` where redundant null-aware operators (`?.`) were used on non-nullable properties after a previous null-check in the chain.
+This plan restores real-time data integration to the Business Dashboard and links the missing "Manage Jobs" and "Detailed Insights" features.
 
 ## Proposed Changes
 
-### Business Registration
+### Business Dashboard
 
-#### [MODIFY] [business_registration_widget.dart](file:///A:/Workspace/Degloor-One/lib/features/businesses/business_registration_widget.dart)
-- Remove redundant `?.` before `trim()` on lines 1015, 1017, and 1019.
-- Change `inputTextController?.text?.trim()` to `inputTextController?.text.trim()`.
-
-### Edit Business Profile
-
-#### [MODIFY] [edit_business_profile_widget.dart](file:///A:/Workspace/Degloor-One/lib/features/businesses/edit_business_profile_widget.dart)
-- Remove redundant `?.` before `trim()` on line 48.
-- Change `inputTextController?.text?.trim()` to `inputTextController?.text.trim()`.
+#### [MODIFY] [business_dashboard_widget.dart](file:///A:/Workspace/Degloor-One/lib/features/businesses/business_dashboard_widget.dart)
+- Restore `_fetchData()` to load the business profile and analytics events.
+- Bind `StatCardWidget` values to live analytics counts:
+    - Profile Views
+    - Call Clicks
+    - WhatsApp Clicks
+    - Directions Clicks
+- Link "Manage Jobs" and "Business Insights" tiles to their respective screens.
+- Implement dynamic `_calculateCompleteness()` logic.
+- Fix FAB to navigate to `EditBusinessProfile` with the current business data.
 
 ## Verification Plan
 
-### Automated Tests
-- Run `flutter analyze` again to verify that all 4 warnings are resolved.
+### Manual Verification
+- Verify that the counts in the "Insights" grid update after interacting with the business profile as a customer.
+- Verify that all management tiles navigate correctly.

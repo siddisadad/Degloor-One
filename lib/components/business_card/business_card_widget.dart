@@ -17,15 +17,15 @@ class BusinessCardWidget extends StatefulWidget {
     String? status,
     bool? verified,
     bool? isOpen,
-  })  : this.category = category ?? 'Hardware & Construction',
-        this.distance = distance ?? '0.8',
-        this.imgDesc = imgDesc ??
+  })  : category = category ?? 'Hardware & Construction',
+        distance = distance ?? '0.8',
+        imgDesc = imgDesc ??
             'https://dimg.dreamflow.cloud/v1/image/hardware%20store%20shelves',
-        this.name = name ?? 'Business Name',
-        this.rating = rating ?? '0.0',
-        this.status = status ?? 'Closed',
-        this.verified = verified ?? false,
-        this.isOpen = isOpen ?? false;
+        name = name ?? 'Business Name',
+        rating = rating ?? '0.0',
+        status = status ?? 'Closed',
+        verified = verified ?? false,
+        isOpen = isOpen ?? false;
 
   final String category;
   final String distance;
@@ -65,7 +65,7 @@ class _BusinessCardWidgetState extends State<BusinessCardWidget> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 16.0),
+      padding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 16.0),
       child: Container(
         decoration: BoxDecoration(
           color: FlutterFlowTheme.of(context).secondaryBackground,
@@ -75,10 +75,8 @@ class _BusinessCardWidgetState extends State<BusinessCardWidget> {
           borderRadius: BorderRadius.circular(
             FlutterFlowTheme.of(context).designToken.radius.lg,
           ),
-          shape: BoxShape.rectangle,
           border: Border.all(
             color: FlutterFlowTheme.of(context).alternate,
-            width: 1.0,
           ),
         ),
         child: Padding(
@@ -86,8 +84,6 @@ class _BusinessCardWidgetState extends State<BusinessCardWidget> {
             FlutterFlowTheme.of(context).designToken.spacing.md,
           ),
           child: Row(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               ClipRRect(
@@ -101,11 +97,10 @@ class _BusinessCardWidgetState extends State<BusinessCardWidget> {
                     borderRadius: BorderRadius.circular(
                       FlutterFlowTheme.of(context).designToken.radius.md,
                     ),
-                    shape: BoxShape.rectangle,
                   ),
                   child: CachedNetworkImage(
-                    fadeInDuration: const Duration(milliseconds: 0),
-                    fadeOutDuration: const Duration(milliseconds: 0),
+                    fadeInDuration: const Duration(),
+                    fadeOutDuration: const Duration(),
                     imageUrl: valueOrDefault<String>(
                       widget.imgDesc,
                       'https://dimg.dreamflow.cloud/v1/image/hardware%20store%20shelves',
@@ -113,7 +108,6 @@ class _BusinessCardWidgetState extends State<BusinessCardWidget> {
                     width: 80.0,
                     height: 80.0,
                     fit: BoxFit.cover,
-                    alignment: const Alignment(0.0, 0.0),
                     errorWidget: (context, url, error) => Container(
                       color: FlutterFlowTheme.of(context).primaryBackground,
                       child: Icon(
@@ -128,18 +122,13 @@ class _BusinessCardWidgetState extends State<BusinessCardWidget> {
               Expanded(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
-                      mainAxisSize: MainAxisSize.max,
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Row(
                           mainAxisSize: MainAxisSize.min,
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Text(
                               valueOrDefault<String>(
@@ -180,7 +169,6 @@ class _BusinessCardWidgetState extends State<BusinessCardWidget> {
                                       .radius
                                       .xs,
                                 ),
-                                shape: BoxShape.rectangle,
                               ),
                               child: Padding(
                                 padding: const EdgeInsetsDirectional.fromSTEB(
@@ -224,14 +212,9 @@ class _BusinessCardWidgetState extends State<BusinessCardWidget> {
                           ),
                     ),
                     Row(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Row(
                           mainAxisSize: MainAxisSize.min,
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Icon(
                               Icons.location_on_outlined,
@@ -263,8 +246,6 @@ class _BusinessCardWidgetState extends State<BusinessCardWidget> {
                         ),
                         Row(
                           mainAxisSize: MainAxisSize.min,
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Icon(
                               Icons.schedule_rounded,

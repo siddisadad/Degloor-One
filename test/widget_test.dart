@@ -21,7 +21,7 @@ void main() {
       MaterialApp(
         home: ChangeNotifierProvider(
           create: (context) => FFAppState.instance,
-          child: SplashScreenWidget(),
+          child: const SplashScreenWidget(),
         ),
       ),
     );

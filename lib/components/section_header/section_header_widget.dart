@@ -10,8 +10,8 @@ class SectionHeaderWidget extends StatefulWidget {
     super.key,
     String? step,
     String? title,
-  })  : this.step = step ?? '1',
-        this.title = title ?? 'Business Identity';
+  })  : step = step ?? '1',
+        title = title ?? 'Business Identity';
 
   final String step;
   final String title;
@@ -46,57 +46,48 @@ class _SectionHeaderWidgetState extends State<SectionHeaderWidget> {
   Widget build(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Container(
               decoration: BoxDecoration(
                 color: FlutterFlowTheme.of(context).primary10,
                 borderRadius: BorderRadius.circular(9999.0),
-                shape: BoxShape.rectangle,
               ),
               child: Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(8.0, 4.0, 8.0, 4.0),
-                child: Container(
-                  child: Text(
-                    valueOrDefault<String>(
-                      'STEP ${widget.step}',
-                      'STEP 1',
-                    ),
-                    style: FlutterFlowTheme.of(context).labelSmall.override(
-                          font: GoogleFonts.inter(
-                            fontWeight: FontWeight.bold,
-                            fontStyle: FlutterFlowTheme.of(context)
-                                .labelSmall
-                                .fontStyle,
-                          ),
-                          color: FlutterFlowTheme.of(context).primary,
-                          letterSpacing: 0.0,
-                          fontWeight: FontWeight.bold,
-                          fontStyle:
-                              FlutterFlowTheme.of(context).labelSmall.fontStyle,
-                          lineHeight: 1.2,
-                        ),
+                padding: const EdgeInsetsDirectional.fromSTEB(8.0, 4.0, 8.0, 4.0),
+                child: Text(
+                  valueOrDefault<String>(
+                    'STEP ${widget.step}',
+                    'STEP 1',
                   ),
+                  style: FlutterFlowTheme.of(context).labelSmall.override(
+                        font: GoogleFonts.inter(
+                          fontWeight: FontWeight.bold,
+                          fontStyle: FlutterFlowTheme.of(context)
+                              .labelSmall
+                              .fontStyle,
+                        ),
+                        color: FlutterFlowTheme.of(context).primary,
+                        letterSpacing: 0.0,
+                        fontWeight: FontWeight.bold,
+                        fontStyle:
+                            FlutterFlowTheme.of(context).labelSmall.fontStyle,
+                        lineHeight: 1.2,
+                      ),
                 ),
               ),
             ),
             Expanded(
-              flex: 1,
               child: Container(
                 height: 1.0,
                 decoration: BoxDecoration(
                   color: FlutterFlowTheme.of(context).alternate,
-                  shape: BoxShape.rectangle,
                 ),
               ),
             ),
-          ].divide(SizedBox(width: 8.0)),
+          ].divide(const SizedBox(width: 8.0)),
         ),
         Text(
           valueOrDefault<String>(
@@ -116,7 +107,7 @@ class _SectionHeaderWidgetState extends State<SectionHeaderWidget> {
                 lineHeight: 1.3,
               ),
         ),
-      ].divide(SizedBox(height: 4.0)),
+      ].divide(const SizedBox(height: 4.0)),
     );
   }
 }

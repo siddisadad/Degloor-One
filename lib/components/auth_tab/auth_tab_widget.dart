@@ -10,8 +10,8 @@ class AuthTabWidget extends StatefulWidget {
     super.key,
     String? active,
     String? label,
-  })  : this.active = active ?? 'true',
-        this.label = label ?? 'Customer';
+  })  : active = active ?? 'true',
+        label = label ?? 'Customer';
 
   final String active;
   final String label;
@@ -45,45 +45,43 @@ class _AuthTabWidgetState extends State<AuthTabWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        shape: BoxShape.rectangle,
+      decoration: const BoxDecoration(
+        
       ),
       child: Padding(
-        padding: EdgeInsetsDirectional.fromSTEB(0.0, 16.0, 0.0, 16.0),
-        child: Container(
-          child: Align(
-            alignment: AlignmentDirectional(0.0, 0.0),
-            child: Text(
-              valueOrDefault<String>(
-                widget.label,
-                'Customer',
-              ),
-              textAlign: TextAlign.center,
-              style: FlutterFlowTheme.of(context).labelLarge.override(
-                    font: GoogleFonts.inter(
-                      fontWeight:
-                          FlutterFlowTheme.of(context).labelLarge.fontWeight,
-                      fontStyle:
-                          FlutterFlowTheme.of(context).labelLarge.fontStyle,
-                    ),
-                    color: valueOrDefault<Color>(
-                      valueOrDefault<String>(
-                                widget.active,
-                                'true',
-                              ) ==
-                              'false'
-                          ? FlutterFlowTheme.of(context).secondaryText
-                          : FlutterFlowTheme.of(context).primary,
-                      FlutterFlowTheme.of(context).primary,
-                    ),
-                    letterSpacing: 0.0,
+        padding: const EdgeInsetsDirectional.fromSTEB(0.0, 16.0, 0.0, 16.0),
+        child: Align(
+          alignment: const AlignmentDirectional(0.0, 0.0),
+          child: Text(
+            valueOrDefault<String>(
+              widget.label,
+              'Customer',
+            ),
+            textAlign: TextAlign.center,
+            style: FlutterFlowTheme.of(context).labelLarge.override(
+                  font: GoogleFonts.inter(
                     fontWeight:
                         FlutterFlowTheme.of(context).labelLarge.fontWeight,
                     fontStyle:
                         FlutterFlowTheme.of(context).labelLarge.fontStyle,
-                    lineHeight: 1.4,
                   ),
-            ),
+                  color: valueOrDefault<Color>(
+                    valueOrDefault<String>(
+                              widget.active,
+                              'true',
+                            ) ==
+                            'false'
+                        ? FlutterFlowTheme.of(context).secondaryText
+                        : FlutterFlowTheme.of(context).primary,
+                    FlutterFlowTheme.of(context).primary,
+                  ),
+                  letterSpacing: 0.0,
+                  fontWeight:
+                      FlutterFlowTheme.of(context).labelLarge.fontWeight,
+                  fontStyle:
+                      FlutterFlowTheme.of(context).labelLarge.fontStyle,
+                  lineHeight: 1.4,
+                ),
           ),
         ),
       ),

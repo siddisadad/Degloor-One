@@ -1,7 +1,17 @@
 
 
 
+include: package:flutter_lints/flutter.yaml
+
 analyzer:
   exclude:
     - lib/custom_code/**
     - lib/flutter_flow/custom_functions.dart
+
+linter:
+  rules:
+    - unnecessary_null_aware_assignments
+    - unnecessary_null_checks
+    - unnecessary_nullable_for_final_variable_declarations
+    - prefer_final_locals
+    - avoid_redundant_argument_values

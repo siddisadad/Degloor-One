@@ -12,8 +12,8 @@ class SocialButtonWidget extends StatefulWidget {
     String? icon,
     String? label,
     this.onTap,
-  })  : this.icon = icon ?? 'https://cdn.simpleicons.org/google/1a1a1a.svg',
-        this.label = label ?? 'Google';
+  })  : icon = icon ?? 'https://cdn.simpleicons.org/google/1a1a1a.svg',
+        label = label ?? 'Google';
 
   final String icon;
   final String label;
@@ -60,10 +60,8 @@ class _SocialButtonWidgetState extends State<SocialButtonWidget> {
         decoration: BoxDecoration(
           color: FlutterFlowTheme.of(context).secondaryBackground,
           borderRadius: BorderRadius.circular(12.0),
-          shape: BoxShape.rectangle,
           border: Border.all(
             color: FlutterFlowTheme.of(context).alternate,
-            width: 1.0,
           ),
         ),
         child: Padding(
@@ -71,13 +69,11 @@ class _SocialButtonWidgetState extends State<SocialButtonWidget> {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               SvgPicture.network(
                 widget.icon,
                 width: 20.0,
                 height: 20.0,
-                fit: BoxFit.contain,
               ),
               Text(
                 widget.label,

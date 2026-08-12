@@ -8,6 +8,7 @@ import 'package:degloor_one/app_state.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:degloor_one/core/error_handler.dart';
 import 'package:degloor_one/features/profile/add_address_model.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 export 'package:degloor_one/features/profile/add_address_model.dart';
@@ -31,7 +32,7 @@ class _AddAddressWidgetState extends State<AddAddressWidget> {
   void initState() {
     super.initState();
     _model = createModel(context, () => AddAddressModel());
-    _model.mapCenter = FFAppState.instance.userLocation ?? LatLng(18.5522, 77.5844);
+    _model.mapCenter = FFAppState.instance.userLocation ?? const LatLng(18.5522, 77.5844);
   }
 
   Future<void> _reverseGeocode(LatLng latLng) async {
@@ -39,7 +40,7 @@ class _AddAddressWidgetState extends State<AddAddressWidget> {
       return;
     }
     try {
-      List<Placemark> placemarks = await placemarkFromCoordinates(
+      final List<Placemark> placemarks = await placemarkFromCoordinates(
         latLng.latitude,
         latLng.longitude,
       );
@@ -58,7 +59,7 @@ class _AddAddressWidgetState extends State<AddAddressWidget> {
         });
       }
     } catch (e) {
-      print('Geocoding error: $e');
+      AppLogger.error('Geocoding error', e);
     }
   }
 
@@ -113,7 +114,6 @@ class _AddAddressWidgetState extends State<AddAddressWidget> {
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         appBar: AppBar(
           backgroundColor: FlutterFlowTheme.of(context).primary,
-          automaticallyImplyLeading: true,
           title: Text(
             'Add New Address',
             style: FlutterFlowTheme.of(context).headlineMedium.override(
@@ -122,16 +122,14 @@ class _AddAddressWidgetState extends State<AddAddressWidget> {
                   fontSize: 22.0,
                 ),
           ),
-          actions: [],
+          actions: const [],
           centerTitle: false,
           elevation: 2.0,
         ),
         body: SafeArea(
-          top: true,
           child: Form(
             key: _model.formKey,
             child: Column(
-              mainAxisSize: MainAxisSize.max,
               children: [
                 Expanded(
                   child: Stack(
@@ -142,18 +140,10 @@ class _AddAddressWidgetState extends State<AddAddressWidget> {
                           setState(() => _model.mapCenter = latLng);
                           _reverseGeocode(latLng);
                         },
-                        initialLocation: _model.mapCenter!,
+                        initialLocation: _model.mapCenter,
                         markerColor: GoogleMarkerColor.violet,
-                        mapType: MapType.normal,
-                        style: GoogleMapStyle.standard,
                         initialZoom: 15.0,
-                        allowInteraction: true,
-                        allowZoom: true,
                         showZoomControls: false,
-                        showLocation: true,
-                        showCompass: false,
-                        showMapToolbar: false,
-                        showTraffic: false,
                         centerMapOnMarkerTap: true,
                       ),
                       const Center(

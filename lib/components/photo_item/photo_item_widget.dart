@@ -9,7 +9,7 @@ class PhotoItemWidget extends StatefulWidget {
   const PhotoItemWidget({
     super.key,
     String? desc,
-  }) : this.desc = desc ??
+  }) : desc = desc ??
             'https://dimg.dreamflow.cloud/v1/image/interior%20of%20hardware%20store%20shelves';
 
   final String desc;
@@ -43,33 +43,29 @@ class _PhotoItemWidgetState extends State<PhotoItemWidget> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 16.0, 0.0),
-      child: Container(
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(8.0),
-          child: Container(
-            width: 140.0,
-            height: 100.0,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8.0),
-              shape: BoxShape.rectangle,
+      padding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 16.0, 0.0),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(8.0),
+        child: Container(
+          width: 140.0,
+          height: 100.0,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+          child: CachedNetworkImage(
+            fadeInDuration: const Duration(),
+            fadeOutDuration: const Duration(),
+            imageUrl: valueOrDefault<String>(
+              widget.desc,
+              'https://dimg.dreamflow.cloud/v1/image/interior%20of%20hardware%20store%20shelves',
             ),
-            child: CachedNetworkImage(
-              fadeInDuration: Duration(milliseconds: 0),
-              fadeOutDuration: Duration(milliseconds: 0),
-              imageUrl: valueOrDefault<String>(
-                widget.desc,
-                'https://dimg.dreamflow.cloud/v1/image/interior%20of%20hardware%20store%20shelves',
-              ),
-              fit: BoxFit.cover,
-              alignment: Alignment(0.0, 0.0),
-              errorWidget: (context, url, error) => Container(
-                color: FlutterFlowTheme.of(context).primaryBackground,
-                child: Icon(
-                  Icons.image_not_supported_rounded,
-                  color: FlutterFlowTheme.of(context).secondaryText,
-                  size: 24,
-                ),
+            fit: BoxFit.cover,
+            errorWidget: (context, url, error) => Container(
+              color: FlutterFlowTheme.of(context).primaryBackground,
+              child: Icon(
+                Icons.image_not_supported_rounded,
+                color: FlutterFlowTheme.of(context).secondaryText,
+                size: 24,
               ),
             ),
           ),

@@ -5,6 +5,7 @@ import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:degloor_one/core/error_handler.dart';
 import 'notifications_model.dart';
 export 'notifications_model.dart';
 
@@ -43,7 +44,7 @@ class _NotificationsWidgetState extends State<NotificationsWidget> {
             .order('created_at', ascending: false),
       );
     } catch (e) {
-      print('Error loading notifications: $e');
+      AppLogger.error('Error loading notifications', e);
     } finally {
       setState(() => _isLoading = false);
     }
@@ -57,7 +58,7 @@ class _NotificationsWidgetState extends State<NotificationsWidget> {
       );
       await _loadNotifications();
     } catch (e) {
-      print('Error marking as read: $e');
+      AppLogger.error('Error marking as read', e);
     }
   }
 
@@ -72,7 +73,7 @@ class _NotificationsWidgetState extends State<NotificationsWidget> {
       );
       await _loadNotifications();
     } catch (e) {
-      print('Error marking all as read: $e');
+      AppLogger.error('Error marking all as read', e);
     }
   }
 
@@ -120,7 +121,7 @@ class _NotificationsWidgetState extends State<NotificationsWidget> {
           actions: [
             if (_notifications.any((n) => !n.isRead))
               Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(0, 0, 12, 0),
+                padding: const EdgeInsetsDirectional.fromSTEB(0, 0, 12, 0),
                 child: TextButton(
                   onPressed: _markAllAsRead,
                   child: Text(
@@ -155,7 +156,7 @@ class _NotificationsWidgetState extends State<NotificationsWidget> {
                           size: 64,
                           color: FlutterFlowTheme.of(context).secondaryText,
                         ),
-                        SizedBox(height: 16),
+                        const SizedBox(height: 16),
                         Text(
                           'No notifications yet',
                           style: FlutterFlowTheme.of(context).titleMedium,
@@ -164,12 +165,12 @@ class _NotificationsWidgetState extends State<NotificationsWidget> {
                     ),
                   )
                 : ListView.builder(
-                    padding: EdgeInsets.symmetric(vertical: 8),
+                    padding: const EdgeInsets.symmetric(vertical: 8),
                     itemCount: _notifications.length,
                     itemBuilder: (context, index) {
                       final notification = _notifications[index];
                       return Padding(
-                        padding: EdgeInsetsDirectional.fromSTEB(16, 8, 16, 8),
+                        padding: const EdgeInsetsDirectional.fromSTEB(16, 8, 16, 8),
                         child: InkWell(
                           onTap: () {
                             if (!notification.isRead) {
@@ -190,7 +191,7 @@ class _NotificationsWidgetState extends State<NotificationsWidget> {
                               ),
                             ),
                             child: Padding(
-                              padding: EdgeInsets.all(16),
+                              padding: const EdgeInsets.all(16),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -212,14 +213,14 @@ class _NotificationsWidgetState extends State<NotificationsWidget> {
                                       ),
                                     ],
                                   ),
-                                  SizedBox(height: 8),
+                                  const SizedBox(height: 8),
                                   Text(
                                     notification.message,
                                     style: FlutterFlowTheme.of(context).bodyMedium,
                                   ),
                                   if (!notification.isRead)
                                     Padding(
-                                      padding: EdgeInsets.only(top: 8.0),
+                                      padding: const EdgeInsets.only(top: 8.0),
                                       child: Text(
                                         'Tap to mark as read',
                                         style: FlutterFlowTheme.of(context).bodySmall.override(

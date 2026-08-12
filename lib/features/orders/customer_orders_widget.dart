@@ -4,6 +4,7 @@ import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:degloor_one/core/error_handler.dart';
 import 'customer_orders_model.dart';
 export 'customer_orders_model.dart';
 
@@ -50,7 +51,7 @@ class _CustomerOrdersWidgetState extends State<CustomerOrdersWidget> {
 
       return orders;
     } catch (e) {
-      print('Error fetching orders: $e');
+      AppLogger.error('Error fetching orders', e);
       return [];
     }
   }
@@ -81,7 +82,6 @@ class _CustomerOrdersWidgetState extends State<CustomerOrdersWidget> {
       backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
       appBar: AppBar(
         backgroundColor: FlutterFlowTheme.of(context).primary,
-        automaticallyImplyLeading: true,
         title: Text(
           'My Orders',
           style: FlutterFlowTheme.of(context).headlineMedium.override(
@@ -90,7 +90,7 @@ class _CustomerOrdersWidgetState extends State<CustomerOrdersWidget> {
                 fontSize: 22.0,
               ),
         ),
-        actions: [],
+        actions: const [],
         centerTitle: false,
         elevation: 2.0,
       ),

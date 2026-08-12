@@ -1,3 +1,5 @@
+import 'package:degloor_one/core/error_handler.dart';
+
 import 'database.dart';
 
 Future<bool> getBusinessOpenStatus(String businessId) async {
@@ -29,7 +31,7 @@ Future<bool> getBusinessOpenStatus(String businessId) async {
       return currentTime >= openTime || currentTime <= closeTime;
     }
   } catch (e) {
-    print('Error checking business open status: $e');
+    AppLogger.error('Error checking business open status', e);
     return false;
   }
 }
@@ -48,7 +50,9 @@ Future<Map<String, bool>> getMultipleBusinessesOpenStatus(
     );
 
     final statusMap = <String, bool>{};
-    for (var id in businessIds) statusMap[id] = false;
+    for (var id in businessIds) {
+      statusMap[id] = false;
+    }
 
     final currentTime = now.hour * 60 + now.minute;
 
@@ -74,7 +78,7 @@ Future<Map<String, bool>> getMultipleBusinessesOpenStatus(
     }
     return statusMap;
   } catch (e) {
-    print('Error checking multiple business open statuses: $e');
+    AppLogger.error('Error checking multiple business open statuses', e);
     return {for (var id in businessIds) id: false};
   }
 }

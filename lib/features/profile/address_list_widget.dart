@@ -73,7 +73,6 @@ class _AddressListWidgetState extends State<AddressListWidget> {
       backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
       appBar: AppBar(
         backgroundColor: FlutterFlowTheme.of(context).primary,
-        automaticallyImplyLeading: true,
         title: Text(
           'Saved Addresses',
           style: FlutterFlowTheme.of(context).headlineMedium.override(
@@ -82,7 +81,7 @@ class _AddressListWidgetState extends State<AddressListWidget> {
                 fontSize: 22.0,
               ),
         ),
-        actions: [],
+        actions: const [],
         centerTitle: false,
         elevation: 2.0,
       ),
@@ -96,7 +95,6 @@ class _AddressListWidgetState extends State<AddressListWidget> {
         label: const Text('Add New', style: TextStyle(color: Colors.white)),
       ),
       body: SafeArea(
-        top: true,
         child: FutureBuilder<List<AddressesRow>>(
           future: _addressesFuture,
           builder: (context, snapshot) {

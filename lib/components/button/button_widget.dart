@@ -20,14 +20,14 @@ class ButtonWidget extends StatefulWidget {
     bool? loading,
     bool? disabled,
     this.onTap,
-  })  : this.iconPresent = iconPresent ?? false,
-        this.iconEndPresent = iconEndPresent ?? false,
-        this.content = content ?? 'Sign In',
-        this.variant = variant ?? 'primary',
-        this.size = size ?? 'small',
-        this.fullWidth = fullWidth ?? true,
-        this.loading = loading ?? false,
-        this.disabled = disabled ?? false;
+  })  : iconPresent = iconPresent ?? false,
+        iconEndPresent = iconEndPresent ?? false,
+        content = content ?? 'Sign In',
+        variant = variant ?? 'primary',
+        size = size ?? 'small',
+        fullWidth = fullWidth ?? true,
+        loading = loading ?? false,
+        disabled = disabled ?? false;
 
   final Widget? icon;
   final bool iconPresent;
@@ -197,7 +197,6 @@ class _ButtonWidgetState extends State<ButtonWidget> {
               4.0,
             )),
           ),
-          shape: BoxShape.rectangle,
           border: Border.all(
             color: valueOrDefault<Color>(
               valueOrDefault<String>(
@@ -222,7 +221,7 @@ class _ButtonWidgetState extends State<ButtonWidget> {
           ),
         ),
         child: Stack(
-          alignment: AlignmentDirectional(0.0, 0.0),
+          alignment: const AlignmentDirectional(0.0, 0.0),
           children: [
             Opacity(
               opacity: valueOrDefault<double>(
@@ -318,8 +317,6 @@ class _ButtonWidgetState extends State<ButtonWidget> {
                     )),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     if (valueOrDefault<bool>(
                       widget.iconPresent,
@@ -391,7 +388,7 @@ class _ButtonWidgetState extends State<ButtonWidget> {
                       false,
                     ))
                       widget.iconEnd!,
-                  ].divide(SizedBox(width: 8.0)),
+                  ].divide(const SizedBox(width: 8.0)),
                 ),
               ),
             ),
@@ -405,7 +402,6 @@ class _ButtonWidgetState extends State<ButtonWidget> {
               false,
             ))
               CircularPercentIndicator(
-                percent: 0.0,
                 radius: 7.0,
                 lineWidth: 2.0,
                 animation: true,

@@ -98,11 +98,13 @@ class _RequestServiceSheetWidgetState extends State<RequestServiceSheetWidget> {
                   );
 
                   if (datePickedDate != null) {
+                    if (!context.mounted) return;
                     final datePickedTime = await showTimePicker(
                       context: context,
                       initialTime: TimeOfDay.fromDateTime(DateTime.now()),
                     );
                     if (datePickedTime != null) {
+                      if (!context.mounted) return;
                       setState(() {
                         _model.datePicked = DateTime(
                           datePickedDate.year,
@@ -156,6 +158,7 @@ class _RequestServiceSheetWidgetState extends State<RequestServiceSheetWidget> {
                       'status': 'pending',
                     });
 
+                    if (!context.mounted) return;
                     Navigator.pop(context);
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Service request sent successfully!')),

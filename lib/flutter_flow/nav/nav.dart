@@ -75,139 +75,138 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
       debugLogDiagnostics: true,
       refreshListenable: appStateNotifier,
       navigatorKey: appNavigatorKey,
-      errorBuilder: (context, state) => InitialRedirectWidget(),
+      errorBuilder: (context, state) => const InitialRedirectWidget(),
       routes: [
         FFRoute(
           name: '_initialize',
           path: '/',
-          builder: (context, _) => InitialRedirectWidget(),
+          builder: (context, _) => const InitialRedirectWidget(),
         ),
         FFRoute(
           name: SplashScreenWidget.routeName,
           path: SplashScreenWidget.routePath,
-          builder: (context, params) => SplashScreenWidget(),
+          builder: (context, params) => const SplashScreenWidget(),
         ),
         FFRoute(
           name: AuthenticationWidget.routeName,
           path: AuthenticationWidget.routePath,
-          builder: (context, params) => AuthenticationWidget(),
+          builder: (context, params) => const AuthenticationWidget(),
         ),
         FFRoute(
           name: PhoneAuthWidget.routeName,
           path: PhoneAuthWidget.routePath,
-          builder: (context, params) => PhoneAuthWidget(),
+          builder: (context, params) => const PhoneAuthWidget(),
         ),
         FFRoute(
           name: OtpVerificationWidget.routeName,
           path: OtpVerificationWidget.routePath,
           builder: (context, params) => OtpVerificationWidget(
-            phone: params.getParam<String>('phone', ParamType.String)!,
-            role: params.getParam<String>('role', ParamType.String)!,
+            phone: params.getParam<String>('phone', ParamType.string)!,
           ),
         ),
         FFRoute(
           name: InitialRedirectWidget.routeName,
           path: InitialRedirectWidget.routePath,
-          builder: (context, params) => InitialRedirectWidget(),
+          builder: (context, params) => const InitialRedirectWidget(),
         ),
         FFRoute(
           name: CustomerHomeWidget.routeName,
           path: CustomerHomeWidget.routePath,
-          builder: (context, params) => CustomerHomeWidget(),
+          builder: (context, params) => const CustomerHomeWidget(),
         ),
         FFRoute(
           name: LocationRadiusSelectorWidget.routeName,
           path: LocationRadiusSelectorWidget.routePath,
-          builder: (context, params) => LocationRadiusSelectorWidget(),
+          builder: (context, params) => const LocationRadiusSelectorWidget(),
         ),
         FFRoute(
           name: SearchResultsWidget.routeName,
           path: SearchResultsWidget.routePath,
           builder: (context, params) => SearchResultsWidget(
-            searchTerm: params.getParam<String>('searchTerm', ParamType.String),
-            categoryId: params.getParam<String>('categoryId', ParamType.String),
+            searchTerm: params.getParam<String>('searchTerm', ParamType.string),
+            categoryId: params.getParam<String>('categoryId', ParamType.string),
             openNow: params.getParam<bool>('openNow', ParamType.bool),
           ),
         ),
         FFRoute(
           name: CategoriesWidget.routeName,
           path: CategoriesWidget.routePath,
-          builder: (context, params) => CategoriesWidget(),
+          builder: (context, params) => const CategoriesWidget(),
         ),
         FFRoute(
           name: BusinessProfileWidget.routeName,
           path: BusinessProfileWidget.routePath,
           builder: (context, params) => BusinessProfileWidget(
-            businessId: params.getParam<String>('businessId', ParamType.String),
+            businessId: params.getParam<String>('businessId', ParamType.string),
           ),
         ),
         FFRoute(
           name: BusinessCatalogueWidget.routeName,
           path: BusinessCatalogueWidget.routePath,
           builder: (context, params) => BusinessCatalogueWidget(
-            businessId: params.getParam<String>('businessId', ParamType.String)!,
+            businessId: params.getParam<String>('businessId', ParamType.string)!,
           ),
         ),
         FFRoute(
           name: BusinessRegistrationWidget.routeName,
           path: BusinessRegistrationWidget.routePath,
-          builder: (context, params) => BusinessRegistrationWidget(),
+          builder: (context, params) => const BusinessRegistrationWidget(),
           requireAuth: true,
         ),
         FFRoute(
           name: BusinessDashboardWidget.routeName,
           path: BusinessDashboardWidget.routePath,
-          builder: (context, params) => BusinessDashboardWidget(),
+          builder: (context, params) => const BusinessDashboardWidget(),
           requireAuth: true,
         ),
         FFRoute(
           name: BusinessAnalyticsWidget.routeName,
           path: BusinessAnalyticsWidget.routePath,
           builder: (context, params) => BusinessAnalyticsWidget(
-            businessId: params.getParam<String>('businessId', ParamType.String)!,
+            businessId: params.getParam<String>('businessId', ParamType.string)!,
           ),
           requireAuth: true,
         ),
         FFRoute(
           name: AdminControlPanelWidget.routeName,
           path: AdminControlPanelWidget.routePath,
-          builder: (context, params) => AdminControlPanelWidget(),
+          builder: (context, params) => const AdminControlPanelWidget(),
           requireAuth: true,
         ),
         FFRoute(
           name: UserProfileReportsWidget.routeName,
           path: UserProfileReportsWidget.routePath,
-          builder: (context, params) => UserProfileReportsWidget(),
+          builder: (context, params) => const UserProfileReportsWidget(),
           requireAuth: true,
         ),
         FFRoute(
           name: CartWidget.routeName,
           path: CartWidget.routePath,
-          builder: (context, params) => CartWidget(),
+          builder: (context, params) => const CartWidget(),
           requireAuth: true,
         ),
         FFRoute(
           name: ManageCatalogueWidget.routeName,
           path: ManageCatalogueWidget.routePath,
-          builder: (context, params) => ManageCatalogueWidget(),
+          builder: (context, params) => const ManageCatalogueWidget(),
           requireAuth: true,
         ),
         FFRoute(
           name: ManageOrdersWidget.routeName,
           path: ManageOrdersWidget.routePath,
-          builder: (context, params) => ManageOrdersWidget(),
+          builder: (context, params) => const ManageOrdersWidget(),
           requireAuth: true,
         ),
         FFRoute(
           name: CustomerOrdersWidget.routeName,
           path: CustomerOrdersWidget.routePath,
-          builder: (context, params) => CustomerOrdersWidget(),
+          builder: (context, params) => const CustomerOrdersWidget(),
           requireAuth: true,
         ),
         FFRoute(
           name: ManageHoursWidget.routeName,
           path: ManageHoursWidget.routePath,
-          builder: (context, params) => ManageHoursWidget(),
+          builder: (context, params) => const ManageHoursWidget(),
           requireAuth: true,
         ),
         /* Commented out Phase 2+ routes
@@ -220,73 +219,53 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
           name: NotificationsWidget.routeName,
           path: NotificationsWidget.routePath,
-          builder: (context, params) => NotificationsWidget(),
-        ),
-        /* Commented out Phase 2+ routes
-        FFRoute(
-          name: ServicesWidget.routeName,
-          path: ServicesWidget.routePath,
-          builder: (context, params) => ServicesWidget(),
-        ),
-        FFRoute(
-          name: ServiceProviderProfileWidget.routeName,
-          path: ServiceProviderProfileWidget.routePath,
-          builder: (context, params) => ServiceProviderProfileWidget(
-            providerId: params.getParam<String>('providerId', ParamType.String)!,
-          ),
-        ),
-        FFRoute(
-          name: ManageServiceRequestsWidget.routeName,
-          path: ManageServiceRequestsWidget.routePath,
-          builder: (context, params) => ManageServiceRequestsWidget(),
+          builder: (context, params) => const NotificationsWidget(),
         ),
         FFRoute(
           name: AddressListWidget.routeName,
           path: AddressListWidget.routePath,
-          builder: (context, params) => AddressListWidget(),
+          builder: (context, params) => const AddressListWidget(),
+          requireAuth: true,
         ),
         FFRoute(
           name: AddAddressWidget.routeName,
           path: AddAddressWidget.routePath,
-          builder: (context, params) => AddAddressWidget(),
-        ),
-        FFRoute(
-          name: ServiceProviderRegistrationWidget.routeName,
-          path: ServiceProviderRegistrationWidget.routePath,
-          builder: (context, params) => ServiceProviderRegistrationWidget(),
+          builder: (context, params) => const AddAddressWidget(),
+          requireAuth: true,
         ),
         FFRoute(
           name: OrderTrackingWidget.routeName,
           path: OrderTrackingWidget.routePath,
           builder: (context, params) => OrderTrackingWidget(
-            orderId: params.getParam<String>('orderId', ParamType.String)!,
+            orderId: params.getParam<String>('orderId', ParamType.string)!,
           ),
+          requireAuth: true,
         ),
         FFRoute(
           name: OrderSuccessWidget.routeName,
           path: OrderSuccessWidget.routePath,
           builder: (context, params) => OrderSuccessWidget(
-            orderId: params.getParam<String>('orderId', ParamType.String),
+            orderId: params.getParam<String>('orderId', ParamType.string),
           ),
+          requireAuth: true,
         ),
-        */
         FFRoute(
           name: EditBusinessProfileWidget.routeName,
           path: EditBusinessProfileWidget.routePath,
           builder: (context, params) => EditBusinessProfileWidget(
-            business: params.getParam<BusinessesRow>('business', ParamType.SupabaseRow)!,
+            business: params.getParam<BusinessesRow>('business', ParamType.supabaseRow)!,
           ),
           requireAuth: true,
         ),
         FFRoute(
           name: JobsMarketplaceWidget.routeName,
           path: JobsMarketplaceWidget.routePath,
-          builder: (context, params) => JobsMarketplaceWidget(),
+          builder: (context, params) => const JobsMarketplaceWidget(),
         ),
         FFRoute(
           name: ManageJobsWidget.routeName,
           path: ManageJobsWidget.routePath,
-          builder: (context, params) => ManageJobsWidget(),
+          builder: (context, params) => const ManageJobsWidget(),
           requireAuth: true,
         )
       ].map((r) => r.toRoute(appStateNotifier)).toList(),
@@ -525,7 +504,7 @@ class TransitionInfo {
   final Duration duration;
   final Alignment? alignment;
 
-  static TransitionInfo appDefault() => TransitionInfo(hasTransition: false);
+  static TransitionInfo appDefault() => const TransitionInfo(hasTransition: false);
 }
 
 class RootPageContext {

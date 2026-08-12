@@ -40,7 +40,7 @@ String dateTimeFormat(String format, DateTime? dateTime, {String? locale}) {
 }
 
 Future launchURL(String url) async {
-  var uri = Uri.parse(url);
+  final uri = Uri.parse(url);
   try {
     await launchUrl(uri);
   } catch (e) {
@@ -160,25 +160,20 @@ T? castToType<T>(dynamic value) {
   if (value == null) {
     return null;
   }
-  switch (T) {
-    case double:
-      if (value is num) {
-        return value.toDouble() as T;
-      }
-      if (value is String) {
-        return double.tryParse(value) as T?;
-      }
-      break;
-    case int:
-      if (value is num) {
-        return value.toInt() as T;
-      }
-      if (value is String) {
-        return int.tryParse(value) as T?;
-      }
-      break;
-    default:
-      break;
+  if (T == double) {
+    if (value is num) {
+      return value.toDouble() as T;
+    }
+    if (value is String) {
+      return double.tryParse(value) as T?;
+    }
+  } else if (T == int) {
+    if (value is num) {
+      return value.toInt() as T;
+    }
+    if (value is String) {
+      return int.tryParse(value) as T?;
+    }
   }
   return value as T;
 }
@@ -244,7 +239,7 @@ bool responsiveVisibility({
 const kTextValidatorUsernameRegex = r'^[a-zA-Z][a-zA-Z0-9_-]{2,16}$';
 // https://stackoverflow.com/a/201378
 const kTextValidatorEmailRegex =
-    "^(?:[a-zA-Z0-9!#\$%&\'*+/=?^_`{|}~-]+(?:\\.[a-zA-Z0-9!#\$%&\'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?|\\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-zA-Z0-9-]*[a-zA-Z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])\$";
+    "^(?:[a-zA-Z0-9!#\$%&'*+/=?^_`{|}~-]+(?:\\.[a-zA-Z0-9!#\$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?|\\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-zA-Z0-9-]*[a-zA-Z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])\$";
 const kTextValidatorWebsiteRegex =
     r'(https?:\/\/)?(www\.)[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,10}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)|(https?:\/\/)?(www\.)?(?!ww)[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,10}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)';
 
@@ -286,12 +281,12 @@ void showSnackbar(
       content: Row(
         children: [
           if (loading)
-            Padding(
+            const Padding(
               padding: EdgeInsetsDirectional.only(end: 10.0),
-              child: Container(
+              child: SizedBox(
                 height: 20,
                 width: 20,
-                child: const CircularProgressIndicator(
+                child: CircularProgressIndicator(
                   color: Colors.white,
                 ),
               ),
@@ -438,8 +433,8 @@ double computeGradientAlignmentY(double evaluatedAngle) {
 
 extension ListUniqueExt<T> on Iterable<T> {
   List<T> unique(dynamic Function(T) getKey) {
-    var distinctSet = <dynamic>{};
-    var distinctList = <T>[];
+    final distinctSet = <dynamic>{};
+    final distinctList = <T>[];
     for (var item in this) {
       if (distinctSet.add(getKey(item))) {
         distinctList.add(item);

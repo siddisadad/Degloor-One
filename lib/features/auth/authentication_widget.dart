@@ -56,13 +56,12 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
                 FlutterFlowTheme.of(context).primaryBackground
               ],
               stops: const [0.0, 0.4],
-              begin: AlignmentDirectional(0.0, -1.0),
-              end: AlignmentDirectional(0, 1.0),
+              begin: const AlignmentDirectional(0.0, -1.0),
+              end: const AlignmentDirectional(0, 1.0),
             ),
           ),
           child: SingleChildScrollView(
             child: Column(
-              mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const SizedBox(height: 80),
@@ -131,34 +130,15 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          // Custom Tab Selector
-                          Container(
-                            height: 50,
-                            decoration: BoxDecoration(
-                              color: FlutterFlowTheme.of(context).primaryBackground,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Row(
-                              children: [
-                                _buildTab('Customer', !_model.isBusinessOwner, () {
-                                  setState(() => _model.isBusinessOwner = false);
-                                }),
-                                _buildTab('Owner', _model.isBusinessOwner, () {
-                                  setState(() => _model.isBusinessOwner = true);
-                                }),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 32),
                           // Inputs
                           wrapWithModel(
                             model: _model.textFieldModel1,
                             updateCallback: () => setState(() {}),
-                            child: TextFieldWidget(
+                            child: const TextFieldWidget(
                               label: 'Email or Phone',
                               labelPresent: true,
                               hint: 'Enter your credentials',
-                              leadingIcon: const Icon(Icons.person_outline_rounded),
+                              leadingIcon: Icon(Icons.person_outline_rounded),
                               leadingIconPresent: true,
                               variant: 'outlined',
                             ),
@@ -167,11 +147,11 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
                           wrapWithModel(
                             model: _model.textFieldModel2,
                             updateCallback: () => setState(() {}),
-                            child: TextFieldWidget(
+                            child: const TextFieldWidget(
                               label: 'Password',
                               labelPresent: true,
                               hint: 'Enter your password',
-                              leadingIcon: const Icon(Icons.lock_outline_rounded),
+                              leadingIcon: Icon(Icons.lock_outline_rounded),
                               leadingIconPresent: true,
                               trailingIconPresent: true,
                               variant: 'outlined',
@@ -258,13 +238,10 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
                                       if (_isLoading) return;
                                       setState(() => _isLoading = true);
                                       try {
-                                        final role = _model.isBusinessOwner
-                                            ? 'business_owner'
-                                            : 'customer';
                                         final user = await authManager
-                                            .signInWithGoogleWithRole(
-                                                context, role);
-                                        if (user != null && mounted) {
+                                            .signInWithGoogle(context);
+                                        if (!mounted) return;
+                                        if (user != null) {
                                           context.goNamed('_initialize');
                                         }
                                       } finally {
@@ -353,28 +330,6 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
     );
   }
 
-  Widget _buildTab(String label, bool isSelected, VoidCallback onTap) {
-    return Expanded(
-      child: InkWell(
-        onTap: onTap,
-        child: Container(
-          decoration: BoxDecoration(
-            color: isSelected ? FlutterFlowTheme.of(context).primary : Colors.transparent,
-            borderRadius: BorderRadius.circular(10),
-          ),
-          alignment: Alignment.center,
-          child: Text(
-            label,
-            style: TextStyle(
-              color: isSelected ? Colors.white : FlutterFlowTheme.of(context).secondaryText,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildLang(String label, String code) {
     final isSelected = FFAppState.instance.locale == code;
     return InkWell(
@@ -405,7 +360,8 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
     setState(() => _isLoading = true);
     try {
       final user = await authManager.signInWithEmail(context, email, password);
-      if (mounted && user != null) {
+      if (!mounted) return;
+      if (user != null) {
         context.goNamed('_initialize');
       }
     } finally {
@@ -420,12 +376,12 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Enter email and password first')));
       return;
     }
-    final role = _model.isBusinessOwner ? 'business_owner' : 'customer';
     setState(() => _isLoading = true);
     try {
-      final user = await authManager.createAccountWithEmailWithRole(
-          context, email, password, role);
-      if (mounted && user != null) {
+      final user = await authManager.createAccountWithEmail(
+          context, email, password);
+      if (!mounted) return;
+      if (user != null) {
         context.goNamed('_initialize');
       }
     } finally {

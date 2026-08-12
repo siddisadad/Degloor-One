@@ -24,6 +24,7 @@ class CartService {
       );
 
       if (existingCarts.isNotEmpty && existingCarts.first.businessId != businessId) {
+        if (!context.mounted) return;
         final confirm = await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
@@ -78,10 +79,12 @@ class CartService {
         });
       }
 
+      if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Added to cart'), backgroundColor: Colors.green),
       );
     } catch (e) {
+      if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error adding to cart: $e'), backgroundColor: Colors.red),
       );

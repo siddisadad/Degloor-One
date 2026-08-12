@@ -87,7 +87,6 @@ class _ServiceProviderRegistrationWidgetState
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         appBar: AppBar(
           backgroundColor: FlutterFlowTheme.of(context).primary,
-          automaticallyImplyLeading: true,
           title: Text(
             'Join as a Provider',
             style: FlutterFlowTheme.of(context).headlineMedium.override(
@@ -96,19 +95,17 @@ class _ServiceProviderRegistrationWidgetState
                   fontSize: 22.0,
                 ),
           ),
-          actions: [],
+          actions: const [],
           centerTitle: false,
           elevation: 2.0,
         ),
         body: SafeArea(
-          top: true,
           child: SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.all(24.0),
               child: Form(
                 key: _model.formKey,
                 child: Column(
-                  mainAxisSize: MainAxisSize.max,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Text(

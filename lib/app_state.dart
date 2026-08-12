@@ -26,7 +26,7 @@ class FFAppState extends ChangeNotifier {
     _prefs = await SharedPreferences.getInstance();
     _discoveryRadius = _prefs.getDouble('ff_discoveryRadius') ?? 10.0;
     if (_prefs.containsKey('ff_userLocation')) {
-      _userLocation = latLngFromString(_prefs.getString('ff_userLocation')!);
+      _userLocation = latLngFromString(_prefs.getString('ff_userLocation'));
     }
     _locale = _prefs.getString('ff_locale') ?? 'en';
   }

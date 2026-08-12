@@ -6,6 +6,7 @@ import 'package:degloor_one/auth/auth_manager.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:degloor_one/core/error_handler.dart';
 import 'email_auth.dart';
 import 'phone_auth.dart';
 
@@ -24,11 +25,12 @@ class SupabaseAuthManager extends AuthManager
   Future deleteUser(BuildContext context) async {
     try {
       if (!loggedIn) {
-        print('Error: delete user attempted with no logged in user!');
+        AppLogger.error('delete user attempted with no logged in user!');
         return;
       }
       await currentUser?.delete();
     } on AuthException catch (e) {
+      if (!context.mounted) return;
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: ${e.message}')),
@@ -43,19 +45,21 @@ class SupabaseAuthManager extends AuthManager
   }) async {
     try {
       if (!loggedIn) {
-        print('Error: update email attempted with no logged in user!');
+        AppLogger.error('update email attempted with no logged in user!');
         return;
       }
       await currentUser?.updateEmail(email);
     } on AuthException catch (e) {
+      if (!context.mounted) return;
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: ${e.message}')),
       );
       return;
     }
+    if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Email change confirmation email sent')),
+      const SnackBar(content: Text('Email change confirmation email sent')),
     );
   }
 
@@ -65,19 +69,21 @@ class SupabaseAuthManager extends AuthManager
   }) async {
     try {
       if (!loggedIn) {
-        print('Error: update password attempted with no logged in user!');
+        AppLogger.error('update password attempted with no logged in user!');
         return;
       }
       await currentUser?.updatePassword(newPassword);
     } on AuthException catch (e) {
+      if (!context.mounted) return;
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: ${e.message}')),
       );
       return;
     }
+    if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Password updated successfully')),
+      const SnackBar(content: Text('Password updated successfully')),
     );
   }
 
@@ -91,14 +97,16 @@ class SupabaseAuthManager extends AuthManager
       await SupaFlow.client.auth
           .resetPasswordForEmail(email, redirectTo: redirectTo);
     } on AuthException catch (e) {
+      if (!context.mounted) return;
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: ${e.message}')),
       );
       return null;
     }
+    if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Password reset email sent')),
+      const SnackBar(content: Text('Password reset email sent')),
     );
   }
 
@@ -113,18 +121,6 @@ class SupabaseAuthManager extends AuthManager
         () => emailSignInFunc(email, password),
       );
 
-  Future<BaseAuthUser?> signInWithEmailWithRole(
-    BuildContext context,
-    String email,
-    String password,
-    String role,
-  ) =>
-      _signInOrCreateAccount(
-        context,
-        () => emailSignInFunc(email, password),
-        role: role,
-      );
-
   @override
   Future<BaseAuthUser?> createAccountWithEmail(
     BuildContext context,
@@ -134,18 +130,6 @@ class SupabaseAuthManager extends AuthManager
       _signInOrCreateAccount(
         context,
         () => emailCreateAccountFunc(email, password),
-      );
-
-  Future<BaseAuthUser?> createAccountWithEmailWithRole(
-    BuildContext context,
-    String email,
-    String password,
-    String role,
-  ) =>
-      _signInOrCreateAccount(
-        context,
-        () => emailCreateAccountFunc(email, password),
-        role: role,
       );
 
   @override
@@ -163,9 +147,10 @@ class SupabaseAuthManager extends AuthManager
       final idToken = googleAuth.idToken;
 
       if (idToken == null) {
-        throw AuthException('No ID Token found.');
+        throw const AuthException('No ID Token found.');
       }
 
+      if (!context.mounted) return null;
       return _signInOrCreateAccount(
         context,
         () => SupaFlow.client.auth
@@ -178,59 +163,14 @@ class SupabaseAuthManager extends AuthManager
             .then((res) => res.user),
       );
     } on AuthException catch (e) {
+      if (!context.mounted) return null;
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: ${e.message}')),
       );
       return null;
     } catch (e) {
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
-      return null;
-    }
-  }
-
-  Future<BaseAuthUser?> signInWithGoogleWithRole(
-    BuildContext context,
-    String role,
-  ) async {
-    try {
-      final googleSignIn = GoogleSignIn(
-        clientId: kIsWeb ? null : null, // Set your Web Client ID here if not using meta tag
-      );
-      final googleUser = await googleSignIn.signIn();
-      if (googleUser == null) {
-        return null;
-      }
-      final googleAuth = await googleUser.authentication;
-      final accessToken = googleAuth.accessToken;
-      final idToken = googleAuth.idToken;
-
-      if (idToken == null) {
-        throw AuthException('No ID Token found.');
-      }
-
-      return _signInOrCreateAccount(
-        context,
-        () => SupaFlow.client.auth
-            // ignore: experimental_member_use
-            .signInWithIdToken(
-              provider: OAuthProvider.google,
-              idToken: idToken,
-              accessToken: accessToken,
-            )
-            .then((res) => res.user),
-        role: role,
-      );
-    } on AuthException catch (e) {
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${e.message}')),
-      );
-      return null;
-    } catch (e) {
+      if (!context.mounted) return null;
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: $e')),
@@ -247,11 +187,14 @@ class SupabaseAuthManager extends AuthManager
   }) async {
     try {
       await phoneSignInFunc(phoneNumber);
+      if (!context.mounted) return;
       onCodeSent(context);
-    } on AuthException catch (e) {
+    } catch (e) {
+      AppLogger.error('beginPhoneAuth error', e);
+      if (!context.mounted) return;
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${e.message}')),
+        SnackBar(content: Text('Error: $e')),
       );
     }
   }
@@ -272,7 +215,6 @@ class SupabaseAuthManager extends AuthManager
     required BuildContext context,
     required String phoneNumber,
     required String smsCode,
-    String? role,
   }) =>
       _signInOrCreateAccount(
         context,
@@ -280,28 +222,27 @@ class SupabaseAuthManager extends AuthManager
           phoneNumber: phoneNumber,
           smsCode: smsCode,
         ),
-        role: role,
       );
 
   /// Tries to sign in or create an account using Supabase Auth.
   /// Returns the User object if sign in was successful.
   Future<BaseAuthUser?> _signInOrCreateAccount(
     BuildContext context,
-    Future<User?> Function() signInFunc, {
-    String? role,
-  }) async {
+    Future<User?> Function() signInFunc,
+  ) async {
     try {
       final user = await signInFunc();
       if (user == null) return null;
 
       // Ensure user record exists in the public.users table and get their role
+      // Added timeout to prevent infinite hang on slow networks
       final rows = await UsersTable().queryRows(
         queryFn: (q) => q.eq('id', user.id),
-      );
+      ).timeout(const Duration(seconds: 10));
 
-      String? actualRole = role;
+      String? actualRole;
       if (rows.isEmpty) {
-        actualRole ??= 'customer';
+        actualRole = 'customer';
         await UsersTable().insert({
           'id': user.id,
           'email': user.email,
@@ -312,14 +253,6 @@ class SupabaseAuthManager extends AuthManager
         });
       } else {
         actualRole = rows.first.role;
-        // If the user exists but has no role, and we provided one, update it.
-        if (actualRole == null && role != null) {
-          actualRole = role;
-          await UsersTable().update(
-            data: {'role': actualRole},
-            matchingRows: (q) => q.eq('id', user.id),
-          );
-        }
       }
 
       final authUser = DegloorOneSupabaseUser(user, actualRole);
@@ -334,17 +267,19 @@ class SupabaseAuthManager extends AuthManager
       }
       return authUser;
     } on AuthException catch (e) {
-      print('Auth error: ${e.message}');
+      AppLogger.error('Auth error', e);
       final errorMsg = e.message.contains('User already registered')
           ? 'Error: The email is already in use by a different account'
           : 'Error: ${e.message}';
+      if (!context.mounted) return null;
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(errorMsg)),
       );
       return null;
     } catch (e) {
-      print('Unexpected error during auth: $e');
+      AppLogger.error('Unexpected error during auth', e);
+      if (!context.mounted) return null;
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Error: An unexpected error occurred. Please try again.')),

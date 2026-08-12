@@ -10,7 +10,7 @@ class JobApplicationsTable extends SupabaseTable<JobApplicationsRow> {
 }
 
 class JobApplicationsRow extends SupabaseDataRow {
-  JobApplicationsRow(Map<String, dynamic> data) : super(data);
+  JobApplicationsRow(super.data);
 
   @override
   SupabaseTable get table => JobApplicationsTable();

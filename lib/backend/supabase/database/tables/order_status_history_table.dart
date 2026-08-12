@@ -10,7 +10,7 @@ class OrderStatusHistoryTable extends SupabaseTable<OrderStatusHistoryRow> {
 }
 
 class OrderStatusHistoryRow extends SupabaseDataRow {
-  OrderStatusHistoryRow(Map<String, dynamic> data) : super(data);
+  OrderStatusHistoryRow(super.data);
 
   @override
   SupabaseTable get table => OrderStatusHistoryTable();

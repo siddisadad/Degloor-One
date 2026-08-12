@@ -7,6 +7,7 @@ import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:degloor_one/core/error_handler.dart';
 import 'manage_catalogue_model.dart';
 export 'manage_catalogue_model.dart';
 
@@ -62,7 +63,7 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
         _businessCategories = categories;
       });
     } catch (e) {
-      print('Error fetching product categories: $e');
+      AppLogger.error('Error fetching product categories', e);
     }
   }
 
@@ -86,7 +87,7 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
         setState(() => _loading = false);
       }
     } catch (e) {
-      print('Error fetching business: $e');
+      AppLogger.error('Error fetching business', e);
       setState(() => _loading = false);
     }
   }
@@ -103,7 +104,7 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
         _loading = false;
       });
     } catch (e) {
-      print('Error fetching products: $e');
+      AppLogger.error('Error fetching products', e);
       setState(() => _loading = false);
     }
   }
@@ -142,7 +143,7 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
 
     if (name.isEmpty || priceStr.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please fill all required fields')),
+        const SnackBar(content: Text('Please fill all required fields')),
       );
       return;
     }
@@ -150,7 +151,7 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
     final price = double.tryParse(priceStr);
     if (price == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Invalid price format')),
+        const SnackBar(content: Text('Invalid price format')),
       );
       return;
     }
@@ -202,7 +203,7 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
       await _fetchBusinessCategories();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Product added successfully'),
+          content: const Text('Product added successfully'),
           backgroundColor: FlutterFlowTheme.of(context).success,
         ),
       );
@@ -225,7 +226,7 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
       );
       await _fetchProducts();
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Product deleted')),
+        const SnackBar(content: Text('Product deleted')),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -414,7 +415,6 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         appBar: AppBar(
           backgroundColor: FlutterFlowTheme.of(context).primary,
-          automaticallyImplyLeading: true,
           title: Text(
             'Manage Catalogue',
             style: FlutterFlowTheme.of(context).headlineMedium.override(
@@ -423,21 +423,19 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
                   fontSize: 22.0,
                 ),
           ),
-          actions: [],
+          actions: const [],
           centerTitle: false,
           elevation: 2.0,
         ),
         body: SafeArea(
-          top: true,
           child: Padding(
-            padding: EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(16.0),
             child: Column(
-              mainAxisSize: MainAxisSize.max,
               children: [
                 if (_business == null && !_loading)
                   Center(
                     child: Padding(
-                      padding: EdgeInsets.all(24.0),
+                      padding: const EdgeInsets.all(24.0),
                       child: Text(
                         'No business found for this account. Please register your business first.',
                         textAlign: TextAlign.center,
@@ -459,7 +457,7 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
                             borderRadius: BorderRadius.circular(12.0),
                           ),
                           child: Padding(
-                            padding: EdgeInsets.all(16.0),
+                            padding: const EdgeInsets.all(16.0),
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -482,7 +480,7 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
                                           border: Border.all(color: FlutterFlowTheme.of(context).alternate),
                                         ),
                                         child: _model.isUploading
-                                            ? Center(child: CircularProgressIndicator())
+                                            ? const Center(child: CircularProgressIndicator())
                                             : _model.uploadedImageUrl != null
                                                 ? ClipRRect(
                                                     borderRadius: BorderRadius.circular(8),
@@ -496,22 +494,18 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
                                       child: TextFormField(
                                         controller: _model.productNameTextController,
                                         focusNode: _model.productNameFocusNode,
-                                        autofocus: false,
-                                        obscureText: false,
                                         decoration: InputDecoration(
                                           labelText: 'Product Name',
                                           labelStyle: FlutterFlowTheme.of(context).labelMedium,
                                           enabledBorder: OutlineInputBorder(
                                             borderSide: BorderSide(
                                               color: FlutterFlowTheme.of(context).alternate,
-                                              width: 1.0,
                                             ),
                                             borderRadius: BorderRadius.circular(8.0),
                                           ),
                                           focusedBorder: OutlineInputBorder(
                                             borderSide: BorderSide(
                                               color: FlutterFlowTheme.of(context).primary,
-                                              width: 1.0,
                                             ),
                                             borderRadius: BorderRadius.circular(8.0),
                                           ),
@@ -528,22 +522,18 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
                                       child: TextFormField(
                                         controller: _model.productPriceTextController,
                                         focusNode: _model.productPriceFocusNode,
-                                        autofocus: false,
-                                        obscureText: false,
                                         decoration: InputDecoration(
                                           labelText: 'Price (₹)',
                                           labelStyle: FlutterFlowTheme.of(context).labelMedium,
                                           enabledBorder: OutlineInputBorder(
                                             borderSide: BorderSide(
                                               color: FlutterFlowTheme.of(context).alternate,
-                                              width: 1.0,
                                             ),
                                             borderRadius: BorderRadius.circular(8.0),
                                           ),
                                           focusedBorder: OutlineInputBorder(
                                             borderSide: BorderSide(
                                               color: FlutterFlowTheme.of(context).primary,
-                                              width: 1.0,
                                             ),
                                             borderRadius: BorderRadius.circular(8.0),
                                           ),
@@ -552,7 +542,7 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
                                         keyboardType: TextInputType.number,
                                       ),
                                     ),
-                                    SizedBox(width: 12.0),
+                                    const SizedBox(width: 12.0),
                                     Expanded(
                                       child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -560,22 +550,18 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
                                           TextFormField(
                                             controller: _model.productCategoryTextController,
                                             focusNode: _model.productCategoryFocusNode,
-                                            autofocus: false,
-                                            obscureText: false,
                                             decoration: InputDecoration(
                                               labelText: 'Category',
                                               labelStyle: FlutterFlowTheme.of(context).labelMedium,
                                               enabledBorder: OutlineInputBorder(
                                                 borderSide: BorderSide(
                                                   color: FlutterFlowTheme.of(context).alternate,
-                                                  width: 1.0,
                                                 ),
                                                 borderRadius: BorderRadius.circular(8.0),
                                               ),
                                               focusedBorder: OutlineInputBorder(
                                                 borderSide: BorderSide(
                                                   color: FlutterFlowTheme.of(context).primary,
-                                                  width: 1.0,
                                                 ),
                                                 borderRadius: BorderRadius.circular(8.0),
                                               ),
@@ -597,7 +583,7 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
                                                         });
                                                       },
                                                       child: Container(
-                                                        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                                         decoration: BoxDecoration(
                                                           color: FlutterFlowTheme.of(context).primaryContainer,
                                                           borderRadius: BorderRadius.circular(16),
@@ -614,29 +600,25 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
                                     ),
                                   ],
                                 ),
-                                SizedBox(height: 12.0),
+                                const SizedBox(height: 12.0),
                                 Row(
                                   children: [
                                     Expanded(
                                       child: TextFormField(
                                         controller: _model.stockQuantityTextController,
                                         focusNode: _model.stockQuantityFocusNode,
-                                        autofocus: false,
-                                        obscureText: false,
                                         decoration: InputDecoration(
                                           labelText: 'Initial Stock',
                                           labelStyle: FlutterFlowTheme.of(context).labelMedium,
                                           enabledBorder: OutlineInputBorder(
                                             borderSide: BorderSide(
                                               color: FlutterFlowTheme.of(context).alternate,
-                                              width: 1.0,
                                             ),
                                             borderRadius: BorderRadius.circular(8.0),
                                           ),
                                           focusedBorder: OutlineInputBorder(
                                             borderSide: BorderSide(
                                               color: FlutterFlowTheme.of(context).primary,
-                                              width: 1.0,
                                             ),
                                             borderRadius: BorderRadius.circular(8.0),
                                           ),
@@ -645,7 +627,7 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
                                         keyboardType: TextInputType.number,
                                       ),
                                     ),
-                                    SizedBox(width: 12.0),
+                                    const SizedBox(width: 12.0),
                                     Row(
                                       children: [
                                         Text(
@@ -664,15 +646,15 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
                                   ],
                                 ),
                                 Padding(
-                                  padding: EdgeInsetsDirectional.fromSTEB(0, 16, 0, 0),
+                                  padding: const EdgeInsetsDirectional.fromSTEB(0, 16, 0, 0),
                                   child: FFButtonWidget(
                                     onPressed: _addProduct,
                                     text: 'Add to Catalogue',
                                     options: FFButtonOptions(
                                       width: double.infinity,
                                       height: 44.0,
-                                      padding: EdgeInsetsDirectional.fromSTEB(0, 0, 0, 0),
-                                      iconPadding: EdgeInsetsDirectional.fromSTEB(0, 0, 0, 0),
+                                      padding: const EdgeInsetsDirectional.fromSTEB(0, 0, 0, 0),
+                                      iconPadding: const EdgeInsetsDirectional.fromSTEB(0, 0, 0, 0),
                                       color: FlutterFlowTheme.of(context).primary,
                                       textStyle: FlutterFlowTheme.of(context).titleSmall.override(
                                             font: GoogleFonts.inter(),
@@ -687,14 +669,14 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
                             ),
                           ),
                         ),
-                        SizedBox(height: 24.0),
+                        const SizedBox(height: 24.0),
                         Text(
                           'Inventory List',
                           style: FlutterFlowTheme.of(context).titleMedium,
                         ),
-                        SizedBox(height: 8.0),
+                        const SizedBox(height: 8.0),
                         if (_loading)
-                          Center(child: CircularProgressIndicator())
+                          const Center(child: CircularProgressIndicator())
                         else if (_products.isEmpty)
                           Expanded(
                             child: Center(
@@ -783,20 +765,20 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
                                             final newStockStr = await showDialog<String>(
                                               context: context,
                                               builder: (context) => AlertDialog(
-                                                title: Text('Update Stock'),
+                                                title: const Text('Update Stock'),
                                                 content: TextField(
                                                   controller: controller,
                                                   keyboardType: TextInputType.number,
-                                                  decoration: InputDecoration(labelText: 'Quantity'),
+                                                  decoration: const InputDecoration(labelText: 'Quantity'),
                                                 ),
                                                 actions: [
                                                   TextButton(
                                                     onPressed: () => Navigator.pop(context),
-                                                    child: Text('Cancel'),
+                                                    child: const Text('Cancel'),
                                                   ),
                                                   TextButton(
                                                     onPressed: () => Navigator.pop(context, controller.text),
-                                                    child: Text('Update'),
+                                                    child: const Text('Update'),
                                                   ),
                                                 ],
                                               ),
@@ -821,16 +803,16 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
                                           final confirm = await showDialog<bool>(
                                             context: context,
                                             builder: (context) => AlertDialog(
-                                              title: Text('Delete Product'),
-                                              content: Text('Are you sure you want to delete this product?'),
+                                              title: const Text('Delete Product'),
+                                              content: const Text('Are you sure you want to delete this product?'),
                                               actions: [
                                                 TextButton(
                                                   onPressed: () => Navigator.pop(context, false),
-                                                  child: Text('Cancel'),
+                                                  child: const Text('Cancel'),
                                                 ),
                                                 TextButton(
                                                   onPressed: () => Navigator.pop(context, true),
-                                                  child: Text('Delete'),
+                                                  child: const Text('Delete'),
                                                 ),
                                               ],
                                             ),

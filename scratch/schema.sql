@@ -390,7 +390,7 @@ CREATE POLICY "Admins manage all" ON cities FOR ALL USING (is_admin());
 CREATE POLICY "Admins manage all" ON business_analytics FOR ALL USING (is_admin());
 
 -- 3. User Data (Authenticated users can manage their own data)
-CREATE POLICY "Users insert own profile" ON users FOR INSERT WITH CHECK (auth.uid() = id AND (role = 'customer' OR role = 'business_owner'));
+CREATE POLICY "Users insert own profile" ON users FOR INSERT WITH CHECK (auth.uid() = id AND role = 'customer');
 CREATE POLICY "Users manage own profile" ON users FOR UPDATE USING (auth.uid() = id) WITH CHECK (auth.uid() = id AND role = (SELECT role FROM users WHERE id = auth.uid()));
 CREATE POLICY "Users manage own addresses" ON addresses FOR ALL USING (auth.uid() = user_id);
 CREATE POLICY "Users manage own carts" ON carts FOR ALL USING (auth.uid() = user_id);
