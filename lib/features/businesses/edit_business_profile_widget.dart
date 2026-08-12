@@ -45,7 +45,7 @@ class _EditBusinessProfileWidgetState extends State<EditBusinessProfileWidget> {
   }
 
   Future<void> _updateProfile() async {
-    final name = _model.textFieldModel1.inputTextController?.text?.trim();
+    final name = _model.textFieldModel1.inputTextController?.text.trim();
     if (name == null || name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Business Name is required')),

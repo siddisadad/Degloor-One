@@ -1012,11 +1012,11 @@ class _BusinessRegistrationWidgetState
                                     }
 
                                     final name = _model.textFieldModel1
-                                        .inputTextController?.text?.trim();
+                                        .inputTextController?.text.trim();
                                     final owner = _model.textFieldModel2
-                                        .inputTextController?.text?.trim();
+                                        .inputTextController?.text.trim();
                                     final phone = _model.textFieldModel4
-                                        .inputTextController?.text?.trim();
+                                        .inputTextController?.text.trim();
 
                                     if (name == null ||
                                         name.isEmpty ||
