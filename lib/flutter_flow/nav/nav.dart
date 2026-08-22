@@ -221,13 +221,38 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           builder: (context, params) => const ManageHoursWidget(),
           requireAuth: true,
         ),
-        /* Commented out Phase 2+ routes
         FFRoute(
           name: DeliveryDashboardWidget.routeName,
           path: DeliveryDashboardWidget.routePath,
-          builder: (context, params) => DeliveryDashboardWidget(),
+          builder: (context, params) => const DeliveryDashboardWidget(),
+          requireAuth: true,
         ),
-        */
+        FFRoute(
+          name: ServicesWidget.routeName,
+          path: ServicesWidget.routePath,
+          builder: (context, params) => const ServicesWidget(),
+        ),
+        FFRoute(
+          name: ServiceProviderProfileWidget.routeName,
+          path: ServiceProviderProfileWidget.routePath,
+          builder: (context, params) => ServiceProviderProfileWidget(
+            providerId:
+                params.getParam<String>('providerId', ParamType.string) ?? '',
+          ),
+        ),
+        FFRoute(
+          name: ServiceProviderRegistrationWidget.routeName,
+          path: ServiceProviderRegistrationWidget.routePath,
+          builder: (context, params) =>
+              const ServiceProviderRegistrationWidget(),
+          requireAuth: true,
+        ),
+        FFRoute(
+          name: ManageServiceRequestsWidget.routeName,
+          path: ManageServiceRequestsWidget.routePath,
+          builder: (context, params) => const ManageServiceRequestsWidget(),
+          requireAuth: true,
+        ),
         FFRoute(
           name: NotificationsWidget.routeName,
           path: NotificationsWidget.routePath,

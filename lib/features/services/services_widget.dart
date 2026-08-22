@@ -34,21 +34,30 @@ class _ServicesWidgetState extends State<ServicesWidget> {
     _model.categoriesFuture = ServiceCategoriesTable().queryRows(
       queryFn: (q) => q.order('name', ascending: true),
     );
-
-    _fetchProviders();
+    _model.providersFuture = _loadProviders();
   }
 
-  void _fetchProviders() {
+  Future<List<dynamic>> _loadProviders() async {
+    var query = SupaFlow.client
+        .from('service_providers')
+        .select('*, users(full_name, avatar_url), service_categories(name)');
+
+    if (_model.selectedCategoryId != null) {
+      query = query.eq('category_id', _model.selectedCategoryId!);
+    }
+
+    final value = await query;
+    return List<dynamic>.from(value);
+  }
+
+  void _onCategorySelected(String categoryId) {
     setState(() {
-      var query = SupaFlow.client
-          .from('service_providers')
-          .select('*, users(full_name, avatar_url), service_categories(name)');
-
-      if (_model.selectedCategoryId != null) {
-        query = query.eq('category_id', _model.selectedCategoryId!);
+      if (_model.selectedCategoryId == categoryId) {
+        _model.selectedCategoryId = null;
+      } else {
+        _model.selectedCategoryId = categoryId;
       }
-
-      _model.providersFuture = query.then((value) => value as List<dynamic>);
+      _model.providersFuture = _loadProviders();
     });
   }
 
@@ -99,7 +108,17 @@ class _ServicesWidgetState extends State<ServicesWidget> {
                   letterSpacing: 0.0,
                 ),
           ),
-          actions: const [],
+          actions: [
+            TextButton(
+              onPressed: () => context.pushNamed('ServiceProviderRegistration'),
+              child: Text(
+                'Offer a service',
+                style: FlutterFlowTheme.of(context).labelLarge.override(
+                      color: FlutterFlowTheme.of(context).primary,
+                    ),
+              ),
+            ),
+          ],
           centerTitle: false,
           elevation: 0.0,
         ),
@@ -122,6 +141,14 @@ class _ServicesWidgetState extends State<ServicesWidget> {
                 child: FutureBuilder<List<ServiceCategoriesRow>>(
                   future: _model.categoriesFuture,
                   builder: (context, snapshot) {
+                    if (snapshot.hasError) {
+                      return Center(
+                        child: Text(
+                          'Could not load categories.',
+                          style: FlutterFlowTheme.of(context).bodySmall,
+                        ),
+                      );
+                    }
                     if (!snapshot.hasData) {
                       return const Center(child: CircularProgressIndicator());
                     }
@@ -135,16 +162,7 @@ class _ServicesWidgetState extends State<ServicesWidget> {
                         final category = categories[index];
                         final isSelected = _model.selectedCategoryId == category.id;
                         return InkWell(
-                          onTap: () {
-                            setState(() {
-                              if (_model.selectedCategoryId == category.id) {
-                                _model.selectedCategoryId = null;
-                              } else {
-                                _model.selectedCategoryId = category.id;
-                              }
-                              _fetchProviders();
-                            });
-                          },
+                          onTap: () => _onCategorySelected(category.id),
                           child: Container(
                             decoration: isSelected ? BoxDecoration(
                               borderRadius: BorderRadius.circular(12.0),
@@ -175,6 +193,14 @@ class _ServicesWidgetState extends State<ServicesWidget> {
                 child: FutureBuilder<List<dynamic>>(
                   future: _model.providersFuture,
                   builder: (context, snapshot) {
+                    if (snapshot.hasError) {
+                      return Center(
+                        child: Text(
+                          'Could not load service providers.',
+                          style: FlutterFlowTheme.of(context).bodyMedium,
+                        ),
+                      );
+                    }
                     if (!snapshot.hasData) {
                       return const Center(child: CircularProgressIndicator());
                     }

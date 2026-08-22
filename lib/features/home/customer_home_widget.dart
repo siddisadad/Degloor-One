@@ -276,8 +276,27 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                             ].divide(const SizedBox(height: 4.0)),
                           ),
                         ),
-                        Row(
+                        Flexible(
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            reverse: true,
+                            child: Row(
                           children: [
+                            FlutterFlowIconButton(
+                              borderColor: Colors.transparent,
+                              borderRadius: 8.0,
+                              buttonSize: 44.0,
+                              fillColor:
+                                  FlutterFlowTheme.of(context).secondaryBackground,
+                              icon: Icon(
+                                Icons.handyman_outlined,
+                                color: FlutterFlowTheme.of(context).primaryText,
+                                size: 24.0,
+                              ),
+                              onPressed: () {
+                                context.pushNamed('Services');
+                              },
+                            ),
                             FlutterFlowIconButton(
                               borderColor: Colors.transparent,
                               borderRadius: 8.0,
@@ -454,6 +473,8 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                             width:
                                 FlutterFlowTheme.of(context).designToken.spacing.sm,
                           )),
+                            ),
+                          ),
                         ),
                       ],
                     ),
