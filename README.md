@@ -36,9 +36,13 @@ Execute the SQL scripts in the Supabase SQL Editor in this order:
 3. `scratch/secure_delivery.sql` — exclusive order accept and server-side delivery OTP.
 
 ### 2. Environment Configuration
-Ensure your `lib/backend/supabase/supabase.dart` is updated with your specific Supabase URL and Anon Key.
+The FlutterFlow default host (`uhaibenopzyzzuqjawlb.supabase.co`) currently does not resolve (`net::ERR_NAME_NOT_RESOLVED`). Restore that project in the Supabase dashboard, or point the app at a live project:
 
-For **Forgot password**, add these Redirect URLs in the Supabase dashboard (Authentication → URL Configuration):
+```bash
+flutter run --dart-define=SUPABASE_URL=https://YOUR_REF.supabase.co --dart-define=SUPABASE_ANON_KEY=YOUR_ANON_KEY
+```
+
+You can also edit `lib/backend/supabase/supabase.dart`. After the project is live, add these **Forgot password** Redirect URLs (Authentication → URL Configuration):
 
 - `degloorone://degloorone.com/resetPassword` (Android / iOS)
 - `http://localhost:*/resetPassword` (local web)
