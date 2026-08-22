@@ -6,6 +6,11 @@ import 'package:degloor_one/core/error_handler.dart';
 void main() {
   test('default project url is the FlutterFlow host', () {
     expect(kSupabaseUrl, 'https://uhaibenopzyzzuqjawlb.supabase.co');
+    expect(SupabaseConnection.shouldSkipAuthRequest, isTrue);
+    expect(
+      Uri.parse(kSupabaseUrl).host,
+      SupabaseConnection.deadFlutterFlowHost,
+    );
   });
 
   test('maps DNS and browser fetch failures to the unreachable message', () {
