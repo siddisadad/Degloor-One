@@ -1,4 +1,5 @@
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/showcase_catalog.dart';
 import 'package:degloor_one/components/request_service_sheet/request_service_sheet_widget.dart';
 import 'package:degloor_one/components/supabase_unreachable_banner.dart';
 import 'package:degloor_one/features/services/service_provider_display.dart';
@@ -39,14 +40,20 @@ class _ServiceProviderProfileWidgetState
     super.initState();
     _model = createModel(context, () => ServiceProviderProfileModel());
 
-    if (widget.providerId.isNotEmpty && !kUsesDeadFlutterFlowHost) {
-      _model.providerFuture = SupaFlow.client
-          .from('service_providers')
-          .select(
-              '*, users(full_name, avatar_url, phone_number), service_categories(name)')
-          .eq('id', widget.providerId)
-          .single();
+    if (widget.providerId.isEmpty) {
+      return;
     }
+    if (kUseShowcaseData) {
+      final provider = ShowcaseCatalog.serviceProvider(widget.providerId);
+      _model.providerFuture = Future.value(provider ?? <String, dynamic>{});
+      return;
+    }
+    _model.providerFuture = SupaFlow.client
+        .from('service_providers')
+        .select(
+            '*, users(full_name, avatar_url, phone_number), service_categories(name)')
+        .eq('id', widget.providerId)
+        .single();
   }
 
   @override
@@ -65,7 +72,7 @@ class _ServiceProviderProfileWidgetState
       child: Scaffold(
         key: scaffoldKey,
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-        body: kUsesDeadFlutterFlowHost
+        body: !kUseShowcaseData && kUsesDeadFlutterFlowHost
             ? const Padding(
                 padding: EdgeInsets.all(24),
                 child: SupabaseUnreachableBanner(),

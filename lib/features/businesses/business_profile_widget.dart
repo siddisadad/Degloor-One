@@ -1,6 +1,7 @@
 import 'package:degloor_one/backend/notification_service.dart';
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/showcase_catalog.dart';
 import 'package:degloor_one/l10n/app_localizations.dart';
 import 'package:degloor_one/components/action_button/action_button_widget.dart';
 import 'package:degloor_one/components/button/button_widget.dart';
@@ -105,7 +106,9 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
   }
 
   Future<List<Map<String, dynamic>>> _fetchReviews() async {
-    if (kUsesDeadFlutterFlowHost) return [];
+    if (kUseShowcaseData) {
+      return ShowcaseCatalog.reviewsForBusiness(widget.businessId!);
+    }
     final response = await SupaFlow.client
         .from('reviews')
         .select('*, users(full_name)')

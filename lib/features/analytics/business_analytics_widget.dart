@@ -1,4 +1,6 @@
 import '/backend/supabase/supabase.dart';
+import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
+import 'package:degloor_one/shared/showcase_catalog.dart';
 import '/components/stat_card/stat_card_widget.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -60,7 +62,18 @@ class _BusinessAnalyticsWidgetState extends State<BusinessAnalyticsWidget>
   }
 
   Future<void> _fetchData() async {
-    if (kUsesDeadFlutterFlowHost) return;
+    if (kUseShowcaseData) {
+      final rows = ShowcaseCatalog.query(
+        'business_analytics',
+        ShowcaseQuery()..eq('business_id', widget.businessId),
+      );
+      if (!mounted) return;
+      safeSetState(() {
+        _analyticsData = rows.map(BusinessAnalyticsRow.new).toList();
+        _isLoading = false;
+      });
+      return;
+    }
     try {
       final now = DateTime.now();
       DateTime? startDate;

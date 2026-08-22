@@ -1,4 +1,5 @@
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/showcase_catalog.dart';
 import 'package:degloor_one/components/apply_job_sheet/apply_job_sheet_widget.dart';
 import 'package:degloor_one/components/job_card/job_card_widget.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_icon_button.dart';
@@ -43,7 +44,12 @@ class _JobsMarketplaceWidgetState extends State<JobsMarketplaceWidget> {
   }
 
   Future<List<Map<String, dynamic>>> _fetchJobs() async {
-    if (kUsesDeadFlutterFlowHost) return [];
+    if (kUseShowcaseData) {
+      return ShowcaseCatalog.activeJobs(
+        search: _model.searchBarController!.text,
+        jobType: _model.jobTypeFilter,
+      );
+    }
     var query = SupaFlow.client
         .from('jobs')
         .select('*, businesses(name, location)')

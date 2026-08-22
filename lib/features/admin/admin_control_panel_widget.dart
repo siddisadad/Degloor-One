@@ -1,5 +1,7 @@
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
+import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/showcase_catalog.dart';
 import 'package:degloor_one/components/action_item/action_item_widget.dart';
 import 'package:degloor_one/components/button/button_widget.dart';
 import 'package:degloor_one/components/category_chip/category_chip_widget.dart';
@@ -67,7 +69,12 @@ class _AdminControlPanelWidgetState extends State<AdminControlPanelWidget> {
   }
 
   Future<int> fetchCount(bool verified) async {
-    if (kUsesDeadFlutterFlowHost) return 0;
+    if (kUseShowcaseData) {
+      return ShowcaseCatalog.query(
+        'businesses',
+        ShowcaseQuery()..eq('is_verified', verified),
+      ).length;
+    }
     final response = await SupaFlow.client
         .from('businesses')
         .select('id')

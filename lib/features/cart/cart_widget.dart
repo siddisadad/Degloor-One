@@ -1,5 +1,7 @@
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
+import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/showcase_catalog.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
@@ -53,7 +55,14 @@ class _CartWidgetState extends State<CartWidget> {
         _model.currentBusiness = business.first;
       }
 
-      if (kUsesDeadFlutterFlowHost) return;
+      if (kUseShowcaseData) {
+        setState(() {
+          _model.cartItemsFuture = Future.value(
+            ShowcaseCatalog.cartItemsWithProducts(_model.currentCart!.id),
+          );
+        });
+        return;
+      }
       final items = await SupaFlow.client
           .from('cart_items')
           .select('*, products(*)')
@@ -119,8 +128,53 @@ class _CartWidgetState extends State<CartWidget> {
         };
       }).toList();
 
-      if (kUsesDeadFlutterFlowHost) {
-        throw Exception('Failed to fetch');
+      if (kUseShowcaseData) {
+        final order = ShowcaseCatalog.insert('orders', {
+          'user_id': currentUserUid,
+          'business_id': _model.currentCart!.businessId,
+          'total_amount': total,
+          'status': 'placed',
+          'payment_status': 'pending',
+          'delivery_address_id': _model.selectedAddress!.id,
+          'delivery_fee': _model.deliveryFee,
+          'payment_method': 'COD',
+          'delivery_otp': '7392',
+        });
+        for (final item in rpcItems) {
+          ShowcaseCatalog.insert('order_items', {
+            'order_id': order['id'],
+            'product_id': item['product_id'],
+            'quantity': item['quantity'],
+            'price_at_purchase': item['price'],
+          });
+        }
+        ShowcaseCatalog.insert('order_status_history', {
+          'order_id': order['id'],
+          'status': 'placed',
+          'notes': 'Order placed from showcase cart',
+        });
+        ShowcaseCatalog.delete(
+          'cart_items',
+          ShowcaseQuery()..eq('cart_id', _model.currentCart!.id),
+        );
+        ShowcaseCatalog.delete(
+          'carts',
+          ShowcaseQuery()..eq('id', _model.currentCart!.id),
+        );
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Order placed successfully!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        context.goNamed(
+          'OrderSuccess',
+          queryParameters: {
+            'orderId': serializeParam(order['id'], ParamType.string),
+          }.withoutNulls,
+        );
+        return;
       }
       final response = await SupaFlow.client.rpc(
         'place_order',

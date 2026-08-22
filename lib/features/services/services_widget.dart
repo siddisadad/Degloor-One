@@ -1,4 +1,5 @@
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/showcase_catalog.dart';
 import 'package:degloor_one/components/category_item/category_item_widget.dart';
 import 'package:degloor_one/components/supabase_unreachable_banner.dart';
 import 'package:degloor_one/components/request_service_sheet/request_service_sheet_widget.dart';
@@ -39,7 +40,11 @@ class _ServicesWidgetState extends State<ServicesWidget> {
   }
 
   Future<List<dynamic>> _loadProviders() async {
-    if (kUsesDeadFlutterFlowHost) return [];
+    if (kUseShowcaseData) {
+      return ShowcaseCatalog.serviceProviders(
+        categoryId: _model.selectedCategoryId,
+      );
+    }
     var query = SupaFlow.client
         .from('service_providers')
         .select('*, users(full_name, avatar_url), service_categories(name)');
@@ -129,10 +134,11 @@ class _ServicesWidgetState extends State<ServicesWidget> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Padding(
-                padding: EdgeInsets.fromLTRB(16, 12, 16, 0),
-                child: SupabaseUnreachableBanner(),
-              ),
+              if (!kUseShowcaseData)
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(16, 12, 16, 0),
+                  child: SupabaseUnreachableBanner(),
+                ),
               Padding(
                 padding: const EdgeInsetsDirectional.fromSTEB(16.0, 12.0, 16.0, 12.0),
                 child: Text(

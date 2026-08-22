@@ -1,4 +1,6 @@
+import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/showcase_catalog.dart';
 
 class DeliveryService {
   static Future<void> acceptOrder(String orderId) {
@@ -20,7 +22,13 @@ class DeliveryService {
   }
 
   static Future<String?> fetchMyDeliveryOtp(String orderId) async {
-    if (kUsesDeadFlutterFlowHost) return null;
+    if (kUseShowcaseData) {
+      final orders = ShowcaseCatalog.query(
+        'orders',
+        ShowcaseQuery()..eq('id', orderId),
+      );
+      return orders.isEmpty ? null : orders.first['delivery_otp'] as String?;
+    }
     final result = await SupaFlow.client.rpc(
       'get_my_delivery_otp',
       params: {'p_order_id': orderId},
@@ -38,8 +46,8 @@ class DeliveryService {
   }
 
   static Future<void> _rpc(String name, Map<String, dynamic> params) async {
-    if (kUsesDeadFlutterFlowHost) {
-      throw Exception('Failed to fetch');
+    if (kUseShowcaseData) {
+      return;
     }
     await SupaFlow.client.rpc(name, params: params);
   }

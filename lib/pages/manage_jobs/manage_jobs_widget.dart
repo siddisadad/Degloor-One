@@ -1,5 +1,6 @@
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/showcase_catalog.dart';
 import 'package:degloor_one/components/job_card/job_card_widget.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_icon_button.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
@@ -206,8 +207,8 @@ class _ManageJobsWidgetState extends State<ManageJobsWidget> {
             const Divider(height: 1),
             Expanded(
               child: FutureBuilder<List<Map<String, dynamic>>>(
-                future: kUsesDeadFlutterFlowHost
-                    ? Future.value(<Map<String, dynamic>>[])
+                future: kUseShowcaseData
+                    ? Future.value(ShowcaseCatalog.jobApplicants(job.id))
                     : SupaFlow.client
                         .from('job_applications')
                         .select('*, users(full_name, phone_number)')

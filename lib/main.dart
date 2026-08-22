@@ -12,6 +12,7 @@ import 'auth/supabase_auth/supabase_user_provider.dart';
 import 'auth/supabase_auth/auth_util.dart';
 
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/showcase_catalog.dart';
 import 'package:degloor_one/core/web_channel_buffers.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'flutter_flow/flutter_flow_util.dart';
@@ -38,6 +39,9 @@ void main() async {
   await appState.initializePersistedState();
   if (kBypassAuth) {
     installGuestSession();
+  }
+  if (kUseShowcaseData && appState.userLocation == null) {
+    appState.userLocation = ShowcaseCatalog.degloor;
   }
 
   runApp(ChangeNotifierProvider(

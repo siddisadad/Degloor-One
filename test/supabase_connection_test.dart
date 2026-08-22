@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/backend/supabase/supabase_connection.dart';
 import 'package:degloor_one/core/error_handler.dart';
+import 'package:degloor_one/shared/showcase_catalog.dart';
 
 void main() {
   test('default project url is the FlutterFlow host', () {
@@ -15,21 +16,24 @@ void main() {
     );
   });
 
-  test('table and search RPCs skip the dead host', () async {
+  test('table and search RPCs use local showcase data on the dead host',
+      () async {
+    ShowcaseCatalog.reset();
     final users = await UsersTable().queryRows(queryFn: (q) => q);
-    expect(users, isEmpty);
+    expect(users, isNotEmpty);
     final businesses = await BusinessesTable().searchInRadius(
       latitude: 18.55,
       longitude: 77.58,
       radiusKm: 10,
     );
-    expect(businesses, isEmpty);
+    expect(businesses, isNotEmpty);
+    expect(businesses.first.distanceKm, isNotNull);
     final products = await ProductsTable().searchInRadius(
       latitude: 18.55,
       longitude: 77.58,
       radiusKm: 10,
     );
-    expect(products, isEmpty);
+    expect(products, isNotEmpty);
   });
 
   test('blocked http client never opens a socket', () async {
