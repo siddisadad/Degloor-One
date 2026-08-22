@@ -128,7 +128,9 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
         _model.isUploading = false;
       });
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Upload failed: $e')));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Upload failed: $e')));
+      }
       setState(() => _model.isUploading = false);
     }
   }
@@ -201,19 +203,23 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
 
       await _fetchProducts();
       await _fetchBusinessCategories();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Product added successfully'),
-          backgroundColor: FlutterFlowTheme.of(context).success,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Product added successfully'),
+            backgroundColor: FlutterFlowTheme.of(context).success,
+          ),
+        );
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error adding product: $e'),
-          backgroundColor: FlutterFlowTheme.of(context).error,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error adding product: $e'),
+            backgroundColor: FlutterFlowTheme.of(context).error,
+          ),
+        );
+      }
       setState(() => _loading = false);
     }
   }
@@ -225,16 +231,20 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
         matchingRows: (q) => q.eq('id', productId),
       );
       await _fetchProducts();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Product deleted')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Product deleted')),
+        );
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error deleting product: $e'),
-          backgroundColor: FlutterFlowTheme.of(context).error,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error deleting product: $e'),
+            backgroundColor: FlutterFlowTheme.of(context).error,
+          ),
+        );
+      }
       setState(() => _loading = false);
     }
   }
@@ -247,9 +257,11 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
       );
       await _fetchProducts();
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error updating stock: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error updating stock: $e')),
+        );
+      }
     }
   }
 
@@ -376,7 +388,9 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
                       },
                       matchingRows: (q) => q.eq('id', product.id),
                     );
-                    Navigator.pop(context);
+                    if (mounted) {
+                      Navigator.pop(context);
+                    }
                     await _fetchProducts();
                   },
                   text: 'Save Changes',

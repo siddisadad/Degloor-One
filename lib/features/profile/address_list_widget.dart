@@ -41,9 +41,11 @@ class _AddressListWidgetState extends State<AddressListWidget> {
   Future<void> _deleteAddress(String id) async {
     await AddressesTable().delete(matchingRows: (q) => q.eq('id', id));
     _fetchAddresses();
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Address deleted')),
-    );
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Address deleted')),
+      );
+    }
   }
 
   Future<void> _setDefaultAddress(String id) async {

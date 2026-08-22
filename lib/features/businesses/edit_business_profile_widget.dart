@@ -8,6 +8,7 @@ import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 import 'edit_business_profile_model.dart';
 export 'edit_business_profile_model.dart';
 
@@ -31,17 +32,46 @@ class _EditBusinessProfileWidgetState extends State<EditBusinessProfileWidget> {
   late EditBusinessProfileModel _model;
   final scaffoldKey = GlobalKey<ScaffoldState>();
   bool _isSaving = false;
+  String? _uploadedImageUrl;
+  bool _isUploading = false;
 
   @override
   void initState() {
     super.initState();
     _model = createModel(context, () => EditBusinessProfileModel());
 
+    _uploadedImageUrl = widget.business.imageUrl;
     // Map radius back to slider (2-25km -> 0-100)
     final radius = widget.business.discoveryRadius ?? 10.0;
     _model.sliderModel.sliderValue = ((radius - 2.0) * 100.0 / (25.0 - 2.0)).clamp(0.0, 100.0);
 
     _model.switchModel.switchValue = widget.business.phoneNumber == widget.business.whatsappNumber;
+  }
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery, imageQuality: 70);
+    if (image == null) return;
+
+    setState(() => _isUploading = true);
+    try {
+      final fileName = 'business_${widget.business.id}_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final path = 'businesses/${widget.business.id}/$fileName';
+      final bytes = await image.readAsBytes();
+
+      await SupaFlow.client.storage.from('product-images').uploadBinary(path, bytes);
+      final url = SupaFlow.client.storage.from('product-images').getPublicUrl(path);
+
+      setState(() {
+        _uploadedImageUrl = url;
+        _isUploading = false;
+      });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Upload failed: $e')));
+      }
+      setState(() => _isUploading = false);
+    }
   }
 
   Future<void> _updateProfile() async {
@@ -69,18 +99,23 @@ class _EditBusinessProfileWidgetState extends State<EditBusinessProfileWidget> {
               : _model.textFieldModel5.inputTextController?.text,
           'address_text': _model.textFieldModel6.inputTextController?.text,
           'discovery_radius': radiusKm,
+          'image_url': _uploadedImageUrl,
         },
         matchingRows: (q) => q.eq('id', widget.business.id),
       );
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Profile updated successfully'), backgroundColor: Colors.green),
-      );
-      context.safePop();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Profile updated successfully'), backgroundColor: Colors.green),
+        );
+        context.safePop();
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error updating profile: $e'), backgroundColor: Colors.red),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error updating profile: $e'), backgroundColor: Colors.red),
+        );
+      }
     } finally {
       setState(() => _isSaving = false);
     }
@@ -136,6 +171,42 @@ class _EditBusinessProfileWidgetState extends State<EditBusinessProfileWidget> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  Center(
+                    child: Stack(
+                      children: [
+                        Container(
+                          width: 120,
+                          height: 120,
+                          decoration: BoxDecoration(
+                            color: FlutterFlowTheme.of(context).secondaryBackground,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: FlutterFlowTheme.of(context).alternate),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(16),
+                            child: _isUploading
+                                ? const Center(child: CircularProgressIndicator())
+                                : (_uploadedImageUrl != null && _uploadedImageUrl!.isNotEmpty)
+                                    ? Image.network(_uploadedImageUrl!, fit: BoxFit.cover)
+                                    : Icon(Icons.business_rounded, size: 60, color: FlutterFlowTheme.of(context).secondaryText),
+                          ),
+                        ),
+                        Positioned(
+                          bottom: 0,
+                          right: 0,
+                          child: FlutterFlowIconButton(
+                            borderColor: Colors.transparent,
+                            borderRadius: 20,
+                            buttonSize: 40,
+                            fillColor: FlutterFlowTheme.of(context).primary,
+                            icon: const Icon(Icons.edit_rounded, color: Colors.white, size: 20),
+                            onPressed: _pickImage,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
                   wrapWithModel(
                     model: _model.textFieldModel1,
                     updateCallback: () => setState(() {}),

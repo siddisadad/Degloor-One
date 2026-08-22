@@ -15,6 +15,7 @@ class CartModel extends FlutterFlowModel<CartWidget> {
 
   // Selected address for the order
   AddressesRow? selectedAddress;
+  double deliveryFee = 0.0;
 
   // Selected payment method
   String selectedPaymentMethod = 'COD';

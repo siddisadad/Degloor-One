@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:degloor_one/l10n/app_localizations.dart';
@@ -76,6 +77,52 @@ class _MyAppState extends State<MyApp> {
 
   /// A stream of the current authenticated user.
   late Stream<BaseAuthUser> userStream;
+  StreamSubscription<List<NotificationsRow>>? _notificationSubscription;
+
+  void _setupNotificationListener(String userId) {
+    _notificationSubscription?.cancel();
+    if (userId.isEmpty) return;
+
+    _notificationSubscription = NotificationsTable()
+        .stream(primaryKey: 'id', queryFn: (q) => q.eq('user_id', userId).order('created_at'))
+        .listen((notifications) {
+      if (notifications.isEmpty) return;
+
+      // Get the latest notification
+      final latest = notifications.toList()..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      final notification = latest.first;
+
+      // Only show if it's brand new (e.g. created in the last 10 seconds)
+      final now = DateTime.now();
+      if (now.difference(notification.createdAt).inSeconds < 10 && !notification.isRead) {
+        _showGlobalNotification(notification);
+      }
+    });
+  }
+
+  void _showGlobalNotification(NotificationsRow notification) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(notification.title, style: const TextStyle(fontWeight: FontWeight.bold)),
+            Text(notification.message),
+          ],
+        ),
+        backgroundColor: FlutterFlowTheme.of(context).primary,
+        behavior: SnackBarBehavior.floating,
+        action: SnackBarAction(
+          label: 'View',
+          textColor: Colors.white,
+          onPressed: () {
+            _router.pushNamed('Notifications');
+          },
+        ),
+      ),
+    );
+  }
 
   @override
   void initState() {
@@ -86,12 +133,23 @@ class _MyAppState extends State<MyApp> {
     userStream = degloorOneSupabaseUserStream()
       ..listen((user) {
         _appStateNotifier.update(user);
+        if (user.loggedIn && user.uid != null) {
+          _setupNotificationListener(user.uid!);
+        } else {
+          _notificationSubscription?.cancel();
+        }
       });
     jwtTokenStream.listen((_) {});
     Future.delayed(
       const Duration(milliseconds: 1000),
       () => _appStateNotifier.stopShowingSplashImage(),
     );
+  }
+
+  @override
+  void dispose() {
+    _notificationSubscription?.cancel();
+    super.dispose();
   }
 
   /// Updates the application's theme mode and persists the choice.

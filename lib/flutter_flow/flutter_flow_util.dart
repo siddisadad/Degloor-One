@@ -448,11 +448,11 @@ String getCurrentRoute(BuildContext context) =>
     context.mounted ? MyApp.of(context).getRoute() : '';
 String getDistance(double? businessLat, double? businessLng) {
   if (businessLat == null || businessLng == null) {
-    return '0 m';
+    return 'Nearby';
   }
 
   final userLoc = FFAppState.instance.userLocation;
-  if (userLoc == null) return '0 m';
+  if (userLoc == null) return 'Nearby';
 
   final double refLat = userLoc.latitude;
   final double refLng = userLoc.longitude;

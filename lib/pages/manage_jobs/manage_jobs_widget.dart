@@ -142,7 +142,7 @@ class _ManageJobsWidgetState extends State<ManageJobsWidget> {
                     'job_type': jobType,
                     'is_active': true,
                   });
-                  if (mounted) {
+                  if (context.mounted) {
                     Navigator.pop(context);
                     setState(() {});
                   }

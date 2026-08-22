@@ -195,8 +195,7 @@ class _BusinessRegistrationWidgetState
                             hint: 'e.g., Maharashtra Hardware & Steel',
                             value: '',
                             onChange: (val) {
-                              _model.textFieldModel1.inputTextController?.text =
-                                  val;
+                              // TextFormField already updates the controller
                             },
                             onSubmit: (_) {},
                             variant: 'outlined',
@@ -221,8 +220,7 @@ class _BusinessRegistrationWidgetState
                             hint: 'Full legal name of proprietor',
                             value: '',
                             onChange: (val) {
-                              _model.textFieldModel2.inputTextController?.text =
-                                  val;
+                              // TextFormField already updates the controller
                             },
                             onSubmit: (_) {},
                             variant: 'outlined',
@@ -332,8 +330,7 @@ class _BusinessRegistrationWidgetState
                             hint: '+91 98765 43210',
                             value: '',
                             onChange: (val) {
-                              _model.textFieldModel4.inputTextController?.text =
-                                  val;
+                              // TextFormField already updates the controller
                             },
                             onSubmit: (_) {},
                             variant: 'outlined',
@@ -358,8 +355,7 @@ class _BusinessRegistrationWidgetState
                             hint: 'For customer enquiries',
                             value: '',
                             onChange: (val) {
-                              _model.textFieldModel5.inputTextController?.text =
-                                  val;
+                              // TextFormField already updates the controller
                             },
                             onSubmit: (_) {},
                             variant: 'outlined',
@@ -408,8 +404,7 @@ class _BusinessRegistrationWidgetState
                             hint: 'Shop No., Building Name, Main Road...',
                             value: '',
                             onChange: (val) {
-                              _model.textFieldModel6.inputTextController?.text =
-                                  val;
+                              // TextFormField already updates the controller
                             },
                             onSubmit: (_) {},
                             variant: 'outlined',
@@ -433,8 +428,7 @@ class _BusinessRegistrationWidgetState
                                   hint: 'Type here...',
                                   value: 'Degloor',
                                   onChange: (val) {
-                                    _model.textFieldModel7.inputTextController
-                                        ?.text = val;
+                                    // TextFormField already updates the controller
                                   },
                                   onSubmit: (_) {},
                                   variant: 'outlined',
@@ -457,8 +451,7 @@ class _BusinessRegistrationWidgetState
                                   hint: 'e.g., Shivaji Chowk',
                                   value: '',
                                   onChange: (val) {
-                                    _model.textFieldModel8.inputTextController
-                                        ?.text = val;
+                                    // TextFormField already updates the controller
                                   },
                                   onSubmit: (_) {},
                                   variant: 'outlined',
@@ -999,8 +992,11 @@ class _BusinessRegistrationWidgetState
                                           ? phone
                                           : _model.textFieldModel5
                                               .inputTextController?.text,
-                                  'address_text':
-                                      '${_model.textFieldModel6.inputTextController?.text ?? ''}, ${_model.textFieldModel8.inputTextController?.text ?? ''}, ${_model.textFieldModel7.inputTextController?.text ?? 'Degloor'}',
+                                  'address_text': [
+                                    _model.textFieldModel6.inputTextController?.text.trim(),
+                                    _model.textFieldModel8.inputTextController?.text.trim(),
+                                    _model.textFieldModel7.inputTextController?.text.trim() ?? 'Degloor',
+                                  ].where((e) => e != null && e.isNotEmpty).join(', '),
                                   'category_id': _model.dropdownValue,
                                   'latitude':
                                       _model.mapGoogleMapsCenter?.latitude,

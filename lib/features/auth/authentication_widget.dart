@@ -240,7 +240,7 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
                                       try {
                                         final user = await authManager
                                             .signInWithGoogle(context);
-                                        if (!mounted) return;
+                                        if (!context.mounted) return;
                                         if (user != null) {
                                           context.goNamed('_initialize');
                                         }

@@ -1,5 +1,7 @@
+import 'package:degloor_one/backend/notification_service.dart';
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/l10n/app_localizations.dart';
 import 'package:degloor_one/components/action_button/action_button_widget.dart';
 import 'package:degloor_one/components/button/button_widget.dart';
 import 'package:degloor_one/components/review_card/review_card_widget.dart';
@@ -135,62 +137,135 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
       return;
     }
 
+    final business = await _businessFuture;
+    if (business == null || !mounted) return;
+
     int rating = 5;
     final commentController = TextEditingController();
 
-    await showDialog(
+    await showModalBottomSheet(
       context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
-          title: const Text('Write a Review'),
-          content: Column(
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: FlutterFlowTheme.of(context).secondaryBackground,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(24),
+            topRight: Radius.circular(24),
+          ),
+        ),
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+          left: 24,
+          right: 24,
+          top: 24,
+        ),
+        child: SingleChildScrollView(
+          child: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(5, (index) {
-                  return IconButton(
-                    icon: Icon(
-                      index < rating ? Icons.star : Icons.star_border,
-                      color: Colors.amber,
-                    ),
-                    onPressed: () => setState(() => rating = index + 1),
-                  );
-                }),
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Write a Review',
+                    style: FlutterFlowTheme.of(context).headlineSmall,
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close_rounded),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
               ),
+              const SizedBox(height: 16),
+              Text(
+                'How was your experience with ${business.name}?',
+                style: FlutterFlowTheme.of(context).bodyMedium,
+              ),
+              const SizedBox(height: 24),
+              StatefulBuilder(
+                builder: (context, setInternalState) => Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(5, (index) {
+                    return InkWell(
+                      onTap: () {
+                        setInternalState(() => rating = index + 1);
+                        rating = index + 1;
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                        child: Icon(
+                          index < rating ? Icons.star_rounded : Icons.star_outline_rounded,
+                          color: Colors.amber,
+                          size: 48,
+                        ),
+                      ),
+                    );
+                  }),
+                ),
+              ),
+              const SizedBox(height: 24),
               TextField(
                 controller: commentController,
-                decoration: const InputDecoration(hintText: 'Enter your comment'),
-                maxLines: 3,
+                decoration: InputDecoration(
+                  hintText: 'Describe your experience (optional)',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                maxLines: 4,
               ),
+              const SizedBox(height: 24),
+              FFButtonWidget(
+                onPressed: () async {
+                  if (rating < 1) return;
+
+                  await ReviewsTable().insert({
+                    'user_id': currentUser,
+                    'business_id': business.id,
+                    'rating': rating,
+                    'comment': commentController.text.trim(),
+                    'created_at': DateTime.now().toIso8601String(),
+                  });
+
+                  // Log Review Submitted
+                  logBusinessEvent(
+                    businessId: business.id,
+                    eventType: BusinessAnalyticsEvents.reviewSubmitted,
+                  );
+
+                  // Notify Owner
+                  if (business.ownerId != null) {
+                    await NotificationService.notifyNewReview(
+                      ownerId: business.ownerId!,
+                      businessName: business.name,
+                      rating: rating,
+                    );
+                  }
+
+                  if (context.mounted) {
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Thank you for your review!')),
+                    );
+                  }
+                  safeSetState(() {
+                    _model.reviewsFuture = _fetchReviews();
+                  });
+                },
+                text: 'Submit Review',
+                options: FFButtonOptions(
+                  height: 50,
+                  color: FlutterFlowTheme.of(context).primary,
+                  textStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              const SizedBox(height: 24),
             ],
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                await ReviewsTable().insert({
-                  'user_id': currentUser,
-                  'business_id': widget.businessId,
-                  'rating': rating,
-                  'comment': commentController.text,
-                });
-                // Log Review Submitted
-                logBusinessEvent(
-                  businessId: widget.businessId!,
-                  eventType: BusinessAnalyticsEvents.reviewSubmitted,
-                );
-                Navigator.pop(context);
-                safeSetState(() {
-                  _model.reviewsFuture = _fetchReviews();
-                });
-              },
-              child: const Text('Submit'),
-            ),
-          ],
         ),
       ),
     );
@@ -296,10 +371,12 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                 'description': descriptionController.text,
                 'status': 'pending',
               });
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Report submitted successfully')),
-              );
+              if (context.mounted) {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Report submitted successfully')),
+                );
+              }
             },
             child: const Text('Submit'),
           ),
@@ -311,7 +388,7 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
   Widget _buildRatingDistribution() {
     final dist = _model.ratingDistribution;
     final total = dist.values.fold(0, (sum, count) => sum + count);
-    if (total == 0) return Container();
+    if (total == 0) return const SizedBox.shrink();
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -483,7 +560,9 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                                           size: 24.0,
                                         ),
                                         onPressed: () async {
-                                          context.safePop();
+                                          if (context.mounted) {
+                                            context.safePop();
+                                          }
                                         },
                                       ),
                                       Row(
@@ -640,10 +719,10 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                                             .primary,
                                         size: 24.0,
                                       ),
-                                      label: 'Call',
+                                      label: AppLocalizations.of(context)!.call,
                                       onTap: () async {
-                                        if (business.phoneNumber != null) {
-                                          final url = Uri.parse('tel:${business.phoneNumber}');
+                                        if (business.phoneNumber != null && business.phoneNumber!.trim().isNotEmpty) {
+                                          final url = Uri.parse('tel:${business.phoneNumber!.trim()}');
                                           if (await canLaunchUrl(url)) {
                                             await launchUrl(url);
                                             // Log Call Click
@@ -652,6 +731,10 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                                               eventType: BusinessAnalyticsEvents.callClick,
                                             );
                                           }
+                                        } else {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            const SnackBar(content: Text('Phone number not available')),
+                                          );
                                         }
                                       },
                                     ),
@@ -669,11 +752,11 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                                           FlutterFlowTheme.of(context).primary,
                                       size: 24.0,
                                     ),
-                                    label: 'WhatsApp',
+                                    label: AppLocalizations.of(context)!.whatsApp,
                                     onTap: () async {
-                                      if (business.whatsappNumber != null) {
+                                      if (business.whatsappNumber != null && business.whatsappNumber!.trim().isNotEmpty) {
                                         await WhatsAppService.launchWhatsApp(
-                                          phoneNumber: business.whatsappNumber!,
+                                          phoneNumber: business.whatsappNumber!.trim(),
                                           message:
                                               'Hello ${business.name}, I found your shop on DEGLOOR ONE app.',
                                         );
@@ -681,6 +764,10 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                                         logBusinessEvent(
                                           businessId: business.id,
                                           eventType: BusinessAnalyticsEvents.whatsappClick,
+                                        );
+                                      } else {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(content: Text('WhatsApp number not available')),
                                         );
                                       }
                                     },
@@ -703,7 +790,7 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                                             .primary,
                                         size: 24.0,
                                       ),
-                                      label: 'Directions',
+                                      label: AppLocalizations.of(context)!.directions,
                                       onTap: () async {
                                         if (business.latitude != null && business.longitude != null) {
                                           final url = Uri.parse('https://www.google.com/maps/search/?api=1&query=${business.latitude},${business.longitude}');
@@ -1014,7 +1101,7 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                                       onPressed: () async {
                                         await _showWriteReviewDialog();
                                       },
-                                      text: 'Write Review',
+                                      text: AppLocalizations.of(context)!.writeReview,
                                       options: FFButtonOptions(
                                         width: 120,
                                         height: 36,
@@ -1094,9 +1181,7 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                           ].divide(const SizedBox(height: 24.0)),
                         ),
                       ),
-                      Container(
-                        height: 40.0,
-                      ),
+                      const SizedBox(height: 40.0),
                     ],
                   ),
                 ),
@@ -1130,12 +1215,12 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        'Verified Listing',
+                                        (business.isVerified ?? false) ? 'Verified Listing' : 'Listing Pending Verification',
                                         style: FlutterFlowTheme.of(context).labelSmall.override(
                                               font: GoogleFonts.inter(
                                                 fontWeight: FontWeight.bold,
                                               ),
-                                              color: FlutterFlowTheme.of(context).success,
+                                              color: (business.isVerified ?? false) ? FlutterFlowTheme.of(context).success : FlutterFlowTheme.of(context).secondaryText,
                                               fontWeight: FontWeight.bold,
                                               lineHeight: 1.2,
                                             ),
@@ -1166,7 +1251,7 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                                       ),
                                       iconPresent: true,
                                       iconEndPresent: false,
-                                      content: 'Report Listing',
+                                      content: AppLocalizations.of(context)!.reportListing,
                                       variant: 'outline',
                                       size: 'small',
                                       fullWidth: false,

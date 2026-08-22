@@ -54,17 +54,21 @@ class _ServiceProviderRegistrationWidgetState
           'is_verified': false,
         });
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Registration submitted! Your profile is now live.'),
-            backgroundColor: Colors.green,
-          ),
-        );
-        context.safePop();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Registration submitted! Your profile is now live.'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          context.safePop();
+        }
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error submitting registration: $e'), backgroundColor: Colors.red),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error submitting registration: $e'), backgroundColor: Colors.red),
+          );
+        }
       }
     }
   }

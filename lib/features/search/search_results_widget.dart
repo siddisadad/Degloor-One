@@ -218,8 +218,41 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
                                   color: FlutterFlowTheme.of(context).primary,
                                   size: 24.0,
                                 ),
-                                onPressed: () {
-                                  AppLogger.log('Tune button pressed');
+                                onPressed: () async {
+                                  await showModalBottomSheet(
+                                    context: context,
+                                    builder: (context) => Container(
+                                      padding: const EdgeInsets.all(24),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text('Sort By', style: FlutterFlowTheme.of(context).titleMedium),
+                                          const SizedBox(height: 16),
+                                          ListTile(
+                                            leading: const Icon(Icons.social_distance_rounded),
+                                            title: const Text('Distance (Nearest First)'),
+                                            onTap: () {
+                                              setState(() {
+                                                _businesses.sort((a, b) => (a.distanceKm ?? 0).compareTo(b.distanceKm ?? 0));
+                                              });
+                                              Navigator.pop(context);
+                                            },
+                                          ),
+                                          ListTile(
+                                            leading: const Icon(Icons.star_rounded, color: Colors.amber),
+                                            title: const Text('Rating (Highest First)'),
+                                            onTap: () {
+                                              setState(() {
+                                                _businesses.sort((a, b) => (b.rating ?? 0).compareTo(a.rating ?? 0));
+                                              });
+                                              Navigator.pop(context);
+                                            },
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
                                 },
                               ),
                             ].divide(const SizedBox(width: 16.0)),

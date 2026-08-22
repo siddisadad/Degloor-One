@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_icon_button.dart';
@@ -24,30 +25,42 @@ class _NotificationsWidgetState extends State<NotificationsWidget> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
   List<NotificationsRow> _notifications = [];
   bool _isLoading = true;
+  StreamSubscription<List<NotificationsRow>>? _notificationsSubscription;
 
   @override
   void initState() {
     super.initState();
     _model = createModel(context, () => NotificationsModel());
-    _loadNotifications();
+    _listenToNotifications();
+  }
+
+  void _listenToNotifications() {
+    final user = currentUserUid;
+    if (user == '') {
+      setState(() => _isLoading = false);
+      return;
+    }
+
+    _notificationsSubscription?.cancel();
+    _notificationsSubscription = NotificationsTable()
+        .stream(
+          primaryKey: 'id',
+          queryFn: (q) => q.eq('user_id', user).order('created_at'),
+        )
+        .listen((notifications) {
+      if (mounted) {
+        setState(() {
+          _notifications = notifications.toList()
+            ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+          _isLoading = false;
+        });
+      }
+    });
   }
 
   Future<void> _loadNotifications() async {
-    setState(() => _isLoading = true);
-    try {
-      final user = currentUserUid;
-      if (user == '') return;
-
-      _notifications = await NotificationsTable().queryRows(
-        queryFn: (q) => q
-            .eq('user_id', user)
-            .order('created_at', ascending: false),
-      );
-    } catch (e) {
-      AppLogger.error('Error loading notifications', e);
-    } finally {
-      setState(() => _isLoading = false);
-    }
+    // This is now handled by the stream, but keeping the signature if needed
+    _listenToNotifications();
   }
 
   Future<void> _markAsRead(String id) async {
@@ -77,9 +90,44 @@ class _NotificationsWidgetState extends State<NotificationsWidget> {
     }
   }
 
+  Future<void> _clearAll() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Clear All'),
+        content: const Text('Are you sure you want to delete all notifications?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Clear All'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      try {
+        final user = currentUserUid;
+        if (user == '') return;
+
+        await NotificationsTable().delete(
+          matchingRows: (q) => q.eq('user_id', user),
+        );
+        // Stream will update UI automatically
+      } catch (e) {
+        AppLogger.error('Error clearing notifications', e);
+      }
+    }
+  }
+
   @override
   void dispose() {
     _model.dispose();
+    _notificationsSubscription?.cancel();
     super.dispose();
   }
 
@@ -119,6 +167,12 @@ class _NotificationsWidgetState extends State<NotificationsWidget> {
                 ),
           ),
           actions: [
+            if (_notifications.isNotEmpty)
+              IconButton(
+                onPressed: _clearAll,
+                icon: const Icon(Icons.delete_sweep_rounded),
+                tooltip: 'Clear All',
+              ),
             if (_notifications.any((n) => !n.isRead))
               Padding(
                 padding: const EdgeInsetsDirectional.fromSTEB(0, 0, 12, 0),

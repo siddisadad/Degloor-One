@@ -9,6 +9,7 @@ class CustomerHomeModel extends FlutterFlowModel<CustomerHomeWidget> {
   ///  State fields for stateful widgets in this page.
 
   Future<List<UsersRow>>? userProfileFuture;
+  Future<List<BusinessesRow>>? openNowBusinessesFuture;
   String locationName = 'Degloor, Maharashtra';
   bool openNow = false;
 

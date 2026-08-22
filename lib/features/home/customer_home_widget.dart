@@ -132,8 +132,16 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
         radiusKm: radius,
         openNow: _model.openNow,
       );
+      // Always fetch open businesses for the horizontal section
+      _model.openNowBusinessesFuture = BusinessesTable().searchInRadius(
+        latitude: userLoc.latitude,
+        longitude: userLoc.longitude,
+        radiusKm: radius,
+        openNow: true,
+      );
     } else {
       _businessesFuture = Future.value([]);
+      _model.openNowBusinessesFuture = Future.value([]);
     }
   }
 
@@ -179,552 +187,998 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
       child: Scaffold(
         key: scaffoldKey,
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-        body: SingleChildScrollView(
-          primary: false,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(
-                  FlutterFlowTheme.of(context).designToken.spacing.lg,
-                  FlutterFlowTheme.of(context).designToken.spacing.lg,
-                  FlutterFlowTheme.of(context).designToken.spacing.lg,
-                  FlutterFlowTheme.of(context).designToken.spacing.md,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    InkWell(
-                      splashColor: Colors.transparent,
-                      focusColor: Colors.transparent,
-                      hoverColor: Colors.transparent,
-                      highlightColor: Colors.transparent,
-                      onTap: () async {
-                        context.pushNamed('LocationRadiusSelector');
-                      },
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
+        body: SafeArea(
+          top: false,
+          child: SingleChildScrollView(
+            primary: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SafeArea(
+                  child: Padding(
+                    padding: EdgeInsetsDirectional.fromSTEB(
+                      FlutterFlowTheme.of(context).designToken.spacing.lg,
+                      FlutterFlowTheme.of(context).designToken.spacing.lg,
+                      FlutterFlowTheme.of(context).designToken.spacing.lg,
+                      FlutterFlowTheme.of(context).designToken.spacing.md,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        InkWell(
+                          splashColor: Colors.transparent,
+                          focusColor: Colors.transparent,
+                          hoverColor: Colors.transparent,
+                          highlightColor: Colors.transparent,
+                          onTap: () async {
+                            context.pushNamed('LocationRadiusSelector');
+                          },
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Icon(
-                                Icons.location_on_rounded,
-                                color: FlutterFlowTheme.of(context).primary,
-                                size: 18.0,
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.location_on_rounded,
+                                    color: FlutterFlowTheme.of(context).primary,
+                                    size: 18.0,
+                                  ),
+                                  Text(
+                                    _model.locationName,
+                                    style: FlutterFlowTheme.of(context)
+                                        .titleMedium
+                                        .override(
+                                          font: GoogleFonts.inter(
+                                            fontWeight: FlutterFlowTheme.of(context)
+                                                .titleMedium
+                                                .fontWeight,
+                                          ),
+                                          color: FlutterFlowTheme.of(context)
+                                              .primaryText,
+                                          letterSpacing: 0.0,
+                                          lineHeight: 1.4,
+                                        ),
+                                  ),
+                                  Icon(
+                                    Icons.keyboard_arrow_down_rounded,
+                                    color:
+                                        FlutterFlowTheme.of(context).secondaryText,
+                                    size: 18.0,
+                                  ),
+                                ].divide(const SizedBox(width: 4.0)),
                               ),
                               Text(
-                                _model.locationName,
-                                style: FlutterFlowTheme.of(context)
-                                    .titleMedium
-                                    .override(
-                                      font: GoogleFonts.inter(
-                                        fontWeight: FlutterFlowTheme.of(context)
-                                            .titleMedium
-                                            .fontWeight,
-                                      ),
-                                      color: FlutterFlowTheme.of(context)
-                                          .primaryText,
-                                      letterSpacing: 0.0,
-                                      lineHeight: 1.4,
-                                    ),
+                                'Within ${appState.discoveryRadius.toInt()} km radius',
+                                style:
+                                    FlutterFlowTheme.of(context).bodySmall.override(
+                                          font: GoogleFonts.inter(
+                                            fontWeight: FlutterFlowTheme.of(context)
+                                                .bodySmall
+                                                .fontWeight,
+                                            fontStyle: FlutterFlowTheme.of(context)
+                                                .bodySmall
+                                                .fontStyle,
+                                          ),
+                                          color: FlutterFlowTheme.of(context)
+                                              .secondaryText,
+                                          letterSpacing: 0.0,
+                                          fontWeight: FlutterFlowTheme.of(context)
+                                              .bodySmall
+                                              .fontWeight,
+                                          fontStyle: FlutterFlowTheme.of(context)
+                                              .bodySmall
+                                              .fontStyle,
+                                          lineHeight: 1.5,
+                                        ),
                               ),
-                              Icon(
-                                Icons.keyboard_arrow_down_rounded,
-                                color:
-                                    FlutterFlowTheme.of(context).secondaryText,
-                                size: 18.0,
-                              ),
-                            ].divide(const SizedBox(width: 4.0)),
+                            ].divide(const SizedBox(height: 4.0)),
                           ),
-                          Text(
-                            'Within ${appState.discoveryRadius.toInt()} km radius',
-                            style:
-                                FlutterFlowTheme.of(context).bodySmall.override(
-                                      font: GoogleFonts.inter(
-                                        fontWeight: FlutterFlowTheme.of(context)
-                                            .bodySmall
-                                            .fontWeight,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .bodySmall
-                                            .fontStyle,
-                                      ),
-                                      color: FlutterFlowTheme.of(context)
-                                          .secondaryText,
-                                      letterSpacing: 0.0,
-                                      fontWeight: FlutterFlowTheme.of(context)
-                                          .bodySmall
-                                          .fontWeight,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .bodySmall
-                                          .fontStyle,
-                                      lineHeight: 1.5,
-                                    ),
-                          ),
-                        ].divide(const SizedBox(height: 4.0)),
-                      ),
-                    ),
-                    Row(
-                      children: [
-                        FlutterFlowIconButton(
-                          borderColor: Colors.transparent,
-                          borderRadius: 8.0,
-                          buttonSize: 44.0,
-                          fillColor:
-                              FlutterFlowTheme.of(context).secondaryBackground,
-                          icon: Icon(
-                            Icons.work_outline_rounded,
-                            color: FlutterFlowTheme.of(context).primaryText,
-                            size: 24.0,
-                          ),
-                          onPressed: () {
-                            context.pushNamed('JobsMarketplace');
-                          },
                         ),
-                        Stack(
+                        Row(
                           children: [
                             FlutterFlowIconButton(
                               borderColor: Colors.transparent,
                               borderRadius: 8.0,
                               buttonSize: 44.0,
-                              fillColor: FlutterFlowTheme.of(context)
-                                  .secondaryBackground,
+                              fillColor:
+                                  FlutterFlowTheme.of(context).secondaryBackground,
                               icon: Icon(
-                                Icons.shopping_cart_outlined,
+                                Icons.work_outline_rounded,
+                                color: FlutterFlowTheme.of(context).primaryText,
+                                size: 24.0,
+                              ),
+                              onPressed: () {
+                                context.pushNamed('JobsMarketplace');
+                              },
+                            ),
+                            Stack(
+                              children: [
+                                FlutterFlowIconButton(
+                                  borderColor: Colors.transparent,
+                                  borderRadius: 8.0,
+                                  buttonSize: 44.0,
+                                  fillColor: FlutterFlowTheme.of(context)
+                                      .secondaryBackground,
+                                  icon: Icon(
+                                    Icons.shopping_cart_outlined,
+                                    color: FlutterFlowTheme.of(context).primaryText,
+                                    size: 24.0,
+                                  ),
+                                  onPressed: () async {
+                                    await context.pushNamed('Cart');
+                                    _fetchCartCount();
+                                  },
+                                ),
+                                if (_cartItemCount > 0)
+                                  Positioned(
+                                    right: 4,
+                                    top: 4,
+                                    child: Container(
+                                      padding: const EdgeInsets.all(2),
+                                      decoration: BoxDecoration(
+                                        color: FlutterFlowTheme.of(context).error,
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      constraints: const BoxConstraints(
+                                          minWidth: 16, minHeight: 16),
+                                      child: Text(
+                                        '$_cartItemCount',
+                                        textAlign: TextAlign.center,
+                                        style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                            FlutterFlowIconButton(
+                              borderColor: Colors.transparent,
+                              borderRadius: 8.0,
+                              buttonSize: 44.0,
+                              fillColor:
+                                  FlutterFlowTheme.of(context).secondaryBackground,
+                              icon: Icon(
+                                Icons.notifications_none_rounded,
                                 color: FlutterFlowTheme.of(context).primaryText,
                                 size: 24.0,
                               ),
                               onPressed: () async {
-                                await context.pushNamed('Cart');
-                                _fetchCartCount();
+                                context.pushNamed('Notifications');
                               },
                             ),
-                            if (_cartItemCount > 0)
-                              Positioned(
-                                right: 4,
-                                top: 4,
-                                child: Container(
-                                  padding: const EdgeInsets.all(2),
-                                  decoration: BoxDecoration(
-                                    color: FlutterFlowTheme.of(context).error,
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  constraints: const BoxConstraints(
-                                      minWidth: 16, minHeight: 16),
-                                  child: Text(
-                                    '$_cartItemCount',
-                                    textAlign: TextAlign.center,
-                                    style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
-                        FlutterFlowIconButton(
-                          borderColor: Colors.transparent,
-                          borderRadius: 8.0,
-                          buttonSize: 44.0,
-                          fillColor:
-                              FlutterFlowTheme.of(context).secondaryBackground,
-                          icon: Icon(
-                            Icons.notifications_none_rounded,
-                            color: FlutterFlowTheme.of(context).primaryText,
-                            size: 24.0,
-                          ),
-                          onPressed: () async {
-                            context.pushNamed('Notifications');
-                          },
-                        ),
-                        FlutterFlowIconButton(
-                          borderColor: Colors.transparent,
-                          borderRadius: 8.0,
-                          buttonSize: 44.0,
-                          fillColor:
-                              FlutterFlowTheme.of(context).secondaryBackground,
-                          icon: Icon(
-                            Icons.logout_rounded,
-                            color: FlutterFlowTheme.of(context).error,
-                            size: 24.0,
-                          ),
-                          onPressed: () async {
-                            final confirm = await showDialog<bool>(
-                              context: context,
-                              builder: (context) => AlertDialog(
-                                title: const Text('Sign Out'),
-                                content: const Text(
-                                    'Are you sure you want to sign out?'),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () =>
-                                        Navigator.pop(context, false),
-                                    child: const Text('Cancel'),
-                                  ),
-                                  TextButton(
-                                    onPressed: () =>
-                                        Navigator.pop(context, true),
-                                    child: const Text('Sign Out'),
-                                  ),
-                                ],
-                              ),
-                            );
-                            if (confirm == true) {
-                              await authManager.signOut();
-                              if (mounted) {
-                                if (!context.mounted) return;
-                                context.goNamed('Authentication');
-                              }
-                            }
-                          },
-                        ),
-                        InkWell(
-                          onTap: () {
-                            context.pushNamed('UserProfileReports');
-                          },
-                          child: Container(
-                            width: 44.0,
-                            height: 44.0,
-                            decoration: BoxDecoration(
-                              color: FlutterFlowTheme.of(context).primary,
-                              boxShadow: [
-                                FlutterFlowTheme.of(context)
-                                    .designToken
-                                    .shadow
-                                    .sm,
-                              ],
-                              borderRadius: BorderRadius.circular(
-                                  FlutterFlowTheme.of(context)
-                                      .designToken
-                                      .radius
-                                      .md),
-                            ),
-                            alignment: const AlignmentDirectional(0.0, 0.0),
-                            child: FutureBuilder<List<UsersRow>>(
-                              future: _model.userProfileFuture,
-                              builder: (context, snapshot) {
-                                final userRow = snapshot.data?.firstOrNull;
-                                final fullName = userRow?.fullName ?? '';
-                                final initials = fullName
-                                    .split(' ')
-                                    .take(2)
-                                    .map((e) => e.isNotEmpty ? e[0] : '')
-                                    .join()
-                                    .toUpperCase();
-                                return Text(
-                                  initials.isEmpty ? 'U' : initials,
-                                  style: FlutterFlowTheme.of(context)
-                                      .labelMedium
-                                      .override(
-                                        font: GoogleFonts.inter(
-                                          fontWeight: FontWeight.w600,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .labelMedium
-                                                  .fontStyle,
-                                        ),
-                                        color: FlutterFlowTheme.of(context)
-                                            .onPrimary,
-                                        fontSize: 16.0,
-                                        letterSpacing: 0.0,
-                                        fontWeight: FontWeight.w600,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .labelMedium
-                                            .fontStyle,
-                                      ),
-                                );
-                              },
-                            ),
-                          ),
-                        ),
-                      ].divide(SizedBox(
-                        width:
-                            FlutterFlowTheme.of(context).designToken.spacing.sm,
-                      )),
-                    ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(
-                  FlutterFlowTheme.of(context).designToken.spacing.lg,
-                  0.0,
-                  FlutterFlowTheme.of(context).designToken.spacing.lg,
-                  FlutterFlowTheme.of(context).designToken.spacing.md,
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    InkWell(
-                      splashColor: Colors.transparent,
-                      focusColor: Colors.transparent,
-                      hoverColor: Colors.transparent,
-                      highlightColor: Colors.transparent,
-                      onTap: () async {
-                        context.pushNamed('SearchResults');
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color:
-                              FlutterFlowTheme.of(context).secondaryBackground,
-                          boxShadow: [
-                            FlutterFlowTheme.of(context).designToken.shadow.sm,
-                          ],
-                          borderRadius: BorderRadius.circular(
-                              FlutterFlowTheme.of(context)
-                                  .designToken
-                                  .radius
-                                  .lg),
-                          border: Border.all(
-                            color: FlutterFlowTheme.of(context).alternate,
-                          ),
-                        ),
-                        child: Padding(
-                          padding: EdgeInsets.all(FlutterFlowTheme.of(context)
-                              .designToken
-                              .spacing
-                              .md),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.search_rounded,
-                                color: FlutterFlowTheme.of(context).onSurface,
+                            FlutterFlowIconButton(
+                              borderColor: Colors.transparent,
+                              borderRadius: 8.0,
+                              buttonSize: 44.0,
+                              fillColor:
+                                  FlutterFlowTheme.of(context).secondaryBackground,
+                              icon: Icon(
+                                Icons.logout_rounded,
+                                color: FlutterFlowTheme.of(context).error,
                                 size: 24.0,
                               ),
-                              Expanded(
-                                child: Text(
-                                  'What do you need? (e.g. Electrician)',
-                                  style: FlutterFlowTheme.of(context).bodyLarge,
+                              onPressed: () async {
+                                final confirm = await showDialog<bool>(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    title: const Text('Sign Out'),
+                                    content: const Text(
+                                        'Are you sure you want to sign out?'),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () =>
+                                            Navigator.pop(context, false),
+                                        child: const Text('Cancel'),
+                                      ),
+                                      TextButton(
+                                        onPressed: () =>
+                                            Navigator.pop(context, true),
+                                        child: const Text('Sign Out'),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                                if (confirm == true) {
+                                  await authManager.signOut();
+                                  if (mounted) {
+                                    if (!context.mounted) return;
+                                    context.goNamed('Authentication');
+                                  }
+                                }
+                              },
+                            ),
+                            InkWell(
+                              onTap: () {
+                                context.pushNamed('UserProfileReports');
+                              },
+                              child: Container(
+                                width: 44.0,
+                                height: 44.0,
+                                decoration: BoxDecoration(
+                                  color: FlutterFlowTheme.of(context).primary,
+                                  boxShadow: [
+                                    FlutterFlowTheme.of(context)
+                                        .designToken
+                                        .shadow
+                                        .sm,
+                                  ],
+                                  borderRadius: BorderRadius.circular(
+                                      FlutterFlowTheme.of(context)
+                                          .designToken
+                                          .radius
+                                          .md),
+                                ),
+                                alignment: const AlignmentDirectional(0.0, 0.0),
+                                child: FutureBuilder<List<UsersRow>>(
+                                  future: _model.userProfileFuture,
+                                  builder: (context, snapshot) {
+                                    final userRow = snapshot.data?.firstOrNull;
+                                    final fullName = userRow?.fullName ?? '';
+                                    final initials = fullName
+                                        .split(' ')
+                                        .take(2)
+                                        .map((e) => e.isNotEmpty ? e[0] : '')
+                                        .join()
+                                        .toUpperCase();
+                                    return Text(
+                                      initials.isEmpty ? 'U' : initials,
+                                      style: FlutterFlowTheme.of(context)
+                                          .labelMedium
+                                          .override(
+                                            font: GoogleFonts.inter(
+                                              fontWeight: FontWeight.w600,
+                                              fontStyle:
+                                                  FlutterFlowTheme.of(context)
+                                                      .labelMedium
+                                                      .fontStyle,
+                                            ),
+                                            color: FlutterFlowTheme.of(context)
+                                                .onPrimary,
+                                            fontSize: 16.0,
+                                            letterSpacing: 0.0,
+                                            fontWeight: FontWeight.w600,
+                                            fontStyle: FlutterFlowTheme.of(context)
+                                                .labelMedium
+                                                .fontStyle,
+                                          ),
+                                    );
+                                  },
                                 ),
                               ),
-                              Icon(
-                                Icons.tune_rounded,
-                                color: FlutterFlowTheme.of(context).primary,
-                                size: 20.0,
-                              ),
-                            ].divide(SizedBox(
-                                width: FlutterFlowTheme.of(context)
+                            ),
+                          ].divide(SizedBox(
+                            width:
+                                FlutterFlowTheme.of(context).designToken.spacing.sm,
+                          )),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsetsDirectional.fromSTEB(
+                    FlutterFlowTheme.of(context).designToken.spacing.lg,
+                    0.0,
+                    FlutterFlowTheme.of(context).designToken.spacing.lg,
+                    FlutterFlowTheme.of(context).designToken.spacing.md,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      InkWell(
+                        splashColor: Colors.transparent,
+                        focusColor: Colors.transparent,
+                        hoverColor: Colors.transparent,
+                        highlightColor: Colors.transparent,
+                        onTap: () async {
+                          context.pushNamed('SearchResults');
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color:
+                                FlutterFlowTheme.of(context).secondaryBackground,
+                            boxShadow: [
+                              FlutterFlowTheme.of(context).designToken.shadow.sm,
+                            ],
+                            borderRadius: BorderRadius.circular(
+                                FlutterFlowTheme.of(context)
                                     .designToken
-                                    .spacing
-                                    .md)),
+                                    .radius
+                                    .lg),
+                            border: Border.all(
+                              color: FlutterFlowTheme.of(context).alternate,
+                            ),
+                          ),
+                          child: Padding(
+                            padding: EdgeInsets.all(FlutterFlowTheme.of(context)
+                                .designToken
+                                .spacing
+                                .md),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.search_rounded,
+                                  color: FlutterFlowTheme.of(context).onSurface,
+                                  size: 24.0,
+                                ),
+                                Expanded(
+                                  child: Text(
+                                    'What do you need? (e.g. Electrician)',
+                                    style: FlutterFlowTheme.of(context).bodyLarge,
+                                  ),
+                                ),
+                                Icon(
+                                  Icons.tune_rounded,
+                                  color: FlutterFlowTheme.of(context).primary,
+                                  size: 20.0,
+                                ),
+                              ].divide(SizedBox(
+                                  width: FlutterFlowTheme.of(context)
+                                      .designToken
+                                      .spacing
+                                      .md)),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [2, 5, 10, 15, 25]
-                                .map((radius) {
-                                  final isSelected =
-                                      appState.discoveryRadius.toInt() ==
-                                          radius;
-                                  return InkWell(
-                                    onTap: () {
-                                      setState(() {
-                                        appState.discoveryRadius =
-                                            radius.toDouble();
-                                        _fetchBusinesses();
-                                      });
-                                    },
-                                    child: AnimatedContainer(
-                                      duration:
-                                          const Duration(milliseconds: 200),
-                                      height: 34.0,
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 16.0),
-                                      decoration: BoxDecoration(
-                                        color: isSelected
-                                            ? FlutterFlowTheme.of(context)
-                                                .primary
-                                            : FlutterFlowTheme.of(context)
-                                                .primaryBackground,
-                                        borderRadius: BorderRadius.circular(
-                                            FlutterFlowTheme.of(context)
-                                                .designToken
-                                                .radius
-                                                .full),
-                                        border: Border.all(
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [2, 5, 10, 15, 25]
+                                  .map((radius) {
+                                    final isSelected =
+                                        appState.discoveryRadius.toInt() ==
+                                            radius;
+                                    return InkWell(
+                                      onTap: () {
+                                        setState(() {
+                                          appState.discoveryRadius =
+                                              radius.toDouble();
+                                          _fetchBusinesses();
+                                        });
+                                      },
+                                      child: AnimatedContainer(
+                                        duration:
+                                            const Duration(milliseconds: 200),
+                                        height: 34.0,
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 16.0),
+                                        decoration: BoxDecoration(
                                           color: isSelected
                                               ? FlutterFlowTheme.of(context)
                                                   .primary
                                               : FlutterFlowTheme.of(context)
-                                                  .alternate,
+                                                  .primaryBackground,
+                                          borderRadius: BorderRadius.circular(
+                                              FlutterFlowTheme.of(context)
+                                                  .designToken
+                                                  .radius
+                                                  .full),
+                                          border: Border.all(
+                                            color: isSelected
+                                                ? FlutterFlowTheme.of(context)
+                                                    .primary
+                                                : FlutterFlowTheme.of(context)
+                                                    .alternate,
+                                          ),
+                                        ),
+                                        child: Center(
+                                          child: Text(
+                                            '${radius}km',
+                                            style: FlutterFlowTheme.of(context)
+                                                .labelSmall
+                                                .override(
+                                                  fontFamily:
+                                                      FlutterFlowTheme.of(context)
+                                                          .labelSmallFamily,
+                                                  color: isSelected
+                                                      ? Colors.white
+                                                      : FlutterFlowTheme.of(
+                                                              context)
+                                                          .primaryText,
+                                                  fontWeight: isSelected
+                                                      ? FontWeight.bold
+                                                      : FontWeight.normal,
+                                                ),
+                                          ),
                                         ),
                                       ),
-                                      child: Center(
-                                        child: Text(
-                                          '${radius}km',
-                                          style: FlutterFlowTheme.of(context)
-                                              .labelSmall
-                                              .override(
-                                                fontFamily:
-                                                    FlutterFlowTheme.of(context)
-                                                        .labelSmallFamily,
-                                                color: isSelected
-                                                    ? Colors.white
-                                                    : FlutterFlowTheme.of(
-                                                            context)
-                                                        .primaryText,
-                                                fontWeight: isSelected
-                                                    ? FontWeight.bold
-                                                    : FontWeight.normal,
-                                              ),
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                })
-                                .toList()
-                                .divide(SizedBox(
-                                    width: FlutterFlowTheme.of(context)
-                                        .designToken
-                                        .spacing
-                                        .sm)),
-                          ),
-                          InkWell(
-                            onTap: () {
-                              setState(() {
-                                _model.openNow = !_model.openNow;
-                                _fetchBusinesses();
-                              });
-                            },
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 200),
-                              height: 34.0,
-                              decoration: BoxDecoration(
-                                color: _model.openNow
-                                    ? FlutterFlowTheme.of(context).success
-                                    : FlutterFlowTheme.of(context)
-                                        .primaryBackground,
-                                borderRadius: BorderRadius.circular(
-                                    FlutterFlowTheme.of(context)
-                                        .designToken
-                                        .radius
-                                        .full),
-                                border: Border.all(
+                                    );
+                                  })
+                                  .toList()
+                                  .divide(SizedBox(
+                                      width: FlutterFlowTheme.of(context)
+                                          .designToken
+                                          .spacing
+                                          .sm)),
+                            ),
+                            InkWell(
+                              onTap: () {
+                                setState(() {
+                                  _model.openNow = !_model.openNow;
+                                  _fetchBusinesses();
+                                });
+                              },
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                height: 34.0,
+                                decoration: BoxDecoration(
                                   color: _model.openNow
                                       ? FlutterFlowTheme.of(context).success
-                                      : FlutterFlowTheme.of(context).alternate,
+                                      : FlutterFlowTheme.of(context)
+                                          .primaryBackground,
+                                  borderRadius: BorderRadius.circular(
+                                      FlutterFlowTheme.of(context)
+                                          .designToken
+                                          .radius
+                                          .full),
+                                  border: Border.all(
+                                    color: _model.openNow
+                                        ? FlutterFlowTheme.of(context).success
+                                        : FlutterFlowTheme.of(context).alternate,
+                                  ),
                                 ),
-                              ),
-                              alignment: const AlignmentDirectional(0.0, 0.0),
-                              child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
-                                    FlutterFlowTheme.of(context)
-                                        .designToken
-                                        .spacing
-                                        .md,
-                                    0.0,
-                                    FlutterFlowTheme.of(context)
-                                        .designToken
-                                        .spacing
-                                        .md,
-                                    0.0),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      _model.openNow
-                                          ? Icons.check_circle_rounded
-                                          : Icons.access_time_filled_rounded,
-                                      size: 14,
-                                      color: _model.openNow
-                                          ? Colors.white
-                                          : FlutterFlowTheme.of(context)
-                                              .secondaryText,
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      'Open Now',
-                                      style: FlutterFlowTheme.of(context)
-                                          .labelMedium
-                                          .override(
-                                            fontFamily:
-                                                FlutterFlowTheme.of(context)
-                                                    .labelMediumFamily,
-                                            fontWeight: _model.openNow
-                                                ? FontWeight.bold
-                                                : FontWeight.normal,
-                                            color: _model.openNow
-                                                ? Colors.white
-                                                : FlutterFlowTheme.of(context)
-                                                    .secondaryText,
-                                            fontSize: 13.0,
-                                          ),
-                                    ),
-                                  ],
+                                alignment: const AlignmentDirectional(0.0, 0.0),
+                                child: Padding(
+                                  padding: EdgeInsetsDirectional.fromSTEB(
+                                      FlutterFlowTheme.of(context)
+                                          .designToken
+                                          .spacing
+                                          .md,
+                                      0.0,
+                                      FlutterFlowTheme.of(context)
+                                          .designToken
+                                          .spacing
+                                          .md,
+                                      0.0),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        _model.openNow
+                                            ? Icons.check_circle_rounded
+                                            : Icons.access_time_filled_rounded,
+                                        size: 14,
+                                        color: _model.openNow
+                                            ? Colors.white
+                                            : FlutterFlowTheme.of(context)
+                                                .secondaryText,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        'Open Now',
+                                        style: FlutterFlowTheme.of(context)
+                                            .labelMedium
+                                            .override(
+                                              fontFamily:
+                                                  FlutterFlowTheme.of(context)
+                                                      .labelMediumFamily,
+                                              fontWeight: _model.openNow
+                                                  ? FontWeight.bold
+                                                  : FontWeight.normal,
+                                              color: _model.openNow
+                                                  ? Colors.white
+                                                  : FlutterFlowTheme.of(context)
+                                                      .secondaryText,
+                                              fontSize: 13.0,
+                                            ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                        ].divide(SizedBox(
-                            width: FlutterFlowTheme.of(context)
-                                .designToken
-                                .spacing
-                                .sm)),
+                          ].divide(SizedBox(
+                              width: FlutterFlowTheme.of(context)
+                                  .designToken
+                                  .spacing
+                                  .sm)),
+                        ),
                       ),
-                    ),
-                  ].divide(SizedBox(
-                      height:
-                          FlutterFlowTheme.of(context).designToken.spacing.md)),
+                    ].divide(SizedBox(
+                        height:
+                            FlutterFlowTheme.of(context).designToken.spacing.md)),
+                  ),
                 ),
-              ),
-              Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(
-                  0.0,
-                  0.0,
-                  0.0,
-                  FlutterFlowTheme.of(context).designToken.spacing.lg,
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Padding(
-                      padding: EdgeInsetsDirectional.fromSTEB(
-                        FlutterFlowTheme.of(context).designToken.spacing.lg,
-                        0.0,
-                        FlutterFlowTheme.of(context).designToken.spacing.lg,
-                        0.0,
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            AppLocalizations.of(context)!.categories,
-                            style: FlutterFlowTheme.of(context)
-                                .titleLarge
-                                .override(
-                                  font: GoogleFonts.inter(
+                Padding(
+                  padding: EdgeInsetsDirectional.fromSTEB(
+                    0.0,
+                    0.0,
+                    0.0,
+                    FlutterFlowTheme.of(context).designToken.spacing.lg,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Padding(
+                        padding: EdgeInsetsDirectional.fromSTEB(
+                          FlutterFlowTheme.of(context).designToken.spacing.lg,
+                          0.0,
+                          FlutterFlowTheme.of(context).designToken.spacing.lg,
+                          0.0,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              AppLocalizations.of(context)!.categories,
+                              style: FlutterFlowTheme.of(context)
+                                  .titleLarge
+                                  .override(
+                                    font: GoogleFonts.inter(
+                                      fontWeight: FlutterFlowTheme.of(context)
+                                          .titleLarge
+                                          .fontWeight,
+                                      fontStyle: FlutterFlowTheme.of(context)
+                                          .titleLarge
+                                          .fontStyle,
+                                    ),
+                                    color:
+                                        FlutterFlowTheme.of(context).primaryText,
+                                    letterSpacing: 0.0,
                                     fontWeight: FlutterFlowTheme.of(context)
                                         .titleLarge
                                         .fontWeight,
                                     fontStyle: FlutterFlowTheme.of(context)
                                         .titleLarge
                                         .fontStyle,
+                                    lineHeight: 1.4,
                                   ),
-                                  color:
-                                      FlutterFlowTheme.of(context).primaryText,
-                                  letterSpacing: 0.0,
-                                  fontWeight: FlutterFlowTheme.of(context)
-                                      .titleLarge
-                                      .fontWeight,
-                                  fontStyle: FlutterFlowTheme.of(context)
-                                      .titleLarge
-                                      .fontStyle,
-                                  lineHeight: 1.4,
+                            ),
+                            InkWell(
+                              onTap: () async {
+                                context.pushNamed('Categories');
+                              },
+                              child: Text(
+                                AppLocalizations.of(context)!.seeAll,
+                                style: FlutterFlowTheme.of(context)
+                                    .labelLarge
+                                    .override(
+                                      color: FlutterFlowTheme.of(context).primary,
+                                      lineHeight: 1.4,
+                                    ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      FutureBuilder<List<BusinessCategoriesRow>>(
+                        future: _categoriesFuture,
+                        builder: (context, snapshot) {
+                          if (snapshot.hasError) {
+                            return Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.error_outline,
+                                      color: FlutterFlowTheme.of(context).error),
+                                  const SizedBox(width: 8),
+                                  const Text('Failed to load categories'),
+                                  TextButton(
+                                    onPressed: () => setState(() {
+                                      _categoriesFuture =
+                                          BusinessCategoriesTable().queryRows(
+                                        queryFn: (q) => q.order('display_order',
+                                            ascending: true),
+                                      );
+                                    }),
+                                    child: const Text('Retry'),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
+                          if (!snapshot.hasData) {
+                            return Center(
+                              child: SizedBox(
+                                width: 50.0,
+                                height: 50.0,
+                                child: CircularProgressIndicator(
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    FlutterFlowTheme.of(context).primary,
+                                  ),
                                 ),
+                              ),
+                            );
+                          }
+                          final categories = snapshot.data!;
+                          return SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Padding(
+                                  padding: EdgeInsetsDirectional.fromSTEB(
+                                    FlutterFlowTheme.of(context)
+                                        .designToken
+                                        .spacing
+                                        .lg,
+                                    0.0,
+                                    FlutterFlowTheme.of(context)
+                                        .designToken
+                                        .spacing
+                                        .lg,
+                                    0.0,
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: categories
+                                        .map((category) {
+                                          return InkWell(
+                                            onTap: () async {
+                                              context.pushNamed(
+                                                'SearchResults',
+                                                queryParameters: {
+                                                  'categoryId': serializeParam(
+                                                    category.id,
+                                                    ParamType.string,
+                                                  ),
+                                                }.withoutNulls,
+                                              );
+                                            },
+                                            child: CategoryItemWidget(
+                                              key: Key('category_${category.id}'),
+                                              icon: getIconFromData(
+                                                  category.iconName),
+                                              label: category.name,
+                                            ),
+                                          );
+                                        })
+                                        .toList()
+                                        .divide(SizedBox(
+                                            width: FlutterFlowTheme.of(context)
+                                                .designToken
+                                                .spacing
+                                                .md)),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ].divide(SizedBox(
+                        height:
+                            FlutterFlowTheme.of(context).designToken.spacing.md)),
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsetsDirectional.fromSTEB(
+                    FlutterFlowTheme.of(context).designToken.spacing.lg,
+                    0.0,
+                    FlutterFlowTheme.of(context).designToken.spacing.lg,
+                    FlutterFlowTheme.of(context).designToken.spacing.lg,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            AppLocalizations.of(context)!.openNow,
+                            style: FlutterFlowTheme.of(context).titleLarge,
                           ),
                           InkWell(
                             onTap: () async {
-                              context.pushNamed('Categories');
+                              context.pushNamed(
+                                'SearchResults',
+                                queryParameters: {
+                                  'openNow': serializeParam(
+                                    true,
+                                    ParamType.bool,
+                                  ),
+                                }.withoutNulls,
+                              );
+                            },
+                            child: Text(
+                              'Filter',
+                              style: FlutterFlowTheme.of(context)
+                                  .labelLarge
+                                  .override(
+                                    fontFamily: FlutterFlowTheme.of(context)
+                                        .labelLargeFamily,
+                                    color: FlutterFlowTheme.of(context).primary,
+                                  ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      FutureBuilder<List<BusinessesRow>>(
+                        future: _model.openNowBusinessesFuture,
+                        builder: (context, snapshot) {
+                          if (snapshot.hasError) {
+                            return Center(
+                              child: Padding(
+                                padding: EdgeInsets.all(
+                                    FlutterFlowTheme.of(context)
+                                        .designToken
+                                        .spacing
+                                        .lg),
+                                child: Column(
+                                  children: [
+                                    const Text('Unable to load businesses'),
+                                    FFButtonWidget(
+                                      onPressed: () => setState(() {
+                                        _fetchBusinesses();
+                                      }),
+                                      text: 'Try Again',
+                                      options: FFButtonOptions(
+                                        height: 40,
+                                        color:
+                                            FlutterFlowTheme.of(context).primary,
+                                        textStyle: FlutterFlowTheme.of(context)
+                                            .titleSmall
+                                            .override(
+                                              fontFamily:
+                                                  FlutterFlowTheme.of(context)
+                                                      .titleSmallFamily,
+                                              color: Colors.white,
+                                              useGoogleFonts: GoogleFonts.asMap()
+                                                  .containsKey(
+                                                      FlutterFlowTheme.of(context)
+                                                          .titleSmallFamily),
+                                            ),
+                                        borderRadius: BorderRadius.circular(
+                                            FlutterFlowTheme.of(context)
+                                                .designToken
+                                                .radius
+                                                .md),
+                                      ),
+                                    ),
+                                  ].divide(SizedBox(
+                                      height: FlutterFlowTheme.of(context)
+                                          .designToken
+                                          .spacing
+                                          .md)),
+                                ),
+                              ),
+                            );
+                          }
+                          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                            return Container();
+                          }
+                          final businesses = snapshot.data!;
+                          if (businesses.isEmpty) return Container();
+                          return SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: businesses.map((business) {
+                                    final isOpen = business.isOpen ?? false;
+                                    return Padding(
+                                      padding: EdgeInsetsDirectional.fromSTEB(
+                                          0.0,
+                                          0.0,
+                                          FlutterFlowTheme.of(context)
+                                              .designToken
+                                              .spacing
+                                              .md,
+                                          0.0),
+                                      child: InkWell(
+                                        onTap: () async {
+                                          context.pushNamed(
+                                            'BusinessProfile',
+                                            queryParameters: {
+                                              'businessId': serializeParam(
+                                                business.id,
+                                                ParamType.string,
+                                              ),
+                                            },
+                                          );
+                                        },
+                                        child: Container(
+                                          width: 280.0,
+                                          decoration: BoxDecoration(
+                                            color: FlutterFlowTheme.of(context)
+                                                .secondaryBackground,
+                                            boxShadow: [
+                                              FlutterFlowTheme.of(context)
+                                                  .designToken
+                                                  .shadow
+                                                  .sm,
+                                            ],
+                                            borderRadius: BorderRadius.circular(
+                                                FlutterFlowTheme.of(context)
+                                                    .designToken
+                                                    .radius
+                                                    .lg),
+                                            border: Border.all(
+                                              color: FlutterFlowTheme.of(context)
+                                                  .alternate,
+                                            ),
+                                          ),
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.stretch,
+                                            children: [
+                                              ClipRRect(
+                                                borderRadius: BorderRadius.only(
+                                                  topLeft: Radius.circular(
+                                                      FlutterFlowTheme.of(context)
+                                                          .designToken
+                                                          .radius
+                                                          .lg),
+                                                  topRight: Radius.circular(
+                                                      FlutterFlowTheme.of(context)
+                                                          .designToken
+                                                          .radius
+                                                          .lg),
+                                                ),
+                                                child: CachedNetworkImage(
+                                                  imageUrl: business.imageUrl ??
+                                                      'https://images.unsplash.com/photo-1534723452862-4c874018d66d?auto=format&fit=crop&w=400&h=300&q=80',
+                                                  height: 120.0,
+                                                  fit: BoxFit.cover,
+                                                  placeholder: (context, url) =>
+                                                      Container(
+                                                    color: FlutterFlowTheme.of(
+                                                            context)
+                                                        .primaryBackground,
+                                                    child: Center(
+                                                      child: SizedBox(
+                                                        width: 24,
+                                                        height: 24,
+                                                        child:
+                                                            CircularProgressIndicator(
+                                                          strokeWidth: 2,
+                                                          valueColor:
+                                                              AlwaysStoppedAnimation<
+                                                                  Color>(
+                                                            FlutterFlowTheme.of(
+                                                                    context)
+                                                                .primary,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  errorWidget:
+                                                      (context, url, error) =>
+                                                          Container(
+                                                    color: FlutterFlowTheme.of(
+                                                            context)
+                                                        .primaryBackground,
+                                                    child: Icon(
+                                                      Icons
+                                                          .image_not_supported_rounded,
+                                                      color: FlutterFlowTheme.of(
+                                                              context)
+                                                          .secondaryText,
+                                                      size: 32,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                              Padding(
+                                                padding: EdgeInsets.all(
+                                                    FlutterFlowTheme.of(context)
+                                                        .designToken
+                                                        .spacing
+                                                        .md),
+                                                child: Column(
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceBetween,
+                                                      children: [
+                                                        Text(
+                                                          business.name,
+                                                          style:
+                                                              FlutterFlowTheme.of(
+                                                                      context)
+                                                                  .titleMedium,
+                                                        ),
+                                                        Container(
+                                                          decoration:
+                                                              BoxDecoration(
+                                                            color: isOpen
+                                                                ? FlutterFlowTheme.of(context).success
+                                                                : FlutterFlowTheme.of(context).error,
+                                                            borderRadius:
+                                                                BorderRadius.circular(
+                                                                    FlutterFlowTheme.of(
+                                                                            context)
+                                                                        .designToken
+                                                                        .radius
+                                                                        .xs),
+                                                          ),
+                                                          child: Padding(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .symmetric(
+                                                                    horizontal: 6,
+                                                                    vertical: 2),
+                                                            child: Text(
+                                                              isOpen ? 'OPEN' : 'CLOSED',
+                                                              style: FlutterFlowTheme
+                                                                      .of(context)
+                                                                  .labelSmall
+                                                                  .override(
+                                                                    fontFamily: FlutterFlowTheme.of(
+                                                                            context)
+                                                                        .labelSmallFamily,
+                                                                    color: Colors
+                                                                        .white,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold,
+                                                                    useGoogleFonts: GoogleFonts
+                                                                            .asMap()
+                                                                        .containsKey(
+                                                                            FlutterFlowTheme.of(context)
+                                                                                .labelSmallFamily),
+                                                                  ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    Text(
+                                                      '${_categoryIdToName[business.categoryId] ?? 'Local Business'} • ${business.distanceKm != null ? (business.distanceKm! < 1.0 ? '${(business.distanceKm! * 1000).toInt()} m' : '${business.distanceKm!.toStringAsFixed(1)} km') : 'Nearby'}',
+                                                      style: FlutterFlowTheme.of(
+                                                              context)
+                                                          .bodySmall,
+                                                    ),
+                                                  ].divide(SizedBox(
+                                                      height: FlutterFlowTheme.of(
+                                                              context)
+                                                          .designToken
+                                                          .spacing
+                                                          .xs)),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  }).toList(),
+                            ),
+                          );
+                        },
+                      ),
+                    ].divide(SizedBox(
+                        height:
+                            FlutterFlowTheme.of(context).designToken.spacing.md)),
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsetsDirectional.fromSTEB(
+                    FlutterFlowTheme.of(context).designToken.spacing.lg,
+                    0.0,
+                    FlutterFlowTheme.of(context).designToken.spacing.lg,
+                    FlutterFlowTheme.of(context).designToken.spacing.xl,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            AppLocalizations.of(context)!.nearbyBusinesses,
+                            style: FlutterFlowTheme.of(context).titleLarge,
+                          ),
+                          InkWell(
+                            onTap: () {
+                              context.pushNamed('SearchResults');
                             },
                             child: Text(
                               AppLocalizations.of(context)!.seeAll,
@@ -732,560 +1186,110 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                                   .labelLarge
                                   .override(
                                     color: FlutterFlowTheme.of(context).primary,
-                                    lineHeight: 1.4,
                                   ),
                             ),
                           ),
                         ],
                       ),
-                    ),
-                    FutureBuilder<List<BusinessCategoriesRow>>(
-                      future: _categoriesFuture,
-                      builder: (context, snapshot) {
-                        if (snapshot.hasError) {
-                          return Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Row(
-                              children: [
-                                Icon(Icons.error_outline,
-                                    color: FlutterFlowTheme.of(context).error),
-                                const SizedBox(width: 8),
-                                const Text('Failed to load categories'),
-                                TextButton(
-                                  onPressed: () => setState(() {
-                                    _categoriesFuture =
-                                        BusinessCategoriesTable().queryRows(
-                                      queryFn: (q) => q.order('display_order',
-                                          ascending: true),
-                                    );
-                                  }),
-                                  child: const Text('Retry'),
-                                ),
-                              ],
-                            ),
-                          );
-                        }
-                        if (!snapshot.hasData) {
-                          return Center(
-                            child: SizedBox(
-                              width: 50.0,
-                              height: 50.0,
+                      FutureBuilder<List<BusinessesRow>>(
+                        future: _businessesFuture,
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData) {
+                            return Center(
                               child: CircularProgressIndicator(
                                 valueColor: AlwaysStoppedAnimation<Color>(
                                   FlutterFlowTheme.of(context).primary,
                                 ),
                               ),
-                            ),
-                          );
-                        }
-                        final categories = snapshot.data!;
-                        return SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
-                                  FlutterFlowTheme.of(context)
-                                      .designToken
-                                      .spacing
-                                      .lg,
-                                  0.0,
-                                  FlutterFlowTheme.of(context)
-                                      .designToken
-                                      .spacing
-                                      .lg,
-                                  0.0,
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: categories
-                                      .map((category) {
-                                        return InkWell(
-                                          onTap: () async {
-                                            context.pushNamed(
-                                              'SearchResults',
-                                              queryParameters: {
-                                                'categoryId': serializeParam(
-                                                  category.id,
-                                                  ParamType.string,
-                                                ),
-                                              }.withoutNulls,
-                                            );
-                                          },
-                                          child: CategoryItemWidget(
-                                            key: Key('category_${category.id}'),
-                                            icon: getIconFromData(
-                                                category.iconName),
-                                            label: category.name,
-                                          ),
-                                        );
-                                      })
-                                      .toList()
-                                      .divide(SizedBox(
-                                          width: FlutterFlowTheme.of(context)
-                                              .designToken
-                                              .spacing
-                                              .md)),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
-                  ].divide(SizedBox(
-                      height:
-                          FlutterFlowTheme.of(context).designToken.spacing.md)),
-                ),
-              ),
-              Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(
-                  FlutterFlowTheme.of(context).designToken.spacing.lg,
-                  0.0,
-                  FlutterFlowTheme.of(context).designToken.spacing.lg,
-                  FlutterFlowTheme.of(context).designToken.spacing.lg,
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          AppLocalizations.of(context)!.openNow,
-                          style: FlutterFlowTheme.of(context).titleLarge,
-                        ),
-                        InkWell(
-                          onTap: () async {
-                            context.pushNamed(
-                              'SearchResults',
-                              queryParameters: {
-                                'openNow': serializeParam(
-                                  true,
-                                  ParamType.bool,
-                                ),
-                              }.withoutNulls,
                             );
-                          },
-                          child: Text(
-                            'Filter',
-                            style: FlutterFlowTheme.of(context)
-                                .labelLarge
-                                .override(
-                                  fontFamily: FlutterFlowTheme.of(context)
-                                      .labelLargeFamily,
-                                  color: FlutterFlowTheme.of(context).primary,
-                                ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    FutureBuilder<List<BusinessesRow>>(
-                      future: _businessesFuture,
-                      builder: (context, snapshot) {
-                        if (snapshot.hasError) {
-                          return Center(
-                            child: Padding(
-                              padding: EdgeInsets.all(
-                                  FlutterFlowTheme.of(context)
-                                      .designToken
-                                      .spacing
-                                      .lg),
-                              child: Column(
-                                children: [
-                                  const Text('Unable to load businesses'),
-                                  FFButtonWidget(
-                                    onPressed: () => setState(() {
-                                      _fetchBusinesses();
-                                    }),
-                                    text: 'Try Again',
-                                    options: FFButtonOptions(
-                                      height: 40,
-                                      color:
-                                          FlutterFlowTheme.of(context).primary,
-                                      textStyle: FlutterFlowTheme.of(context)
-                                          .titleSmall
-                                          .override(
-                                            fontFamily:
-                                                FlutterFlowTheme.of(context)
-                                                    .titleSmallFamily,
-                                            color: Colors.white,
-                                            useGoogleFonts: GoogleFonts.asMap()
-                                                .containsKey(
-                                                    FlutterFlowTheme.of(context)
-                                                        .titleSmallFamily),
+                          }
+                          final businesses = snapshot.data!;
+                          if (businesses.isEmpty) {
+                            final hasLocation =
+                                FFAppState.instance.userLocation != null;
+                            return EmptyStateView(
+                              icon: hasLocation
+                                  ? Icons.search_off_rounded
+                                  : Icons.location_off_rounded,
+                              title: hasLocation
+                                  ? AppLocalizations.of(context)!.noResultsFound
+                                  : AppLocalizations.of(context)!
+                                      .locationRequired,
+                              description: hasLocation
+                                  ? AppLocalizations.of(context)!
+                                      .noResultsDescription
+                                  : AppLocalizations.of(context)!
+                                      .enableLocationDescription,
+                              buttonText: hasLocation
+                                  ? AppLocalizations.of(context)!.discoveryArea
+                                  : AppLocalizations.of(context)!.enableLocation,
+                              onTap: hasLocation
+                                  ? () =>
+                                      context.pushNamed('LocationRadiusSelector')
+                                  : () => LocationService.updateCurrentLocation(
+                                      context),
+                            );
+                          }
+                          return Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: businesses
+                                .map((business) {
+                                  final isOpen = business.isOpen ?? false;
+                                  return InkWell(
+                                    splashColor: Colors.transparent,
+                                    focusColor: Colors.transparent,
+                                    hoverColor: Colors.transparent,
+                                    highlightColor: Colors.transparent,
+                                    onTap: () async {
+                                      context.pushNamed(
+                                        'BusinessProfile',
+                                        queryParameters: {
+                                          'businessId': serializeParam(
+                                            business.id,
+                                            ParamType.string,
                                           ),
-                                      borderRadius: BorderRadius.circular(
-                                          FlutterFlowTheme.of(context)
-                                              .designToken
-                                              .radius
-                                              .md),
+                                        },
+                                      );
+                                    },
+                                    child: BusinessCardWidget(
+                                      key: Key('business_${business.id}'),
+                                      name: business.name,
+                                      category: _categoryIdToName[
+                                              business.categoryId] ??
+                                          'Local Business',
+                                      distance: business.distanceKm != null
+                                          ? (business.distanceKm! < 1.0
+                                              ? '${(business.distanceKm! * 1000).toInt()} m'
+                                              : '${business.distanceKm!.toStringAsFixed(1)} km')
+                                          : 'Nearby',
+                                      imgDesc: business.imageUrl ??
+                                          'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=800&q=80',
+                                      rating: (business.rating ?? 0.0).toString(),
+                                      status: isOpen ? 'Open' : 'Closed',
+                                      verified: business.isVerified ?? false,
+                                      isOpen: isOpen,
                                     ),
-                                  ),
-                                ].divide(SizedBox(
+                                  );
+                                })
+                                .toList()
+                                .divide(SizedBox(
                                     height: FlutterFlowTheme.of(context)
                                         .designToken
                                         .spacing
                                         .md)),
-                              ),
-                            ),
                           );
-                        }
-                        if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                          return Container();
-                        }
-                        final allBusinesses = snapshot.data!;
-                        // Remove duplicate filtering if global toggle is ON
-                        final businesses = _model.openNow
-                            ? allBusinesses
-                            : allBusinesses
-                                .where((b) => b.isOpen ?? false)
-                                .toList();
-                        if (businesses.isEmpty) return Container();
-                        return SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Row(
-                                children: businesses.map((business) {
-                                  return Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
-                                        0.0,
-                                        0.0,
-                                        FlutterFlowTheme.of(context)
-                                            .designToken
-                                            .spacing
-                                            .md,
-                                        0.0),
-                                    child: InkWell(
-                                      onTap: () async {
-                                        context.pushNamed(
-                                          'BusinessProfile',
-                                          queryParameters: {
-                                            'businessId': serializeParam(
-                                              business.id,
-                                              ParamType.string,
-                                            ),
-                                          },
-                                        );
-                                      },
-                                      child: Container(
-                                        width: 280.0,
-                                        decoration: BoxDecoration(
-                                          color: FlutterFlowTheme.of(context)
-                                              .secondaryBackground,
-                                          boxShadow: [
-                                            FlutterFlowTheme.of(context)
-                                                .designToken
-                                                .shadow
-                                                .sm,
-                                          ],
-                                          borderRadius: BorderRadius.circular(
-                                              FlutterFlowTheme.of(context)
-                                                  .designToken
-                                                  .radius
-                                                  .lg),
-                                          border: Border.all(
-                                            color: FlutterFlowTheme.of(context)
-                                                .alternate,
-                                          ),
-                                        ),
-                                        child: Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.stretch,
-                                          children: [
-                                            ClipRRect(
-                                              borderRadius: BorderRadius.only(
-                                                topLeft: Radius.circular(
-                                                    FlutterFlowTheme.of(context)
-                                                        .designToken
-                                                        .radius
-                                                        .lg),
-                                                topRight: Radius.circular(
-                                                    FlutterFlowTheme.of(context)
-                                                        .designToken
-                                                        .radius
-                                                        .lg),
-                                              ),
-                                              child: CachedNetworkImage(
-                                                imageUrl: business.imageUrl ??
-                                                    'https://images.unsplash.com/photo-1534723452862-4c874018d66d?auto=format&fit=crop&w=400&h=300&q=80',
-                                                height: 120.0,
-                                                fit: BoxFit.cover,
-                                                placeholder: (context, url) =>
-                                                    Container(
-                                                  color: FlutterFlowTheme.of(
-                                                          context)
-                                                      .primaryBackground,
-                                                  child: Center(
-                                                    child: SizedBox(
-                                                      width: 24,
-                                                      height: 24,
-                                                      child:
-                                                          CircularProgressIndicator(
-                                                        strokeWidth: 2,
-                                                        valueColor:
-                                                            AlwaysStoppedAnimation<
-                                                                Color>(
-                                                          FlutterFlowTheme.of(
-                                                                  context)
-                                                              .primary,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
-                                                errorWidget:
-                                                    (context, url, error) =>
-                                                        Container(
-                                                  color: FlutterFlowTheme.of(
-                                                          context)
-                                                      .primaryBackground,
-                                                  child: Icon(
-                                                    Icons
-                                                        .image_not_supported_rounded,
-                                                    color: FlutterFlowTheme.of(
-                                                            context)
-                                                        .secondaryText,
-                                                    size: 32,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                            Padding(
-                                              padding: EdgeInsets.all(
-                                                  FlutterFlowTheme.of(context)
-                                                      .designToken
-                                                      .spacing
-                                                      .md),
-                                              child: Column(
-                                                mainAxisSize: MainAxisSize.min,
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .spaceBetween,
-                                                    children: [
-                                                      Text(
-                                                        business.name,
-                                                        style:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .titleMedium,
-                                                      ),
-                                                      Container(
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          color: FlutterFlowTheme
-                                                                  .of(context)
-                                                              .success,
-                                                          borderRadius:
-                                                              BorderRadius.circular(
-                                                                  FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .designToken
-                                                                      .radius
-                                                                      .xs),
-                                                        ),
-                                                        child: Padding(
-                                                          padding:
-                                                              const EdgeInsets
-                                                                  .symmetric(
-                                                                  horizontal: 6,
-                                                                  vertical: 2),
-                                                          child: Text(
-                                                            'OPEN',
-                                                            style: FlutterFlowTheme
-                                                                    .of(context)
-                                                                .labelSmall
-                                                                .override(
-                                                                  fontFamily: FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .labelSmallFamily,
-                                                                  color: Colors
-                                                                      .white,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .bold,
-                                                                  useGoogleFonts: GoogleFonts
-                                                                          .asMap()
-                                                                      .containsKey(
-                                                                          FlutterFlowTheme.of(context)
-                                                                              .labelSmallFamily),
-                                                                ),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  Text(
-                                                    '${_categoryIdToName[business.categoryId] ?? 'Local Business'} • ${business.distanceKm != null ? (business.distanceKm! < 1.0 ? '${(business.distanceKm! * 1000).toInt()} m' : '${business.distanceKm!.toStringAsFixed(1)} km') : 'Nearby'}',
-                                                    style: FlutterFlowTheme.of(
-                                                            context)
-                                                        .bodySmall,
-                                                  ),
-                                                ].divide(SizedBox(
-                                                    height: FlutterFlowTheme.of(
-                                                            context)
-                                                        .designToken
-                                                        .spacing
-                                                        .xs)),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                }).toList(),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
-                  ].divide(SizedBox(
-                      height:
-                          FlutterFlowTheme.of(context).designToken.spacing.md)),
+                        },
+                      ),
+                    ].divide(SizedBox(
+                        height:
+                            FlutterFlowTheme.of(context).designToken.spacing.md)),
+                  ),
                 ),
-              ),
-              Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(
-                  FlutterFlowTheme.of(context).designToken.spacing.lg,
-                  0.0,
-                  FlutterFlowTheme.of(context).designToken.spacing.lg,
-                  FlutterFlowTheme.of(context).designToken.spacing.xl,
+                Container(
+                  height: FlutterFlowTheme.of(context).designToken.spacing.lg,
                 ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          AppLocalizations.of(context)!.nearbyBusinesses,
-                          style: FlutterFlowTheme.of(context).titleLarge,
-                        ),
-                        InkWell(
-                          onTap: () {
-                            context.pushNamed('SearchResults');
-                          },
-                          child: Text(
-                            AppLocalizations.of(context)!.seeAll,
-                            style: FlutterFlowTheme.of(context)
-                                .labelLarge
-                                .override(
-                                  color: FlutterFlowTheme.of(context).primary,
-                                ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    FutureBuilder<List<BusinessesRow>>(
-                      future: _businessesFuture,
-                      builder: (context, snapshot) {
-                        if (!snapshot.hasData) {
-                          return Center(
-                            child: CircularProgressIndicator(
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                FlutterFlowTheme.of(context).primary,
-                              ),
-                            ),
-                          );
-                        }
-                        final businesses = snapshot.data!;
-                        if (businesses.isEmpty) {
-                          final hasLocation =
-                              FFAppState.instance.userLocation != null;
-                          return EmptyStateView(
-                            icon: hasLocation
-                                ? Icons.search_off_rounded
-                                : Icons.location_off_rounded,
-                            title: hasLocation
-                                ? AppLocalizations.of(context)!.noResultsFound
-                                : AppLocalizations.of(context)!
-                                    .locationRequired,
-                            description: hasLocation
-                                ? AppLocalizations.of(context)!
-                                    .noResultsDescription
-                                : AppLocalizations.of(context)!
-                                    .enableLocationDescription,
-                            buttonText: hasLocation
-                                ? AppLocalizations.of(context)!.discoveryArea
-                                : AppLocalizations.of(context)!.enableLocation,
-                            onTap: hasLocation
-                                ? () =>
-                                    context.pushNamed('LocationRadiusSelector')
-                                : () => LocationService.updateCurrentLocation(
-                                    context),
-                          );
-                        }
-                        return Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: businesses
-                              .map((business) {
-                                final isOpen = business.isOpen ?? false;
-                                return InkWell(
-                                  splashColor: Colors.transparent,
-                                  focusColor: Colors.transparent,
-                                  hoverColor: Colors.transparent,
-                                  highlightColor: Colors.transparent,
-                                  onTap: () async {
-                                    context.pushNamed(
-                                      'BusinessProfile',
-                                      queryParameters: {
-                                        'businessId': serializeParam(
-                                          business.id,
-                                          ParamType.string,
-                                        ),
-                                      },
-                                    );
-                                  },
-                                  child: BusinessCardWidget(
-                                    key: Key('business_${business.id}'),
-                                    name: business.name,
-                                    category: _categoryIdToName[
-                                            business.categoryId] ??
-                                        'Local Business',
-                                    distance: business.distanceKm != null
-                                        ? (business.distanceKm! < 1.0
-                                            ? '${(business.distanceKm! * 1000).toInt()} m'
-                                            : '${business.distanceKm!.toStringAsFixed(1)} km')
-                                        : 'Nearby',
-                                    imgDesc: business.imageUrl ??
-                                        'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=800&q=80',
-                                    rating: (business.rating ?? 0.0).toString(),
-                                    status: isOpen ? 'Open' : 'Closed',
-                                    verified: business.isVerified ?? false,
-                                    isOpen: isOpen,
-                                  ),
-                                );
-                              })
-                              .toList()
-                              .divide(SizedBox(
-                                  height: FlutterFlowTheme.of(context)
-                                      .designToken
-                                      .spacing
-                                      .md)),
-                        );
-                      },
-                    ),
-                  ].divide(SizedBox(
-                      height:
-                          FlutterFlowTheme.of(context).designToken.spacing.md)),
-                ),
-              ),
-              Container(
-                height: FlutterFlowTheme.of(context).designToken.spacing.lg,
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

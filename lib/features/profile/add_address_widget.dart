@@ -89,10 +89,12 @@ class _AddAddressWidgetState extends State<AddAddressWidget> {
         );
       }
 
-      context.safePop();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Address saved successfully')),
-      );
+      if (mounted) {
+        context.safePop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Address saved successfully')),
+        );
+      }
     }
   }
 

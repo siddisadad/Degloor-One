@@ -1,3 +1,4 @@
+import 'package:degloor_one/backend/notification_service.dart';
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/backend/whatsapp_service.dart';
@@ -165,30 +166,31 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
       // Send Notification to Customer
       if (orderRows.isNotEmpty) {
         final order = orderRows.first;
-        await NotificationsTable().insert({
-          'user_id': order.userId,
-          'title': 'Order Status Updated',
-          'message':
-              'Your order #${order.id.substring(0, 8)} is now ${newStatus.toLowerCase()}.',
-          'type': 'order_status',
-          'is_read': false,
-        });
+        await NotificationService.notifyOrderStatusUpdate(
+          userId: order.userId,
+          orderId: order.id,
+          status: newStatus.toLowerCase(),
+        );
       }
 
       // No need to call _fetchOrders() as the stream will update automatically
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Order status updated to $newStatus'),
-          backgroundColor: FlutterFlowTheme.of(context).success,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Order status updated to $newStatus'),
+            backgroundColor: FlutterFlowTheme.of(context).success,
+          ),
+        );
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error updating order: $e'),
-          backgroundColor: FlutterFlowTheme.of(context).error,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error updating order: $e'),
+            backgroundColor: FlutterFlowTheme.of(context).error,
+          ),
+        );
+      }
       setState(() => _loading = false);
     }
   }

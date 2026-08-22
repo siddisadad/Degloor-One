@@ -107,7 +107,9 @@ class _DeliveryDashboardWidgetState extends State<DeliveryDashboardWidget> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Order accepted!')),
     );
-    setState(() {});
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   Future<void> _confirmPickup(String assignmentId, String orderId) async {
@@ -126,7 +128,9 @@ class _DeliveryDashboardWidgetState extends State<DeliveryDashboardWidget> {
       'status': 'out_for_delivery',
       'notes': 'Order picked up by delivery partner.',
     });
-    setState(() {});
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   Future<void> _confirmDelivery(String assignmentId, String orderId) async {
@@ -195,10 +199,12 @@ class _DeliveryDashboardWidgetState extends State<DeliveryDashboardWidget> {
       'status': 'delivered',
       'notes': 'Order delivered successfully after OTP verification.',
     });
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Order delivered!')),
-    );
-    setState(() {});
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Order delivered!')),
+      );
+      setState(() {});
+    }
   }
 
   @override
@@ -349,8 +355,8 @@ class _DeliveryDashboardWidgetState extends State<DeliveryDashboardWidget> {
                                       child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          Text('Order ID: ${order.id}', style: const TextStyle(fontWeight: FontWeight.bold)),
-                                          Text('Total: \$${order.totalAmount}'),
+                                          Text('Order ID: ${order.id.substring(0, 8)}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                                          Text('Total: ₹${order.totalAmount}'),
                                           Text('Status: ${assignment.status}'),
                                           if (order.userId.length > 10)
                                             FutureBuilder<List<UsersRow>>(
@@ -443,7 +449,7 @@ class _DeliveryDashboardWidgetState extends State<DeliveryDashboardWidget> {
                               return Card(
                                 child: ListTile(
                                   title: Text('Order #${order.id.substring(0, 8)}'),
-                                  subtitle: Text('Amount: \$${order.totalAmount}'),
+                                  subtitle: Text('Amount: ₹${order.totalAmount}'),
                                   trailing: FFButtonWidget(
                                     onPressed: () => _acceptOrder(order.id, partner),
                                     text: 'Accept',

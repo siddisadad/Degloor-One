@@ -76,6 +76,19 @@ class _CartWidgetState extends State<CartWidget> {
         _model.selectedAddress = addresses.firstWhere((a) => a.isDefault, orElse: () => addresses.first);
       }
     });
+    _updateDeliveryFee();
+  }
+
+  Future<void> _updateDeliveryFee() async {
+    if (_model.currentBusiness != null && _model.selectedAddress != null) {
+      final fee = await OrdersTable().calculateDeliveryFee(
+        businessId: _model.currentBusiness!.id,
+        addressId: _model.selectedAddress!.id,
+      );
+      setState(() {
+        _model.deliveryFee = fee;
+      });
+    }
   }
 
   Future<void> _updateQuantity(String itemId, int newQty) async {
@@ -120,6 +133,8 @@ class _CartWidgetState extends State<CartWidget> {
         throw Exception('Failed to place order (no response from server)');
       }
 
+      if (!mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Order placed successfully!'),
@@ -136,12 +151,14 @@ class _CartWidgetState extends State<CartWidget> {
       );
     } catch (e) {
       AppLogger.error('Failed to place order', e);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to place order: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to place order: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     } finally {
       setState(() => _model.isPlacingOrder = false);
     }
@@ -313,7 +330,10 @@ class _CartWidgetState extends State<CartWidget> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text('Delivery Fee', style: FlutterFlowTheme.of(context).bodyMedium),
-                          const Text('₹0', style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
+                          Text('₹${_model.deliveryFee.toStringAsFixed(2)}',
+                              style: TextStyle(
+                                  color: _model.deliveryFee == 0 ? Colors.green : FlutterFlowTheme.of(context).primaryText,
+                                  fontWeight: FontWeight.bold)),
                         ],
                       ),
                       const Divider(height: 32),
@@ -321,12 +341,14 @@ class _CartWidgetState extends State<CartWidget> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text('Total', style: FlutterFlowTheme.of(context).headlineSmall),
-                          Text('₹$subtotal', style: FlutterFlowTheme.of(context).headlineSmall.override(font: GoogleFonts.inter(fontWeight: FontWeight.w800, color: FlutterFlowTheme.of(context).primary))),
+                          Text('₹${(subtotal + _model.deliveryFee).toStringAsFixed(2)}',
+                              style: FlutterFlowTheme.of(context).headlineSmall.override(
+                                  font: GoogleFonts.inter(fontWeight: FontWeight.w800, color: FlutterFlowTheme.of(context).primary))),
                         ],
                       ),
                       const SizedBox(height: 24),
                       FFButtonWidget(
-                        onPressed: _model.isPlacingOrder ? null : () => _placeOrder(items, subtotal),
+                        onPressed: _model.isPlacingOrder ? null : () => _placeOrder(items, subtotal + _model.deliveryFee),
                         text: 'Place Order (COD)',
                         options: FFButtonOptions(
                           width: double.infinity,

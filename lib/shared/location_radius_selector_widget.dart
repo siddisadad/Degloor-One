@@ -108,6 +108,10 @@ class _LocationRadiusSelectorWidgetState
                       ),
                       InkWell(
                         onTap: () async {
+                          FFAppState.instance.discoveryRadius = _selectedRadius;
+                          if (_model.mapGoogleMapsCenter != null) {
+                            FFAppState.instance.userLocation = _model.mapGoogleMapsCenter;
+                          }
                           context.safePop();
                         },
                         child: wrapWithModel(

@@ -56,12 +56,18 @@ abstract class SupabaseTable<T extends SupabaseDataRow> {
         matchingRows,
     bool returnRows = false,
   }) async {
-    final update = matchingRows(SupaFlow.client.from(tableName).update(data));
-    if (!returnRows) {
-      await update;
-      return [];
+    try {
+      final update = matchingRows(SupaFlow.client.from(tableName).update(data));
+      if (!returnRows) {
+        await update;
+        return [];
+      }
+      final rows = await update.select().then((rows) => rows.map(createRow).toList());
+      return rows;
+    } catch (e) {
+      AppLogger.error('Supabase update error ($tableName)', e);
+      rethrow;
     }
-    return update.select().then((rows) => rows.map(createRow).toList());
   }
 
   Future<List<T>> delete({
@@ -69,12 +75,27 @@ abstract class SupabaseTable<T extends SupabaseDataRow> {
         matchingRows,
     bool returnRows = false,
   }) async {
-    final delete = matchingRows(SupaFlow.client.from(tableName).delete());
-    if (!returnRows) {
-      await delete;
-      return [];
+    try {
+      final delete = matchingRows(SupaFlow.client.from(tableName).delete());
+      if (!returnRows) {
+        await delete;
+        return [];
+      }
+      final rows = await delete.select().then((rows) => rows.map(createRow).toList());
+      return rows;
+    } catch (e) {
+      AppLogger.error('Supabase delete error ($tableName)', e);
+      rethrow;
     }
-    return delete.select().then((rows) => rows.map(createRow).toList());
+  }
+
+  Future<void> upsert(List<Map<String, dynamic>> data) async {
+    try {
+      await SupaFlow.client.from(tableName).upsert(data);
+    } catch (e) {
+      AppLogger.error('Supabase upsert error ($tableName)', e);
+      rethrow;
+    }
   }
 
   Stream<List<T>> stream({

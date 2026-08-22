@@ -151,7 +151,7 @@ class SupabaseAuthManager extends AuthManager
       }
 
       if (!context.mounted) return null;
-      return _signInOrCreateAccount(
+      return await _signInOrCreateAccount(
         context,
         () => SupaFlow.client.auth
             // ignore: experimental_member_use

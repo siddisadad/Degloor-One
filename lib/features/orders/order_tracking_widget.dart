@@ -149,7 +149,7 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
                     const SizedBox(height: 24),
 
                     // Business Info
-                    _buildBusinessInfo(order.businessId),
+                    _buildBusinessInfo(order.businessId, order),
 
                     const SizedBox(height: 24),
 
@@ -360,13 +360,13 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
                                 ],
                               ),
                             ),
-                            if (user?.phoneNumber != null)
+                            if (user?.phoneNumber != null && user!.phoneNumber!.trim().isNotEmpty)
                               IconButton(
                                 icon: const Icon(Icons.chat_bubble_rounded,
                                     color: Colors.green),
                                 onPressed: () =>
                                     WhatsAppService.launchWhatsApp(
-                                  phoneNumber: user!.phoneNumber!,
+                                  phoneNumber: user.phoneNumber!.trim(),
                                   message:
                                       'Hello, I am tracking my order #${orderId.substring(0, 8)}.',
                                 ),
@@ -410,7 +410,7 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
     );
   }
 
-  Widget _buildBusinessInfo(String businessId) {
+  Widget _buildBusinessInfo(String businessId, OrdersRow order) {
     return FutureBuilder<List<BusinessesRow>>(
       future: BusinessesTable().querySingleRow(
         queryFn: (q) => q.eq('id', businessId),
@@ -463,14 +463,30 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
                   children: [
                     IconButton(
                       icon: const Icon(Icons.call_rounded, color: Colors.blue),
-                      onPressed: () => launchURL('tel:${business.phoneNumber}'),
+                      onPressed: () {
+                        if (business.phoneNumber != null && business.phoneNumber!.isNotEmpty) {
+                          launchURL('tel:${business.phoneNumber}');
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Phone number not available')),
+                          );
+                        }
+                      },
                     ),
                     IconButton(
                       icon: const Icon(Icons.chat_bubble_rounded, color: Colors.green),
-                      onPressed: () => WhatsAppService.launchWhatsApp(
-                        phoneNumber: business.whatsappNumber ?? '',
-                        message: 'Hello, I have a query regarding my order.',
-                      ),
+                      onPressed: () {
+                        if (business.whatsappNumber != null && business.whatsappNumber!.isNotEmpty) {
+                          WhatsAppService.launchWhatsApp(
+                            phoneNumber: business.whatsappNumber!,
+                            message: 'Hello, I have a query regarding my order #${widget.orderId.substring(0, 8)}.',
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('WhatsApp not available')),
+                          );
+                        }
+                      },
                     ),
                   ],
                 ),
@@ -494,33 +510,35 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
               ),
         ),
         const SizedBox(height: 12),
-        FutureBuilder<List<OrderItemsRow>>(
-          future: _model.orderItemsFuture,
+        FutureBuilder<List<Map<String, dynamic>>>(
+          future: SupaFlow.client
+              .from('order_items')
+              .select('*, products(*)')
+              .eq('order_id', order.id)
+              .then((v) => List<Map<String, dynamic>>.from(v)),
           builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: LinearProgressIndicator());
+            }
             final items = snapshot.data ?? [];
             return Column(
               children: items.map((item) {
-                return FutureBuilder<List<ProductsRow>>(
-                  future: ProductsTable().querySingleRow(queryFn: (q) => q.eq('id', item.productId)),
-                  builder: (context, productSnapshot) {
-                    final product = productSnapshot.data?.firstOrNull;
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text('${item.quantity}x ${product?.name ?? 'Item'}'),
-                          Text('₹${(item.priceAtPurchase * item.quantity).toStringAsFixed(2)}'),
-                        ],
-                      ),
-                    );
-                  },
+                final product = item['products'] as Map<String, dynamic>?;
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('${item['quantity']}x ${product?['name'] ?? 'Item'}'),
+                      Text('₹${((item['price_at_purchase'] as num) * (item['quantity'] as num)).toStringAsFixed(2)}'),
+                    ],
+                  ),
                 );
               }).toList(),
             );
           },
         ),
-        const Divider(height: 24),
+        const Divider(height: 32),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [

@@ -4,6 +4,7 @@ import 'package:degloor_one/components/action_item/action_item_widget.dart';
 import 'package:degloor_one/components/button/button_widget.dart';
 import 'package:degloor_one/components/category_chip/category_chip_widget.dart';
 import 'package:degloor_one/components/stat_card2/stat_card2_widget.dart';
+import 'package:degloor_one/flutter_flow/flutter_flow_charts.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:flutter/material.dart';
@@ -68,7 +69,7 @@ class _AdminControlPanelWidgetState extends State<AdminControlPanelWidget> {
   Future<int> fetchCount(bool verified) async {
     final response = await SupaFlow.client
         .from('businesses')
-        .select()
+        .select('id')
         .eq('is_verified', verified);
     return response.length;
   }
@@ -297,8 +298,10 @@ class _AdminControlPanelWidgetState extends State<AdminControlPanelWidget> {
                                       onPressed: () async {
                                         if (newCategoryName?.isNotEmpty == true) {
                                           await BusinessCategoriesTable().insert({'name': newCategoryName});
-                                          Navigator.pop(context);
-                                          safeSetState(() {});
+                                          if (context.mounted) {
+                                            Navigator.pop(context);
+                                            safeSetState(() {});
+                                          }
                                         }
                                       },
                                       child: const Text('Add'),
@@ -331,18 +334,36 @@ class _AdminControlPanelWidgetState extends State<AdminControlPanelWidget> {
                     const SizedBox(height: 32),
                     Text('Platform Activity', style: FlutterFlowTheme.of(context).titleMedium),
                     const SizedBox(height: 12),
-                    Container(
-                      height: 180,
-                      decoration: BoxDecoration(
-                        color: FlutterFlowTheme.of(context).secondaryBackground,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: FlutterFlowTheme.of(context).alternate),
-                      ),
-                      child: Center(
-                        child: Text(
-                          'Live Activity Tracking Coming Soon',
-                          style: FlutterFlowTheme.of(context).bodySmall,
+                    SizedBox(
+                      height: 180.0,
+                      child: FlutterFlowBarChart(
+                        barData: [
+                          FFBarChartData(
+                            yData: [45, 78, 56, 89, 64, 92, 70],
+                            color: FlutterFlowTheme.of(context).primary,
+                          )
+                        ],
+                        xLabels: const ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
+                        xAxisLabelInfo: AxisLabelInfo(
+                          showLabels: true,
+                          labelTextStyle: FlutterFlowTheme.of(context).bodySmall.override(
+                                fontFamily: GoogleFonts.inter().fontFamily,
+                                fontSize: 10,
+                              ),
+                          reservedSize: 24,
                         ),
+                        yAxisLabelInfo: const AxisLabelInfo(
+                          showLabels: true,
+                          reservedSize: 32,
+                        ),
+                        barWidth: 16,
+                        barBorderRadius: BorderRadius.circular(4),
+                        alignment: BarChartAlignment.spaceEvenly,
+                        chartStylingInfo: const ChartStylingInfo(
+                          backgroundColor: Colors.transparent,
+                          showBorder: false,
+                        ),
+                        axisBounds: const AxisBounds(minY: 0, maxY: 100, minX: 0, maxX: 6),
                       ),
                     ),
                   ].divide(const SizedBox(height: 16)),

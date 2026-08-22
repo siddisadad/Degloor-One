@@ -103,30 +103,20 @@ class _ManageHoursWidgetState extends State<ManageHoursWidget> {
     setState(() => _loading = true);
 
     try {
-      for (final row in _hours) {
+      final List<Map<String, dynamic>> data = _hours.map((row) {
         final rowId = row.data['id'];
-        if (rowId == null) {
-          // It's a new row (we initialized it locally)
-          // We need to insert it
-          await BusinessHoursTable().insert({
-            'business_id': row.businessId,
-            'day_of_week': row.dayOfWeek,
-            'open_time': row.openTime?.toIso8601String(),
-            'close_time': row.closeTime?.toIso8601String(),
-            'is_closed': row.isClosed,
-          });
-        } else {
-          // Update existing
-          await BusinessHoursTable().update(
-            data: {
-              'open_time': row.openTime?.toIso8601String(),
-              'close_time': row.closeTime?.toIso8601String(),
-              'is_closed': row.isClosed,
-            },
-            matchingRows: (q) => q.eq('id', rowId),
-          );
-        }
-      }
+        return {
+          if (rowId != null) 'id': rowId,
+          'business_id': row.businessId,
+          'day_of_week': row.dayOfWeek,
+          'open_time': row.openTime?.toIso8601String(),
+          'close_time': row.closeTime?.toIso8601String(),
+          'is_closed': row.isClosed,
+        };
+      }).toList();
+
+      await BusinessHoursTable().upsert(data);
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Business hours updated successfully')),

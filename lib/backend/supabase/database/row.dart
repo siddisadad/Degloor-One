@@ -64,9 +64,13 @@ T? _supaDeserialize<T>(dynamic value) {
   }
 
   if (T == int) {
-    return (value as num).round() as T?;
+    if (value is num) return value.round() as T?;
+    if (value is String) return int.tryParse(value) as T?;
+    return null;
   } else if (T == double) {
-    return (value as num).toDouble() as T?;
+    if (value is num) return value.toDouble() as T?;
+    if (value is String) return double.tryParse(value) as T?;
+    return null;
   } else if (T == DateTime) {
     return DateTime.tryParse(value as String)?.toLocal() as T?;
   } else if (T == PostgresTime) {
