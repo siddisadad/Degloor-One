@@ -1,5 +1,5 @@
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
-import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/backend/job_service.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
@@ -193,12 +193,11 @@ class _ApplyJobSheetWidgetState extends State<ApplyJobSheetWidget> {
                     }
 
                     try {
-                      await JobApplicationsTable().insert({
-                        'job_id': widget.jobId,
-                        'applicant_id': currentUserUid,
-                        'experience_summary': _model.experienceController!.text,
-                        'status': 'applied',
-                      });
+                      await JobService.instance.apply(
+                        jobId: widget.jobId,
+                        applicantId: currentUserUid,
+                        experienceSummary: _model.experienceController!.text,
+                      );
 
                       if (context.mounted) {
                         Navigator.pop(context);

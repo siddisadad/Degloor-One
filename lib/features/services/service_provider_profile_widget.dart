@@ -1,5 +1,5 @@
+import 'package:degloor_one/backend/service_marketplace_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
-import 'package:degloor_one/shared/showcase_catalog.dart';
 import 'package:degloor_one/components/request_service_sheet/request_service_sheet_widget.dart';
 import 'package:degloor_one/components/supabase_unreachable_banner.dart';
 import 'package:degloor_one/features/services/service_provider_display.dart';
@@ -43,17 +43,9 @@ class _ServiceProviderProfileWidgetState
     if (widget.providerId.isEmpty) {
       return;
     }
-    if (kUseShowcaseData) {
-      final provider = ShowcaseCatalog.serviceProvider(widget.providerId);
-      _model.providerFuture = Future.value(provider ?? <String, dynamic>{});
-      return;
-    }
-    _model.providerFuture = SupaFlow.client
-        .from('service_providers')
-        .select(
-            '*, users(full_name, avatar_url, phone_number), service_categories(name)')
-        .eq('id', widget.providerId)
-        .single();
+    _model.providerFuture = ServiceMarketplaceService.instance
+        .providerById(widget.providerId)
+        .then((provider) => provider ?? <String, dynamic>{});
   }
 
   @override
@@ -90,6 +82,9 @@ class _ServiceProviderProfileWidgetState
             }
 
             final provider = snapshot.data!;
+            if (provider.isEmpty || provider['id'] == null) {
+              return const Center(child: Text('Provider not found.'));
+            }
             final user = provider['users'];
             final category = provider['service_categories'];
             final displayName = ServiceProviderDisplay.name(user);

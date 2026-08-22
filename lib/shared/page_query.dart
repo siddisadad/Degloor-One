@@ -1,4 +1,4 @@
-/// Offset pagination used by order and notification lists.
+/// Offset pagination used by discovery, jobs, services, orders, and notifications.
 class PageQuery {
   const PageQuery({this.limit = 20, this.offset = 0});
 

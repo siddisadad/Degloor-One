@@ -5,6 +5,9 @@ import 'package:degloor_one/l10n/app_localizations.dart';
 import 'package:degloor_one/components/business_card/business_card_widget.dart';
 import 'package:degloor_one/components/category_item/category_item_widget.dart';
 import 'package:degloor_one/backend/cart_service.dart';
+import 'package:degloor_one/backend/discovery_service.dart';
+import 'package:degloor_one/backend/repositories/discovery_repository.dart';
+import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
@@ -41,7 +44,12 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   Future<List<BusinessCategoriesRow>>? _categoriesFuture;
-  Future<List<BusinessesRow>>? _businessesFuture;
+  List<BusinessesRow> _nearbyBusinesses = [];
+  bool _nearbyLoading = false;
+  bool _nearbyHasMore = true;
+  int _nearbyOffset = 0;
+  int _nearbyToken = 0;
+  static const _nearbyPageSize = 6;
   final Map<String, String> _categoryIdToName = {};
   int _cartItemCount = 0;
 
@@ -63,13 +71,9 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
     FFAppState.instance.addListener(_onAppStateChanged);
 
     if (loggedIn && currentUserUid.length > 10) {
-      _model.userProfileFuture = UsersTable().queryRows(
-        queryFn: (q) => q.eq('id', currentUserUid),
-      );
+      _model.userProfileFuture = DiscoveryService.instance.profile(currentUserUid);
     }
-    _categoriesFuture = BusinessCategoriesTable().queryRows(
-      queryFn: (q) => q.order('display_order', ascending: true),
-    );
+    _categoriesFuture = DiscoveryService.instance.categories();
     _categoriesFuture?.then((rows) {
       if (mounted) {
         setState(() {
@@ -128,23 +132,60 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
     final userLoc = FFAppState.instance.userLocation;
     final radius = FFAppState.instance.discoveryRadius;
 
+    _nearbyToken++;
+    _nearbyBusinesses = [];
+    _nearbyOffset = 0;
+    _nearbyLoading = false;
+    _nearbyHasMore = userLoc != null;
     if (userLoc != null) {
-      _businessesFuture = BusinessesTable().searchInRadius(
-        latitude: userLoc.latitude,
-        longitude: userLoc.longitude,
-        radiusKm: radius,
-        openNow: _model.openNow,
-      );
-      // Always fetch open businesses for the horizontal section
-      _model.openNowBusinessesFuture = BusinessesTable().searchInRadius(
-        latitude: userLoc.latitude,
-        longitude: userLoc.longitude,
-        radiusKm: radius,
-        openNow: true,
-      );
+      _model.openNowBusinessesFuture = DiscoveryService.instance
+          .search(
+            DiscoverySearch(
+              latitude: userLoc.latitude,
+              longitude: userLoc.longitude,
+              radiusKm: radius,
+              openNow: true,
+              page: const PageQuery(limit: 8),
+            ),
+          )
+          .then((page) => page.items);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _loadMoreNearby();
+      });
     } else {
-      _businessesFuture = Future.value([]);
       _model.openNowBusinessesFuture = Future.value([]);
+      _nearbyLoading = false;
+    }
+  }
+
+  Future<void> _loadMoreNearby() async {
+    final userLoc = FFAppState.instance.userLocation;
+    if (userLoc == null || _nearbyLoading || !_nearbyHasMore) return;
+
+    final token = _nearbyToken;
+    setState(() => _nearbyLoading = true);
+    try {
+      final page = await DiscoveryService.instance.search(
+        DiscoverySearch(
+          latitude: userLoc.latitude,
+          longitude: userLoc.longitude,
+          radiusKm: FFAppState.instance.discoveryRadius,
+          openNow: _model.openNow,
+          page: PageQuery(limit: _nearbyPageSize, offset: _nearbyOffset),
+        ),
+      );
+      if (!mounted || token != _nearbyToken) return;
+      setState(() {
+        _nearbyBusinesses.addAll(page.items);
+        _nearbyOffset += _nearbyPageSize;
+        _nearbyHasMore = page.hasMore;
+        _nearbyLoading = false;
+      });
+    } catch (e) {
+      AppLogger.error('Nearby businesses error', e);
+      if (mounted && token == _nearbyToken) {
+        setState(() => _nearbyLoading = false);
+      }
     }
   }
 
@@ -691,10 +732,7 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                                   TextButton(
                                     onPressed: () => setState(() {
                                       _categoriesFuture =
-                                          BusinessCategoriesTable().queryRows(
-                                        queryFn: (q) => q.order('display_order',
-                                            ascending: true),
-                                      );
+                                          DiscoveryService.instance.categories();
                                     }),
                                     child: const Text('Retry'),
                                   ),
@@ -1120,10 +1158,9 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                           ),
                         ],
                       ),
-                      FutureBuilder<List<BusinessesRow>>(
-                        future: _businessesFuture,
-                        builder: (context, snapshot) {
-                          if (!snapshot.hasData) {
+                      Builder(
+                        builder: (context) {
+                          if (_nearbyLoading && _nearbyBusinesses.isEmpty) {
                             return Center(
                               child: CircularProgressIndicator(
                                 valueColor: AlwaysStoppedAnimation<Color>(
@@ -1132,7 +1169,7 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                               ),
                             );
                           }
-                          final businesses = snapshot.data!;
+                          final businesses = _nearbyBusinesses;
                           if (businesses.isEmpty) {
                             final hasLocation =
                                 FFAppState.instance.userLocation != null;
@@ -1161,51 +1198,76 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                           }
                           return Column(
                             mainAxisSize: MainAxisSize.min,
-                            children: businesses
-                                .map((business) {
-                                  final isOpen = business.isOpen ?? false;
-                                  return InkWell(
-                                    splashColor: Colors.transparent,
-                                    focusColor: Colors.transparent,
-                                    hoverColor: Colors.transparent,
-                                    highlightColor: Colors.transparent,
-                                    onTap: () async {
-                                      context.pushNamed(
-                                        'BusinessProfile',
-                                        queryParameters: {
-                                          'businessId': serializeParam(
-                                            business.id,
-                                            ParamType.string,
+                            children: [
+                              ...businesses
+                                  .map((business) {
+                                    final isOpen = business.isOpen ?? false;
+                                    return InkWell(
+                                      splashColor: Colors.transparent,
+                                      focusColor: Colors.transparent,
+                                      hoverColor: Colors.transparent,
+                                      highlightColor: Colors.transparent,
+                                      onTap: () async {
+                                        context.pushNamed(
+                                          'BusinessProfile',
+                                          queryParameters: {
+                                            'businessId': serializeParam(
+                                              business.id,
+                                              ParamType.string,
+                                            ),
+                                          },
+                                        );
+                                      },
+                                      child: BusinessCardWidget(
+                                        key: Key('business_${business.id}'),
+                                        name: business.name,
+                                        category: _categoryIdToName[
+                                                business.categoryId] ??
+                                            'Local Business',
+                                        distance: business.distanceKm != null
+                                            ? (business.distanceKm! < 1.0
+                                                ? '${(business.distanceKm! * 1000).toInt()} m'
+                                                : '${business.distanceKm!.toStringAsFixed(1)} km')
+                                            : 'Nearby',
+                                        imgDesc: business.imageUrl ??
+                                            'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=800&q=80',
+                                        rating:
+                                            (business.rating ?? 0.0).toString(),
+                                        status: isOpen ? 'Open' : 'Closed',
+                                        verified: business.isVerified ?? false,
+                                        isOpen: isOpen,
+                                      ),
+                                    );
+                                  })
+                                  .toList()
+                                  .divide(SizedBox(
+                                      height: FlutterFlowTheme.of(context)
+                                          .designToken
+                                          .spacing
+                                          .md)),
+                              if (_nearbyHasMore)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 16),
+                                  child: FFButtonWidget(
+                                    onPressed:
+                                        _nearbyLoading ? null : _loadMoreNearby,
+                                    text: _nearbyLoading
+                                        ? 'Loading...'
+                                        : 'Load more',
+                                    options: FFButtonOptions(
+                                      height: 40,
+                                      color:
+                                          FlutterFlowTheme.of(context).primary,
+                                      textStyle: FlutterFlowTheme.of(context)
+                                          .titleSmall
+                                          .override(
+                                            color: Colors.white,
                                           ),
-                                        },
-                                      );
-                                    },
-                                    child: BusinessCardWidget(
-                                      key: Key('business_${business.id}'),
-                                      name: business.name,
-                                      category: _categoryIdToName[
-                                              business.categoryId] ??
-                                          'Local Business',
-                                      distance: business.distanceKm != null
-                                          ? (business.distanceKm! < 1.0
-                                              ? '${(business.distanceKm! * 1000).toInt()} m'
-                                              : '${business.distanceKm!.toStringAsFixed(1)} km')
-                                          : 'Nearby',
-                                      imgDesc: business.imageUrl ??
-                                          'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=800&q=80',
-                                      rating: (business.rating ?? 0.0).toString(),
-                                      status: isOpen ? 'Open' : 'Closed',
-                                      verified: business.isVerified ?? false,
-                                      isOpen: isOpen,
+                                      borderRadius: BorderRadius.circular(8),
                                     ),
-                                  );
-                                })
-                                .toList()
-                                .divide(SizedBox(
-                                    height: FlutterFlowTheme.of(context)
-                                        .designToken
-                                        .spacing
-                                        .md)),
+                                  ),
+                                ),
+                            ],
                           );
                         },
                       ),

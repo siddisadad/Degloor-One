@@ -279,10 +279,14 @@ class ShowcaseCatalog {
     }).toList();
   }
 
-  static List<Map<String, dynamic>> serviceProviders({String? categoryId}) {
+  static List<Map<String, dynamic>> serviceProviders({
+    String? categoryId,
+    int? limit,
+    int offset = 0,
+  }) {
     final q = ShowcaseQuery();
     if (categoryId != null) q.eq('category_id', categoryId);
-    return query('service_providers', q).map((provider) {
+    var rows = query('service_providers', q).map((provider) {
       final users =
           query('users', ShowcaseQuery()..eq('id', provider['user_id']));
       final cats = query(
@@ -298,6 +302,13 @@ class ShowcaseCatalog {
             cats.isEmpty ? {'name': 'General'} : cats.first,
       };
     }).toList();
+    if (offset > 0) {
+      rows = offset >= rows.length ? <Map<String, dynamic>>[] : rows.sublist(offset);
+    }
+    if (limit != null && rows.length > limit) {
+      rows = rows.take(limit).toList();
+    }
+    return rows;
   }
 
   static Map<String, dynamic>? serviceProvider(String id) {
@@ -308,10 +319,12 @@ class ShowcaseCatalog {
   static List<Map<String, dynamic>> activeJobs({
     String? search,
     String? jobType,
+    int? limit,
+    int offset = 0,
   }) {
     final q = ShowcaseQuery()..eq('is_active', true);
     if (jobType != null && jobType != 'All') q.eq('job_type', jobType);
-    return query('jobs', q).where((job) {
+    var rows = query('jobs', q).where((job) {
       if (search == null || search.trim().isEmpty) return true;
       return '${job['title']}'.toLowerCase().contains(search.toLowerCase());
     }).map((job) {
@@ -326,6 +339,13 @@ class ShowcaseCatalog {
         },
       };
     }).toList();
+    if (offset > 0) {
+      rows = offset >= rows.length ? <Map<String, dynamic>>[] : rows.sublist(offset);
+    }
+    if (limit != null && rows.length > limit) {
+      rows = rows.take(limit).toList();
+    }
+    return rows;
   }
 
   static List<Map<String, dynamic>> jobApplicants(String jobId) {

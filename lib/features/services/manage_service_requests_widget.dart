@@ -1,4 +1,6 @@
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
+import 'package:degloor_one/backend/discovery_service.dart';
+import 'package:degloor_one/backend/service_marketplace_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/backend/whatsapp_service.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
@@ -49,12 +51,10 @@ class _ManageServiceRequestsWidgetState
 
     try {
       // 1. Get the provider profile for this user
-      final providers = await ServiceProvidersTable().queryRows(
-        queryFn: (q) => q.eq('user_id', user),
-      );
+      final provider = await ServiceMarketplaceService.instance.forUser(user);
 
-      if (providers.isNotEmpty) {
-        _currentProvider = providers.first;
+      if (provider != null) {
+        _currentProvider = provider;
         _listenToRequests();
       } else {
         setState(() => _loading = false);
@@ -69,11 +69,8 @@ class _ManageServiceRequestsWidgetState
     if (_currentProvider == null) return;
 
     _requestsSubscription?.cancel();
-    _requestsSubscription = ServiceRequestsTable()
-        .stream(
-          primaryKey: 'id',
-          queryFn: (q) => q.eq('provider_id', _currentProvider!.id),
-        )
+    _requestsSubscription = ServiceMarketplaceService.instance
+        .watchForProvider(_currentProvider!.id)
         .listen((requests) async {
       final sortedRequests = requests.toList()
         ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
@@ -90,9 +87,7 @@ class _ManageServiceRequestsWidgetState
 
       if (newUserIds.isNotEmpty) {
         try {
-          final users = await UsersTable().queryRows(
-            queryFn: (q) => q.inFilter('id', newUserIds),
-          );
+          final users = await DiscoveryService.instance.usersByIds(newUserIds);
           for (var user in users) {
             _customerNames[user.id] = user.fullName ?? 'Unknown Customer';
             if (user.phoneNumber != null) {
@@ -113,22 +108,13 @@ class _ManageServiceRequestsWidgetState
     });
   }
 
-  Future<void> _updateRequestStatus(String requestId, String newStatus, String? customerId) async {
+  Future<void> _updateRequestStatus(String requestId, String newStatus) async {
     try {
-      await ServiceRequestsTable().update(
-        data: {'status': newStatus},
-        matchingRows: (q) => q.eq('id', requestId),
+      await ServiceMarketplaceService.instance.updateStatus(
+        requestId: requestId,
+        nextStatus: newStatus,
+        actorUserId: currentUserUid,
       );
-
-      if (customerId != null) {
-        await NotificationsTable().insert({
-          'user_id': customerId,
-          'title': 'Service Request Update',
-          'message': 'Your service request is now $newStatus.',
-          'type': 'service_request',
-          'is_read': false,
-        });
-      }
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -267,7 +253,7 @@ class _ManageServiceRequestsWidgetState
                                     children: [
                                       Expanded(
                                         child: FFButtonWidget(
-                                          onPressed: () => _updateRequestStatus(req.id, 'accepted', req.userId),
+                                          onPressed: () => _updateRequestStatus(req.id, 'accepted'),
                                           text: 'Accept',
                                           options: FFButtonOptions(
                                             height: 36,
@@ -280,7 +266,7 @@ class _ManageServiceRequestsWidgetState
                                       const SizedBox(width: 12),
                                       Expanded(
                                         child: FFButtonWidget(
-                                          onPressed: () => _updateRequestStatus(req.id, 'declined', req.userId),
+                                          onPressed: () => _updateRequestStatus(req.id, 'declined'),
                                           text: 'Decline',
                                           options: FFButtonOptions(
                                             height: 36,
@@ -297,7 +283,7 @@ class _ManageServiceRequestsWidgetState
                                 Padding(
                                   padding: const EdgeInsets.only(top: 16.0),
                                   child: FFButtonWidget(
-                                    onPressed: () => _updateRequestStatus(req.id, 'completed', req.userId),
+                                    onPressed: () => _updateRequestStatus(req.id, 'completed'),
                                     text: 'Mark as Completed',
                                     options: FFButtonOptions(
                                       width: double.infinity,
