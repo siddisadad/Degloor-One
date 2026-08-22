@@ -1,4 +1,5 @@
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
+import 'package:degloor_one/backend/notification_service.dart';
 import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
@@ -50,14 +51,13 @@ class _AdminControlPanelWidgetState extends State<AdminControlPanelWidget> {
       matchingRows: (q) => q.eq('id', complaint.id),
     );
 
-    // Send notification to user
-    await NotificationsTable().insert({
-      'user_id': complaint.userId,
-      'title': 'Complaint Resolved',
-      'message': 'Your complaint regarding "${complaint.subject}" has been resolved.',
-      'type': 'complaint_resolved',
-      'is_read': false,
-    });
+    await NotificationService.adminNotify(
+      userId: complaint.userId,
+      title: 'Complaint Resolved',
+      message:
+          'Your complaint regarding "${complaint.subject}" has been resolved.',
+      type: 'complaint_resolved',
+    );
 
     safeSetState(() {});
   }
@@ -227,13 +227,13 @@ class _AdminControlPanelWidgetState extends State<AdminControlPanelWidget> {
 
                                     // Notify owner
                                     if (business.ownerId != null) {
-                                      await NotificationsTable().insert({
-                                        'user_id': business.ownerId,
-                                        'title': 'Business Verified!',
-                                        'message': 'Your business "${business.name}" has been verified and is now live.',
-                                        'type': 'business_verified',
-                                        'is_read': false,
-                                      });
+                                      await NotificationService.adminNotify(
+                                        userId: business.ownerId!,
+                                        title: 'Business Verified!',
+                                        message:
+                                            'Your business "${business.name}" has been verified and is now live.',
+                                        type: 'business_verified',
+                                      );
                                     }
 
                                     safeSetState(() {});
