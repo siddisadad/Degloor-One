@@ -53,22 +53,37 @@ class BrandMark extends StatelessWidget {
     );
 
     if (compact) {
-      return Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          mark,
-          const SizedBox(width: 10),
-          Flexible(
-            child: Column(
+      // Auth/profile screens place this in a start-aligned Column. Flexible
+      // inside a shrink-wrapped Row throws; Expanded fails as a sibling in
+      // another Row. Scale the lockup down when the parent is narrow.
+      return FittedBox(
+        fit: BoxFit.scaleDown,
+        alignment: Alignment.centerLeft,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            mark,
+            const SizedBox(width: 10),
+            Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(kBrandName, style: titleStyle),
-                Text(kBrandTagline, style: taglineStyle),
+                Text(
+                  kBrandName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: titleStyle,
+                ),
+                Text(
+                  kBrandTagline,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: taglineStyle,
+                ),
               ],
             ),
-          ),
-        ],
+          ],
+        ),
       );
     }
 
