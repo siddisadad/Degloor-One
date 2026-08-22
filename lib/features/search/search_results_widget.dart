@@ -10,8 +10,10 @@ import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart' as ff_widgets;
 import 'package:degloor_one/app_state.dart';
+import 'package:degloor_one/components/discovery_radius_bar.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/core/error_handler.dart';
+import 'package:degloor_one/shared/discovery_radius.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'search_results_model.dart';
@@ -271,43 +273,123 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
                                         '${FFAppState.instance.discoveryRadius.toInt()} km',
                                     selected: true,
                                     onTap: () async {
-                                      final result = await showModalBottomSheet<double>(
+                                      final result =
+                                          await showModalBottomSheet<double>(
                                         context: context,
-                                        builder: (context) => Container(
-                                          padding: const EdgeInsets.all(24),
-                                          child: Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Text('Select Search Radius',
-                                                  style: FlutterFlowTheme.of(context).titleMedium),
-                                              const SizedBox(height: 16),
-                                              Row(
-                                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                                children: [2, 5, 10, 15, 25].map((r) => InkWell(
-                                                  onTap: () => Navigator.pop(context, r.toDouble()),
-                                                  child: Container(
-                                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                                    decoration: BoxDecoration(
-                                                      color: FFAppState.instance.discoveryRadius == r ? FlutterFlowTheme.of(context).primary : Colors.transparent,
-                                                      borderRadius: BorderRadius.circular(20),
-                                                      border: Border.all(color: FlutterFlowTheme.of(context).alternate),
-                                                    ),
-                                                    child: Text('${r}km',
-                                                      style: TextStyle(color: FFAppState.instance.discoveryRadius == r ? Colors.white : FlutterFlowTheme.of(context).primaryText),
-                                                    ),
-                                                  ),
-                                                )).toList(),
-                                              ),
-                                              const SizedBox(height: 16),
-                                            ],
+                                        backgroundColor:
+                                            FlutterFlowTheme.of(context)
+                                                .secondaryBackground,
+                                        shape: const RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.vertical(
+                                            top: Radius.circular(20),
                                           ),
                                         ),
+                                        builder: (context) {
+                                          var draft = snapDiscoveryRadius(
+                                            FFAppState
+                                                .instance.discoveryRadius,
+                                          );
+                                          return StatefulBuilder(
+                                            builder: (context, setSheetState) {
+                                              return Padding(
+                                                padding:
+                                                    const EdgeInsets.fromLTRB(
+                                                        24, 12, 24, 28),
+                                                child: Column(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment
+                                                          .stretch,
+                                                  children: [
+                                                    Center(
+                                                      child: Container(
+                                                        width: 36,
+                                                        height: 4,
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          color:
+                                                              FlutterFlowTheme.of(
+                                                                      context)
+                                                                  .alternate,
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(4),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    const SizedBox(height: 16),
+                                                    Text(
+                                                      'Search radius',
+                                                      style: FlutterFlowTheme
+                                                              .of(context)
+                                                          .titleMedium,
+                                                    ),
+                                                    const SizedBox(height: 4),
+                                                    Text(
+                                                      'Show shops within this distance of your pin.',
+                                                      style: FlutterFlowTheme
+                                                              .of(context)
+                                                          .bodySmall
+                                                          .override(
+                                                            fontFamily:
+                                                                GoogleFonts
+                                                                        .inter()
+                                                                    .fontFamily,
+                                                            color: FlutterFlowTheme
+                                                                    .of(context)
+                                                                .secondaryText,
+                                                          ),
+                                                    ),
+                                                    const SizedBox(height: 16),
+                                                    DiscoveryRadiusBar(
+                                                      selectedKm: draft,
+                                                      onChanged: (radius) {
+                                                        setSheetState(() =>
+                                                            draft = radius);
+                                                      },
+                                                    ),
+                                                    const SizedBox(height: 20),
+                                                    ff_widgets.FFButtonWidget(
+                                                      onPressed: () =>
+                                                          Navigator.pop(
+                                                              context, draft),
+                                                      text: 'Apply',
+                                                      options: ff_widgets
+                                                          .FFButtonOptions(
+                                                        width:
+                                                            double.infinity,
+                                                        height: 48,
+                                                        color:
+                                                            FlutterFlowTheme.of(
+                                                                    context)
+                                                                .primary,
+                                                        textStyle:
+                                                            const TextStyle(
+                                                          color: Colors.white,
+                                                          fontWeight:
+                                                              FontWeight.w700,
+                                                        ),
+                                                        elevation: 0,
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(12),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              );
+                                            },
+                                          );
+                                        },
                                       );
                                       if (result != null) {
                                         setState(() {
-                                          FFAppState.instance.discoveryRadius = result;
+                                          FFAppState.instance.discoveryRadius =
+                                              result;
                                         });
-                                        _performSearch(_currentSearchTerm, categoryId: _currentCategoryId);
+                                        _performSearch(_currentSearchTerm,
+                                            categoryId: _currentCategoryId);
                                       }
                                     },
                                   ),
@@ -549,7 +631,9 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
                                                   lineHeight: 1.5,
                                                 ),
                                           ),
-                                          if (FFAppState.instance.discoveryRadius < 25)
+                                          if (nextDiscoveryRadius(FFAppState
+                                                  .instance.discoveryRadius) !=
+                                              null)
                                             wrapWithModel(
                                               model: _model.buttonModel,
                                               updateCallback: () =>
@@ -558,17 +642,27 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
                                                 iconPresent: false,
                                                 iconEndPresent: false,
                                                 content:
-                                                    'Increase Radius to ${FFAppState.instance.discoveryRadius.toInt() + 5} km',
+                                                    'Increase radius to ${nextDiscoveryRadius(FFAppState.instance.discoveryRadius)!.toInt()} km',
                                                 variant: 'outline',
                                                 size: 'small',
                                                 fullWidth: false,
                                                 loading: false,
                                                 disabled: false,
                                                 onTap: () async {
+                                                  final next =
+                                                      nextDiscoveryRadius(
+                                                          FFAppState.instance
+                                                              .discoveryRadius);
+                                                  if (next == null) return;
                                                   setState(() {
-                                                    FFAppState.instance.discoveryRadius = (FFAppState.instance.discoveryRadius + 5).clamp(2.0, 25.0);
+                                                    FFAppState.instance
+                                                            .discoveryRadius =
+                                                        next;
                                                   });
-                                                  _performSearch(_currentSearchTerm, categoryId: _currentCategoryId);
+                                                  _performSearch(
+                                                      _currentSearchTerm,
+                                                      categoryId:
+                                                          _currentCategoryId);
                                                 },
                                               ),
                                             ),

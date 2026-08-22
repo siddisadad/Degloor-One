@@ -29,7 +29,7 @@ class SliderWidget extends StatefulWidget {
         valueLabelPresent = valueLabelPresent ?? false,
         step = step ?? 0.0,
         divisions = divisions ?? 12,
-        valuePercentage = valuePercentage ?? 34.78260869565217,
+        valuePercentage = valuePercentage ?? 50.0,
         color = color ?? const Color(0x00000000),
         variant = variant ?? 'Material',
         disabled = disabled ?? false,
@@ -206,9 +206,10 @@ class _SliderWidgetState extends State<SliderWidget> {
               ),
               inactiveColor: FlutterFlowTheme.of(context).alternate,
               max: 100.0,
+              divisions: widget.divisions > 0 ? widget.divisions : null,
               value: _model.sliderValue ??= valueOrDefault<double>(
                 widget.valuePercentage,
-                34.78260869565217,
+                50.0,
               ),
               onChanged: (newValue) {
                 newValue = double.parse(newValue.toStringAsFixed(2));

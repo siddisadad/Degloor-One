@@ -1,6 +1,6 @@
 import 'package:degloor_one/components/button/button_widget.dart';
+import 'package:degloor_one/components/discovery_radius_bar.dart';
 import 'package:degloor_one/components/location_item/location_item_widget.dart';
-import 'package:degloor_one/components/radius_option/radius_option_widget.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_google_map.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_icon_button.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
@@ -11,6 +11,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart' as google_maps;
 import 'package:degloor_one/app_state.dart';
 import 'package:degloor_one/backend/location_service.dart';
 import 'package:degloor_one/core/google_maps_js.dart';
+import 'package:degloor_one/shared/discovery_radius.dart';
 import 'location_radius_selector_model.dart';
 export 'location_radius_selector_model.dart';
 
@@ -36,7 +37,7 @@ class _LocationRadiusSelectorWidgetState
   void initState() {
     super.initState();
     _model = createModel(context, () => LocationRadiusSelectorModel());
-    _selectedRadius = FFAppState.instance.discoveryRadius;
+    _selectedRadius = snapDiscoveryRadius(FFAppState.instance.discoveryRadius);
     _model.mapGoogleMapsCenter = FFAppState.instance.userLocation;
   }
 
@@ -323,79 +324,13 @@ class _LocationRadiusSelectorWidgetState
                             ),
                           ],
                         ),
-                        Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: wrapWithModel(
-                                    model: _model.radiusOptionModel1,
-                                    updateCallback: () => safeSetState(() {}),
-                                    child: RadiusOptionWidget(
-                                      value: '2',
-                                      selected: _selectedRadius == 2,
-                                      onTap: () => setState(() => _selectedRadius = 2),
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                  child: wrapWithModel(
-                                    model: _model.radiusOptionModel2,
-                                    updateCallback: () => safeSetState(() {}),
-                                    child: RadiusOptionWidget(
-                                      value: '5',
-                                      selected: _selectedRadius == 5,
-                                      onTap: () => setState(() => _selectedRadius = 5),
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                  child: wrapWithModel(
-                                    model: _model.radiusOptionModel3,
-                                    updateCallback: () => safeSetState(() {}),
-                                    child: RadiusOptionWidget(
-                                      value: '10',
-                                      selected: _selectedRadius == 10,
-                                      onTap: () => setState(() => _selectedRadius = 10),
-                                    ),
-                                  ),
-                                ),
-                              ].divide(const SizedBox(width: 16.0)),
-                            ),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: wrapWithModel(
-                                    model: _model.radiusOptionModel4,
-                                    updateCallback: () => safeSetState(() {}),
-                                    child: RadiusOptionWidget(
-                                      value: '15',
-                                      selected: _selectedRadius == 15,
-                                      onTap: () => setState(() => _selectedRadius = 15),
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                  child: wrapWithModel(
-                                    model: _model.radiusOptionModel5,
-                                    updateCallback: () => safeSetState(() {}),
-                                    child: RadiusOptionWidget(
-                                      value: '25',
-                                      selected: _selectedRadius == 25,
-                                      onTap: () => setState(() => _selectedRadius = 25),
-                                    ),
-                                  ),
-                                ),
-                                const Expanded(
-                                  child: SizedBox(),
-                                ),
-                              ].divide(const SizedBox(width: 16.0)),
-                            ),
-                          ].divide(const SizedBox(height: 8.0)),
+                        DiscoveryRadiusBar(
+                          selectedKm: _selectedRadius,
+                          onChanged: (radius) =>
+                              setState(() => _selectedRadius = radius),
                         ),
                         Text(
-                          'Businesses within this range will be shown in your search results.',
+                          'Only shops within 5, 10, or 15 km of your pin will appear.',
                           style: FlutterFlowTheme.of(context)
                               .bodySmall
                               .override(
