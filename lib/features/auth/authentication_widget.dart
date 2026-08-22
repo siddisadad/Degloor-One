@@ -288,8 +288,9 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
                   padding: const EdgeInsets.all(32.0),
                   child: Column(
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                      Wrap(
+                        alignment: WrapAlignment.center,
+                        crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
                           Text('Don\'t have an account? ', style: FlutterFlowTheme.of(context).bodyMedium),
                           InkWell(
@@ -308,8 +309,9 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
                       ),
                       const SizedBox(height: 32),
                       // Language Selector
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                      Wrap(
+                        alignment: WrapAlignment.center,
+                        crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
                           _buildLang('English', 'en'),
                           _buildDot(),

@@ -101,6 +101,8 @@ class _ServicesWidgetState extends State<ServicesWidget> {
           backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
           title: Text(
             'Find local services',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: FlutterFlowTheme.of(context).headlineMedium.override(
                   font: GoogleFonts.inter(),
                   color: FlutterFlowTheme.of(context).primaryText,
@@ -109,13 +111,12 @@ class _ServicesWidgetState extends State<ServicesWidget> {
                 ),
           ),
           actions: [
-            TextButton(
+            IconButton(
+              tooltip: 'Offer a service',
               onPressed: () => context.pushNamed('ServiceProviderRegistration'),
-              child: Text(
-                'Offer a service',
-                style: FlutterFlowTheme.of(context).labelLarge.override(
-                      color: FlutterFlowTheme.of(context).primary,
-                    ),
+              icon: Icon(
+                Icons.add_business_outlined,
+                color: FlutterFlowTheme.of(context).primary,
               ),
             ),
           ],
