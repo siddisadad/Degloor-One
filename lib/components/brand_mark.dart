@@ -53,9 +53,8 @@ class BrandMark extends StatelessWidget {
     );
 
     if (compact) {
-      // Auth/profile screens place this in a start-aligned Column. Flexible
-      // inside a shrink-wrapped Row throws; Expanded fails as a sibling in
-      // another Row. Scale the lockup down when the parent is narrow.
+      // Scale down instead of flex so this works in start-aligned columns
+      // and as a non-flex sibling in a header Row.
       return FittedBox(
         fit: BoxFit.scaleDown,
         alignment: Alignment.centerLeft,

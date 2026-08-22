@@ -49,6 +49,31 @@ void main() {
     expect(find.text('DEGLOOR ONE'), findsOneWidget);
   });
 
+  testWidgets('compact brand mark fits a 280px auth-style column',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(280, 200));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                BrandMark(size: 56, showWordmark: true, compact: true),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('DEGLOOR ONE'), findsOneWidget);
+  });
+
   testWidgets('compact brand mark shows the wordmark', (tester) async {
     await tester.pumpWidget(
       const MaterialApp(
@@ -75,7 +100,9 @@ void main() {
             padding: EdgeInsets.symmetric(horizontal: 16),
             child: Row(
               children: [
-                BrandMark(size: 40, showWordmark: true, compact: true),
+                Flexible(
+                  child: BrandMark(size: 40, showWordmark: true, compact: true),
+                ),
                 SizedBox(width: 12),
                 Expanded(child: Text('Degloor, Maharashtra')),
               ],
