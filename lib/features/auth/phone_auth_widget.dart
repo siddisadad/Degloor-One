@@ -126,6 +126,7 @@ class _PhoneAuthWidgetState extends State<PhoneAuthWidget> {
                 ),
               ],
             ),
+            ),
           ),
         ),
       ),
