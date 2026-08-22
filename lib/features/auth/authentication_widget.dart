@@ -4,6 +4,7 @@ import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/backend/supabase/supabase_connection.dart';
 import 'package:degloor_one/components/social_button/social_button_widget.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:degloor_one/components/text_field/text_field_widget.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
@@ -288,7 +289,7 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
                                   model: _model.socialButtonModel1,
                                   updateCallback: () => setState(() {}),
                                   child: SocialButtonWidget(
-                                    icon: 'https://cdn.simpleicons.org/google/1a1a1a.svg',
+                                    icon: FontAwesomeIcons.google,
                                     label: 'Google',
                                     onTap: () async {
                                       if (_isLoading) return;
@@ -315,7 +316,7 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
                                   model: _model.socialButtonModel2,
                                   updateCallback: () => setState(() {}),
                                   child: SocialButtonWidget(
-                                    icon: 'https://cdn.simpleicons.org/apple/1a1a1a.svg',
+                                    icon: FontAwesomeIcons.apple,
                                     label: 'Apple',
                                     onTap: () async {
                                       ScaffoldMessenger.of(context).showSnackBar(

@@ -1,21 +1,18 @@
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'social_button_model.dart';
 export 'social_button_model.dart';
 
 class SocialButtonWidget extends StatefulWidget {
   const SocialButtonWidget({
     super.key,
-    String? icon,
-    String? label,
+    this.icon = Icons.login,
+    this.label = 'Continue',
     this.onTap,
-  })  : icon = icon ?? 'https://cdn.simpleicons.org/google/1a1a1a.svg',
-        label = label ?? 'Google';
+  });
 
-  final String icon;
+  final IconData icon;
   final String label;
   final Future Function()? onTap;
 
@@ -69,21 +66,21 @@ class _SocialButtonWidgetState extends State<SocialButtonWidget> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              SvgPicture.network(
+              Icon(
                 widget.icon,
-                width: 20.0,
-                height: 20.0,
+                size: 20.0,
+                color: FlutterFlowTheme.of(context).primaryText,
               ),
               Flexible(
                 child: Text(
-                widget.label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: FlutterFlowTheme.of(context).labelLarge.override(
-                      fontFamily: GoogleFonts.inter().fontFamily,
-                      color: FlutterFlowTheme.of(context).primaryText,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  widget.label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: FlutterFlowTheme.of(context).labelLarge.override(
+                        fontFamily: 'Inter',
+                        color: FlutterFlowTheme.of(context).primaryText,
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
               ),
             ].divide(const SizedBox(width: 8.0)),
