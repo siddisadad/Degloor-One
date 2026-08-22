@@ -1,3 +1,4 @@
+import 'package:degloor_one/backend/delivery_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/backend/whatsapp_service.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
@@ -137,9 +138,13 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
 
                     const SizedBox(height: 32),
 
-                    // OTP Section (Only for active delivery)
+                    // OTP is fetched via RPC so partners cannot read it from the orders row.
                     if (order.status.toLowerCase() != 'pending' && order.status.toLowerCase() != 'delivered' && order.status.toLowerCase() != 'cancelled')
-                      _buildOtpCard(order.deliveryOtp),
+                      FutureBuilder<String?>(
+                        future: DeliveryService.fetchMyDeliveryOtp(order.id),
+                        builder: (context, otpSnapshot) =>
+                            _buildOtpCard(otpSnapshot.data),
+                      ),
 
                     const SizedBox(height: 24),
 
