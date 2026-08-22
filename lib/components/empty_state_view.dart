@@ -11,6 +11,7 @@ class EmptyStateView extends StatelessWidget {
     this.description,
     this.buttonText,
     this.onTap,
+    this.footer,
   });
 
   final IconData icon;
@@ -18,53 +19,66 @@ class EmptyStateView extends StatelessWidget {
   final String? description;
   final String? buttonText;
   final VoidCallback? onTap;
+  final Widget? footer;
 
   @override
   Widget build(BuildContext context) {
+    final theme = FlutterFlowTheme.of(context);
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(40.0),
+        padding: const EdgeInsets.all(32.0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              icon,
-              size: 72,
-              color: FlutterFlowTheme.of(context).alternate,
+            Container(
+              width: 72,
+              height: 72,
+              decoration: BoxDecoration(
+                color: theme.primary.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Icon(icon, size: 36, color: theme.primary),
             ),
             const SizedBox(height: 16),
             Text(
               title,
               textAlign: TextAlign.center,
-              style: FlutterFlowTheme.of(context).headlineSmall.override(
-                    fontFamily: GoogleFonts.inter().fontFamily,
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: theme.headlineSmall.override(
+                fontFamily: GoogleFonts.inter().fontFamily,
+                fontWeight: FontWeight.w700,
+              ),
             ),
             if (description != null) ...[
               const SizedBox(height: 8),
               Text(
                 description!,
                 textAlign: TextAlign.center,
-                style: FlutterFlowTheme.of(context).bodyMedium.override(
-                      fontFamily: GoogleFonts.inter().fontFamily,
-                      color: FlutterFlowTheme.of(context).secondaryText,
-                    ),
+                style: theme.bodyMedium.override(
+                  fontFamily: GoogleFonts.inter().fontFamily,
+                  color: theme.secondaryText,
+                ),
               ),
             ],
             if (buttonText != null && onTap != null) ...[
-              const SizedBox(height: 32),
+              const SizedBox(height: 24),
               FFButtonWidget(
                 onPressed: onTap,
                 text: buttonText!,
                 options: FFButtonOptions(
                   height: 44,
                   padding: const EdgeInsets.symmetric(horizontal: 24),
-                  color: FlutterFlowTheme.of(context).primary,
-                  textStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                  borderRadius: BorderRadius.circular(22),
+                  color: theme.primary,
+                  textStyle: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
                 ),
               ),
+            ],
+            if (footer != null) ...[
+              const SizedBox(height: 20),
+              footer!,
             ],
           ],
         ),

@@ -1,5 +1,6 @@
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:flutter/material.dart';
@@ -56,17 +57,29 @@ class _CustomerOrdersWidgetState extends State<CustomerOrdersWidget> {
     }
   }
 
-  Color _getStatusColor(String status) {
+  Color _getStatusColor(BuildContext context, String status) {
+    final theme = FlutterFlowTheme.of(context);
     switch (status.toLowerCase()) {
-      case 'pending': return Colors.orange;
-      case 'accepted': return Colors.blue;
-      case 'ready': return Colors.purple;
+      case 'pending':
+        return theme.warning;
+      case 'accepted':
+        return theme.info;
+      case 'ready':
+        return theme.secondary;
       case 'shipping':
-      case 'out_for_delivery': return Colors.teal;
-      case 'delivered': return Colors.green;
-      case 'cancelled': return Colors.red;
-      default: return Colors.grey;
+      case 'out_for_delivery':
+        return theme.primary;
+      case 'delivered':
+        return theme.success;
+      case 'cancelled':
+        return theme.error;
+      default:
+        return theme.secondaryText;
     }
+  }
+
+  String _prettyStatus(String status) {
+    return status.replaceAll('_', ' ');
   }
 
   @override
@@ -81,18 +94,18 @@ class _CustomerOrdersWidgetState extends State<CustomerOrdersWidget> {
       key: scaffoldKey,
       backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
       appBar: AppBar(
-        backgroundColor: FlutterFlowTheme.of(context).primary,
+        backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         title: Text(
           'My Orders',
           style: FlutterFlowTheme.of(context).headlineMedium.override(
-                font: GoogleFonts.inter(),
-                color: Colors.white,
+                font: GoogleFonts.inter(fontWeight: FontWeight.w700),
+                color: FlutterFlowTheme.of(context).primaryText,
                 fontSize: 22.0,
               ),
         ),
         actions: const [],
         centerTitle: false,
-        elevation: 2.0,
+        elevation: 0,
       ),
       body: FutureBuilder<List<OrdersRow>>(
         future: _model.ordersFuture,
@@ -102,20 +115,12 @@ class _CustomerOrdersWidgetState extends State<CustomerOrdersWidget> {
           }
           final orders = snapshot.data ?? [];
           if (orders.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.shopping_bag_outlined, size: 64, color: FlutterFlowTheme.of(context).alternate),
-                  const SizedBox(height: 16),
-                  Text('No orders yet', style: FlutterFlowTheme.of(context).titleMedium),
-                  const SizedBox(height: 24),
-                  ElevatedButton(
-                    onPressed: () => context.goNamed('CustomerHome'),
-                    child: const Text('Start Shopping'),
-                  ),
-                ],
-              ),
+            return EmptyStateView(
+              icon: Icons.receipt_long_rounded,
+              title: 'No orders yet',
+              description: 'Your cart and local shops are ready when you are.',
+              buttonText: 'Start shopping',
+              onTap: () => context.goNamed('CustomerHome'),
             );
           }
 
@@ -132,38 +137,57 @@ class _CustomerOrdersWidgetState extends State<CustomerOrdersWidget> {
                   'OrderTracking',
                   queryParameters: {'orderId': order.id},
                 ),
-                child: Card(
-                  clipBehavior: Clip.antiAliasWithSaveLayer,
-                  color: FlutterFlowTheme.of(context).secondaryBackground,
-                  elevation: 2,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: FlutterFlowTheme.of(context).secondaryBackground,
+                    borderRadius: BorderRadius.circular(
+                      FlutterFlowTheme.of(context).designToken.radius.lg,
+                    ),
+                    border: Border.all(
+                      color: FlutterFlowTheme.of(context).alternate,
+                    ),
+                    boxShadow: [
+                      FlutterFlowTheme.of(context).designToken.shadow.sm,
+                    ],
+                  ),
                   child: Padding(
                     padding: const EdgeInsets.all(16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              business?.name ?? 'Loading...',
-                              style: FlutterFlowTheme.of(context).titleSmall.override(
-                                    font: GoogleFonts.inter(),
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                            Expanded(
+                              child: Text(
+                                business?.name ?? 'Loading...',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: FlutterFlowTheme.of(context)
+                                    .titleSmall
+                                    .override(
+                                      font: GoogleFonts.inter(),
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                              ),
                             ),
+                            const SizedBox(width: 8),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
-                                color: _getStatusColor(order.status).withValues(alpha: 0.1),
+                                color: _getStatusColor(context, order.status)
+                                    .withValues(alpha: 0.12),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
-                                order.status.toUpperCase(),
-                                style: FlutterFlowTheme.of(context).labelSmall.override(
+                                _prettyStatus(order.status),
+                                style: FlutterFlowTheme.of(context)
+                                    .labelSmall
+                                    .override(
                                       font: GoogleFonts.inter(),
-                                      color: _getStatusColor(order.status),
-                                      fontWeight: FontWeight.bold,
+                                      color: _getStatusColor(
+                                          context, order.status),
+                                      fontWeight: FontWeight.w700,
                                     ),
                               ),
                             ),

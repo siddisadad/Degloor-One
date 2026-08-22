@@ -1,6 +1,7 @@
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 import 'package:degloor_one/components/category_item/category_item_widget.dart';
+import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/components/supabase_unreachable_banner.dart';
 import 'package:degloor_one/components/request_service_sheet/request_service_sheet_widget.dart';
 import 'package:degloor_one/features/services/service_provider_display.dart';
@@ -143,8 +144,8 @@ class _ServicesWidgetState extends State<ServicesWidget> {
                 padding: const EdgeInsetsDirectional.fromSTEB(16.0, 12.0, 16.0, 12.0),
                 child: Text(
                   'Categories',
-                  style: FlutterFlowTheme.of(context).titleMedium.override(
-                        font: GoogleFonts.inter(),
+                  style: FlutterFlowTheme.of(context).titleLarge.override(
+                        font: GoogleFonts.inter(fontWeight: FontWeight.w700),
                         letterSpacing: 0.0,
                       ),
                 ),
@@ -195,9 +196,9 @@ class _ServicesWidgetState extends State<ServicesWidget> {
               Padding(
                 padding: const EdgeInsetsDirectional.fromSTEB(16.0, 16.0, 16.0, 12.0),
                 child: Text(
-                  'Service Providers',
-                  style: FlutterFlowTheme.of(context).titleMedium.override(
-                        font: GoogleFonts.inter(),
+                  'Service providers',
+                  style: FlutterFlowTheme.of(context).titleLarge.override(
+                        font: GoogleFonts.inter(fontWeight: FontWeight.w700),
                         letterSpacing: 0.0,
                       ),
                 ),
@@ -219,12 +220,22 @@ class _ServicesWidgetState extends State<ServicesWidget> {
                     }
                     final providers = snapshot.data!;
                     if (providers.isEmpty) {
-                      return Center(
-                        child: Text(
-                          kUsesDeadFlutterFlowHost
-                              ? 'Service listings are unavailable until the server is restored.'
-                              : 'No providers found in this category.',
-                        ),
+                      return EmptyStateView(
+                        icon: Icons.handyman_outlined,
+                        title: 'No providers here',
+                        description: kUsesDeadFlutterFlowHost && !kUseShowcaseData
+                            ? 'Service listings are unavailable until the server is restored.'
+                            : 'Try another category or offer your own service.',
+                        buttonText: _model.selectedCategoryId != null
+                            ? 'Show all'
+                            : 'Offer a service',
+                        onTap: () {
+                          if (_model.selectedCategoryId != null) {
+                            _onCategorySelected(_model.selectedCategoryId!);
+                          } else {
+                            context.pushNamed('ServiceProviderRegistration');
+                          }
+                        },
                       );
                     }
                     return ListView.separated(
@@ -250,7 +261,15 @@ class _ServicesWidgetState extends State<ServicesWidget> {
                           child: Container(
                             decoration: BoxDecoration(
                               color: FlutterFlowTheme.of(context).secondaryBackground,
-                              borderRadius: BorderRadius.circular(12.0),
+                              borderRadius: BorderRadius.circular(
+                                FlutterFlowTheme.of(context).designToken.radius.lg,
+                              ),
+                              border: Border.all(
+                                color: FlutterFlowTheme.of(context).alternate,
+                              ),
+                              boxShadow: [
+                                FlutterFlowTheme.of(context).designToken.shadow.sm,
+                              ],
                             ),
                             child: Padding(
                               padding: const EdgeInsets.all(12.0),
@@ -272,6 +291,8 @@ class _ServicesWidgetState extends State<ServicesWidget> {
                                       children: [
                                         Text(
                                           displayName,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
                                           style: FlutterFlowTheme.of(context).titleSmall,
                                         ),
                                         Text(
