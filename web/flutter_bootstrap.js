@@ -1,16 +1,7 @@
 {{flutter_js}}
 {{flutter_build_config}}
 
-_flutter.loader.load(
-    {
-        onEntrypointLoaded: async function(engineInitializer) {
-            // Initialize the Flutter engine
-            let appRunner = await engineInitializer.initializeEngine({
-                useColorEmoji: true,
-                renderer: "html",
-            });
-            // Run the app
-            await appRunner.runApp();
-          }
-    }
-);
+// HTML renderer was removed in Flutter 3.29. Use the default CanvasKit/Skwasm
+// engine so initializeEngine does not stall on a dead `renderer: "html"` option
+// while Chrome focus/blur floods flutter/lifecycle.
+_flutter.loader.load();

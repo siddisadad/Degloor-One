@@ -11,6 +11,7 @@ import 'auth/supabase_auth/supabase_user_provider.dart';
 import 'auth/supabase_auth/auth_util.dart';
 
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/core/web_channel_buffers.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/app_state.dart';
@@ -22,6 +23,7 @@ import 'package:provider/provider.dart';
 /// and initializes essential services like Supabase, Theme, and AppState
 /// before launching the app.
 void main() async {
+  acceptEarlyLifecycleMessages();
   WidgetsFlutterBinding.ensureInitialized();
   GoRouter.optionURLReflectsImperativeAPIs = true;
   usePathUrlStrategy();
