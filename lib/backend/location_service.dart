@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:degloor_one/app_state.dart';
@@ -44,11 +47,14 @@ class LocationService {
         position = await Geolocator.getCurrentPosition(
           locationSettings: const LocationSettings(
             accuracy: LocationAccuracy.high,
-            timeLimit: Duration(seconds: 15), // Increased from 10
+            timeLimit: Duration(seconds: kIsWeb ? 4 : 10),
           ),
         );
+      } on TimeoutException catch (e) {
+        AppLogger.log('Location timed out; using last known if available', error: e);
+        position = null;
       } catch (e) {
-        AppLogger.error('Geolocator.getCurrentPosition failed', e);
+        AppLogger.log('Geolocator.getCurrentPosition failed', error: e);
         position = null;
       }
 
