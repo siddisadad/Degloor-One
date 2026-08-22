@@ -470,7 +470,7 @@ class FFRoute {
             return redirectLocation;
           }
 
-          if (requireAuth && !appStateNotifier.loggedIn) {
+          if (requireAuth && !kBypassAuth && !appStateNotifier.loggedIn) {
             appStateNotifier.setRedirectLocationIfUnset(state.uri.toString());
             return '/authentication';
           }

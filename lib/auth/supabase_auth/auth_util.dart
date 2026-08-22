@@ -1,3 +1,4 @@
+import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'supabase_auth_manager.dart';
 
@@ -21,6 +22,7 @@ String get currentJwtToken => _currentJwtToken ?? '';
 bool get currentUserEmailVerified => currentUser?.emailVerified ?? false;
 
 Future<String?> getCurrentUserRole() async {
+  if (currentUser is GuestAuthUser) return 'customer';
   if (!loggedIn || currentUserUid.length < 10) return null;
   final rows = await UsersTable().queryRows(
     queryFn: (q) => q.eq('id', currentUserUid),

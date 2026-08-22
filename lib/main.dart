@@ -6,6 +6,7 @@ import 'package:degloor_one/l10n/app_localizations.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'auth/guest_auth_user.dart';
 import 'auth/password_recovery.dart';
 import 'auth/supabase_auth/supabase_user_provider.dart';
 import 'auth/supabase_auth/auth_util.dart';
@@ -35,6 +36,9 @@ void main() async {
 
   final appState = FFAppState.instance; // Initialize shared states
   await appState.initializePersistedState();
+  if (kBypassAuth) {
+    installGuestSession();
+  }
 
   runApp(ChangeNotifierProvider(
     create: (context) => appState,
@@ -133,11 +137,15 @@ class _MyAppState extends State<MyApp> {
     super.initState();
 
     _appStateNotifier = AppStateNotifier.instance;
+    if (kBypassAuth) {
+      installGuestSession();
+      _appStateNotifier.update(currentUser!);
+    }
     _router = createRouter(_appStateNotifier);
     userStream = degloorOneSupabaseUserStream()
       ..listen((user) {
         _appStateNotifier.update(user);
-        if (user.loggedIn && user.uid != null) {
+        if (user.loggedIn && user.uid != null && user is! GuestAuthUser) {
           _setupNotificationListener(user.uid!);
         } else {
           _notificationSubscription?.cancel();
