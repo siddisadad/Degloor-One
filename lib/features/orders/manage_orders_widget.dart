@@ -1,6 +1,6 @@
-import 'package:degloor_one/backend/notification_service.dart';
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/delivery_service.dart';
+import 'package:degloor_one/backend/order_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/backend/whatsapp_service.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
@@ -72,11 +72,8 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
   void _listenToOrders() {
     if (_business == null) return;
     _ordersSubscription?.cancel();
-    _ordersSubscription = OrdersTable()
-        .stream(
-          primaryKey: 'id',
-          queryFn: (q) => q.eq('business_id', _business!.id).order('created_at'),
-        )
+    _ordersSubscription = OrderService.instance
+        .watchBusiness(_business!.id)
         .listen((orders) async {
       // Stream order is ascending by default in Supabase stream if not specified correctly,
       // but we want newest first. Supabase .stream().order() works.
@@ -119,66 +116,12 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
   Future<void> _updateOrderStatus(String orderId, String newStatus) async {
     setState(() => _loading = true);
     try {
-      final orderRows = await OrdersTable().queryRows(
-        queryFn: (q) => q.eq('id', orderId),
-      );
-      if (orderRows.isEmpty) {
-        setState(() => _loading = false);
-        return;
-      }
-      final currentOrder = orderRows.first;
-
-      final status = OrderLifecycle.normalizeStatus(newStatus);
-      if (status == OrderLifecycle.cancelled &&
-          currentOrder.status != OrderLifecycle.cancelled) {
-        // Restore inventory
-        final items = await OrderItemsTable().queryRows(
-          queryFn: (q) => q.eq('order_id', orderId),
-        );
-        for (var item in items) {
-          final products = await ProductsTable().queryRows(
-            queryFn: (q) => q.eq('id', item.productId),
-          );
-          if (products.isNotEmpty) {
-            final product = products.first;
-            if (product.trackInventory == true) {
-              await ProductsTable().update(
-                data: {
-                  'stock_quantity': (product.stockQuantity ?? 0) + item.quantity
-                },
-                matchingRows: (q) => q.eq('id', product.id),
-              );
-            }
-          }
-        }
-      }
-
-      // If status is delivered, we must have verified the OTP
-      await OrdersTable().update(
-        data: {'status': status},
-        matchingRows: (q) => q.eq('id', orderId),
+      await OrderService.instance.updateOwnerStatus(
+        orderId: orderId,
+        nextStatus: newStatus,
+        ownerId: currentUserUid,
       );
 
-      // Log status history
-      await OrderStatusHistoryTable().insert({
-        'order_id': orderId,
-        'status': status,
-        'notes': status == OrderLifecycle.delivered
-            ? 'Order delivered after OTP verification.'
-            : 'Order status updated by business owner.',
-      });
-
-      // Send Notification to Customer
-      if (orderRows.isNotEmpty) {
-        final order = orderRows.first;
-        await NotificationService.notifyOrderStatusUpdate(
-          userId: order.userId,
-          orderId: order.id,
-          status: status,
-        );
-      }
-
-      // No need to call _fetchOrders() as the stream will update automatically
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -196,7 +139,8 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
           ),
         );
       }
-      setState(() => _loading = false);
+    } finally {
+      if (mounted) setState(() => _loading = false);
     }
   }
 
@@ -315,30 +259,37 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
                                 _buildInfoRow('Total Amount', '₹${order.totalAmount.toStringAsFixed(2)}'),
                                 _buildInfoRow('Date', dateTimeFormat('MMM d, y HH:mm', order.createdAt)),
                                 const SizedBox(height: 16),
-                                if (order.status != 'delivered' && order.status != 'cancelled')
+                                if (!OrderLifecycle.isTerminal(order.status))
                                   Wrap(
                                     spacing: 8.0,
                                     runSpacing: 8.0,
                                     children: [
-                                      if (order.status == 'pending')
+                                      if (OrderLifecycle.canTransition(
+                                        from: order.status,
+                                        to: OrderLifecycle.accepted,
+                                      ))
                                         FFButtonWidget(
                                           onPressed: () => _updateOrderStatus(order.id, 'accepted'),
                                           text: 'Accept',
                                           options: _buttonOptions(context, FlutterFlowTheme.of(context).success),
                                         ),
-                                      if (order.status == 'accepted')
+                                      if (OrderLifecycle.canTransition(
+                                        from: order.status,
+                                        to: OrderLifecycle.ready,
+                                      ))
                                         FFButtonWidget(
                                           onPressed: () => _updateOrderStatus(order.id, 'ready'),
                                           text: 'Mark as Ready',
                                           options: _buttonOptions(context, FlutterFlowTheme.of(context).primary),
                                         ),
-                                      if (order.status == 'ready')
+                                      if (OrderLifecycle.normalizeStatus(order.status) ==
+                                          OrderLifecycle.ready)
                                         FFButtonWidget(
                                           onPressed: () => _showOtpVerificationDialog(order),
                                           text: 'Deliver (Verify OTP)',
                                           options: _buttonOptions(context, FlutterFlowTheme.of(context).tertiary),
                                         ),
-                                      if (order.status != 'delivered' && order.status != 'cancelled')
+                                      if (OrderLifecycle.canOwnerCancel(order.status))
                                         FFButtonWidget(
                                           onPressed: () async {
                                             final confirm = await showDialog<bool>(

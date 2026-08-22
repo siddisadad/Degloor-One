@@ -12,17 +12,23 @@ abstract class SupabaseTable<T extends SupabaseDataRow> {
   Future<List<T>> queryRows({
     required dynamic Function(dynamic) queryFn,
     int? limit,
+    int? offset,
   }) async {
     if (kUseShowcaseData) {
       final captured = ShowcaseQuery();
       queryFn(captured);
+      if (offset != null) captured.offsetCount = offset;
       if (limit != null) captured.limit(limit);
       return ShowcaseCatalog.query(tableName, captured).map(createRow).toList();
     }
     try {
       final select = _select();
       var query = queryFn(select);
-      query = limit != null ? query.limit(limit) : query;
+      if (offset != null && limit != null) {
+        query = query.range(offset, offset + limit - 1);
+      } else if (limit != null) {
+        query = query.limit(limit);
+      }
       final rows = await query.select();
       return rows.map(createRow).toList();
     } catch (e) {

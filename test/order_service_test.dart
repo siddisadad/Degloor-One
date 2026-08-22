@@ -19,19 +19,27 @@ void main() {
       businessId: ShowcaseCatalog.bizPatil,
       cartId: ShowcaseCatalog.cartGuest,
       addressId: 'addr-home',
-      totalAmount: 199,
+      totalAmount: 1,
       deliveryFee: 25,
       items: [
         {
           'product_id': ShowcaseCatalog.prodRice,
           'quantity': 1,
-          'price': 120.0,
+          'price': 1.0,
         },
       ],
     );
 
     expect(order['status'], OrderLifecycle.pending);
     expect(order['payment_status'], OrderLifecycle.unpaid);
+    expect(order['total_amount'], 145.0);
+    expect(
+      ShowcaseCatalog.query(
+        'order_items',
+        ShowcaseQuery()..eq('order_id', order['id']),
+      ).single['price_at_purchase'],
+      120.0,
+    );
     expect(
       ShowcaseCatalog.query(
         'carts',
@@ -98,5 +106,101 @@ void main() {
     await delivered.future.timeout(const Duration(seconds: 2));
     expect(statuses.last, OrderLifecycle.delivered);
     await sub.cancel();
+  });
+
+  test('showcase checkout rejects a client-supplied price and uses catalog stock',
+      () async {
+    final rice = ShowcaseCatalog.query(
+      'products',
+      ShowcaseQuery()..eq('id', ShowcaseCatalog.prodRice),
+    ).single;
+    final stockBefore = rice['stock_quantity'] as int;
+
+    final order = await OrderService.instance.placeOrder(
+      userId: GuestAuthUser.guestUid,
+      businessId: ShowcaseCatalog.bizPatil,
+      addressId: 'addr-home',
+      cartId: ShowcaseCatalog.cartGuest,
+      items: [
+        {
+          'product_id': ShowcaseCatalog.prodRice,
+          'quantity': 2,
+          'price': 1.0,
+        },
+      ],
+    );
+
+    final items = ShowcaseCatalog.query(
+      'order_items',
+      ShowcaseQuery()..eq('order_id', order),
+    );
+    expect(items.single['price_at_purchase'], 120.0);
+    expect(
+      ShowcaseCatalog.query(
+        'products',
+        ShowcaseQuery()..eq('id', ShowcaseCatalog.prodRice),
+      ).single['stock_quantity'],
+      stockBefore - 2,
+    );
+  });
+
+  test('customer can cancel a pending order and stock is restored', () async {
+    final order = OrderService.placeShowcaseOrder(
+      userId: GuestAuthUser.guestUid,
+      businessId: ShowcaseCatalog.bizPatil,
+      cartId: ShowcaseCatalog.cartGuest,
+      addressId: 'addr-home',
+      items: [
+        {
+          'product_id': ShowcaseCatalog.prodRice,
+          'quantity': 1,
+        },
+      ],
+    );
+    final stockAfterPlace = ShowcaseCatalog.query(
+      'products',
+      ShowcaseQuery()..eq('id', ShowcaseCatalog.prodRice),
+    ).single['stock_quantity'] as int;
+
+    await OrderService.instance.cancelOrder(
+      orderId: order['id'] as String,
+      actorUserId: GuestAuthUser.guestUid,
+    );
+
+    expect(
+      ShowcaseCatalog.query(
+        'orders',
+        ShowcaseQuery()..eq('id', order['id']),
+      ).single['status'],
+      OrderLifecycle.cancelled,
+    );
+    expect(
+      ShowcaseCatalog.query(
+        'products',
+        ShowcaseQuery()..eq('id', ShowcaseCatalog.prodRice),
+      ).single['stock_quantity'],
+      stockAfterPlace + 1,
+    );
+  });
+
+  test('owner cannot skip from pending to ready', () async {
+    await expectLater(
+      OrderService.instance.updateOwnerStatus(
+        orderId: 'order-pending',
+        nextStatus: OrderLifecycle.ready,
+        ownerId: GuestAuthUser.guestUid,
+      ),
+      throwsA(isA<Exception>()),
+    );
+  });
+
+  test('owner cannot cancel after a rider is assigned', () async {
+    await expectLater(
+      OrderService.instance.cancelOrder(
+        orderId: ShowcaseCatalog.orderOut,
+        actorUserId: GuestAuthUser.guestUid,
+      ),
+      throwsA(isA<Exception>()),
+    );
   });
 }

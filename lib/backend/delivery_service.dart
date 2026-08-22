@@ -22,13 +22,57 @@ class DeliveryService {
     });
   }
 
+  static Future<void> updatePartnerLocation({
+    required double latitude,
+    required double longitude,
+    String? partnerId,
+  }) async {
+    if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
+      throw Exception('Invalid coordinates');
+    }
+    if (kUseShowcaseData) {
+      final query = ShowcaseQuery();
+      if (partnerId != null && partnerId.isNotEmpty) {
+        query.eq('id', partnerId);
+      } else {
+        query.eq('user_id', ShowcaseCatalog.riderId);
+      }
+      ShowcaseCatalog.update(
+        'delivery_partners',
+        {
+          'current_latitude': latitude,
+          'current_longitude': longitude,
+        },
+        query,
+      );
+      return;
+    }
+    await SupaFlow.client.rpc(
+      'update_delivery_location',
+      params: {
+        'p_latitude': latitude,
+        'p_longitude': longitude,
+      },
+    );
+  }
+
+  static bool canConfirmDelivery(String status) {
+    final current = OrderLifecycle.normalizeStatus(status);
+    return current == OrderLifecycle.ready ||
+        current == OrderLifecycle.shipping ||
+        current == OrderLifecycle.outForDelivery;
+  }
+
   static Future<String?> fetchMyDeliveryOtp(String orderId) async {
     if (kUseShowcaseData) {
       final orders = ShowcaseCatalog.query(
         'orders',
         ShowcaseQuery()..eq('id', orderId),
       );
-      return orders.isEmpty ? null : orders.first['delivery_otp'] as String?;
+      if (orders.isEmpty) return null;
+      final status = OrderLifecycle.normalizeStatus('${orders.first['status']}');
+      if (OrderLifecycle.isTerminal(status)) return null;
+      return orders.first['delivery_otp'] as String?;
     }
     final result = await SupaFlow.client.rpc(
       'get_my_delivery_otp',
@@ -65,6 +109,10 @@ class DeliveryService {
       if (orders.isEmpty) {
         throw Exception('Order not found');
       }
+      final status = OrderLifecycle.normalizeStatus('${orders.first['status']}');
+      if (!canConfirmDelivery(status)) {
+        throw Exception('Order is no longer active');
+      }
       final expected = '${orders.first['delivery_otp'] ?? ''}'.trim();
       if (expected.isEmpty || expected != otp) {
         throw Exception('Invalid delivery OTP');
@@ -83,12 +131,52 @@ class DeliveryService {
     }
     if (name == 'accept_delivery_order') {
       final orderId = params['p_order_id'] as String;
+      final orders = ShowcaseCatalog.query(
+        'orders',
+        ShowcaseQuery()..eq('id', orderId),
+      );
+      if (orders.isEmpty ||
+          OrderLifecycle.normalizeStatus('${orders.first['status']}') !=
+              OrderLifecycle.ready) {
+        throw Exception('Order is no longer available');
+      }
+      ShowcaseCatalog.update(
+        'orders',
+        {'status': OrderLifecycle.shipping},
+        ShowcaseQuery()..eq('id', orderId),
+      );
+      ShowcaseCatalog.insert('order_status_history', {
+        'order_id': orderId,
+        'status': OrderLifecycle.shipping,
+        'notes': 'Order accepted by delivery partner.',
+      });
+      return;
+    }
+    if (name == 'confirm_delivery_pickup') {
+      final assignmentId = params['p_assignment_id'] as String;
+      final assignments = ShowcaseCatalog.query(
+        'delivery_assignments',
+        ShowcaseQuery()..eq('id', assignmentId),
+      );
+      if (assignments.isEmpty) {
+        throw Exception('Pickup is not allowed for this assignment');
+      }
+      final orderId = '${assignments.first['order_id']}';
+      ShowcaseCatalog.update(
+        'delivery_assignments',
+        {'status': 'picked_up'},
+        ShowcaseQuery()..eq('id', assignmentId),
+      );
       ShowcaseCatalog.update(
         'orders',
         {'status': OrderLifecycle.outForDelivery},
         ShowcaseQuery()..eq('id', orderId),
       );
-      return;
+      ShowcaseCatalog.insert('order_status_history', {
+        'order_id': orderId,
+        'status': OrderLifecycle.outForDelivery,
+        'notes': 'Order picked up by delivery partner.',
+      });
     }
   }
 }

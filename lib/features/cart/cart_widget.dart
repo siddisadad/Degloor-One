@@ -124,7 +124,7 @@ class _CartWidgetState extends State<CartWidget> {
     _fetchCartData();
   }
 
-  Future<void> _placeOrder(List<Map<String, dynamic>> items, double total) async {
+  Future<void> _placeOrder(List<Map<String, dynamic>> items) async {
     if (_model.selectedAddress == null) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please select a delivery address')));
       return;
@@ -142,45 +142,13 @@ class _CartWidgetState extends State<CartWidget> {
         };
       }).toList();
 
-      if (kUseShowcaseData) {
-        final order = OrderService.placeShowcaseOrder(
-          userId: currentUserUid,
-          businessId: _model.currentCart!.businessId,
-          cartId: _model.currentCart!.id,
-          addressId: _model.selectedAddress!.id,
-          totalAmount: total,
-          deliveryFee: _model.deliveryFee,
-          items: rpcItems,
-        );
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Order placed successfully!'),
-            backgroundColor: Colors.green,
-          ),
-        );
-        context.goNamed(
-          'OrderSuccess',
-          queryParameters: {
-            'orderId': serializeParam(order['id'], ParamType.string),
-          }.withoutNulls,
-        );
-        return;
-      }
-      final response = await SupaFlow.client.rpc(
-        'place_order',
-        params: {
-          'p_business_id': _model.currentCart!.businessId,
-          'p_total_amount': total,
-          'p_delivery_address_id': _model.selectedAddress!.id,
-          'p_payment_method': 'COD',
-          'p_items': rpcItems,
-        },
+      final orderId = await OrderService.instance.placeOrder(
+        userId: currentUserUid,
+        businessId: _model.currentCart!.businessId,
+        addressId: _model.selectedAddress!.id,
+        cartId: _model.currentCart!.id,
+        items: rpcItems,
       );
-
-      if (response == null) {
-        throw Exception('Failed to place order (no response from server)');
-      }
 
       if (!mounted) return;
 
@@ -191,11 +159,10 @@ class _CartWidgetState extends State<CartWidget> {
         ),
       );
 
-      // Navigate to order success
       context.goNamed(
         'OrderSuccess',
         queryParameters: {
-          'orderId': serializeParam(response, ParamType.string),
+          'orderId': serializeParam(orderId, ParamType.string),
         }.withoutNulls,
       );
     } catch (e) {
@@ -396,7 +363,7 @@ class _CartWidgetState extends State<CartWidget> {
                       ),
                       const SizedBox(height: 24),
                       FFButtonWidget(
-                        onPressed: _model.isPlacingOrder ? null : () => _placeOrder(items, subtotal + _model.deliveryFee),
+                        onPressed: _model.isPlacingOrder ? null : () => _placeOrder(items),
                         text: _model.isPlacingOrder ? 'Placing order...' : 'Place Order (COD)',
                         options: FFButtonOptions(
                           width: double.infinity,

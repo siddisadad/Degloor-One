@@ -1,7 +1,11 @@
+import 'package:degloor_one/backend/repositories/notification_repository.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/core/error_handler.dart';
+import 'package:degloor_one/shared/showcase_catalog.dart';
 
 class NotificationService {
+  static final repository = NotificationRepository();
+
   static Future<void> sendNotification({
     required String userId,
     required String title,
@@ -9,7 +13,11 @@ class NotificationService {
     String? type,
   }) async {
     try {
-      await NotificationsTable().insert({
+      if (!kUseShowcaseData) {
+        // Live inserts go through SECURITY DEFINER RPCs only.
+        return;
+      }
+      ShowcaseCatalog.insert('notifications', {
         'user_id': userId,
         'title': title,
         'message': message,

@@ -6,6 +6,7 @@ class ShowcaseQuery {
   String? orderColumn;
   bool ascending = true;
   int? limitCount;
+  int? offsetCount;
 
   ShowcaseQuery eq(String column, dynamic value) {
     equals[column] = value;
@@ -30,6 +31,12 @@ class ShowcaseQuery {
 
   ShowcaseQuery limit(int count) {
     limitCount = count;
+    return this;
+  }
+
+  ShowcaseQuery range(int from, int to) {
+    offsetCount = from;
+    limitCount = to - from + 1;
     return this;
   }
 

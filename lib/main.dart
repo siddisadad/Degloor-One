@@ -11,6 +11,7 @@ import 'auth/password_recovery.dart';
 import 'auth/supabase_auth/supabase_user_provider.dart';
 import 'auth/supabase_auth/auth_util.dart';
 
+import 'package:degloor_one/backend/notification_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 import 'package:degloor_one/core/web_channel_buffers.dart';
@@ -95,8 +96,8 @@ class _MyAppState extends State<MyApp> {
     _notificationSubscription?.cancel();
     if (userId.isEmpty) return;
 
-    _notificationSubscription = NotificationsTable()
-        .stream(primaryKey: 'id', queryFn: (q) => q.eq('user_id', userId).order('created_at'))
+    _notificationSubscription = NotificationService.repository
+        .watchForUser(userId)
         .listen((notifications) {
       if (notifications.isEmpty) return;
 

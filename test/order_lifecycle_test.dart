@@ -11,4 +11,33 @@ void main() {
     expect(OrderLifecycle.stepperIndex('cancelled'), -1);
     expect(OrderLifecycle.label('out_for_delivery'), 'out for delivery');
   });
+
+  test('owner transitions and cancel rules', () {
+    expect(
+      OrderLifecycle.canTransition(
+        from: OrderLifecycle.pending,
+        to: OrderLifecycle.accepted,
+      ),
+      isTrue,
+    );
+    expect(
+      OrderLifecycle.canTransition(
+        from: OrderLifecycle.pending,
+        to: OrderLifecycle.ready,
+      ),
+      isFalse,
+    );
+    expect(
+      OrderLifecycle.canTransition(
+        from: OrderLifecycle.pending,
+        to: OrderLifecycle.delivered,
+      ),
+      isFalse,
+    );
+    expect(OrderLifecycle.canCustomerCancel(OrderLifecycle.pending), isTrue);
+    expect(OrderLifecycle.canCustomerCancel(OrderLifecycle.accepted), isFalse);
+    expect(OrderLifecycle.canOwnerCancel(OrderLifecycle.ready), isTrue);
+    expect(OrderLifecycle.canOwnerCancel(OrderLifecycle.shipping), isFalse);
+    expect(OrderLifecycle.isTerminal(OrderLifecycle.delivered), isTrue);
+  });
 }
