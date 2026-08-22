@@ -1,9 +1,14 @@
 import 'dart:js_interop';
 
+/// JS function installed by `web/flutter_bootstrap.js`.
+@JS('__degloorReleaseLifecycle')
+external JSFunction? get _degloorReleaseLifecycle;
+
 /// Lets window focus/blur reach Flutter after the lifecycle handler is bound.
 void releaseHeldBrowserLifecycle() {
-  final release = globalContext.getProperty('__degloorReleaseLifecycle'.toJS);
-  if (release.isA<JSFunction>()) {
-    (release as JSFunction).callAsFunction();
+  try {
+    _degloorReleaseLifecycle?.callAsFunction();
+  } catch (_) {
+    // Missing when widget tests run without the web bootstrap script.
   }
 }
