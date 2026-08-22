@@ -11,6 +11,7 @@ abstract class SupabaseTable<T extends SupabaseDataRow> {
     required PostgrestTransformBuilder Function(PostgrestFilterBuilder) queryFn,
     int? limit,
   }) async {
+    if (kUsesDeadFlutterFlowHost) return [];
     try {
       final select = _select();
       var query = queryFn(select);
@@ -26,6 +27,7 @@ abstract class SupabaseTable<T extends SupabaseDataRow> {
   Future<List<T>> querySingleRow({
     required PostgrestTransformBuilder Function(PostgrestFilterBuilder) queryFn,
   }) async {
+    if (kUsesDeadFlutterFlowHost) return [];
     try {
       final r = await queryFn(_select()).limit(1).select().maybeSingle();
       return [if (r != null) createRow(r)];
@@ -36,6 +38,9 @@ abstract class SupabaseTable<T extends SupabaseDataRow> {
   }
 
   Future<T> insert(Map<String, dynamic> data) {
+    if (kUsesDeadFlutterFlowHost) {
+      return Future.error(Exception('Failed to fetch'));
+    }
     try {
       return SupaFlow.client
           .from(tableName)
@@ -56,6 +61,9 @@ abstract class SupabaseTable<T extends SupabaseDataRow> {
         matchingRows,
     bool returnRows = false,
   }) async {
+    if (kUsesDeadFlutterFlowHost) {
+      throw Exception('Failed to fetch');
+    }
     try {
       final update = matchingRows(SupaFlow.client.from(tableName).update(data));
       if (!returnRows) {
@@ -75,6 +83,9 @@ abstract class SupabaseTable<T extends SupabaseDataRow> {
         matchingRows,
     bool returnRows = false,
   }) async {
+    if (kUsesDeadFlutterFlowHost) {
+      throw Exception('Failed to fetch');
+    }
     try {
       final delete = matchingRows(SupaFlow.client.from(tableName).delete());
       if (!returnRows) {
@@ -90,6 +101,9 @@ abstract class SupabaseTable<T extends SupabaseDataRow> {
   }
 
   Future<void> upsert(List<Map<String, dynamic>> data) async {
+    if (kUsesDeadFlutterFlowHost) {
+      throw Exception('Failed to fetch');
+    }
     try {
       await SupaFlow.client.from(tableName).upsert(data);
     } catch (e) {
@@ -102,6 +116,9 @@ abstract class SupabaseTable<T extends SupabaseDataRow> {
     required String primaryKey,
     SupabaseStreamBuilder Function(SupabaseStreamFilterBuilder)? queryFn,
   }) {
+    if (kUsesDeadFlutterFlowHost) {
+      return Stream<List<T>>.value(<T>[]);
+    }
     final builder = SupaFlow.client.from(tableName).stream(primaryKey: [primaryKey]);
     final stream = queryFn != null ? queryFn(builder) : builder;
     return stream.map((rows) => rows.map(createRow).toList());

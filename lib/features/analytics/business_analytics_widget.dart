@@ -60,6 +60,7 @@ class _BusinessAnalyticsWidgetState extends State<BusinessAnalyticsWidget>
   }
 
   Future<void> _fetchData() async {
+    if (kUsesDeadFlutterFlowHost) return;
     try {
       final now = DateTime.now();
       DateTime? startDate;
