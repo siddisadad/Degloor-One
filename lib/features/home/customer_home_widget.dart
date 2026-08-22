@@ -18,6 +18,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:degloor_one/app_state.dart';
 import 'package:degloor_one/backend/location_service.dart';
+import 'package:degloor_one/components/discovery_radius_bar.dart';
 import 'package:degloor_one/core/error_handler.dart';
 import 'customer_home_model.dart';
 export 'customer_home_model.dart';
@@ -554,162 +555,33 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                           ),
                         ),
                       ),
-                      SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [2, 5, 10, 15, 25]
-                                  .map((radius) {
-                                    final isSelected =
-                                        appState.discoveryRadius.toInt() ==
-                                            radius;
-                                    return InkWell(
-                                      onTap: () {
-                                        setState(() {
-                                          appState.discoveryRadius =
-                                              radius.toDouble();
-                                          _fetchBusinesses();
-                                        });
-                                      },
-                                      child: AnimatedContainer(
-                                        duration:
-                                            const Duration(milliseconds: 200),
-                                        height: 34.0,
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 16.0),
-                                        decoration: BoxDecoration(
-                                          color: isSelected
-                                              ? FlutterFlowTheme.of(context)
-                                                  .primary
-                                              : FlutterFlowTheme.of(context)
-                                                  .primaryBackground,
-                                          borderRadius: BorderRadius.circular(
-                                              FlutterFlowTheme.of(context)
-                                                  .designToken
-                                                  .radius
-                                                  .full),
-                                          border: Border.all(
-                                            color: isSelected
-                                                ? FlutterFlowTheme.of(context)
-                                                    .primary
-                                                : FlutterFlowTheme.of(context)
-                                                    .alternate,
-                                          ),
-                                        ),
-                                        child: Center(
-                                          child: Text(
-                                            '${radius}km',
-                                            style: FlutterFlowTheme.of(context)
-                                                .labelSmall
-                                                .override(
-                                                  fontFamily:
-                                                      FlutterFlowTheme.of(context)
-                                                          .labelSmallFamily,
-                                                  color: isSelected
-                                                      ? Colors.white
-                                                      : FlutterFlowTheme.of(
-                                                              context)
-                                                          .primaryText,
-                                                  fontWeight: isSelected
-                                                      ? FontWeight.bold
-                                                      : FontWeight.normal,
-                                                ),
-                                          ),
-                                        ),
-                                      ),
-                                    );
-                                  })
-                                  .toList()
-                                  .divide(SizedBox(
-                                      width: FlutterFlowTheme.of(context)
-                                          .designToken
-                                          .spacing
-                                          .sm)),
-                            ),
-                            InkWell(
-                              onTap: () {
-                                setState(() {
-                                  _model.openNow = !_model.openNow;
-                                  _fetchBusinesses();
-                                });
-                              },
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 200),
-                                height: 34.0,
-                                decoration: BoxDecoration(
-                                  color: _model.openNow
-                                      ? FlutterFlowTheme.of(context).success
-                                      : FlutterFlowTheme.of(context)
-                                          .primaryBackground,
-                                  borderRadius: BorderRadius.circular(
-                                      FlutterFlowTheme.of(context)
-                                          .designToken
-                                          .radius
-                                          .full),
-                                  border: Border.all(
-                                    color: _model.openNow
-                                        ? FlutterFlowTheme.of(context).success
-                                        : FlutterFlowTheme.of(context).alternate,
-                                  ),
-                                ),
-                                alignment: const AlignmentDirectional(0.0, 0.0),
-                                child: Padding(
-                                  padding: EdgeInsetsDirectional.fromSTEB(
-                                      FlutterFlowTheme.of(context)
-                                          .designToken
-                                          .spacing
-                                          .md,
-                                      0.0,
-                                      FlutterFlowTheme.of(context)
-                                          .designToken
-                                          .spacing
-                                          .md,
-                                      0.0),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(
-                                        _model.openNow
-                                            ? Icons.check_circle_rounded
-                                            : Icons.access_time_filled_rounded,
-                                        size: 14,
-                                        color: _model.openNow
-                                            ? Colors.white
-                                            : FlutterFlowTheme.of(context)
-                                                .secondaryText,
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        'Open Now',
-                                        style: FlutterFlowTheme.of(context)
-                                            .labelMedium
-                                            .override(
-                                              fontFamily:
-                                                  FlutterFlowTheme.of(context)
-                                                      .labelMediumFamily,
-                                              fontWeight: _model.openNow
-                                                  ? FontWeight.bold
-                                                  : FontWeight.normal,
-                                              color: _model.openNow
-                                                  ? Colors.white
-                                                  : FlutterFlowTheme.of(context)
-                                                      .secondaryText,
-                                              fontSize: 13.0,
-                                            ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ].divide(SizedBox(
-                              width: FlutterFlowTheme.of(context)
-                                  .designToken
-                                  .spacing
-                                  .sm)),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: FlutterFlowTheme.of(context)
+                              .secondaryBackground,
+                          borderRadius: BorderRadius.circular(
+                            FlutterFlowTheme.of(context).designToken.radius.lg,
+                          ),
+                          border: Border.all(
+                            color: FlutterFlowTheme.of(context).alternate,
+                          ),
+                        ),
+                        padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+                        child: DiscoveryRadiusBar(
+                          selectedKm: appState.discoveryRadius,
+                          openNow: _model.openNow,
+                          onChanged: (radius) {
+                            setState(() {
+                              appState.discoveryRadius = radius;
+                              _fetchBusinesses();
+                            });
+                          },
+                          onOpenNowToggle: () {
+                            setState(() {
+                              _model.openNow = !_model.openNow;
+                              _fetchBusinesses();
+                            });
+                          },
                         ),
                       ),
                     ].divide(SizedBox(

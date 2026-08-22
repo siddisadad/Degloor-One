@@ -19,6 +19,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:degloor_one/core/error_handler.dart';
 import 'package:degloor_one/core/google_maps_js.dart';
+import 'package:degloor_one/shared/discovery_radius.dart';
 import 'business_registration_model.dart';
 export 'business_registration_model.dart';
 
@@ -47,8 +48,8 @@ class _BusinessRegistrationWidgetState
     super.initState();
     _model = createModel(context, () => BusinessRegistrationModel());
     _loadCategories();
-    // Default 10 KM (0-100 slider mapping: 2 + (x * 23 / 100) = 10 -> x * 23 = 800 -> x = 34.78)
-    _model.sliderModel.sliderValue = 34.78;
+    _model.sliderModel.sliderValue =
+        sliderPercentFromRadius(kDefaultDiscoveryRadiusKm);
   }
 
   Future<void> _loadCategories() async {
@@ -627,12 +628,13 @@ class _BusinessRegistrationWidgetState
                             description: '',
                             descriptionPresent: false,
                             valueLabel:
-                                '${(2.0 + ((_model.sliderModel.sliderValue ?? 34.78) * (25.0 - 2.0) / 100.0)).toInt()} KM',
+                                '${radiusFromSliderPercent(_model.sliderModel.sliderValue ?? sliderPercentFromRadius(kDefaultDiscoveryRadiusKm)).toInt()} KM',
                             valueLabelPresent: true,
                             step: 0.0,
-                            divisions: 0,
-                            valuePercentage:
-                                _model.sliderModel.sliderValue ?? 34.78,
+                            divisions: 2,
+                            valuePercentage: _model.sliderModel.sliderValue ??
+                                sliderPercentFromRadius(
+                                    kDefaultDiscoveryRadiusKm),
                             color: FlutterFlowTheme.of(context).primary,
                             variant: 'Material',
                             disabled: false,
@@ -643,7 +645,7 @@ class _BusinessRegistrationWidgetState
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              '2 KM',
+                              '5 KM',
                               style: FlutterFlowTheme.of(context)
                                   .labelSmall
                                   .override(
@@ -668,7 +670,7 @@ class _BusinessRegistrationWidgetState
                                   ),
                             ),
                             Text(
-                              '25 KM',
+                              '15 KM',
                               style: FlutterFlowTheme.of(context)
                                   .labelSmall
                                   .override(
@@ -952,11 +954,12 @@ class _BusinessRegistrationWidgetState
                               setState(() => _isSubmitting = true);
 
                               try {
-                                // Discovery radius mapping: slider is 0-100, we want 2-25 KM
                                 final sliderVal =
-                                    _model.sliderModel.sliderValue ?? 34.78;
+                                    _model.sliderModel.sliderValue ??
+                                        sliderPercentFromRadius(
+                                            kDefaultDiscoveryRadiusKm);
                                 final radiusKm =
-                                    2.0 + (sliderVal * (25.0 - 2.0) / 100.0);
+                                    radiusFromSliderPercent(sliderVal);
 
                                 await BusinessesTable().insert({
                                   'owner_id': currentUserUid,

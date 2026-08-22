@@ -32,7 +32,7 @@ void main() {
                         ],
                       ),
                       Text(
-                        'Within 25 km radius',
+                        'Within 15 km radius',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),

@@ -1,6 +1,5 @@
 import 'package:degloor_one/components/button/button_widget.dart';
 import 'package:degloor_one/components/location_item/location_item_widget.dart';
-import 'package:degloor_one/components/radius_option/radius_option_widget.dart';
 import 'package:degloor_one/components/slider/slider_widget.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_google_map.dart' hide LatLng;
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
@@ -16,16 +15,6 @@ class LocationRadiusSelectorModel
   // State field(s) for Map Google Map widget.
   LatLng? mapGoogleMapsCenter;
   final mapGoogleMapsController = Completer<GoogleMapController>();
-  // Model for RadiusOption.
-  late RadiusOptionModel radiusOptionModel1;
-  // Model for RadiusOption.
-  late RadiusOptionModel radiusOptionModel2;
-  // Model for RadiusOption.
-  late RadiusOptionModel radiusOptionModel3;
-  // Model for RadiusOption.
-  late RadiusOptionModel radiusOptionModel4;
-  // Model for RadiusOption.
-  late RadiusOptionModel radiusOptionModel5;
   // Model for Slider.
   late SliderModel sliderModel;
   // Model for LocationItem.
@@ -40,11 +29,6 @@ class LocationRadiusSelectorModel
   @override
   void initState(BuildContext context) {
     buttonModel1 = createModel(context, () => ButtonModel());
-    radiusOptionModel1 = createModel(context, () => RadiusOptionModel());
-    radiusOptionModel2 = createModel(context, () => RadiusOptionModel());
-    radiusOptionModel3 = createModel(context, () => RadiusOptionModel());
-    radiusOptionModel4 = createModel(context, () => RadiusOptionModel());
-    radiusOptionModel5 = createModel(context, () => RadiusOptionModel());
     sliderModel = createModel(context, () => SliderModel());
     locationItemModel1 = createModel(context, () => LocationItemModel());
     locationItemModel2 = createModel(context, () => LocationItemModel());
@@ -55,11 +39,6 @@ class LocationRadiusSelectorModel
   @override
   void dispose() {
     buttonModel1.dispose();
-    radiusOptionModel1.dispose();
-    radiusOptionModel2.dispose();
-    radiusOptionModel3.dispose();
-    radiusOptionModel4.dispose();
-    radiusOptionModel5.dispose();
     sliderModel.dispose();
     locationItemModel1.dispose();
     locationItemModel2.dispose();

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
+import 'package:degloor_one/shared/discovery_radius.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// A singleton class that manages the application's global state using [ChangeNotifier].
@@ -24,7 +25,9 @@ class FFAppState extends ChangeNotifier {
   /// This should be called during the application startup flow.
   Future initializePersistedState() async {
     _prefs = await SharedPreferences.getInstance();
-    _discoveryRadius = _prefs.getDouble('ff_discoveryRadius') ?? 10.0;
+    _discoveryRadius = snapDiscoveryRadius(
+      _prefs.getDouble('ff_discoveryRadius') ?? kDefaultDiscoveryRadiusKm,
+    );
     if (_prefs.containsKey('ff_userLocation')) {
       _userLocation = latLngFromString(_prefs.getString('ff_userLocation'));
     }
@@ -53,11 +56,11 @@ class FFAppState extends ChangeNotifier {
   }
 
   /// The radius in kilometers for local discovery.
-  double _discoveryRadius = 10.0;
+  double _discoveryRadius = kDefaultDiscoveryRadiusKm;
   double get discoveryRadius => _discoveryRadius;
   set discoveryRadius(double value) {
-    _discoveryRadius = value;
-    _prefs.setDouble('ff_discoveryRadius', value);
+    _discoveryRadius = snapDiscoveryRadius(value);
+    _prefs.setDouble('ff_discoveryRadius', _discoveryRadius);
     notifyListeners();
   }
 

@@ -11,7 +11,7 @@ class RadiusOptionWidget extends StatefulWidget {
     String? value,
     bool? selected,
     this.onTap,
-  })  : value = value ?? '2',
+  })  : value = value ?? '10',
         selected = selected ?? false;
 
   final String value;
@@ -60,7 +60,18 @@ class _RadiusOptionWidgetState extends State<RadiusOptionWidget> {
                 : FlutterFlowTheme.of(context).secondaryBackground,
             FlutterFlowTheme.of(context).secondaryBackground,
           ),
-          borderRadius: BorderRadius.circular(8.0),
+          borderRadius: BorderRadius.circular(12.0),
+          boxShadow: widget.selected
+              ? [
+                  BoxShadow(
+                    color: FlutterFlowTheme.of(context)
+                        .primary
+                        .withValues(alpha: 0.22),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
           border: Border.all(
             color: valueOrDefault<Color>(
               valueOrDefault<bool>(
@@ -86,7 +97,7 @@ class _RadiusOptionWidgetState extends State<RadiusOptionWidget> {
         child: Text(
           valueOrDefault<String>(
             '${widget.value} KM',
-            '2 KM',
+            '10 KM',
           ),
           style: FlutterFlowTheme.of(context).labelLarge.override(
                 font: GoogleFonts.inter(

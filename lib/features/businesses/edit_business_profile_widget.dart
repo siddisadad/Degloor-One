@@ -6,6 +6,7 @@ import 'package:degloor_one/flutter_flow/flutter_flow_icon_button.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
+import 'package:degloor_one/shared/discovery_radius.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
@@ -41,9 +42,9 @@ class _EditBusinessProfileWidgetState extends State<EditBusinessProfileWidget> {
     _model = createModel(context, () => EditBusinessProfileModel());
 
     _uploadedImageUrl = widget.business.imageUrl;
-    // Map radius back to slider (2-25km -> 0-100)
-    final radius = widget.business.discoveryRadius ?? 10.0;
-    _model.sliderModel.sliderValue = ((radius - 2.0) * 100.0 / (25.0 - 2.0)).clamp(0.0, 100.0);
+    final radius =
+        widget.business.discoveryRadius ?? kDefaultDiscoveryRadiusKm;
+    _model.sliderModel.sliderValue = sliderPercentFromRadius(radius);
 
     _model.switchModel.switchValue = widget.business.phoneNumber == widget.business.whatsappNumber;
   }
@@ -85,8 +86,9 @@ class _EditBusinessProfileWidgetState extends State<EditBusinessProfileWidget> {
 
     setState(() => _isSaving = true);
     try {
-      final sliderVal = _model.sliderModel.sliderValue ?? 0.0;
-      final radiusKm = 2.0 + (sliderVal * (25.0 - 2.0) / 100.0);
+      final sliderVal = _model.sliderModel.sliderValue ??
+          sliderPercentFromRadius(kDefaultDiscoveryRadiusKm);
+      final radiusKm = radiusFromSliderPercent(sliderVal);
 
       await BusinessesTable().update(
         data: {
@@ -307,8 +309,12 @@ class _EditBusinessProfileWidgetState extends State<EditBusinessProfileWidget> {
                     child: SliderWidget(
                       label: 'Discovery Radius (KM)',
                       labelPresent: true,
-                      valueLabel: '${(2.0 + ((_model.sliderModel.sliderValue ?? 0) * (25.0 - 2.0) / 100.0)).toInt()} KM',
+                      valueLabel:
+                          '${radiusFromSliderPercent(_model.sliderModel.sliderValue ?? sliderPercentFromRadius(kDefaultDiscoveryRadiusKm)).toInt()} KM',
                       valueLabelPresent: true,
+                      divisions: 2,
+                      valuePercentage: _model.sliderModel.sliderValue ??
+                          sliderPercentFromRadius(kDefaultDiscoveryRadiusKm),
                     ),
                   ),
                   const SizedBox(height: 40),
