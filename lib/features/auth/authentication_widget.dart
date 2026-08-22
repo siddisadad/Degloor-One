@@ -4,6 +4,7 @@ import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/backend/supabase/supabase_connection.dart';
 import 'package:degloor_one/components/social_button/social_button_widget.dart';
+import 'package:degloor_one/components/supabase_unreachable_banner.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:degloor_one/components/text_field/text_field_widget.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
@@ -157,29 +158,7 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          if (_serverWarning != null) ...[
-                            Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: FlutterFlowTheme.of(context)
-                                    .error
-                                    .withValues(alpha: 0.08),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: FlutterFlowTheme.of(context).error,
-                                ),
-                              ),
-                              child: Text(
-                                _serverWarning!,
-                                style: FlutterFlowTheme.of(context)
-                                    .bodySmall
-                                    .override(
-                                      color: FlutterFlowTheme.of(context).error,
-                                    ),
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                          ],
+                          SupabaseUnreachableBanner(message: _serverWarning),
                           // Inputs
                           wrapWithModel(
                             model: _model.textFieldModel1,

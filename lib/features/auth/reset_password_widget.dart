@@ -1,5 +1,7 @@
 import 'package:degloor_one/auth/password_recovery.dart';
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
+import 'package:degloor_one/backend/supabase/supabase_connection.dart';
+import 'package:degloor_one/components/supabase_unreachable_banner.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_icon_button.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
@@ -139,7 +141,8 @@ class _ResetPasswordWidgetState extends State<ResetPasswordWidget> {
                   color: FlutterFlowTheme.of(context).secondaryText,
                 ),
           ),
-          const SizedBox(height: 40),
+          const SizedBox(height: 24),
+          const SupabaseUnreachableBanner(),
           _passwordField(
             controller: _model.passwordController,
             focusNode: _model.passwordFocusNode,
@@ -161,7 +164,9 @@ class _ResetPasswordWidgetState extends State<ResetPasswordWidget> {
           ),
           const SizedBox(height: 32),
           FFButtonWidget(
-            onPressed: _isLoading ? null : _handleSave,
+            onPressed: _isLoading || SupabaseConnection.shouldSkipAuthRequest
+                ? null
+                : _handleSave,
             text: _isLoading ? 'Saving...' : 'Update password',
             options: FFButtonOptions(
               width: double.infinity,
