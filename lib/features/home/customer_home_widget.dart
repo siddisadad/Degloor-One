@@ -206,7 +206,8 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        InkWell(
+                        Expanded(
+                          child: InkWell(
                           splashColor: Colors.transparent,
                           focusColor: Colors.transparent,
                           hoverColor: Colors.transparent,
@@ -225,8 +226,11 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                                     color: FlutterFlowTheme.of(context).primary,
                                     size: 18.0,
                                   ),
-                                  Text(
+                                  Expanded(
+                                    child: Text(
                                     _model.locationName,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                     style: FlutterFlowTheme.of(context)
                                         .titleMedium
                                         .override(
@@ -240,6 +244,7 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                                           letterSpacing: 0.0,
                                           lineHeight: 1.4,
                                         ),
+                                    ),
                                   ),
                                   Icon(
                                     Icons.keyboard_arrow_down_rounded,
@@ -251,6 +256,8 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                               ),
                               Text(
                                 'Within ${appState.discoveryRadius.toInt()} km radius',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                                 style:
                                     FlutterFlowTheme.of(context).bodySmall.override(
                                           font: GoogleFonts.inter(
@@ -274,6 +281,7 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                                         ),
                               ),
                             ].divide(const SizedBox(height: 4.0)),
+                          ),
                           ),
                         ),
                         Flexible(
@@ -730,8 +738,11 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
+                            Expanded(
+                              child: Text(
                               AppLocalizations.of(context)!.categories,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                               style: FlutterFlowTheme.of(context)
                                   .titleLarge
                                   .override(
@@ -754,6 +765,7 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                                         .fontStyle,
                                     lineHeight: 1.4,
                                   ),
+                            ),
                             ),
                             InkWell(
                               onTap: () async {
@@ -783,7 +795,13 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                                   Icon(Icons.error_outline,
                                       color: FlutterFlowTheme.of(context).error),
                                   const SizedBox(width: 8),
-                                  const Text('Failed to load categories'),
+                                  const Expanded(
+                                    child: Text(
+                                      'Failed to load categories',
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
                                   TextButton(
                                     onPressed: () => setState(() {
                                       _categoriesFuture =
@@ -1193,9 +1211,13 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
+                          Expanded(
+                            child: Text(
                             AppLocalizations.of(context)!.nearbyBusinesses,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: FlutterFlowTheme.of(context).titleLarge,
+                            ),
                           ),
                           InkWell(
                             onTap: () {

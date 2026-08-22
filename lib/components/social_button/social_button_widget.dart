@@ -67,7 +67,6 @@ class _SocialButtonWidgetState extends State<SocialButtonWidget> {
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Row(
-            mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               SvgPicture.network(
@@ -75,13 +74,17 @@ class _SocialButtonWidgetState extends State<SocialButtonWidget> {
                 width: 20.0,
                 height: 20.0,
               ),
-              Text(
+              Flexible(
+                child: Text(
                 widget.label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: FlutterFlowTheme.of(context).labelLarge.override(
                       fontFamily: GoogleFonts.inter().fontFamily,
                       color: FlutterFlowTheme.of(context).primaryText,
                       fontWeight: FontWeight.bold,
                     ),
+                ),
               ),
             ].divide(const SizedBox(width: 8.0)),
           ),
