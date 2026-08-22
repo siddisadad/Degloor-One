@@ -1,5 +1,8 @@
+import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/delivery_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/components/empty_state_view.dart';
+import 'package:degloor_one/shared/order_lifecycle.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 import 'package:degloor_one/backend/whatsapp_service.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
@@ -36,7 +39,7 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
     _model = createModel(context, () => OrderTrackingModel());
 
     _model.orderFuture = OrdersTable().queryRows(
-      queryFn: (q) => q.eq('id', widget.orderId),
+      queryFn: (q) => q.eq('id', widget.orderId).eq('user_id', currentUserUid),
     );
     _model.orderItemsFuture = OrderItemsTable().queryRows(
       queryFn: (q) => q.eq('order_id', widget.orderId),
@@ -52,18 +55,7 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
     super.dispose();
   }
 
-  int _getStatusIndex(String status) {
-    switch (status.toLowerCase()) {
-      case 'pending': return 0;
-      case 'accepted': return 1;
-      case 'ready': return 2;
-      case 'shipping':
-      case 'out_for_delivery': return 3;
-      case 'delivered': return 4;
-      case 'cancelled': return -1;
-      default: return 0;
-    }
-  }
+  int _getStatusIndex(String status) => OrderLifecycle.stepperIndex(status);
 
   @override
   Widget build(BuildContext context) {
@@ -76,27 +68,37 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
         key: scaffoldKey,
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         appBar: AppBar(
-          backgroundColor: FlutterFlowTheme.of(context).primary,
+          backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
           title: Text(
             'Track Order',
             style: FlutterFlowTheme.of(context).headlineMedium.override(
-                  font: GoogleFonts.inter(),
-                  color: Colors.white,
+                  font: GoogleFonts.inter(fontWeight: FontWeight.w700),
+                  color: FlutterFlowTheme.of(context).primaryText,
                   fontSize: 22.0,
                 ),
           ),
           actions: const [],
           centerTitle: false,
-          elevation: 2.0,
+          elevation: 0,
         ),
         body: StreamBuilder<List<OrdersRow>>(
           stream: OrdersTable().stream(
             primaryKey: 'id',
-            queryFn: (q) => q.eq('id', widget.orderId),
+            queryFn: (q) =>
+                q.eq('id', widget.orderId).eq('user_id', currentUserUid),
           ),
           builder: (context, snapshot) {
-            if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            if (!snapshot.hasData) {
               return const Center(child: CircularProgressIndicator());
+            }
+            if (snapshot.data!.isEmpty) {
+              return EmptyStateView(
+                icon: Icons.receipt_long_outlined,
+                title: 'Order not found',
+                description: 'This order is missing or belongs to another account.',
+                buttonText: 'My orders',
+                onTap: () => context.goNamed('CustomerOrders'),
+              );
             }
 
             final order = snapshot.data!.first;

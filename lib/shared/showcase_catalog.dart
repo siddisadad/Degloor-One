@@ -74,16 +74,21 @@ class ShowcaseCatalog {
     return _tables[name] ?? const [];
   }
 
+  static bool matches(Map<String, dynamic> row, ShowcaseQuery q) {
+    for (final entry in q.equals.entries) {
+      if (!_same(row[entry.key], entry.value)) return false;
+    }
+    for (final entry in q.notEquals.entries) {
+      if (_same(row[entry.key], entry.value)) return false;
+    }
+    for (final entry in q.inFilters.entries) {
+      if (!entry.value.any((v) => _same(row[entry.key], v))) return false;
+    }
+    return true;
+  }
+
   static List<Map<String, dynamic>> query(String tableName, ShowcaseQuery q) {
-    var rows = table(tableName).where((row) {
-      for (final entry in q.equals.entries) {
-        if (!_same(row[entry.key], entry.value)) return false;
-      }
-      for (final entry in q.inFilters.entries) {
-        if (!entry.value.any((v) => _same(row[entry.key], v))) return false;
-      }
-      return true;
-    }).toList();
+    var rows = table(tableName).where((row) => matches(row, q)).toList();
 
     if (q.orderColumn != null) {
       rows.sort((a, b) {
@@ -122,11 +127,7 @@ class ShowcaseCatalog {
   ) {
     final updated = <Map<String, dynamic>>[];
     for (final row in table(tableName)) {
-      var match = true;
-      for (final entry in q.equals.entries) {
-        if (!_same(row[entry.key], entry.value)) match = false;
-      }
-      if (!match) continue;
+      if (!matches(row, q)) continue;
       row.addAll(data);
       updated.add(Map<String, dynamic>.from(row));
     }
@@ -137,12 +138,11 @@ class ShowcaseCatalog {
     ensureLoaded();
     final kept = <Map<String, dynamic>>[];
     final removed = <Map<String, dynamic>>[];
+    final hasFilter = q.equals.isNotEmpty ||
+        q.notEquals.isNotEmpty ||
+        q.inFilters.isNotEmpty;
     for (final row in table(tableName)) {
-      var match = q.equals.isNotEmpty;
-      for (final entry in q.equals.entries) {
-        if (!_same(row[entry.key], entry.value)) match = false;
-      }
-      if (match) {
+      if (hasFilter && matches(row, q)) {
         removed.add(Map<String, dynamic>.from(row));
       } else {
         kept.add(row);

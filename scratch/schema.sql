@@ -397,7 +397,8 @@ CREATE POLICY "Users manage own carts" ON carts FOR ALL USING (auth.uid() = user
 CREATE POLICY "Users manage own cart items" ON cart_items FOR ALL USING (
     EXISTS (SELECT 1 FROM carts WHERE id = cart_items.cart_id AND user_id = auth.uid())
 );
-CREATE POLICY "Users manage own orders" ON orders FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "Users read own orders" ON orders FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users insert own orders" ON orders FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Users manage own order items" ON order_items FOR ALL USING (
     EXISTS (SELECT 1 FROM orders WHERE id = order_items.order_id AND user_id = auth.uid())
 );
@@ -461,6 +462,17 @@ CREATE POLICY "Owners manage own business hours" ON business_hours FOR ALL USING
 );
 CREATE POLICY "Owners read orders for their business" ON orders FOR SELECT USING (
     EXISTS (SELECT 1 FROM businesses WHERE id = orders.business_id AND owner_id = auth.uid())
+);
+CREATE POLICY "Owners update orders for their business" ON orders FOR UPDATE
+USING (
+    EXISTS (SELECT 1 FROM businesses WHERE id = orders.business_id AND owner_id = auth.uid())
+)
+WITH CHECK (
+    EXISTS (SELECT 1 FROM businesses WHERE id = orders.business_id AND owner_id = auth.uid())
+    AND status IN (
+        'pending', 'accepted', 'ready', 'shipping',
+        'out_for_delivery', 'delivered', 'cancelled'
+    )
 );
 
 -- ==========================================

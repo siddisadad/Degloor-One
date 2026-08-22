@@ -34,6 +34,7 @@ Execute the SQL scripts in the Supabase SQL Editor in this order:
 1. `scratch/schema.sql` — tables, relationships, and Row Level Security (RLS) policies.
 2. `scratch/secure_transactions.sql` — atomic `place_order` RPC with stock checks.
 3. `scratch/secure_delivery.sql` — exclusive order accept and server-side delivery OTP.
+4. `scratch/rls_order_policies.sql` — customers cannot change order status; owners can update fulfillment.
 
 ### 2. Environment Configuration
 The FlutterFlow default host (`uhaibenopzyzzuqjawlb.supabase.co`) currently does not resolve (`net::ERR_NAME_NOT_RESOLVED`). Restore that project in the Supabase dashboard, or point the app at a live project:

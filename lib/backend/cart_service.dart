@@ -19,9 +19,7 @@ class CartService {
 
     try {
       // 1. Check for existing cart from different business
-      final existingCarts = await CartsTable().queryRows(
-        queryFn: (q) => q.eq('user_id', userId),
-      );
+      final existingCarts = await cartsForUser(userId);
 
       if (existingCarts.isNotEmpty && existingCarts.first.businessId != businessId) {
         if (!context.mounted) return;
@@ -91,14 +89,26 @@ class CartService {
     }
   }
 
+  static Future<List<CartsRow>> cartsForUser(String userId) {
+    return CartsTable().queryRows(
+      queryFn: (q) => q.eq('user_id', userId).order('created_at', ascending: false),
+    );
+  }
+
   static Future<int> getCartItemCount() async {
     final userId = currentUserUid;
     if (userId == '') return 0;
 
-    final carts = await CartsTable().queryRows(queryFn: (q) => q.eq('user_id', userId));
+    final carts = await cartsForUser(userId);
     if (carts.isEmpty) return 0;
 
-    final items = await CartItemsTable().queryRows(queryFn: (q) => q.eq('cart_id', carts.first.id));
-    return items.fold<int>(0, (sum, item) => sum + item.quantity);
+    var total = 0;
+    for (final cart in carts) {
+      final items = await CartItemsTable().queryRows(
+        queryFn: (q) => q.eq('cart_id', cart.id),
+      );
+      total += items.fold<int>(0, (sum, item) => sum + item.quantity);
+    }
+    return total;
   }
 }

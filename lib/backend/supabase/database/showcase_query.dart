@@ -1,6 +1,7 @@
 /// Records eq / inFilter / order / limit from existing table `queryFn` lambdas.
 class ShowcaseQuery {
   final Map<String, dynamic> equals = {};
+  final Map<String, dynamic> notEquals = {};
   final Map<String, List<dynamic>> inFilters = {};
   String? orderColumn;
   bool ascending = true;
@@ -11,7 +12,10 @@ class ShowcaseQuery {
     return this;
   }
 
-  ShowcaseQuery neq(String column, dynamic value) => this;
+  ShowcaseQuery neq(String column, dynamic value) {
+    notEquals[column] = value;
+    return this;
+  }
 
   ShowcaseQuery inFilter(String column, List<dynamic> values) {
     inFilters[column] = values;

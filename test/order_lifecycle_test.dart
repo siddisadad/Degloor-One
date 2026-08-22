@@ -1,0 +1,14 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:degloor_one/shared/order_lifecycle.dart';
+
+void main() {
+  test('normalizes retired checkout statuses onto pending / unpaid', () {
+    expect(OrderLifecycle.normalizeStatus('placed'), OrderLifecycle.pending);
+    expect(OrderLifecycle.normalizeStatus('CREATED'), OrderLifecycle.pending);
+    expect(OrderLifecycle.normalizePayment('pending'), OrderLifecycle.unpaid);
+    expect(OrderLifecycle.stepperIndex('placed'), 0);
+    expect(OrderLifecycle.stepperIndex('out_for_delivery'), 3);
+    expect(OrderLifecycle.stepperIndex('cancelled'), -1);
+    expect(OrderLifecycle.label('out_for_delivery'), 'out for delivery');
+  });
+}

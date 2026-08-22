@@ -3,6 +3,8 @@ import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/delivery_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/backend/whatsapp_service.dart';
+import 'package:degloor_one/components/empty_state_view.dart';
+import 'package:degloor_one/shared/order_lifecycle.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
@@ -126,7 +128,9 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
       }
       final currentOrder = orderRows.first;
 
-      if (newStatus == 'cancelled' && currentOrder.status != 'cancelled') {
+      final status = OrderLifecycle.normalizeStatus(newStatus);
+      if (status == OrderLifecycle.cancelled &&
+          currentOrder.status != OrderLifecycle.cancelled) {
         // Restore inventory
         final items = await OrderItemsTable().queryRows(
           queryFn: (q) => q.eq('order_id', orderId),
@@ -151,15 +155,15 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
 
       // If status is delivered, we must have verified the OTP
       await OrdersTable().update(
-        data: {'status': newStatus.toLowerCase()},
+        data: {'status': status},
         matchingRows: (q) => q.eq('id', orderId),
       );
 
       // Log status history
       await OrderStatusHistoryTable().insert({
         'order_id': orderId,
-        'status': newStatus.toLowerCase(),
-        'notes': newStatus.toLowerCase() == 'delivered'
+        'status': status,
+        'notes': status == OrderLifecycle.delivered
             ? 'Order delivered after OTP verification.'
             : 'Order status updated by business owner.',
       });
@@ -170,7 +174,7 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
         await NotificationService.notifyOrderStatusUpdate(
           userId: order.userId,
           orderId: order.id,
-          status: newStatus.toLowerCase(),
+          status: status,
         );
       }
 
@@ -214,18 +218,18 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
         key: scaffoldKey,
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         appBar: AppBar(
-          backgroundColor: FlutterFlowTheme.of(context).primary,
+          backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
           title: Text(
             'Manage Orders',
             style: FlutterFlowTheme.of(context).headlineMedium.override(
-                  font: GoogleFonts.inter(),
-                  color: Colors.white,
+                  font: GoogleFonts.inter(fontWeight: FontWeight.w700),
+                  color: FlutterFlowTheme.of(context).primaryText,
                   fontSize: 22.0,
                 ),
           ),
           actions: const [],
           centerTitle: false,
-          elevation: 2.0,
+          elevation: 0,
         ),
         body: SafeArea(
           child: Padding(
@@ -233,25 +237,23 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
             child: Column(
               children: [
                 if (_business == null && !_loading)
-                  Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(24.0),
-                      child: Text(
-                        'No business found for this account. Please register your business first.',
-                        textAlign: TextAlign.center,
-                        style: FlutterFlowTheme.of(context).bodyMedium,
-                      ),
+                  const Expanded(
+                    child: EmptyStateView(
+                      icon: Icons.storefront_outlined,
+                      title: 'No shop yet',
+                      description:
+                          'Register your business to accept and fulfill Degloor orders.',
                     ),
                   )
                 else if (_loading && _orders.isEmpty)
                   const Center(child: CircularProgressIndicator())
                 else if (_orders.isEmpty)
-                  Expanded(
-                    child: Center(
-                      child: Text(
-                        'No orders found for your business.',
-                        style: FlutterFlowTheme.of(context).labelMedium,
-                      ),
+                  const Expanded(
+                    child: EmptyStateView(
+                      icon: Icons.receipt_long_outlined,
+                      title: 'No orders yet',
+                      description:
+                          'New customer orders for your shop will show up here.',
                     ),
                   )
                 else

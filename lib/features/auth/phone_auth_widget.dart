@@ -1,3 +1,4 @@
+import 'package:degloor_one/auth/phone_number.dart';
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/components/brand_mark.dart';
 import 'package:degloor_one/backend/supabase/supabase_connection.dart';
@@ -123,7 +124,7 @@ class _PhoneAuthWidgetState extends State<PhoneAuthWidget> {
                           SupabaseConnection.shouldSkipAuthRequest
                       ? null
                       : _handleSendOtp,
-                  text: 'Send OTP',
+                  text: _isLoading ? 'Sending...' : 'Send OTP',
                   options: FFButtonOptions(
                     width: double.infinity,
                     height: 54,
@@ -145,25 +146,12 @@ class _PhoneAuthWidgetState extends State<PhoneAuthWidget> {
   }
 
   Future<void> _handleSendOtp() async {
-    String phone = _model.textController.text.trim();
-    if (phone.isEmpty) {
+    final phone = PhoneNumber.normalize(_model.textController.text);
+    if (phone == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter your phone number')),
+        const SnackBar(content: Text('Enter a valid 10-digit phone number')),
       );
       return;
-    }
-
-    // Normalize phone number: remove all non-digit characters except '+'
-    // and ensure it starts with '+'
-    phone = phone.replaceAll(RegExp(r'[^\d+]'), '');
-    if (!phone.startsWith('+')) {
-      // Default to +91 if no country code provided and it's a 10-digit number
-      if (phone.length == 10) {
-        phone = '+91$phone';
-      } else {
-        // Just prepend + if it's missing but might have country code (e.g. 91...)
-        phone = '+$phone';
-      }
     }
 
     setState(() => _isLoading = true);
