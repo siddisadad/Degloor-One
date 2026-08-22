@@ -1,5 +1,6 @@
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/components/request_service_sheet/request_service_sheet_widget.dart';
+import 'package:degloor_one/components/supabase_unreachable_banner.dart';
 import 'package:degloor_one/features/services/service_provider_display.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_icon_button.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
@@ -64,7 +65,12 @@ class _ServiceProviderProfileWidgetState
       child: Scaffold(
         key: scaffoldKey,
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-        body: widget.providerId.isEmpty
+        body: kUsesDeadFlutterFlowHost
+            ? const Padding(
+                padding: EdgeInsets.all(24),
+                child: SupabaseUnreachableBanner(),
+              )
+            : widget.providerId.isEmpty
             ? const Center(child: Text('Provider not found.'))
             : FutureBuilder<Map<String, dynamic>>(
           future: _model.providerFuture,

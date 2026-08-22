@@ -1,5 +1,6 @@
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/components/category_item/category_item_widget.dart';
+import 'package:degloor_one/components/supabase_unreachable_banner.dart';
 import 'package:degloor_one/components/request_service_sheet/request_service_sheet_widget.dart';
 import 'package:degloor_one/features/services/service_provider_display.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
@@ -128,6 +129,10 @@ class _ServicesWidgetState extends State<ServicesWidget> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              const Padding(
+                padding: EdgeInsets.fromLTRB(16, 12, 16, 0),
+                child: SupabaseUnreachableBanner(),
+              ),
               Padding(
                 padding: const EdgeInsetsDirectional.fromSTEB(16.0, 12.0, 16.0, 12.0),
                 child: Text(
@@ -208,7 +213,13 @@ class _ServicesWidgetState extends State<ServicesWidget> {
                     }
                     final providers = snapshot.data!;
                     if (providers.isEmpty) {
-                      return const Center(child: Text('No providers found in this category.'));
+                      return Center(
+                        child: Text(
+                          kUsesDeadFlutterFlowHost
+                              ? 'Service listings are unavailable until the server is restored.'
+                              : 'No providers found in this category.',
+                        ),
+                      );
                     }
                     return ListView.separated(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
