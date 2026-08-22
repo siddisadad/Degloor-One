@@ -64,5 +64,14 @@ void main() {
       ),
       SupabaseConnection.unreachableMessage,
     );
+    expect(
+      SupabaseConnection.messageFor(
+        Exception(
+          'AuthRetryableFetchException(message: ClientException: Failed to fetch, '
+          'uri=https://uhaibenopzyzzuqjawlb.supabase.co/auth/v1/otp?)',
+        ),
+      ),
+      SupabaseConnection.unreachableMessage,
+    );
   });
 }

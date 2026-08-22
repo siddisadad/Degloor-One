@@ -1,5 +1,5 @@
 import 'package:degloor_one/backend/supabase/supabase.dart';
-import 'package:degloor_one/core/error_handler.dart';
+import 'package:degloor_one/backend/supabase/supabase_connection.dart';
 
 Future phoneSignInFunc(String phoneNumber) async {
   try {
@@ -7,7 +7,7 @@ Future phoneSignInFunc(String phoneNumber) async {
       phone: phoneNumber,
     );
   } catch (e) {
-    AppLogger.log('Supabase OTP Error for $phoneNumber', error: e);
+    SupabaseConnection.log(e, context: 'Phone OTP send');
     rethrow;
   }
 }
@@ -24,7 +24,7 @@ Future<User?> phoneVerifyCodeFunc({
     );
     return res.user;
   } catch (e) {
-    AppLogger.log('Supabase OTP Verification Error for $phoneNumber', error: e);
+    SupabaseConnection.log(e, context: 'Phone OTP verify');
     rethrow;
   }
 }
