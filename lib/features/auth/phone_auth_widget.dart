@@ -1,4 +1,6 @@
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
+import 'package:degloor_one/backend/supabase/supabase_connection.dart';
+import 'package:degloor_one/components/supabase_unreachable_banner.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_icon_button.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
@@ -81,7 +83,8 @@ class _PhoneAuthWidgetState extends State<PhoneAuthWidget> {
                         color: FlutterFlowTheme.of(context).secondaryText,
                       ),
                 ),
-                const SizedBox(height: 40),
+                const SizedBox(height: 24),
+                const SupabaseUnreachableBanner(),
                 TextFormField(
                   controller: _model.textController,
                   focusNode: _model.textFieldFocusNode,
@@ -113,7 +116,10 @@ class _PhoneAuthWidgetState extends State<PhoneAuthWidget> {
                 ),
                 const SizedBox(height: 32),
                 FFButtonWidget(
-                  onPressed: _isLoading ? null : _handleSendOtp,
+                  onPressed: _isLoading ||
+                          SupabaseConnection.shouldSkipAuthRequest
+                      ? null
+                      : _handleSendOtp,
                   text: 'Send OTP',
                   options: FFButtonOptions(
                     width: double.infinity,
