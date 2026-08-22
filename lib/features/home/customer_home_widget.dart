@@ -209,6 +209,8 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
+                        const BrandMark(size: 40),
+                        const SizedBox(width: 10),
                         Expanded(
                           child: InkWell(
                           splashColor: Colors.transparent,

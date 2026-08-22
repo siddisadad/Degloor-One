@@ -101,7 +101,7 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
               children: [
                 const SizedBox(height: 80),
                 BrandMark(
-                  size: 96,
+                  size: 168,
                   showWordmark: true,
                   wordmarkColor: Colors.white,
                   taglineColor: Colors.white.withValues(alpha: 0.82),

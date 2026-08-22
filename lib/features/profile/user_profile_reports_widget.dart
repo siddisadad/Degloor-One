@@ -2,6 +2,7 @@ import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/l10n/app_localizations.dart';
 import 'package:degloor_one/app_state.dart';
+import 'package:degloor_one/components/brand_mark.dart';
 import 'package:degloor_one/components/button/button_widget.dart';
 import 'package:degloor_one/components/profile_option/profile_option_widget.dart';
 import 'package:degloor_one/components/report_item/report_item_widget.dart';
@@ -67,6 +68,8 @@ class _UserProfileReportsWidgetState extends State<UserProfileReportsWidget> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  const BrandMark(size: 48, showWordmark: true, compact: true),
+                  const SizedBox(height: 20),
                   // User Profile Section
                   FutureBuilder<List<UsersRow>>(
                     future: _model.userProfileFuture,

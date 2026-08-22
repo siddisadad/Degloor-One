@@ -9,18 +9,32 @@ void main() {
     GoogleFonts.config.allowRuntimeFetching = false;
   });
 
-  testWidgets('brand mark shows DEGLOOR ONE wordmark', (tester) async {
+  testWidgets('brand mark loads the DEGLOOR ONE logo asset', (tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
-          body: Center(child: BrandMark(showWordmark: true)),
+          body: Center(child: BrandMark(size: 72, showWordmark: true)),
+        ),
+      ),
+    );
+
+    expect(find.byType(Image), findsOneWidget);
+    expect(find.text('Everything Local. One App.'), findsOneWidget);
+    final image = tester.widget<Image>(find.byType(Image));
+    expect((image.image as AssetImage).assetName, kBrandImageAsset);
+  });
+
+  testWidgets('compact brand mark shows the wordmark', (tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: BrandMark(size: 40, showWordmark: true, compact: true),
         ),
       ),
     );
 
     expect(find.text('DEGLOOR ONE'), findsOneWidget);
-    expect(find.text('Everything Local. One App.'), findsOneWidget);
-    expect(find.text('D1'), findsOneWidget);
+    expect(find.byType(Image), findsOneWidget);
   });
 
   testWidgets('home shortcuts expose services, jobs, and orders',
