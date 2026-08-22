@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/backend/supabase/supabase_connection.dart';
+import 'package:degloor_one/core/error_handler.dart';
 
 void main() {
   test('default project url is the FlutterFlow host', () {
@@ -64,5 +65,14 @@ void main() {
       ),
       SupabaseConnection.unreachableMessage,
     );
+  });
+
+  test('AppLogger treats the console AuthRetryableFetchException as unreachable',
+      () {
+    const dumped =
+        'AuthRetryableFetchException(message: ClientException: Failed to fetch, '
+        'uri=https://uhaibenopzyzzuqjawlb.supabase.co/auth/v1/token?grant_type=password, '
+        'statusCode: null)';
+    expect(AppLogger.isUnreachable(Exception(dumped)), isTrue);
   });
 }
