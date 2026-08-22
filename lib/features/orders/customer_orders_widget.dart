@@ -1,7 +1,6 @@
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/order_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
-import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/shared/order_lifecycle.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
@@ -38,10 +37,7 @@ class _CustomerOrdersWidgetState extends State<CustomerOrdersWidget> {
     if (userId == '') return [];
 
     try {
-      final page = await OrderService.instance.listForUser(
-        userId,
-        page: const PageQuery(limit: 20),
-      );
+      final page = await OrderService.instance.listForUser(userId);
       final orders = page.items;
 
       // Fetch business details for these orders

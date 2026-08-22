@@ -87,6 +87,7 @@ class LocationService {
       await DeliveryService.updatePartnerLocation(
         latitude: position.latitude,
         longitude: position.longitude,
+        partnerId: partnerId,
       );
     } catch (e) {
       // Internal error handling logic could go here

@@ -141,11 +141,22 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
                         padding: const EdgeInsets.only(bottom: 16),
                         child: FFButtonWidget(
                           onPressed: () async {
-                            await OrderService.instance.cancelOrder(
-                              orderId: order.id,
-                              actorUserId: currentUserUid,
-                              reason: 'Cancelled by customer',
-                            );
+                            try {
+                              await OrderService.instance.cancelOrder(
+                                orderId: order.id,
+                                actorUserId: currentUserUid,
+                                reason: 'Cancelled by customer',
+                              );
+                            } catch (e) {
+                              if (!context.mounted) return;
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Could not cancel: $e'),
+                                  backgroundColor:
+                                      FlutterFlowTheme.of(context).error,
+                                ),
+                              );
+                            }
                           },
                           text: 'Cancel order',
                           options: FFButtonOptions(

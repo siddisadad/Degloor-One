@@ -108,7 +108,7 @@ CREATE POLICY "Users update own notifications" ON notifications
 
 -- ==========================================
 -- Storage — product-images bucket
--- Path convention: products/{business_id}/{filename}
+-- Path convention: products/{business_id}/… or businesses/{business_id}/…
 -- ==========================================
 
 INSERT INTO storage.buckets (id, name, public)
@@ -126,7 +126,7 @@ CREATE POLICY "Owners upload product images" ON storage.objects
   WITH CHECK (
     bucket_id = 'product-images'
     AND auth.role() = 'authenticated'
-    AND (storage.foldername(name))[1] = 'products'
+    AND (storage.foldername(name))[1] IN ('products', 'businesses')
     AND EXISTS (
       SELECT 1 FROM businesses
       WHERE id::text = (storage.foldername(name))[2]
@@ -139,6 +139,7 @@ CREATE POLICY "Owners update product images" ON storage.objects
   FOR UPDATE
   USING (
     bucket_id = 'product-images'
+    AND (storage.foldername(name))[1] IN ('products', 'businesses')
     AND EXISTS (
       SELECT 1 FROM businesses
       WHERE id::text = (storage.foldername(name))[2]
@@ -151,6 +152,7 @@ CREATE POLICY "Owners delete product images" ON storage.objects
   FOR DELETE
   USING (
     bucket_id = 'product-images'
+    AND (storage.foldername(name))[1] IN ('products', 'businesses')
     AND EXISTS (
       SELECT 1 FROM businesses
       WHERE id::text = (storage.foldername(name))[2]
@@ -182,7 +184,9 @@ BEGIN
 END;
 $$;
 
-GRANT EXECUTE ON FUNCTION notify_user(UUID, TEXT, TEXT, TEXT) TO authenticated;
+REVOKE ALL ON FUNCTION notify_user(UUID, TEXT, TEXT, TEXT) FROM PUBLIC;
+REVOKE ALL ON FUNCTION notify_user(UUID, TEXT, TEXT, TEXT) FROM anon;
+REVOKE ALL ON FUNCTION notify_user(UUID, TEXT, TEXT, TEXT) FROM authenticated;
 
 -- ==========================================
 -- Checkout — server-side pricing, stock, history

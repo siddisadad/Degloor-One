@@ -25,18 +25,25 @@ class DeliveryService {
   static Future<void> updatePartnerLocation({
     required double latitude,
     required double longitude,
+    String? partnerId,
   }) async {
     if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
       throw Exception('Invalid coordinates');
     }
     if (kUseShowcaseData) {
+      final query = ShowcaseQuery();
+      if (partnerId != null && partnerId.isNotEmpty) {
+        query.eq('id', partnerId);
+      } else {
+        query.eq('user_id', ShowcaseCatalog.riderId);
+      }
       ShowcaseCatalog.update(
         'delivery_partners',
         {
           'current_latitude': latitude,
           'current_longitude': longitude,
         },
-        ShowcaseQuery()..eq('user_id', ShowcaseCatalog.riderId),
+        query,
       );
       return;
     }

@@ -33,10 +33,11 @@ void main() {
     await DeliveryService.updatePartnerLocation(
       latitude: 18.55,
       longitude: 77.58,
+      partnerId: 'dp-amit',
     );
     final partners = ShowcaseCatalog.query(
       'delivery_partners',
-      ShowcaseQuery()..eq('user_id', ShowcaseCatalog.riderId),
+      ShowcaseQuery()..eq('id', 'dp-amit'),
     );
     expect(partners, isNotEmpty);
     expect(partners.first['current_latitude'], 18.55);

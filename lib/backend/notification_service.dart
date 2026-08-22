@@ -13,26 +13,18 @@ class NotificationService {
     String? type,
   }) async {
     try {
-      if (kUseShowcaseData) {
-        ShowcaseCatalog.insert('notifications', {
-          'user_id': userId,
-          'title': title,
-          'message': message,
-          'type': type ?? 'general',
-          'is_read': false,
-          'created_at': DateTime.now().toIso8601String(),
-        });
+      if (!kUseShowcaseData) {
+        // Live inserts go through SECURITY DEFINER RPCs only.
         return;
       }
-      await SupaFlow.client.rpc(
-        'notify_user',
-        params: {
-          'p_user_id': userId,
-          'p_title': title,
-          'p_message': message,
-          'p_type': type ?? 'general',
-        },
-      );
+      ShowcaseCatalog.insert('notifications', {
+        'user_id': userId,
+        'title': title,
+        'message': message,
+        'type': type ?? 'general',
+        'is_read': false,
+        'created_at': DateTime.now().toIso8601String(),
+      });
     } catch (e) {
       AppLogger.error('Failed to send notification', e);
     }

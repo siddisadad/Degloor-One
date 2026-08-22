@@ -139,7 +139,8 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
           ),
         );
       }
-      setState(() => _loading = false);
+    } finally {
+      if (mounted) setState(() => _loading = false);
     }
   }
 
