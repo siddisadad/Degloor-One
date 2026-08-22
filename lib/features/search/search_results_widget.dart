@@ -1,5 +1,8 @@
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/backend/discovery_service.dart';
 import 'package:degloor_one/backend/location_service.dart';
+import 'package:degloor_one/backend/repositories/discovery_repository.dart';
+import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/l10n/app_localizations.dart';
 import 'package:degloor_one/components/business_card/business_card_widget.dart';
 import 'package:degloor_one/components/button/button_widget.dart';
@@ -66,7 +69,7 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
     _onlyOpen = widget.openNow ?? false;
     _performSearch(_currentSearchTerm, categoryId: _currentCategoryId);
 
-    BusinessCategoriesTable().queryRows(queryFn: (q) => q).then((rows) {
+    DiscoveryService.instance.categories().then((rows) {
       if (mounted) {
         setState(() {
           for (var row in rows) {
@@ -96,18 +99,20 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
 
     if (userLoc != null) {
       try {
-        final newBusinesses = await BusinessesTable().searchInRadius(
-          latitude: userLoc.latitude,
-          longitude: userLoc.longitude,
-          radiusKm: radius,
-          searchTerm: term,
-          categoryId: categoryId,
-          verifiedOnly: _onlyVerified,
-          openNow: _onlyOpen,
-          minRating: _minRating4 ? 4.0 : 0.0,
-          limit: _limit,
-          offset: _offset,
+        final page = await DiscoveryService.instance.search(
+          DiscoverySearch(
+            latitude: userLoc.latitude,
+            longitude: userLoc.longitude,
+            radiusKm: radius,
+            searchTerm: term,
+            categoryId: categoryId,
+            verifiedOnly: _onlyVerified,
+            openNow: _onlyOpen,
+            minRating: _minRating4 ? 4.0 : 0.0,
+            page: PageQuery(limit: _limit, offset: _offset),
+          ),
         );
+        final newBusinesses = page.items;
 
         setState(() {
           _businesses.addAll(newBusinesses);

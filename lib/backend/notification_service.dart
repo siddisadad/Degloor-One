@@ -56,4 +56,16 @@ class NotificationService {
       type: 'new_review',
     );
   }
+
+  static Future<void> notifyServiceRequestUpdate({
+    required String userId,
+    required String status,
+  }) async {
+    await sendNotification(
+      userId: userId,
+      title: 'Service Request Update',
+      message: 'Your service request is now $status.',
+      type: 'service_request',
+    );
+  }
 }

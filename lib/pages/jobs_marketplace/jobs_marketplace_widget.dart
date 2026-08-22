@@ -1,5 +1,5 @@
-import 'package:degloor_one/backend/supabase/supabase.dart';
-import 'package:degloor_one/shared/showcase_catalog.dart';
+import 'package:degloor_one/backend/job_service.dart';
+import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/components/apply_job_sheet/apply_job_sheet_widget.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/components/job_card/job_card_widget.dart';
@@ -25,6 +25,11 @@ class _JobsMarketplaceWidgetState extends State<JobsMarketplaceWidget> {
   late JobsMarketplaceModel _model;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
+  List<Map<String, dynamic>> _jobs = [];
+  bool _loading = false;
+  bool _hasMore = true;
+  int _offset = 0;
+  static const _pageSize = 20;
 
   @override
   void initState() {
@@ -37,6 +42,7 @@ class _JobsMarketplaceWidgetState extends State<JobsMarketplaceWidget> {
     _model.searchBarController!.addListener(() {
       setState(() {});
     });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadJobs());
   }
 
   @override
@@ -45,28 +51,32 @@ class _JobsMarketplaceWidgetState extends State<JobsMarketplaceWidget> {
     super.dispose();
   }
 
-  Future<List<Map<String, dynamic>>> _fetchJobs() async {
-    if (kUseShowcaseData) {
-      return ShowcaseCatalog.activeJobs(
+  Future<void> _loadJobs({bool loadMore = false}) async {
+    if (_loading) return;
+    setState(() {
+      _loading = true;
+      if (!loadMore) {
+        _jobs = [];
+        _offset = 0;
+        _hasMore = true;
+      }
+    });
+    try {
+      final page = await JobService.instance.listActive(
         search: _model.searchBarController!.text,
         jobType: _model.jobTypeFilter,
+        page: PageQuery(limit: _pageSize, offset: _offset),
       );
+      if (!mounted) return;
+      setState(() {
+        _jobs.addAll(page.items);
+        _offset += _pageSize;
+        _hasMore = page.hasMore;
+        _loading = false;
+      });
+    } catch (_) {
+      if (mounted) setState(() => _loading = false);
     }
-    var query = SupaFlow.client
-        .from('jobs')
-        .select('*, businesses(name, location)')
-        .eq('is_active', true);
-
-    if (_model.searchBarController!.text.isNotEmpty) {
-      query = query.ilike('title', '%${_model.searchBarController!.text}%');
-    }
-
-    if (_model.jobTypeFilter != null && _model.jobTypeFilter != 'All') {
-      query = query.eq('job_type', _model.jobTypeFilter!);
-    }
-
-    final response = await query.order('created_at', ascending: false);
-    return List<Map<String, dynamic>>.from(response);
   }
 
   void _applyForJob(Map<String, dynamic> job) async {
@@ -159,7 +169,7 @@ class _JobsMarketplaceWidgetState extends State<JobsMarketplaceWidget> {
                               ? InkWell(
                                   onTap: () async {
                                     _model.searchBarController?.clear();
-                                    setState(() {});
+                                    _loadJobs();
                                   },
                                   child: Icon(
                                     Icons.clear,
@@ -172,6 +182,7 @@ class _JobsMarketplaceWidgetState extends State<JobsMarketplaceWidget> {
                           fillColor: FlutterFlowTheme.of(context).primaryBackground,
                         ),
                         style: FlutterFlowTheme.of(context).bodyMedium,
+                        onFieldSubmitted: (_) => _loadJobs(),
                       ),
                       const SizedBox(height: 16),
                       SingleChildScrollView(
@@ -188,6 +199,7 @@ class _JobsMarketplaceWidgetState extends State<JobsMarketplaceWidget> {
                                   setState(() {
                                     _model.jobTypeFilter = selected ? type : 'All';
                                   });
+                                  _loadJobs();
                                 },
                                 selectedColor: FlutterFlowTheme.of(context).primary,
                                 backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
@@ -211,62 +223,58 @@ class _JobsMarketplaceWidgetState extends State<JobsMarketplaceWidget> {
                 ),
               ),
               Expanded(
-                child: FutureBuilder<List<Map<String, dynamic>>>(
-                  future: _fetchJobs(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-                    if (snapshot.hasError) {
-                      return EmptyStateView(
-                        icon: Icons.wifi_off_rounded,
-                        title: 'Could not load jobs',
-                        description: 'Try again in a moment.',
-                        buttonText: 'Retry',
-                        onTap: () => setState(() {}),
-                      );
-                    }
-                    final jobs = snapshot.data ?? [];
-                    if (jobs.isEmpty) {
-                      return EmptyStateView(
-                        icon: Icons.work_outline_rounded,
-                        title: 'No jobs found',
-                        description:
-                            'Try another search or check services nearby.',
-                        buttonText: 'Clear filters',
-                        onTap: () {
-                          setState(() {
-                            _model.searchBarController?.clear();
-                            _model.jobTypeFilter = 'All';
-                          });
-                        },
-                      );
-                    }
+                child: _loading && _jobs.isEmpty
+                    ? const Center(child: CircularProgressIndicator())
+                    : _jobs.isEmpty
+                        ? EmptyStateView(
+                            icon: Icons.work_outline_rounded,
+                            title: 'No jobs found',
+                            description:
+                                'Try another search or check services nearby.',
+                            buttonText: 'Clear filters',
+                            onTap: () {
+                              _model.searchBarController?.clear();
+                              _model.jobTypeFilter = 'All';
+                              _loadJobs();
+                            },
+                          )
+                        : ListView.builder(
+                            padding: const EdgeInsets.all(16),
+                            itemCount: _jobs.length + (_hasMore ? 1 : 0),
+                            itemBuilder: (context, index) {
+                              if (index >= _jobs.length) {
+                                return Padding(
+                                  padding: const EdgeInsets.only(top: 8),
+                                  child: TextButton(
+                                    onPressed: _loading
+                                        ? null
+                                        : () => _loadJobs(loadMore: true),
+                                    child: Text(
+                                      _loading ? 'Loading...' : 'Load more',
+                                    ),
+                                  ),
+                                );
+                              }
+                              final job = _jobs[index];
+                              final business =
+                                  job['businesses'] as Map<String, dynamic>?;
 
-                    return ListView.builder(
-                      padding: const EdgeInsets.all(16),
-                      itemCount: jobs.length,
-                      itemBuilder: (context, index) {
-                        final job = jobs[index];
-                        final business = job['businesses'] as Map<String, dynamic>?;
-
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 16.0),
-                          child: JobCardWidget(
-                            title: job['title'] ?? 'Job Title',
-                            companyName: business?['name'] ?? 'Employer',
-                            location: business?['address_text'] ??
-                                business?['location'] ??
-                                'Degloor',
-                            salary: job['salary_range'] ?? 'Salary Not Specified',
-                            jobType: job['job_type'] ?? 'Type',
-                            onActionPressed: () async => _applyForJob(job),
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 16.0),
+                                child: JobCardWidget(
+                                  title: job['title'] ?? 'Job Title',
+                                  companyName: business?['name'] ?? 'Employer',
+                                  location: business?['address_text'] ??
+                                      business?['location'] ??
+                                      'Degloor',
+                                  salary: job['salary_range'] ??
+                                      'Salary Not Specified',
+                                  jobType: job['job_type'] ?? 'Type',
+                                  onActionPressed: () async => _applyForJob(job),
+                                ),
+                              );
+                            },
                           ),
-                        );
-                      },
-                    );
-                  },
-                ),
               ),
             ],
           ),

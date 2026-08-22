@@ -1,5 +1,6 @@
+import 'package:degloor_one/backend/service_marketplace_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
-import 'package:degloor_one/shared/showcase_catalog.dart';
+import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/components/category_item/category_item_widget.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/components/supabase_unreachable_banner.dart';
@@ -34,28 +35,35 @@ class _ServicesWidgetState extends State<ServicesWidget> {
     super.initState();
     _model = createModel(context, () => ServicesModel());
 
-    _model.categoriesFuture = ServiceCategoriesTable().queryRows(
-      queryFn: (q) => q.order('name', ascending: true),
-    );
-    _model.providersFuture = _loadProviders();
+    _model.categoriesFuture = ServiceMarketplaceService.instance.categories();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadProviders());
   }
 
-  Future<List<dynamic>> _loadProviders() async {
-    if (kUseShowcaseData) {
-      return ShowcaseCatalog.serviceProviders(
+  Future<void> _loadProviders({bool loadMore = false}) async {
+    if (_model.providersLoading) return;
+    setState(() {
+      _model.providersLoading = true;
+      if (!loadMore) {
+        _model.providers = [];
+        _model.providersOffset = 0;
+        _model.providersHasMore = true;
+      }
+    });
+    try {
+      final page = await ServiceMarketplaceService.instance.providers(
         categoryId: _model.selectedCategoryId,
+        page: PageQuery(limit: 20, offset: _model.providersOffset),
       );
+      if (!mounted) return;
+      setState(() {
+        _model.providers.addAll(page.items);
+        _model.providersOffset += 20;
+        _model.providersHasMore = page.hasMore;
+        _model.providersLoading = false;
+      });
+    } catch (_) {
+      if (mounted) setState(() => _model.providersLoading = false);
     }
-    var query = SupaFlow.client
-        .from('service_providers')
-        .select('*, users(full_name, avatar_url), service_categories(name)');
-
-    if (_model.selectedCategoryId != null) {
-      query = query.eq('category_id', _model.selectedCategoryId!);
-    }
-
-    final value = await query;
-    return List<dynamic>.from(value);
   }
 
   void _onCategorySelected(String categoryId) {
@@ -65,8 +73,8 @@ class _ServicesWidgetState extends State<ServicesWidget> {
       } else {
         _model.selectedCategoryId = categoryId;
       }
-      _model.providersFuture = _loadProviders();
     });
+    _loadProviders();
   }
 
   Widget getIconFromData(String? iconName) {
@@ -204,21 +212,12 @@ class _ServicesWidgetState extends State<ServicesWidget> {
                 ),
               ),
               Expanded(
-                child: FutureBuilder<List<dynamic>>(
-                  future: _model.providersFuture,
-                  builder: (context, snapshot) {
-                    if (snapshot.hasError) {
-                      return Center(
-                        child: Text(
-                          'Could not load service providers.',
-                          style: FlutterFlowTheme.of(context).bodyMedium,
-                        ),
-                      );
-                    }
-                    if (!snapshot.hasData) {
+                child: Builder(
+                  builder: (context) {
+                    if (_model.providersLoading && _model.providers.isEmpty) {
                       return const Center(child: CircularProgressIndicator());
                     }
-                    final providers = snapshot.data!;
+                    final providers = _model.providers;
                     if (providers.isEmpty) {
                       return EmptyStateView(
                         icon: Icons.handyman_outlined,
@@ -240,9 +239,22 @@ class _ServicesWidgetState extends State<ServicesWidget> {
                     }
                     return ListView.separated(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      itemCount: providers.length,
+                      itemCount: providers.length +
+                          (_model.providersHasMore ? 1 : 0),
                       separatorBuilder: (context, index) => const SizedBox(height: 12.0),
                       itemBuilder: (context, index) {
+                        if (index >= providers.length) {
+                          return TextButton(
+                            onPressed: _model.providersLoading
+                                ? null
+                                : () => _loadProviders(loadMore: true),
+                            child: Text(
+                              _model.providersLoading
+                                  ? 'Loading...'
+                                  : 'Load more',
+                            ),
+                          );
+                        }
                         final provider = providers[index];
                         final user = provider['users'];
                         final category = provider['service_categories'];

@@ -7,7 +7,10 @@ class ServicesModel extends FlutterFlowModel<ServicesWidget> {
   ///  State fields for stateful widgets in this page.
 
   Future<List<ServiceCategoriesRow>>? categoriesFuture;
-  Future<List<dynamic>>? providersFuture;
+  List<dynamic> providers = [];
+  bool providersLoading = false;
+  bool providersHasMore = true;
+  int providersOffset = 0;
 
   String? selectedCategoryId;
 

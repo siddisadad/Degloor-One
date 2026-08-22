@@ -1,5 +1,5 @@
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
-import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/backend/service_marketplace_service.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
@@ -150,14 +150,13 @@ class _RequestServiceSheetWidgetState extends State<RequestServiceSheetWidget> {
                       return;
                     }
 
-                    await ServiceRequestsTable().insert({
-                      'user_id': currentUserUid,
-                      'provider_id': widget.providerId,
-                      'description':
+                    await ServiceMarketplaceService.instance.createRequest(
+                      userId: currentUserUid,
+                      providerId: widget.providerId,
+                      description:
                           _model.descriptionTextController?.text ?? '',
-                      'scheduled_at': _model.datePicked?.toIso8601String(),
-                      'status': 'pending',
-                    });
+                      scheduledAt: _model.datePicked!,
+                    );
 
                     if (!context.mounted) return;
                     Navigator.pop(context);
