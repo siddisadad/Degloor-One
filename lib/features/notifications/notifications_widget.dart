@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/notification_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_icon_button.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
@@ -27,6 +28,11 @@ class _NotificationsWidgetState extends State<NotificationsWidget> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
   List<NotificationsRow> _notifications = [];
   bool _isLoading = true;
+  bool _loadingMore = false;
+  bool _hasMore = true;
+  int _offset = 0;
+  int _loadToken = 0;
+  static const _pageSize = 20;
   StreamSubscription<List<NotificationsRow>>? _notificationsSubscription;
 
   @override
@@ -44,31 +50,64 @@ class _NotificationsWidgetState extends State<NotificationsWidget> {
     }
 
     _notificationsSubscription?.cancel();
-    _notificationsSubscription = NotificationService.repository
+    _notificationsSubscription = NotificationService.instance
         .watchForUser(user)
-        .listen((notifications) {
-      if (mounted) {
-        setState(() {
-          _notifications = notifications.toList()
-            ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-          _isLoading = false;
-        });
-      }
+        .listen((_) {
+      if (mounted) _loadPage(reset: true);
     });
+    _loadPage(reset: true);
   }
 
-  Future<void> _loadNotifications() async {
-    // This is now handled by the stream, but keeping the signature if needed
-    _listenToNotifications();
+  Future<void> _loadPage({bool reset = false}) async {
+    final user = currentUserUid;
+    if (user == '') {
+      if (mounted) setState(() => _isLoading = false);
+      return;
+    }
+    if (!reset && (_loadingMore || !_hasMore)) return;
+    final token = reset ? ++_loadToken : _loadToken;
+    if (reset) {
+      _offset = 0;
+      _hasMore = true;
+    }
+    setState(() {
+      _isLoading = reset && _notifications.isEmpty;
+      _loadingMore = !reset;
+    });
+    try {
+      final page = await NotificationService.instance.listForUser(
+        user,
+        page: PageQuery(limit: _pageSize, offset: _offset),
+      );
+      if (!mounted || token != _loadToken) return;
+      setState(() {
+        if (reset) {
+          _notifications = page.items;
+        } else {
+          _notifications.addAll(page.items);
+        }
+        _offset += _pageSize;
+        _hasMore = page.hasMore;
+        _isLoading = false;
+        _loadingMore = false;
+      });
+    } catch (e) {
+      AppLogger.error('Error loading notifications', e);
+      if (mounted && token == _loadToken) {
+        setState(() {
+          _isLoading = false;
+          _loadingMore = false;
+        });
+      }
+    }
   }
 
   Future<void> _markAsRead(String id) async {
     try {
-      await NotificationsTable().update(
-        data: {'is_read': true},
-        matchingRows: (q) => q.eq('id', id),
+      await NotificationService.instance.markRead(
+        notificationId: id,
+        userId: currentUserUid,
       );
-      await _loadNotifications();
     } catch (e) {
       AppLogger.error('Error marking as read', e);
     }
@@ -78,12 +117,7 @@ class _NotificationsWidgetState extends State<NotificationsWidget> {
     try {
       final user = currentUserUid;
       if (user == '') return;
-
-      await NotificationsTable().update(
-        data: {'is_read': true},
-        matchingRows: (q) => q.eq('user_id', user).eq('is_read', false),
-      );
-      await _loadNotifications();
+      await NotificationService.instance.markAllRead(user);
     } catch (e) {
       AppLogger.error('Error marking all as read', e);
     }
@@ -113,10 +147,8 @@ class _NotificationsWidgetState extends State<NotificationsWidget> {
         final user = currentUserUid;
         if (user == '') return;
 
-        await NotificationsTable().delete(
-          matchingRows: (q) => q.eq('user_id', user),
-        );
-        // Stream will update UI automatically
+        await NotificationService.instance.clearAll(user);
+        if (mounted) _loadPage(reset: true);
       } catch (e) {
         AppLogger.error('Error clearing notifications', e);
       }
@@ -207,8 +239,25 @@ class _NotificationsWidgetState extends State<NotificationsWidget> {
                   )
                 : ListView.builder(
                     padding: const EdgeInsets.symmetric(vertical: 8),
-                    itemCount: _notifications.length,
+                    itemCount: _notifications.length + (_hasMore ? 1 : 0),
                     itemBuilder: (context, index) {
+                      if (index >= _notifications.length) {
+                        return Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                          child: TextButton(
+                            onPressed: _loadingMore
+                                ? null
+                                : () => _loadPage(),
+                            child: _loadingMore
+                                ? const SizedBox(
+                                    height: 18,
+                                    width: 18,
+                                    child: CircularProgressIndicator(strokeWidth: 2),
+                                  )
+                                : const Text('Load more'),
+                          ),
+                        );
+                      }
                       final notification = _notifications[index];
                       return Padding(
                         padding: const EdgeInsetsDirectional.fromSTEB(16, 8, 16, 8),

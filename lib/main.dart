@@ -90,6 +90,9 @@ class _MyAppState extends State<MyApp> {
   /// A stream of the current authenticated user.
   late Stream<BaseAuthUser> userStream;
   StreamSubscription<List<NotificationsRow>>? _notificationSubscription;
+  StreamSubscription<BaseAuthUser>? _userSubscription;
+  StreamSubscription<dynamic>? _jwtSubscription;
+  StreamSubscription<AuthState>? _authSubscription;
 
   void _setupNotificationListener(String userId) {
     _notificationSubscription?.cancel();
@@ -146,17 +149,17 @@ class _MyAppState extends State<MyApp> {
       _appStateNotifier.update(currentUser!);
     }
     _router = createRouter(_appStateNotifier);
-    userStream = degloorOneSupabaseUserStream()
-      ..listen((user) {
-        _appStateNotifier.update(user);
-        if (user.loggedIn && user.uid != null && user is! GuestAuthUser) {
-          _setupNotificationListener(user.uid!);
-        } else {
-          _notificationSubscription?.cancel();
-        }
-      });
-    jwtTokenStream.listen((_) {});
-    SupaFlow.client.auth.onAuthStateChange.listen((authState) {
+    userStream = degloorOneSupabaseUserStream();
+    _userSubscription = userStream.listen((user) {
+      _appStateNotifier.update(user);
+      if (user.loggedIn && user.uid != null && user is! GuestAuthUser) {
+        _setupNotificationListener(user.uid!);
+      } else {
+        _notificationSubscription?.cancel();
+      }
+    });
+    _jwtSubscription = jwtTokenStream.listen((_) {});
+    _authSubscription = SupaFlow.client.auth.onAuthStateChange.listen((authState) {
       if (authState.event == AuthChangeEvent.passwordRecovery && mounted) {
         PasswordRecovery.pending.value = true;
         _router.goNamed('ResetPassword');
@@ -171,6 +174,9 @@ class _MyAppState extends State<MyApp> {
   @override
   void dispose() {
     _notificationSubscription?.cancel();
+    _userSubscription?.cancel();
+    _jwtSubscription?.cancel();
+    _authSubscription?.cancel();
     super.dispose();
   }
 

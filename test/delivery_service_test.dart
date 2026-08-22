@@ -6,18 +6,21 @@ import 'package:degloor_one/shared/showcase_catalog.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() {
-  test('messageFor prefers PostgrestException.message', () {
+  test('messageFor hides PostgrestException internals', () {
     const error = PostgrestException(
-      message: 'Order is no longer available',
-      code: 'P0001',
+      message: 'permission denied for table orders',
+      code: 'PGRST301',
     );
-    expect(DeliveryService.messageFor(error), 'Order is no longer available');
+    expect(
+      DeliveryService.messageFor(error),
+      'Something went wrong. Please try again.',
+    );
   });
 
-  test('messageFor strips Exception prefixes from generic errors', () {
+  test('messageFor maps OTP failures to a customer sentence', () {
     expect(
-      DeliveryService.messageFor(Exception('Invalid OTP')),
-      'Invalid OTP',
+      DeliveryService.messageFor(Exception('Invalid delivery OTP')),
+      'The delivery code is invalid or has expired.',
     );
   });
 

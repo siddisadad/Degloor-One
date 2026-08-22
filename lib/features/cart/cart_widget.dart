@@ -104,12 +104,28 @@ class _CartWidgetState extends State<CartWidget> {
   }
 
   Future<void> _updateQuantity(String itemId, int newQty) async {
-    if (newQty <= 0) {
-      await CartItemsTable().delete(matchingRows: (q) => q.eq('id', itemId));
-    } else {
-      await CartItemsTable().update(data: {'quantity': newQty}, matchingRows: (q) => q.eq('id', itemId));
+    try {
+      await CartService.updateQuantity(itemId: itemId, quantity: newQty);
+      await _fetchCartData();
+    } catch (e) {
+      AppLogger.event(
+        'CART_QTY_FAILED',
+        fields: {'item_id': itemId, 'quantity': newQty},
+        error: e,
+      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            AppLogger.userFacingMessage(
+              e,
+              fallback: 'Unable to update the cart. Please try again.',
+            ),
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
-    _fetchCartData();
   }
 
   Future<void> _placeOrder(List<Map<String, dynamic>> items) async {
@@ -154,11 +170,23 @@ class _CartWidgetState extends State<CartWidget> {
         }.withoutNulls,
       );
     } catch (e) {
-      AppLogger.error('Failed to place order', e);
+      AppLogger.event(
+        'ORDER_CREATE_FAILED',
+        fields: {
+          'user_id': currentUserUid,
+          'cart_id': _model.currentCart?.id,
+        },
+        error: e,
+      );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to place order: $e'),
+            content: Text(
+              AppLogger.userFacingMessage(
+                e,
+                fallback: 'Unable to place the order. Please try again.',
+              ),
+            ),
             backgroundColor: Colors.red,
           ),
         );

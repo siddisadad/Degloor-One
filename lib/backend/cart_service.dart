@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
+import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/core/error_handler.dart';
+import 'package:degloor_one/shared/rpc_row.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
 class CartAddResult {
@@ -29,9 +32,12 @@ class CartAddResult {
     message: 'Added to cart',
   );
 
-  factory CartAddResult.failure(Object error) => CartAddResult._(
+  factory CartAddResult.failure([Object? error]) => CartAddResult._(
         added: false,
-        message: 'Error adding to cart: $error',
+        message: AppLogger.userFacingMessage(
+          error,
+          fallback: 'Unable to update the cart. Please try again.',
+        ),
       );
 }
 
@@ -107,10 +113,20 @@ class CartService {
         );
       }
     } catch (e) {
+      AppLogger.event(
+        'CART_ADD_FAILED',
+        fields: {'user_id': userId, 'product_id': productId},
+        error: e,
+      );
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error adding to cart: $e'),
+          content: Text(
+            AppLogger.userFacingMessage(
+              e,
+              fallback: 'Unable to update the cart. Please try again.',
+            ),
+          ),
           backgroundColor: Colors.red,
         ),
       );
@@ -118,6 +134,7 @@ class CartService {
   }
 
   /// Data-only add so tests and UI share the same cart rules.
+  /// Live path uses `add_to_cart()`; showcase stays local.
   static Future<CartAddResult> addProduct({
     required String userId,
     required String businessId,
@@ -126,54 +143,179 @@ class CartService {
     bool replaceOtherBusiness = false,
   }) async {
     if (userId.isEmpty) return CartAddResult.signedOut;
+    if (quantity < 1 || quantity > 99) {
+      return CartAddResult.failure('CART_INVALID_QTY');
+    }
 
     try {
-      final existingCarts = await cartsForUser(userId);
-
-      if (existingCarts.isNotEmpty &&
-          existingCarts.first.businessId != businessId) {
-        if (!replaceOtherBusiness) return CartAddResult.needsConfirm;
-        await CartsTable().delete(matchingRows: (q) => q.eq('user_id', userId));
-      }
-
-      String cartId;
-      final currentCart = await CartsTable().queryRows(
-        queryFn: (q) => q.eq('user_id', userId).eq('business_id', businessId),
-      );
-
-      if (currentCart.isEmpty) {
-        final newCart = await CartsTable().insert({
-          'user_id': userId,
-          'business_id': businessId,
-          'created_at': DateTime.now().toIso8601String(),
-        });
-        cartId = newCart.id;
-      } else {
-        cartId = currentCart.first.id;
-      }
-
-      final existingItems = await CartItemsTable().queryRows(
-        queryFn: (q) => q.eq('cart_id', cartId).eq('product_id', productId),
-      );
-
-      if (existingItems.isNotEmpty) {
-        await CartItemsTable().update(
-          data: {'quantity': existingItems.first.quantity + quantity},
-          matchingRows: (q) => q.eq('id', existingItems.first.id),
+      if (!kUseShowcaseData) {
+        return await _addProductLive(
+          productId: productId,
+          quantity: quantity,
+          replaceOtherBusiness: replaceOtherBusiness,
         );
-      } else {
-        await CartItemsTable().insert({
-          'cart_id': cartId,
-          'product_id': productId,
-          'quantity': quantity,
-          'created_at': DateTime.now().toIso8601String(),
-        });
       }
-
-      return CartAddResult.success;
+      return await _addProductShowcase(
+        userId: userId,
+        businessId: businessId,
+        productId: productId,
+        quantity: quantity,
+        replaceOtherBusiness: replaceOtherBusiness,
+      );
     } catch (e) {
+      AppLogger.event(
+        'CART_ADD_FAILED',
+        fields: {
+          'user_id': userId,
+          'product_id': productId,
+          'cart_id': businessId,
+        },
+        error: e,
+      );
       return CartAddResult.failure(e);
     }
+  }
+
+  static Future<CartAddResult> _addProductLive({
+    required String productId,
+    required int quantity,
+    required bool replaceOtherBusiness,
+  }) async {
+    final response = await SupaFlow.client.rpc(
+      'add_to_cart',
+      params: {
+        'p_product_id': productId,
+        'p_quantity': quantity,
+        'p_replace_other_business': replaceOtherBusiness,
+      },
+    );
+    final row = asRpcRow(response);
+    if (row == null) {
+      return CartAddResult.failure('CART_PRODUCT');
+    }
+    if (row['ok'] == false && row['code'] == 'needs_replacement') {
+      return CartAddResult.needsConfirm;
+    }
+    if (row['ok'] == true) return CartAddResult.success;
+    return CartAddResult.failure('CART_PRODUCT');
+  }
+
+  static Future<CartAddResult> _addProductShowcase({
+    required String userId,
+    required String businessId,
+    required String productId,
+    required int quantity,
+    required bool replaceOtherBusiness,
+  }) async {
+    _assertShowcaseProduct(businessId: businessId, productId: productId);
+
+    final existingCarts = await cartsForUser(userId);
+    if (existingCarts.isNotEmpty &&
+        existingCarts.first.businessId != businessId) {
+      if (!replaceOtherBusiness) return CartAddResult.needsConfirm;
+      await CartsTable().delete(matchingRows: (q) => q.eq('user_id', userId));
+    }
+
+    String cartId;
+    final currentCart = await CartsTable().queryRows(
+      queryFn: (q) => q.eq('user_id', userId).eq('business_id', businessId),
+    );
+
+    if (currentCart.isEmpty) {
+      final newCart = await CartsTable().insert({
+        'user_id': userId,
+        'business_id': businessId,
+        'created_at': DateTime.now().toIso8601String(),
+      });
+      cartId = newCart.id;
+    } else {
+      cartId = currentCart.first.id;
+    }
+
+    final existingItems = await CartItemsTable().queryRows(
+      queryFn: (q) => q.eq('cart_id', cartId).eq('product_id', productId),
+    );
+
+    final nextQty = existingItems.isEmpty
+        ? quantity
+        : existingItems.first.quantity + quantity;
+    _assertShowcaseStock(productId: productId, quantity: nextQty);
+
+    if (existingItems.isNotEmpty) {
+      await CartItemsTable().update(
+        data: {'quantity': nextQty},
+        matchingRows: (q) => q.eq('id', existingItems.first.id),
+      );
+    } else {
+      await CartItemsTable().insert({
+        'cart_id': cartId,
+        'product_id': productId,
+        'quantity': quantity,
+        'created_at': DateTime.now().toIso8601String(),
+      });
+    }
+
+    return CartAddResult.success;
+  }
+
+  static Future<void> updateQuantity({
+    required String itemId,
+    required int quantity,
+    String? userId,
+  }) async {
+    final uid = userId ?? currentUserUid;
+    if (uid.isEmpty) {
+      throw Exception('CART_UNAUTHORIZED');
+    }
+    if (kUseShowcaseData) {
+      _assertShowcaseCartItemOwner(itemId, uid);
+      if (quantity <= 0) {
+        await _removeShowcaseItem(itemId);
+        return;
+      }
+      if (quantity > 99) {
+        throw Exception('CART_INVALID_QTY');
+      }
+      final items = ShowcaseCatalog.query(
+        'cart_items',
+        ShowcaseQuery()..eq('id', itemId),
+      );
+      _assertShowcaseStock(
+        productId: '${items.first['product_id']}',
+        quantity: quantity,
+      );
+      await CartItemsTable().update(
+        data: {'quantity': quantity},
+        matchingRows: (q) => q.eq('id', itemId),
+      );
+      return;
+    }
+    await SupaFlow.client.rpc(
+      'update_cart_quantity',
+      params: {
+        'p_item_id': itemId,
+        'p_quantity': quantity,
+      },
+    );
+  }
+
+  static Future<void> removeItem({
+    required String itemId,
+    String? userId,
+  }) {
+    return updateQuantity(itemId: itemId, quantity: 0, userId: userId);
+  }
+
+  static Future<void> clearCart({String? userId}) async {
+    final uid = userId ?? currentUserUid;
+    if (uid.isEmpty) {
+      throw Exception('CART_UNAUTHORIZED');
+    }
+    if (kUseShowcaseData) {
+      await CartsTable().delete(matchingRows: (q) => q.eq('user_id', uid));
+      return;
+    }
+    await SupaFlow.client.rpc('clear_cart');
   }
 
   static Future<List<CartsRow>> cartsForUser(String userId) {
@@ -209,5 +351,73 @@ class CartService {
       total += items.fold<int>(0, (sum, item) => sum + item.quantity);
     }
     return total;
+  }
+
+  static void _assertShowcaseCartItemOwner(String itemId, String userId) {
+    final items = ShowcaseCatalog.query(
+      'cart_items',
+      ShowcaseQuery()..eq('id', itemId),
+    );
+    if (items.isEmpty) {
+      throw Exception('CART_NOT_FOUND');
+    }
+    final carts = ShowcaseCatalog.query(
+      'carts',
+      ShowcaseQuery()..eq('id', items.first['cart_id']),
+    );
+    if (carts.isEmpty || carts.first['user_id'] != userId) {
+      throw Exception('CART_UNAUTHORIZED');
+    }
+  }
+
+  static Future<void> _removeShowcaseItem(String itemId) async {
+    final items = ShowcaseCatalog.query(
+      'cart_items',
+      ShowcaseQuery()..eq('id', itemId),
+    );
+    await CartItemsTable().delete(matchingRows: (q) => q.eq('id', itemId));
+    if (items.isEmpty) return;
+    final cartId = '${items.first['cart_id']}';
+    final remaining = ShowcaseCatalog.query(
+      'cart_items',
+      ShowcaseQuery()..eq('cart_id', cartId),
+    );
+    if (remaining.isEmpty) {
+      await CartsTable().delete(matchingRows: (q) => q.eq('id', cartId));
+    }
+  }
+
+  static void _assertShowcaseProduct({
+    required String businessId,
+    required String productId,
+  }) {
+    final products = ShowcaseCatalog.query(
+      'products',
+      ShowcaseQuery()..eq('id', productId),
+    );
+    if (products.isEmpty || products.first['business_id'] != businessId) {
+      throw Exception('CART_PRODUCT');
+    }
+    if (products.first['is_available'] == false) {
+      throw Exception('CART_UNAVAILABLE');
+    }
+  }
+
+  static void _assertShowcaseStock({
+    required String productId,
+    required int quantity,
+  }) {
+    final products = ShowcaseCatalog.query(
+      'products',
+      ShowcaseQuery()..eq('id', productId),
+    );
+    if (products.isEmpty) {
+      throw Exception('CART_PRODUCT');
+    }
+    if (products.first['track_inventory'] != true) return;
+    final stock = (products.first['stock_quantity'] as num?)?.toInt() ?? 0;
+    if (stock < quantity) {
+      throw Exception('CART_STOCK');
+    }
   }
 }
