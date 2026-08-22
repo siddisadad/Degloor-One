@@ -12,5 +12,9 @@ void main() {
     expect(guest.role, 'customer');
     expect(guest.uid, GuestAuthUser.guestUid);
     expect(guest.uid!.length, greaterThan(10));
+
+    installGuestSession();
+    expect(currentUser, isA<GuestAuthUser>());
+    expect(loggedIn, isTrue);
   });
 }
