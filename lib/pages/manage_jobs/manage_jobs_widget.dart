@@ -206,10 +206,12 @@ class _ManageJobsWidgetState extends State<ManageJobsWidget> {
             const Divider(height: 1),
             Expanded(
               child: FutureBuilder<List<Map<String, dynamic>>>(
-                future: SupaFlow.client
-                    .from('job_applications')
-                    .select('*, users(full_name, phone_number)')
-                    .eq('job_id', job.id),
+                future: kUsesDeadFlutterFlowHost
+                    ? Future.value(<Map<String, dynamic>>[])
+                    : SupaFlow.client
+                        .from('job_applications')
+                        .select('*, users(full_name, phone_number)')
+                        .eq('job_id', job.id),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());

@@ -38,7 +38,7 @@ class _ServiceProviderProfileWidgetState
     super.initState();
     _model = createModel(context, () => ServiceProviderProfileModel());
 
-    if (widget.providerId.isNotEmpty) {
+    if (widget.providerId.isNotEmpty && !kUsesDeadFlutterFlowHost) {
       _model.providerFuture = SupaFlow.client
           .from('service_providers')
           .select(

@@ -43,6 +43,7 @@ class _JobsMarketplaceWidgetState extends State<JobsMarketplaceWidget> {
   }
 
   Future<List<Map<String, dynamic>>> _fetchJobs() async {
+    if (kUsesDeadFlutterFlowHost) return [];
     var query = SupaFlow.client
         .from('jobs')
         .select('*, businesses(name, location)')

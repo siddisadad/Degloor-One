@@ -38,6 +38,7 @@ class _ServicesWidgetState extends State<ServicesWidget> {
   }
 
   Future<List<dynamic>> _loadProviders() async {
+    if (kUsesDeadFlutterFlowHost) return [];
     var query = SupaFlow.client
         .from('service_providers')
         .select('*, users(full_name, avatar_url), service_categories(name)');

@@ -516,11 +516,13 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
         ),
         const SizedBox(height: 12),
         FutureBuilder<List<Map<String, dynamic>>>(
-          future: SupaFlow.client
-              .from('order_items')
-              .select('*, products(*)')
-              .eq('order_id', order.id)
-              .then((v) => List<Map<String, dynamic>>.from(v)),
+          future: kUsesDeadFlutterFlowHost
+              ? Future.value(<Map<String, dynamic>>[])
+              : SupaFlow.client
+                  .from('order_items')
+                  .select('*, products(*)')
+                  .eq('order_id', order.id)
+                  .then((v) => List<Map<String, dynamic>>.from(v)),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: LinearProgressIndicator());

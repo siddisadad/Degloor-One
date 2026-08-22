@@ -20,6 +20,7 @@ class DeliveryService {
   }
 
   static Future<String?> fetchMyDeliveryOtp(String orderId) async {
+    if (kUsesDeadFlutterFlowHost) return null;
     final result = await SupaFlow.client.rpc(
       'get_my_delivery_otp',
       params: {'p_order_id': orderId},
@@ -37,6 +38,9 @@ class DeliveryService {
   }
 
   static Future<void> _rpc(String name, Map<String, dynamic> params) async {
+    if (kUsesDeadFlutterFlowHost) {
+      throw Exception('Failed to fetch');
+    }
     await SupaFlow.client.rpc(name, params: params);
   }
 }

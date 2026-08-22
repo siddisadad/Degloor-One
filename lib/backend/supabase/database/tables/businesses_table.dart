@@ -19,6 +19,7 @@ class BusinessesTable extends SupabaseTable<BusinessesRow> {
     int limit = 20,
     int offset = 0,
   }) async {
+    if (kUsesDeadFlutterFlowHost) return [];
     final response = await SupaFlow.client.rpc(
       'search_businesses_in_radius',
       params: {

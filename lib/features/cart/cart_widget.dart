@@ -53,6 +53,7 @@ class _CartWidgetState extends State<CartWidget> {
         _model.currentBusiness = business.first;
       }
 
+      if (kUsesDeadFlutterFlowHost) return;
       final items = await SupaFlow.client
           .from('cart_items')
           .select('*, products(*)')
@@ -118,6 +119,9 @@ class _CartWidgetState extends State<CartWidget> {
         };
       }).toList();
 
+      if (kUsesDeadFlutterFlowHost) {
+        throw Exception('Failed to fetch');
+      }
       final response = await SupaFlow.client.rpc(
         'place_order',
         params: {
