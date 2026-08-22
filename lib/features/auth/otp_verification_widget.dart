@@ -2,14 +2,14 @@ import 'dart:async';
 
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/supabase/supabase_connection.dart';
-import 'package:degloor_one/components/brand_mark.dart';
+import 'package:degloor_one/components/auth_page_header.dart';
 import 'package:degloor_one/components/supabase_unreachable_banner.dart';
+import 'package:degloor_one/shared/otp_copy.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_icon_button.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'otp_verification_model.dart';
 export 'otp_verification_model.dart';
 
@@ -93,25 +93,20 @@ class _OtpVerificationWidgetState extends State<OtpVerificationWidget> {
           ),
         ),
         body: SafeArea(
-          child: Padding(
+          child: AuthPageScaffold(
+            child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 8),
-                const BrandMark(size: 56, showWordmark: true, compact: true),
-                const SizedBox(height: 20),
-                Text(
-                  'Verification Code',
-                  style: FlutterFlowTheme.of(context).headlineMedium.override(
-                        fontFamily: 'Inter',
-                        fontWeight: FontWeight.w800,
-                      ),
+                AuthPageHeader(
+                  title: 'Verification Code',
+                  subtitle: OtpCopy.smsSentTo(widget.phone),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Enter the 6-digit code sent to ${widget.phone}',
-                  style: FlutterFlowTheme.of(context).bodyMedium.override(
+                  OtpCopy.smsHint,
+                  style: FlutterFlowTheme.of(context).labelSmall.override(
                         fontFamily: 'Inter',
                         color: FlutterFlowTheme.of(context).secondaryText,
                       ),
@@ -143,7 +138,8 @@ class _OtpVerificationWidgetState extends State<OtpVerificationWidget> {
                     ),
                   ),
                   style: FlutterFlowTheme.of(context).headlineSmall.override(
-                        font: GoogleFonts.inter(fontWeight: FontWeight.bold),
+                        fontFamily: 'Inter',
+                        fontWeight: FontWeight.bold,
                         letterSpacing: 8.0,
                       ),
                 ),
@@ -186,6 +182,7 @@ class _OtpVerificationWidgetState extends State<OtpVerificationWidget> {
                   ),
                 ),
               ],
+            ),
             ),
           ),
         ),

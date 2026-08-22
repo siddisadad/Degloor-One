@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/backend/supabase/supabase_connection.dart';
+import 'package:degloor_one/components/auth_page_header.dart';
 import 'package:degloor_one/components/brand_mark.dart';
 import 'package:degloor_one/components/social_button/social_button_widget.dart';
 import 'package:degloor_one/components/supabase_unreachable_banner.dart';
@@ -95,7 +96,8 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
               end: const AlignmentDirectional(0, 1.0),
             ),
           ),
-          child: SingleChildScrollView(
+          child: AuthPageScaffold(
+            child: SingleChildScrollView(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -128,6 +130,27 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
+                          Text(
+                            'Welcome back',
+                            style: FlutterFlowTheme.of(context)
+                                .headlineSmall
+                                .override(
+                                  fontFamily: 'Inter',
+                                  fontWeight: FontWeight.w800,
+                                ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Sign in to shop local in Degloor.',
+                            style: FlutterFlowTheme.of(context)
+                                .bodySmall
+                                .override(
+                                  fontFamily: 'Inter',
+                                  color: FlutterFlowTheme.of(context)
+                                      .secondaryText,
+                                ),
+                          ),
+                          const SizedBox(height: 20),
                           SupabaseUnreachableBanner(message: _serverWarning),
                           // Inputs
                           wrapWithModel(
@@ -192,8 +215,9 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
                               width: double.infinity,
                               height: 54,
                               color: FlutterFlowTheme.of(context).primary,
+                              elevation: 2,
                               textStyle: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(14),
                             ),
                           ),
                           const SizedBox(height: 16),
@@ -338,6 +362,7 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
                 ),
               ],
             ),
+            ),
           ),
         ),
       ),
@@ -345,14 +370,30 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
   }
 
   Widget _buildLang(String label, String code) {
+    final theme = FlutterFlowTheme.of(context);
     final isSelected = FFAppState.instance.locale == code;
     return InkWell(
+      borderRadius: BorderRadius.circular(999),
       onTap: () => setState(() => FFAppState.instance.locale = code),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: isSelected ? FlutterFlowTheme.of(context).primary : FlutterFlowTheme.of(context).secondaryText,
-          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? theme.primary.withValues(alpha: 0.12)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(
+            color: isSelected ? theme.primary : theme.alternate,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? theme.primary : theme.secondaryText,
+            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+            fontSize: 13,
+          ),
         ),
       ),
     );

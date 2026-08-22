@@ -1,4 +1,5 @@
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/components/cached_remote_image.dart';
 import 'package:degloor_one/components/slider/slider_widget.dart';
 import 'package:degloor_one/components/switch_component/switch_component_widget.dart';
 import 'package:degloor_one/components/text_field/text_field_widget.dart';
@@ -189,7 +190,7 @@ class _EditBusinessProfileWidgetState extends State<EditBusinessProfileWidget> {
                             child: _isUploading
                                 ? const Center(child: CircularProgressIndicator())
                                 : (_uploadedImageUrl != null && _uploadedImageUrl!.isNotEmpty)
-                                    ? Image.network(_uploadedImageUrl!, fit: BoxFit.cover)
+                                    ? CachedRemoteImage(url: _uploadedImageUrl!)
                                     : Icon(Icons.business_rounded, size: 60, color: FlutterFlowTheme.of(context).secondaryText),
                           ),
                         ),
