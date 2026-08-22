@@ -7,12 +7,12 @@ export 'social_button_model.dart';
 class SocialButtonWidget extends StatefulWidget {
   const SocialButtonWidget({
     super.key,
-    this.icon = Icons.login,
+    this.icon,
     this.label = 'Continue',
     this.onTap,
   });
 
-  final IconData icon;
+  final Widget? icon;
   final String label;
   final Future Function()? onTap;
 
@@ -66,11 +66,12 @@ class _SocialButtonWidgetState extends State<SocialButtonWidget> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                widget.icon,
-                size: 20.0,
-                color: FlutterFlowTheme.of(context).primaryText,
-              ),
+              widget.icon ??
+                  Icon(
+                    Icons.login,
+                    size: 20.0,
+                    color: FlutterFlowTheme.of(context).primaryText,
+                  ),
               Flexible(
                 child: Text(
                   widget.label,

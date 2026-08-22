@@ -289,7 +289,10 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
                                   model: _model.socialButtonModel1,
                                   updateCallback: () => setState(() {}),
                                   child: SocialButtonWidget(
-                                    icon: FontAwesomeIcons.google,
+                                    icon: const FaIcon(
+                                      FontAwesomeIcons.google,
+                                      size: 18,
+                                    ),
                                     label: 'Google',
                                     onTap: () async {
                                       if (_isLoading) return;
@@ -316,7 +319,10 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
                                   model: _model.socialButtonModel2,
                                   updateCallback: () => setState(() {}),
                                   child: SocialButtonWidget(
-                                    icon: FontAwesomeIcons.apple,
+                                    icon: const FaIcon(
+                                      FontAwesomeIcons.apple,
+                                      size: 18,
+                                    ),
                                     label: 'Apple',
                                     onTap: () async {
                                       ScaffoldMessenger.of(context).showSnackBar(

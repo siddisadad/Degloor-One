@@ -13,13 +13,13 @@ void main() {
             children: [
               Expanded(
                 child: SocialButtonWidget(
-                  icon: FontAwesomeIcons.google,
+                  icon: FaIcon(FontAwesomeIcons.google, size: 18),
                   label: 'Google',
                 ),
               ),
               Expanded(
                 child: SocialButtonWidget(
-                  icon: FontAwesomeIcons.apple,
+                  icon: FaIcon(FontAwesomeIcons.apple, size: 18),
                   label: 'Apple',
                 ),
               ),
@@ -32,8 +32,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Google'), findsOneWidget);
     expect(find.text('Apple'), findsOneWidget);
-    expect(find.byIcon(FontAwesomeIcons.google), findsOneWidget);
-    expect(find.byIcon(FontAwesomeIcons.apple), findsOneWidget);
+    expect(find.byType(FaIcon), findsNWidgets(2));
     expect(tester.takeException(), isNull);
   });
 }
