@@ -37,6 +37,7 @@ Execute the SQL scripts in the Supabase SQL Editor in this order:
 4. `scratch/rls_order_policies.sql` — customers cannot change order status; owners can update fulfillment.
 5. `scratch/secure_platform.sql` — server-side pricing, order state machine, storage policies, delivery location, indexes.
 6. `scratch/jobs_services.sql` — jobs/services RLS, marketplace RPCs, and list indexes.
+7. `scratch/notifications_admin.sql` — admin-only `admin_notify_user()` wrapper.
 
 ### 2. Environment Configuration
 Dart-defines are owned by `lib/core/app_environment.dart`. The FlutterFlow default host (`uhaibenopzyzzuqjawlb.supabase.co`) currently does not resolve (`net::ERR_NAME_NOT_RESOLVED`). That dead host automatically enables guest login and the local showcase catalog.

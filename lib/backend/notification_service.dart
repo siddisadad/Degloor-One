@@ -1,10 +1,43 @@
 import 'package:degloor_one/backend/repositories/notification_repository.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/core/error_handler.dart';
+import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
 class NotificationService {
-  static final repository = NotificationRepository();
+  NotificationService({NotificationRepository? repository})
+      : _repository = repository ?? NotificationRepository();
+
+  final NotificationRepository _repository;
+
+  static final instance = NotificationService();
+
+  /// Kept for existing call sites.
+  static NotificationRepository get repository => instance._repository;
+
+  Future<PageResult<NotificationsRow>> listForUser(
+    String userId, {
+    PageQuery page = const PageQuery(),
+  }) async {
+    final rows = await _repository.forUser(userId, page: page);
+    return PageResult(items: rows, hasMore: rows.length >= page.limit);
+  }
+
+  Future<int> unreadCount(String userId) => _repository.unreadCount(userId);
+
+  Future<void> markRead({
+    required String notificationId,
+    required String userId,
+  }) {
+    return _repository.markRead(notificationId: notificationId, userId: userId);
+  }
+
+  Future<void> markAllRead(String userId) => _repository.markAllRead(userId);
+
+  Future<void> clearAll(String userId) => _repository.deleteAll(userId);
+
+  Stream<List<NotificationsRow>> watchForUser(String userId) =>
+      _repository.watchForUser(userId);
 
   static Future<void> sendNotification({
     required String userId,
@@ -13,21 +46,51 @@ class NotificationService {
     String? type,
   }) async {
     try {
-      if (!kUseShowcaseData) {
-        // Live inserts go through SECURITY DEFINER RPCs only.
+      if (kUseShowcaseData) {
+        ShowcaseCatalog.insert('notifications', {
+          'user_id': userId,
+          'title': title,
+          'message': message,
+          'type': type ?? 'general',
+          'is_read': false,
+          'created_at': DateTime.now().toIso8601String(),
+        });
         return;
       }
-      ShowcaseCatalog.insert('notifications', {
-        'user_id': userId,
-        'title': title,
-        'message': message,
-        'type': type ?? 'general',
-        'is_read': false,
-        'created_at': DateTime.now().toIso8601String(),
-      });
+      // Live customer/owner inserts go through SECURITY DEFINER order RPCs.
     } catch (e) {
       AppLogger.error('Failed to send notification', e);
     }
+  }
+
+  /// Admin-only notify. Live path uses admin_notify_user().
+  static Future<void> adminNotify({
+    required String userId,
+    required String title,
+    required String message,
+    String? type,
+  }) async {
+    if (userId.isEmpty) {
+      throw Exception('Missing recipient');
+    }
+    if (kUseShowcaseData) {
+      await sendNotification(
+        userId: userId,
+        title: title,
+        message: message,
+        type: type,
+      );
+      return;
+    }
+    await SupaFlow.client.rpc(
+      'admin_notify_user',
+      params: {
+        'p_user_id': userId,
+        'p_title': title,
+        'p_message': message,
+        'p_type': type ?? 'general',
+      },
+    );
   }
 
   static Future<void> notifyOrderStatusUpdate({
