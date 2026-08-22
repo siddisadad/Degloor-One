@@ -2,6 +2,7 @@ import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/backend/supabase/supabase_connection.dart';
 
 Future phoneSignInFunc(String phoneNumber) async {
+  if (SupabaseConnection.shouldSkipAuthRequest) return;
   try {
     await SupaFlow.client.auth.signInWithOtp(
       phone: phoneNumber,
@@ -16,6 +17,7 @@ Future<User?> phoneVerifyCodeFunc({
   required String phoneNumber,
   required String smsCode,
 }) async {
+  if (SupabaseConnection.shouldSkipAuthRequest) return null;
   try {
     final AuthResponse res = await SupaFlow.client.auth.verifyOTP(
       phone: phoneNumber,
