@@ -2,8 +2,12 @@
 /// `users` and `service_categories`. Those joins are null when the FK is
 /// missing or the related row was deleted.
 class ServiceProviderDisplay {
-  static const fallbackAvatarUrl =
-      'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=100&h=100&q=80';
+  static String get fallbackAvatarUrl => fallbackAvatar();
+
+  static String fallbackAvatar({int width = 100, int height = 100}) {
+    return 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde'
+        '?auto=format&fit=crop&w=$width&h=$height&q=80';
+  }
 
   static Map<String, dynamic>? asJoinMap(dynamic value) {
     if (value is Map<String, dynamic>) return value;
@@ -19,12 +23,16 @@ class ServiceProviderDisplay {
     return 'Unknown Provider';
   }
 
-  static String avatarUrl(dynamic user) {
+  static String avatarUrl(
+    dynamic user, {
+    int width = 100,
+    int height = 100,
+  }) {
     final url = asJoinMap(user)?['avatar_url'];
     if (url is String && url.trim().isNotEmpty) {
       return url.trim();
     }
-    return fallbackAvatarUrl;
+    return fallbackAvatar(width: width, height: height);
   }
 
   static String categoryName(dynamic category) {

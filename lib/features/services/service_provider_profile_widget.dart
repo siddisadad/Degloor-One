@@ -83,7 +83,11 @@ class _ServiceProviderProfileWidgetState
                   pinned: true,
                   flexibleSpace: FlexibleSpaceBar(
                     background: CachedNetworkImage(
-                      imageUrl: ServiceProviderDisplay.avatarUrl(user),
+                      imageUrl: ServiceProviderDisplay.avatarUrl(
+                        user,
+                        width: 400,
+                        height: 300,
+                      ),
                       fit: BoxFit.cover,
                     ),
                   ),

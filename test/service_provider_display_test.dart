@@ -24,10 +24,18 @@ void main() {
     expect(ServiceProviderDisplay.hourlyRateLabel(null), 'Rate on request');
   });
 
-  test('avatarUrl uses the fallback when the join has no photo', () {
+  test('avatarUrl uses a size-aware fallback when the join has no photo', () {
     expect(
       ServiceProviderDisplay.avatarUrl(null),
-      ServiceProviderDisplay.fallbackAvatarUrl,
+      ServiceProviderDisplay.fallbackAvatar(),
+    );
+    expect(
+      ServiceProviderDisplay.avatarUrl(null, width: 400, height: 300),
+      ServiceProviderDisplay.fallbackAvatar(width: 400, height: 300),
+    );
+    expect(
+      ServiceProviderDisplay.fallbackAvatar(width: 400, height: 300),
+      contains('w=400&h=300'),
     );
     expect(
       ServiceProviderDisplay.avatarUrl({'avatar_url': 'https://cdn.example/a.png'}),
