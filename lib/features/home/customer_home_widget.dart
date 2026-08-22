@@ -48,6 +48,7 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
   bool _nearbyLoading = false;
   bool _nearbyHasMore = true;
   int _nearbyOffset = 0;
+  int _nearbyToken = 0;
   static const _nearbyPageSize = 6;
   final Map<String, String> _categoryIdToName = {};
   int _cartItemCount = 0;
@@ -131,8 +132,10 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
     final userLoc = FFAppState.instance.userLocation;
     final radius = FFAppState.instance.discoveryRadius;
 
+    _nearbyToken++;
     _nearbyBusinesses = [];
     _nearbyOffset = 0;
+    _nearbyLoading = false;
     _nearbyHasMore = userLoc != null;
     if (userLoc != null) {
       _model.openNowBusinessesFuture = DiscoveryService.instance
@@ -159,6 +162,7 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
     final userLoc = FFAppState.instance.userLocation;
     if (userLoc == null || _nearbyLoading || !_nearbyHasMore) return;
 
+    final token = _nearbyToken;
     setState(() => _nearbyLoading = true);
     try {
       final page = await DiscoveryService.instance.search(
@@ -170,7 +174,7 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
           page: PageQuery(limit: _nearbyPageSize, offset: _nearbyOffset),
         ),
       );
-      if (!mounted) return;
+      if (!mounted || token != _nearbyToken) return;
       setState(() {
         _nearbyBusinesses.addAll(page.items);
         _nearbyOffset += _nearbyPageSize;
@@ -179,7 +183,9 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
       });
     } catch (e) {
       AppLogger.error('Nearby businesses error', e);
-      if (mounted) setState(() => _nearbyLoading = false);
+      if (mounted && token == _nearbyToken) {
+        setState(() => _nearbyLoading = false);
+      }
     }
   }
 
