@@ -26,8 +26,8 @@ void main() {
       ),
     );
 
-    // Verify that the app title and tagline are present
-    expect(find.text('DEGLOOR ONE'), findsOneWidget);
+    expect(find.byType(Image), findsWidgets);
     expect(find.text('Everything Local. One App.'), findsOneWidget);
+    expect(find.textContaining('DEGLOOR ONE'), findsWidgets);
   });
 }

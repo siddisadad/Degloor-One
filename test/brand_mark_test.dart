@@ -9,18 +9,85 @@ void main() {
     GoogleFonts.config.allowRuntimeFetching = false;
   });
 
-  testWidgets('brand mark shows DEGLOOR ONE wordmark', (tester) async {
+  testWidgets('brand mark loads the DEGLOOR ONE logo asset', (tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
-          body: Center(child: BrandMark(showWordmark: true)),
+          body: Center(child: BrandMark(size: 72, showWordmark: true)),
         ),
       ),
     );
 
-    expect(find.text('DEGLOOR ONE'), findsOneWidget);
+    expect(find.byType(Image), findsOneWidget);
     expect(find.text('Everything Local. One App.'), findsOneWidget);
-    expect(find.text('D1'), findsOneWidget);
+    final image = tester.widget<Image>(find.byType(Image));
+    expect((image.image as AssetImage).assetName, kBrandImageAsset);
+  });
+
+  testWidgets('compact brand mark fits a narrow start-aligned column',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(360, 200));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Padding(
+            padding: EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                BrandMark(size: 56, showWordmark: true, compact: true),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('DEGLOOR ONE'), findsOneWidget);
+  });
+
+  testWidgets('compact brand mark shows the wordmark', (tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: BrandMark(size: 40, showWordmark: true, compact: true),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('DEGLOOR ONE'), findsOneWidget);
+    expect(find.byType(Image), findsOneWidget);
+  });
+
+  testWidgets('compact brand mark fits beside siblings in a header row',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(360, 120));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              children: [
+                BrandMark(size: 40, showWordmark: true, compact: true),
+                SizedBox(width: 12),
+                Expanded(child: Text('Degloor, Maharashtra')),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('DEGLOOR ONE'), findsOneWidget);
+    expect(find.text('Degloor, Maharashtra'), findsOneWidget);
   });
 
   testWidgets('home shortcuts expose services, jobs, and orders',

@@ -3,6 +3,7 @@ import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 import 'package:degloor_one/l10n/app_localizations.dart';
+import 'package:degloor_one/components/brand_mark.dart';
 import 'package:degloor_one/components/action_button/action_button_widget.dart';
 import 'package:degloor_one/components/button/button_widget.dart';
 import 'package:degloor_one/components/review_card/review_card_widget.dart';
@@ -1217,6 +1218,8 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                             alignment: const AlignmentDirectional(0.0, 0.0),
                             child: Row(
                               children: [
+                                const BrandMark(size: 32),
+                                const SizedBox(width: 10),
                                 Expanded(
                                   child: Column(
                                     mainAxisSize: MainAxisSize.min,
