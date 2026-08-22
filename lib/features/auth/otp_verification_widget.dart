@@ -68,7 +68,8 @@ class _OtpVerificationWidgetState extends State<OtpVerificationWidget> {
           ),
         ),
         body: SafeArea(
-          child: Padding(
+          child: AuthPageScaffold(
+            child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -147,6 +148,7 @@ class _OtpVerificationWidgetState extends State<OtpVerificationWidget> {
                 ),
               ],
             ),
+          ),
           ),
         ),
       ),

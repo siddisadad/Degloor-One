@@ -63,7 +63,8 @@ class _PhoneAuthWidgetState extends State<PhoneAuthWidget> {
           ),
         ),
         body: SafeArea(
-          child: Padding(
+          child: AuthPageScaffold(
+            child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

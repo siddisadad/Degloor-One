@@ -96,7 +96,11 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
             ),
           ),
           child: SingleChildScrollView(
-            child: Column(
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 560),
+                child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const SizedBox(height: 80),
@@ -359,6 +363,8 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
                   ),
                 ),
               ],
+            ),
+              ),
             ),
           ),
         ),

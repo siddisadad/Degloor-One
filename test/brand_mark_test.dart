@@ -143,6 +143,25 @@ void main() {
     expect(find.text('Enter the email on your account.'), findsOneWidget);
   });
 
+  testWidgets('auth page scaffold keeps forms at a readable width',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1200, 400));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: AuthPageScaffold(
+            child: SizedBox(width: double.infinity, height: 40),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+    expect(tester.getSize(find.byType(SizedBox)).width, 520);
+  });
+
   testWidgets('home shortcuts expose services, jobs, and orders',
       (tester) async {
     var tapped = '';

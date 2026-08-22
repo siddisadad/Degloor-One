@@ -74,9 +74,11 @@ class _ForgotPasswordWidgetState extends State<ForgotPasswordWidget> {
           ),
         ),
         body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            child: _emailSent ? _buildSentState() : _buildForm(),
+          child: AuthPageScaffold(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: _emailSent ? _buildSentState() : _buildForm(),
+            ),
           ),
         ),
       ),

@@ -3,6 +3,27 @@ import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+/// Centers auth forms so they stay readable on wide web layouts.
+class AuthPageScaffold extends StatelessWidget {
+  const AuthPageScaffold({
+    super.key,
+    required this.child,
+  });
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.topCenter,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 520),
+        child: child,
+      ),
+    );
+  }
+}
+
 /// Branded title block used on phone, OTP, and password screens.
 class AuthPageHeader extends StatelessWidget {
   const AuthPageHeader({

@@ -72,9 +72,11 @@ class _ResetPasswordWidgetState extends State<ResetPasswordWidget> {
           ),
         ),
         body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            child: _canSetPassword ? _buildForm() : _buildExpired(),
+          child: AuthPageScaffold(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: _canSetPassword ? _buildForm() : _buildExpired(),
+            ),
           ),
         ),
       ),
