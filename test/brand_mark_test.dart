@@ -75,7 +75,9 @@ void main() {
             padding: EdgeInsets.symmetric(horizontal: 16),
             child: Row(
               children: [
-                BrandMark(size: 40, showWordmark: true, compact: true),
+                Flexible(
+                  child: BrandMark(size: 40, showWordmark: true, compact: true),
+                ),
                 SizedBox(width: 12),
                 Expanded(child: Text('Degloor, Maharashtra')),
               ],

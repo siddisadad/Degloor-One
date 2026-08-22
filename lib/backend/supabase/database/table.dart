@@ -137,9 +137,18 @@ abstract class SupabaseTable<T extends SupabaseDataRow> {
     if (kUseShowcaseData) {
       final captured = ShowcaseQuery();
       queryFn?.call(captured);
-      return Stream<List<T>>.value(
-        ShowcaseCatalog.query(tableName, captured).map(createRow).toList(),
-      );
+      List<T> read() =>
+          ShowcaseCatalog.query(tableName, captured).map(createRow).toList();
+      return Stream<List<T>>.multi((controller) {
+        controller.add(read());
+        final sub = ShowcaseCatalog.changes.listen((_) {
+          if (!controller.isClosed) controller.add(read());
+        });
+        controller
+          ..onPause = sub.pause
+          ..onResume = sub.resume
+          ..onCancel = () => sub.cancel();
+      });
     }
     final builder = SupaFlow.client.from(tableName).stream(primaryKey: [primaryKey]);
     final stream = queryFn != null ? queryFn(builder) : builder;

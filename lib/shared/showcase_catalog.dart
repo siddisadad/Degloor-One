@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:degloor_one/auth/guest_auth_user.dart';
@@ -47,8 +48,18 @@ class ShowcaseCatalog {
   static const orderDelivered = 'order-delivered';
 
   static final Map<String, List<Map<String, dynamic>>> _tables = {};
+  static final StreamController<void> _changes =
+      StreamController<void>.broadcast();
   static bool _ready = false;
   static int _seq = 200;
+
+  static Stream<void> get changes => _changes.stream;
+
+  static void notifyChanged() {
+    if (!_changes.isClosed) {
+      _changes.add(null);
+    }
+  }
 
   static String nextId(String prefix) => '$prefix-${_seq++}';
 
@@ -74,16 +85,21 @@ class ShowcaseCatalog {
     return _tables[name] ?? const [];
   }
 
+  static bool matches(Map<String, dynamic> row, ShowcaseQuery q) {
+    for (final entry in q.equals.entries) {
+      if (!_same(row[entry.key], entry.value)) return false;
+    }
+    for (final entry in q.notEquals.entries) {
+      if (_same(row[entry.key], entry.value)) return false;
+    }
+    for (final entry in q.inFilters.entries) {
+      if (!entry.value.any((v) => _same(row[entry.key], v))) return false;
+    }
+    return true;
+  }
+
   static List<Map<String, dynamic>> query(String tableName, ShowcaseQuery q) {
-    var rows = table(tableName).where((row) {
-      for (final entry in q.equals.entries) {
-        if (!_same(row[entry.key], entry.value)) return false;
-      }
-      for (final entry in q.inFilters.entries) {
-        if (!entry.value.any((v) => _same(row[entry.key], v))) return false;
-      }
-      return true;
-    }).toList();
+    var rows = table(tableName).where((row) => matches(row, q)).toList();
 
     if (q.orderColumn != null) {
       rows.sort((a, b) {
@@ -112,6 +128,7 @@ class ShowcaseCatalog {
     row['created_at'] ??= _now;
     _tables.putIfAbsent(tableName, () => []);
     _tables[tableName]!.add(row);
+    notifyChanged();
     return Map<String, dynamic>.from(row);
   }
 
@@ -122,14 +139,11 @@ class ShowcaseCatalog {
   ) {
     final updated = <Map<String, dynamic>>[];
     for (final row in table(tableName)) {
-      var match = true;
-      for (final entry in q.equals.entries) {
-        if (!_same(row[entry.key], entry.value)) match = false;
-      }
-      if (!match) continue;
+      if (!matches(row, q)) continue;
       row.addAll(data);
       updated.add(Map<String, dynamic>.from(row));
     }
+    if (updated.isNotEmpty) notifyChanged();
     return updated;
   }
 
@@ -137,18 +151,18 @@ class ShowcaseCatalog {
     ensureLoaded();
     final kept = <Map<String, dynamic>>[];
     final removed = <Map<String, dynamic>>[];
+    final hasFilter = q.equals.isNotEmpty ||
+        q.notEquals.isNotEmpty ||
+        q.inFilters.isNotEmpty;
     for (final row in table(tableName)) {
-      var match = q.equals.isNotEmpty;
-      for (final entry in q.equals.entries) {
-        if (!_same(row[entry.key], entry.value)) match = false;
-      }
-      if (match) {
+      if (hasFilter && matches(row, q)) {
         removed.add(Map<String, dynamic>.from(row));
       } else {
         kept.add(row);
       }
     }
     _tables[tableName] = kept;
+    if (removed.isNotEmpty) notifyChanged();
     return removed;
   }
 

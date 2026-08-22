@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/supabase/supabase_connection.dart';
 import 'package:degloor_one/components/brand_mark.dart';
@@ -7,6 +9,7 @@ import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_icon_button.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'otp_verification_model.dart';
 export 'otp_verification_model.dart';
 
@@ -29,15 +32,37 @@ class _OtpVerificationWidgetState extends State<OtpVerificationWidget> {
   late OtpVerificationModel _model;
   final scaffoldKey = GlobalKey<ScaffoldState>();
   bool _isLoading = false;
+  int _resendInSeconds = 30;
+  Timer? _resendTimer;
 
   @override
   void initState() {
     super.initState();
     _model = createModel(context, () => OtpVerificationModel());
+    _startResendCooldown(notify: false);
+  }
+
+  void _startResendCooldown({bool notify = true}) {
+    _resendTimer?.cancel();
+    _resendInSeconds = 30;
+    if (notify && mounted) setState(() {});
+    _resendTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+      if (_resendInSeconds <= 1) {
+        timer.cancel();
+        setState(() => _resendInSeconds = 0);
+      } else {
+        setState(() => _resendInSeconds -= 1);
+      }
+    });
   }
 
   @override
   void dispose() {
+    _resendTimer?.cancel();
     _model.dispose();
     super.dispose();
   }
@@ -118,8 +143,7 @@ class _OtpVerificationWidgetState extends State<OtpVerificationWidget> {
                     ),
                   ),
                   style: FlutterFlowTheme.of(context).headlineSmall.override(
-                        fontFamily: 'Inter',
-                        fontWeight: FontWeight.bold,
+                        font: GoogleFonts.inter(fontWeight: FontWeight.bold),
                         letterSpacing: 8.0,
                       ),
                 ),
@@ -129,7 +153,7 @@ class _OtpVerificationWidgetState extends State<OtpVerificationWidget> {
                           SupabaseConnection.shouldSkipAuthRequest
                       ? null
                       : _handleVerify,
-                  text: 'Verify Code',
+                  text: _isLoading ? 'Verifying...' : 'Verify Code',
                   options: FFButtonOptions(
                     width: double.infinity,
                     height: 54,
@@ -146,11 +170,14 @@ class _OtpVerificationWidgetState extends State<OtpVerificationWidget> {
                 Center(
                   child: TextButton(
                     onPressed: _isLoading ||
+                            _resendInSeconds > 0 ||
                             SupabaseConnection.shouldSkipAuthRequest
                         ? null
                         : _handleResend,
                     child: Text(
-                      'Resend Code',
+                      _resendInSeconds > 0
+                          ? 'Resend code in ${_resendInSeconds}s'
+                          : 'Resend Code',
                       style: TextStyle(
                         color: FlutterFlowTheme.of(context).primary,
                         fontWeight: FontWeight.bold,
@@ -197,6 +224,8 @@ class _OtpVerificationWidgetState extends State<OtpVerificationWidget> {
         context: context,
         phoneNumber: widget.phone,
         onCodeSent: (_) {
+          if (!mounted) return;
+          _startResendCooldown();
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Code resent successfully')),
           );

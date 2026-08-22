@@ -1,7 +1,9 @@
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
-import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:degloor_one/backend/cart_service.dart';
+import 'package:degloor_one/backend/order_service.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
@@ -36,10 +38,17 @@ class _CartWidgetState extends State<CartWidget> {
 
   Future<void> _fetchCartData() async {
     final userId = currentUserUid;
-    if (userId == '') return;
+    if (userId == '') {
+      if (!mounted) return;
+      setState(() {
+        _model.cartItemsFuture = Future.value([]);
+        _model.currentCart = null;
+      });
+      return;
+    }
 
     try {
-      final carts = await CartsTable().queryRows(queryFn: (q) => q.eq('user_id', userId));
+      final carts = await CartService.cartsForUser(userId);
       if (carts.isEmpty) {
         setState(() {
           _model.cartItemsFuture = Future.value([]);
@@ -74,6 +83,10 @@ class _CartWidgetState extends State<CartWidget> {
       });
     } catch (e) {
       AppLogger.error('Error fetching cart', e);
+      if (!mounted) return;
+      setState(() {
+        _model.cartItemsFuture = Future.value([]);
+      });
     }
   }
 
@@ -130,37 +143,14 @@ class _CartWidgetState extends State<CartWidget> {
       }).toList();
 
       if (kUseShowcaseData) {
-        final order = ShowcaseCatalog.insert('orders', {
-          'user_id': currentUserUid,
-          'business_id': _model.currentCart!.businessId,
-          'total_amount': total,
-          'status': 'placed',
-          'payment_status': 'pending',
-          'delivery_address_id': _model.selectedAddress!.id,
-          'delivery_fee': _model.deliveryFee,
-          'payment_method': 'COD',
-          'delivery_otp': '7392',
-        });
-        for (final item in rpcItems) {
-          ShowcaseCatalog.insert('order_items', {
-            'order_id': order['id'],
-            'product_id': item['product_id'],
-            'quantity': item['quantity'],
-            'price_at_purchase': item['price'],
-          });
-        }
-        ShowcaseCatalog.insert('order_status_history', {
-          'order_id': order['id'],
-          'status': 'placed',
-          'notes': 'Order placed from showcase cart',
-        });
-        ShowcaseCatalog.delete(
-          'cart_items',
-          ShowcaseQuery()..eq('cart_id', _model.currentCart!.id),
-        );
-        ShowcaseCatalog.delete(
-          'carts',
-          ShowcaseQuery()..eq('id', _model.currentCart!.id),
+        final order = OrderService.placeShowcaseOrder(
+          userId: currentUserUid,
+          businessId: _model.currentCart!.businessId,
+          cartId: _model.currentCart!.id,
+          addressId: _model.selectedAddress!.id,
+          totalAmount: total,
+          deliveryFee: _model.deliveryFee,
+          items: rpcItems,
         );
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
@@ -300,7 +290,14 @@ class _CartWidgetState extends State<CartWidget> {
                               height: 60,
                               color: FlutterFlowTheme.of(context).secondaryBackground,
                               child: product['image_url'] != null
-                                  ? Image.network(product['image_url'], fit: BoxFit.cover)
+                                  ? CachedNetworkImage(
+                                      imageUrl: product['image_url'],
+                                      fit: BoxFit.cover,
+                                      errorWidget: (_, __, ___) => Icon(
+                                        Icons.image_not_supported_rounded,
+                                        color: FlutterFlowTheme.of(context).alternate,
+                                      ),
+                                    )
                                   : Icon(Icons.image_not_supported_rounded, color: FlutterFlowTheme.of(context).alternate),
                             ),
                           ),
@@ -400,7 +397,7 @@ class _CartWidgetState extends State<CartWidget> {
                       const SizedBox(height: 24),
                       FFButtonWidget(
                         onPressed: _model.isPlacingOrder ? null : () => _placeOrder(items, subtotal + _model.deliveryFee),
-                        text: 'Place Order (COD)',
+                        text: _model.isPlacingOrder ? 'Placing order...' : 'Place Order (COD)',
                         options: FFButtonOptions(
                           width: double.infinity,
                           height: 54,

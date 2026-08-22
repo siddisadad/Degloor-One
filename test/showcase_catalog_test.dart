@@ -57,4 +57,16 @@ void main() {
     );
     expect(found, hasLength(1));
   });
+
+  test('showcase query neq excludes matching rows', () {
+    final open = ShowcaseCatalog.query(
+      'orders',
+      ShowcaseQuery()..neq('status', 'delivered'),
+    );
+    expect(open, isNotEmpty);
+    expect(
+      open.every((row) => row['status'] != 'delivered'),
+      isTrue,
+    );
+  });
 }

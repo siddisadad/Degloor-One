@@ -1,6 +1,7 @@
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
+import 'package:degloor_one/shared/order_lifecycle.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:flutter/material.dart';
@@ -59,27 +60,23 @@ class _CustomerOrdersWidgetState extends State<CustomerOrdersWidget> {
 
   Color _getStatusColor(BuildContext context, String status) {
     final theme = FlutterFlowTheme.of(context);
-    switch (status.toLowerCase()) {
-      case 'pending':
+    switch (OrderLifecycle.normalizeStatus(status)) {
+      case OrderLifecycle.pending:
         return theme.warning;
-      case 'accepted':
+      case OrderLifecycle.accepted:
         return theme.info;
-      case 'ready':
+      case OrderLifecycle.ready:
         return theme.secondary;
-      case 'shipping':
-      case 'out_for_delivery':
+      case OrderLifecycle.shipping:
+      case OrderLifecycle.outForDelivery:
         return theme.primary;
-      case 'delivered':
+      case OrderLifecycle.delivered:
         return theme.success;
-      case 'cancelled':
+      case OrderLifecycle.cancelled:
         return theme.error;
       default:
         return theme.secondaryText;
     }
-  }
-
-  String _prettyStatus(String status) {
-    return status.replaceAll('_', ' ');
   }
 
   @override
@@ -124,7 +121,15 @@ class _CustomerOrdersWidgetState extends State<CustomerOrdersWidget> {
             );
           }
 
-          return ListView.separated(
+          return RefreshIndicator(
+            onRefresh: () async {
+              final next = await _fetchOrders();
+              if (mounted) {
+                setState(() => _model.ordersFuture = Future.value(next));
+              }
+            },
+            child: ListView.separated(
+            physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.all(16),
             itemCount: orders.length,
             separatorBuilder: (context, index) => const SizedBox(height: 12),
@@ -180,7 +185,7 @@ class _CustomerOrdersWidgetState extends State<CustomerOrdersWidget> {
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
-                                _prettyStatus(order.status),
+                                OrderLifecycle.label(order.status),
                                 style: FlutterFlowTheme.of(context)
                                     .labelSmall
                                     .override(
@@ -222,6 +227,7 @@ class _CustomerOrdersWidgetState extends State<CustomerOrdersWidget> {
                 ),
               );
             },
+          ),
           );
         },
       ),

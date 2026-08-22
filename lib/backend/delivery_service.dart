@@ -1,5 +1,6 @@
 import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/order_lifecycle.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
 class DeliveryService {
@@ -47,8 +48,47 @@ class DeliveryService {
 
   static Future<void> _rpc(String name, Map<String, dynamic> params) async {
     if (kUseShowcaseData) {
+      _applyShowcaseRpc(name, params);
       return;
     }
     await SupaFlow.client.rpc(name, params: params);
+  }
+
+  static void _applyShowcaseRpc(String name, Map<String, dynamic> params) {
+    if (name == 'confirm_delivery_with_otp') {
+      final orderId = params['p_order_id'] as String;
+      final otp = '${params['p_otp']}'.trim();
+      final orders = ShowcaseCatalog.query(
+        'orders',
+        ShowcaseQuery()..eq('id', orderId),
+      );
+      if (orders.isEmpty) {
+        throw Exception('Order not found');
+      }
+      final expected = '${orders.first['delivery_otp'] ?? ''}'.trim();
+      if (expected.isEmpty || expected != otp) {
+        throw Exception('Invalid delivery OTP');
+      }
+      ShowcaseCatalog.update(
+        'orders',
+        {'status': OrderLifecycle.delivered},
+        ShowcaseQuery()..eq('id', orderId),
+      );
+      ShowcaseCatalog.insert('order_status_history', {
+        'order_id': orderId,
+        'status': OrderLifecycle.delivered,
+        'notes': 'Order delivered after OTP verification.',
+      });
+      return;
+    }
+    if (name == 'accept_delivery_order') {
+      final orderId = params['p_order_id'] as String;
+      ShowcaseCatalog.update(
+        'orders',
+        {'status': OrderLifecycle.outForDelivery},
+        ShowcaseQuery()..eq('id', orderId),
+      );
+      return;
+    }
   }
 }
