@@ -11,7 +11,7 @@ class OrdersTable extends SupabaseTable<OrdersRow> {
     required String businessId,
     required String addressId,
   }) async {
-    if (kUsesDeadFlutterFlowHost) return 0.0;
+    if (kUseShowcaseData) return 25.0;
     try {
       final response = await SupaFlow.client.rpc(
         'calculate_delivery_fee',

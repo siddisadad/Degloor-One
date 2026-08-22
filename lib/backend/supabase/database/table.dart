@@ -1,5 +1,7 @@
 import 'database.dart';
 import 'package:degloor_one/core/error_handler.dart';
+import 'package:degloor_one/shared/showcase_catalog.dart';
+import 'showcase_query.dart';
 
 abstract class SupabaseTable<T extends SupabaseDataRow> {
   String get tableName;
@@ -8,10 +10,15 @@ abstract class SupabaseTable<T extends SupabaseDataRow> {
   PostgrestFilterBuilder _select() => SupaFlow.client.from(tableName).select();
 
   Future<List<T>> queryRows({
-    required PostgrestTransformBuilder Function(PostgrestFilterBuilder) queryFn,
+    required dynamic Function(dynamic) queryFn,
     int? limit,
   }) async {
-    if (kUsesDeadFlutterFlowHost) return [];
+    if (kUseShowcaseData) {
+      final captured = ShowcaseQuery();
+      queryFn(captured);
+      if (limit != null) captured.limit(limit);
+      return ShowcaseCatalog.query(tableName, captured).map(createRow).toList();
+    }
     try {
       final select = _select();
       var query = queryFn(select);
@@ -25,9 +32,13 @@ abstract class SupabaseTable<T extends SupabaseDataRow> {
   }
 
   Future<List<T>> querySingleRow({
-    required PostgrestTransformBuilder Function(PostgrestFilterBuilder) queryFn,
+    required dynamic Function(dynamic) queryFn,
   }) async {
-    if (kUsesDeadFlutterFlowHost) return [];
+    if (kUseShowcaseData) {
+      final captured = ShowcaseQuery()..limit(1);
+      queryFn(captured);
+      return ShowcaseCatalog.query(tableName, captured).map(createRow).toList();
+    }
     try {
       final r = await queryFn(_select()).limit(1).select().maybeSingle();
       return [if (r != null) createRow(r)];
@@ -38,8 +49,8 @@ abstract class SupabaseTable<T extends SupabaseDataRow> {
   }
 
   Future<T> insert(Map<String, dynamic> data) {
-    if (kUsesDeadFlutterFlowHost) {
-      return Future.error(Exception('Failed to fetch'));
+    if (kUseShowcaseData) {
+      return Future.value(createRow(ShowcaseCatalog.insert(tableName, data)));
     }
     try {
       return SupaFlow.client
@@ -57,12 +68,15 @@ abstract class SupabaseTable<T extends SupabaseDataRow> {
 
   Future<List<T>> update({
     required Map<String, dynamic> data,
-    required PostgrestTransformBuilder Function(PostgrestFilterBuilder)
-        matchingRows,
+    required dynamic Function(dynamic) matchingRows,
     bool returnRows = false,
   }) async {
-    if (kUsesDeadFlutterFlowHost) {
-      throw Exception('Failed to fetch');
+    if (kUseShowcaseData) {
+      final captured = ShowcaseQuery();
+      matchingRows(captured);
+      return ShowcaseCatalog.update(tableName, data, captured)
+          .map(createRow)
+          .toList();
     }
     try {
       final update = matchingRows(SupaFlow.client.from(tableName).update(data));
@@ -79,12 +93,13 @@ abstract class SupabaseTable<T extends SupabaseDataRow> {
   }
 
   Future<List<T>> delete({
-    required PostgrestTransformBuilder Function(PostgrestFilterBuilder)
-        matchingRows,
+    required dynamic Function(dynamic) matchingRows,
     bool returnRows = false,
   }) async {
-    if (kUsesDeadFlutterFlowHost) {
-      throw Exception('Failed to fetch');
+    if (kUseShowcaseData) {
+      final captured = ShowcaseQuery();
+      matchingRows(captured);
+      return ShowcaseCatalog.delete(tableName, captured).map(createRow).toList();
     }
     try {
       final delete = matchingRows(SupaFlow.client.from(tableName).delete());
@@ -101,8 +116,11 @@ abstract class SupabaseTable<T extends SupabaseDataRow> {
   }
 
   Future<void> upsert(List<Map<String, dynamic>> data) async {
-    if (kUsesDeadFlutterFlowHost) {
-      throw Exception('Failed to fetch');
+    if (kUseShowcaseData) {
+      for (final row in data) {
+        ShowcaseCatalog.insert(tableName, row);
+      }
+      return;
     }
     try {
       await SupaFlow.client.from(tableName).upsert(data);
@@ -114,10 +132,14 @@ abstract class SupabaseTable<T extends SupabaseDataRow> {
 
   Stream<List<T>> stream({
     required String primaryKey,
-    SupabaseStreamBuilder Function(SupabaseStreamFilterBuilder)? queryFn,
+    dynamic Function(dynamic)? queryFn,
   }) {
-    if (kUsesDeadFlutterFlowHost) {
-      return Stream<List<T>>.value(<T>[]);
+    if (kUseShowcaseData) {
+      final captured = ShowcaseQuery();
+      queryFn?.call(captured);
+      return Stream<List<T>>.value(
+        ShowcaseCatalog.query(tableName, captured).map(createRow).toList(),
+      );
     }
     final builder = SupaFlow.client.from(tableName).stream(primaryKey: [primaryKey]);
     final stream = queryFn != null ? queryFn(builder) : builder;

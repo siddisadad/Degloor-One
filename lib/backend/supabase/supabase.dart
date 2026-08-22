@@ -36,6 +36,15 @@ bool get kBypassAuth {
   return kUsesDeadFlutterFlowHost;
 }
 
+/// Local Degloor catalog so screens have data while Auth/PostgREST are down.
+/// Override with `--dart-define=SHOWCASE_DATA=true|false`.
+bool get kUseShowcaseData {
+  const flag = String.fromEnvironment('SHOWCASE_DATA');
+  if (flag == 'true') return true;
+  if (flag == 'false') return false;
+  return kUsesDeadFlutterFlowHost;
+}
+
 /// Throws immediately so Chrome never POSTs to a host that NXDOMAINs.
 class BlockedSupabaseHttpClient extends http.BaseClient {
   @override

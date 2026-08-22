@@ -1,4 +1,5 @@
 import '../database.dart';
+import 'package:degloor_one/shared/showcase_catalog.dart';
 
 class BusinessesTable extends SupabaseTable<BusinessesRow> {
   @override
@@ -19,7 +20,20 @@ class BusinessesTable extends SupabaseTable<BusinessesRow> {
     int limit = 20,
     int offset = 0,
   }) async {
-    if (kUsesDeadFlutterFlowHost) return [];
+    if (kUseShowcaseData) {
+      return ShowcaseCatalog.searchBusinesses(
+        latitude: latitude,
+        longitude: longitude,
+        radiusKm: radiusKm,
+        searchTerm: searchTerm,
+        categoryId: categoryId,
+        openNow: openNow,
+        verifiedOnly: verifiedOnly,
+        minRating: minRating,
+        limit: limit,
+        offset: offset,
+      ).map(createRow).toList();
+    }
     final response = await SupaFlow.client.rpc(
       'search_businesses_in_radius',
       params: {

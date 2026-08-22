@@ -1,5 +1,6 @@
 import 'package:degloor_one/backend/delivery_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/showcase_catalog.dart';
 import 'package:degloor_one/backend/whatsapp_service.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
@@ -516,8 +517,8 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
         ),
         const SizedBox(height: 12),
         FutureBuilder<List<Map<String, dynamic>>>(
-          future: kUsesDeadFlutterFlowHost
-              ? Future.value(<Map<String, dynamic>>[])
+          future: kUseShowcaseData
+              ? Future.value(ShowcaseCatalog.orderItemsWithProducts(order.id))
               : SupaFlow.client
                   .from('order_items')
                   .select('*, products(*)')

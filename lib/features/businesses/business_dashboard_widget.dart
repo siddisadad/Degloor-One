@@ -1,5 +1,7 @@
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
+import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/showcase_catalog.dart';
 import 'package:degloor_one/l10n/app_localizations.dart';
 import '/components/action_tile/action_tile_widget.dart';
 import '/components/completeness_card/completeness_card_widget.dart';
@@ -73,8 +75,36 @@ class _BusinessDashboardWidgetState extends State<BusinessDashboardWidget> {
       );
 
       // 3. Fetch Business Analytics
-      if (kUsesDeadFlutterFlowHost) {
-        safeSetState(() => _isLoading = false);
+      if (kUseShowcaseData) {
+        final events = ShowcaseCatalog.query(
+          'business_analytics',
+          ShowcaseQuery()..eq('business_id', _business!.id),
+        );
+        int views = 0;
+        int calls = 0;
+        int whatsapp = 0;
+        int directions = 0;
+        for (final e in events) {
+          final type = e['event_type'] as String?;
+          if (type == 'PROFILE_VIEW') views++;
+          if (type == 'CALL_CLICK') calls++;
+          if (type == 'WHATSAPP_CLICK') whatsapp++;
+          if (type == 'DIRECTIONS_CLICK') directions++;
+        }
+        final pendingOrders = await OrdersTable().queryRows(
+          queryFn: (q) =>
+              q.eq('business_id', _business!.id).eq('status', 'pending'),
+        );
+        if (!mounted) return;
+        setState(() {
+          _totalReviews = reviews.length;
+          _profileViews = views;
+          _callClicks = calls;
+          _whatsappClicks = whatsapp;
+          _directionsClicks = directions;
+          _pendingOrders = pendingOrders.length;
+          _isLoading = false;
+        });
         return;
       }
       final analytics = await SupaFlow.client
