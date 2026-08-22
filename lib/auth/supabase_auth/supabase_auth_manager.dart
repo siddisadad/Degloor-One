@@ -31,11 +31,9 @@ class SupabaseAuthManager extends AuthManager
       }
       await currentUser?.delete();
     } on AuthException catch (e) {
+      SupabaseConnection.log(e, context: 'delete user');
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${e.message}')),
-      );
+      SupabaseConnection.showSnackBar(context, e, authMessage: e.message);
     }
   }
 
@@ -51,11 +49,9 @@ class SupabaseAuthManager extends AuthManager
       }
       await currentUser?.updateEmail(email);
     } on AuthException catch (e) {
+      SupabaseConnection.log(e, context: 'update email');
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${e.message}')),
-      );
+      SupabaseConnection.showSnackBar(context, e, authMessage: e.message);
       return;
     }
     if (!context.mounted) return;
@@ -75,11 +71,9 @@ class SupabaseAuthManager extends AuthManager
       }
       await currentUser?.updatePassword(newPassword);
     } on AuthException catch (e) {
+      SupabaseConnection.log(e, context: 'update password');
       if (!context.mounted) return false;
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${e.message}')),
-      );
+      SupabaseConnection.showSnackBar(context, e, authMessage: e.message);
       return false;
     }
     if (!context.mounted) return false;
@@ -99,22 +93,14 @@ class SupabaseAuthManager extends AuthManager
       await SupaFlow.client.auth
           .resetPasswordForEmail(email, redirectTo: redirectTo);
     } on AuthException catch (e) {
+      SupabaseConnection.log(e, context: 'reset password');
       if (!context.mounted) return false;
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            SupabaseConnection.messageFor(e, authMessage: e.message),
-          ),
-        ),
-      );
+      SupabaseConnection.showSnackBar(context, e, authMessage: e.message);
       return false;
     } catch (e) {
+      SupabaseConnection.log(e, context: 'reset password');
       if (!context.mounted) return false;
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(SupabaseConnection.messageFor(e))),
-      );
+      SupabaseConnection.showSnackBar(context, e);
       return false;
     }
     if (!context.mounted) return false;
@@ -174,18 +160,14 @@ class SupabaseAuthManager extends AuthManager
             .then((res) => res.user),
       );
     } on AuthException catch (e) {
+      SupabaseConnection.log(e, context: 'Google sign-in');
       if (!context.mounted) return null;
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${e.message}')),
-      );
+      SupabaseConnection.showSnackBar(context, e, authMessage: e.message);
       return null;
     } catch (e) {
+      SupabaseConnection.log(e, context: 'Google sign-in');
       if (!context.mounted) return null;
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
+      SupabaseConnection.showSnackBar(context, e);
       return null;
     }
   }
@@ -201,12 +183,9 @@ class SupabaseAuthManager extends AuthManager
       if (!context.mounted) return;
       onCodeSent(context);
     } catch (e) {
-      AppLogger.error('beginPhoneAuth error', e);
+      SupabaseConnection.log(e, context: 'beginPhoneAuth error');
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
+      SupabaseConnection.showSnackBar(context, e);
     }
   }
 
@@ -278,29 +257,24 @@ class SupabaseAuthManager extends AuthManager
       }
       return authUser;
     } on AuthException catch (e) {
-      AppLogger.error('Auth error', e);
-      final errorMsg = e.message.contains('User already registered')
-          ? 'Error: The email is already in use by a different account'
-          : 'Error: ${e.message}';
+      SupabaseConnection.log(e, context: 'Auth error');
       if (!context.mounted) return null;
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(errorMsg)),
-      );
+      SupabaseConnection.showSnackBar(context, e, authMessage: e.message);
       return null;
     } catch (e) {
-      AppLogger.error('Unexpected error during auth', e);
-      if (!context.mounted) return null;
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            SupabaseConnection.looksUnreachable(e)
-                ? SupabaseConnection.unreachableMessage
-                : 'Error: An unexpected error occurred. Please try again.',
+      SupabaseConnection.log(e, context: 'Unexpected error during auth');
+      if (SupabaseConnection.looksUnreachable(e)) {
+        SupabaseConnection.showSnackBar(context, e);
+      } else if (context.mounted) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Error: An unexpected error occurred. Please try again.',
+            ),
           ),
-        ),
-      );
+        );
+      }
       return null;
     }
   }
