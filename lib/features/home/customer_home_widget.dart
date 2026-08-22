@@ -206,7 +206,8 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        InkWell(
+                        Flexible(
+                          child: InkWell(
                           splashColor: Colors.transparent,
                           focusColor: Colors.transparent,
                           hoverColor: Colors.transparent,
@@ -225,8 +226,11 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                                     color: FlutterFlowTheme.of(context).primary,
                                     size: 18.0,
                                   ),
-                                  Text(
+                                  Flexible(
+                                    child: Text(
                                     _model.locationName,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                     style: FlutterFlowTheme.of(context)
                                         .titleMedium
                                         .override(
@@ -240,6 +244,7 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                                           letterSpacing: 0.0,
                                           lineHeight: 1.4,
                                         ),
+                                    ),
                                   ),
                                   Icon(
                                     Icons.keyboard_arrow_down_rounded,
@@ -251,6 +256,8 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                               ),
                               Text(
                                 'Within ${appState.discoveryRadius.toInt()} km radius',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                                 style:
                                     FlutterFlowTheme.of(context).bodySmall.override(
                                           font: GoogleFonts.inter(
@@ -274,6 +281,7 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                                         ),
                               ),
                             ].divide(const SizedBox(height: 4.0)),
+                          ),
                           ),
                         ),
                         Flexible(
