@@ -5,6 +5,7 @@ import 'package:degloor_one/l10n/app_localizations.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'auth/password_recovery.dart';
 import 'auth/supabase_auth/supabase_user_provider.dart';
 import 'auth/supabase_auth/auth_util.dart';
 
@@ -88,6 +89,12 @@ class _MyAppState extends State<MyApp> {
         _appStateNotifier.update(user);
       });
     jwtTokenStream.listen((_) {});
+    SupaFlow.client.auth.onAuthStateChange.listen((authState) {
+      if (authState.event == AuthChangeEvent.passwordRecovery && mounted) {
+        PasswordRecovery.pending.value = true;
+        _router.goNamed('ResetPassword');
+      }
+    });
     Future.delayed(
       const Duration(milliseconds: 1000),
       () => _appStateNotifier.stopShowingSplashImage(),

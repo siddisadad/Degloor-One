@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:degloor_one/auth/password_recovery.dart';
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
@@ -45,6 +46,11 @@ class _InitialRedirectWidgetState extends State<InitialRedirectWidget> {
 
   Future<void> _handleRedirect() async {
     try {
+      if (PasswordRecovery.pending.value) {
+        context.goNamed('ResetPassword');
+        return;
+      }
+
       if (!loggedIn) {
         context.goNamed('Authentication');
         return;
