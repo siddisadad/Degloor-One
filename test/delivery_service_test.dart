@@ -46,6 +46,18 @@ void main() {
     expect(partners.first['current_latitude'], 18.55);
   });
 
+  test('active assignment is scoped to the order', () async {
+    ShowcaseCatalog.reset();
+    final assignment = await DeliveryService.activeAssignment(
+      ShowcaseCatalog.orderOut,
+    );
+    expect(assignment?.id, 'da-1');
+    expect(
+      await DeliveryService.activeAssignment('order-pending'),
+      isNull,
+    );
+  });
+
   test('accept only claims ready orders', () async {
     ShowcaseCatalog.reset();
     await expectLater(

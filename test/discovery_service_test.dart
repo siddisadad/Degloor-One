@@ -48,4 +48,19 @@ void main() {
     expect(profile, hasLength(1));
     expect(profile.first.id, GuestAuthUser.guestUid);
   });
+
+    test('owned shops and id lookups use the catalog', () async {
+    final guestShops =
+        await DiscoveryService.instance.ownedBy(GuestAuthUser.guestUid);
+    expect(guestShops.map((row) => row.id), contains(ShowcaseCatalog.bizPatil));
+
+    final hotel = await DiscoveryService.instance.ownedBy(ShowcaseCatalog.owner2);
+    expect(hotel.map((row) => row.id), contains(ShowcaseCatalog.bizHotel));
+
+    final shops = await DiscoveryService.instance.businessesByIds([
+      ShowcaseCatalog.bizPatil,
+    ]);
+    expect(shops, hasLength(1));
+    expect(shops.first.name, isNotEmpty);
+  });
 }

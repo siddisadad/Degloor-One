@@ -1,11 +1,11 @@
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/delivery_service.dart';
+import 'package:degloor_one/backend/discovery_service.dart';
 import 'package:degloor_one/backend/order_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/shared/order_lifecycle.dart';
 import 'package:degloor_one/shared/otp_copy.dart';
-import 'package:degloor_one/shared/showcase_catalog.dart';
 import 'package:degloor_one/backend/whatsapp_service.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
@@ -13,6 +13,7 @@ import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:degloor_one/core/error_handler.dart';
 import 'order_tracking_model.dart';
 export 'order_tracking_model.dart';
 
@@ -39,16 +40,6 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
   void initState() {
     super.initState();
     _model = createModel(context, () => OrderTrackingModel());
-
-    _model.orderFuture = OrdersTable().queryRows(
-      queryFn: (q) => q.eq('id', widget.orderId).eq('user_id', currentUserUid),
-    );
-    _model.orderItemsFuture = OrderItemsTable().queryRows(
-      queryFn: (q) => q.eq('order_id', widget.orderId),
-    );
-    _model.historyFuture = OrderStatusHistoryTable().queryRows(
-      queryFn: (q) => q.eq('order_id', widget.orderId).order('created_at', ascending: false),
-    );
   }
 
   @override
@@ -152,7 +143,13 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
                               if (!context.mounted) return;
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: Text('Could not cancel: $e'),
+                                  content: Text(
+                                    AppLogger.userFacingMessage(
+                                      e,
+                                      fallback:
+                                          'Unable to cancel the order. Please try again.',
+                                    ),
+                                  ),
                                   backgroundColor:
                                       FlutterFlowTheme.of(context).error,
                                 ),
@@ -338,27 +335,20 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
   }
 
   Widget _buildDeliveryPartnerInfo(String orderId) {
-    return FutureBuilder<List<DeliveryAssignmentsRow>>(
-      future: DeliveryAssignmentsTable().querySingleRow(
-        queryFn: (q) => q.eq('order_id', orderId).neq('status', 'delivered'),
-      ),
+    return FutureBuilder<DeliveryAssignmentsRow?>(
+      future: DeliveryService.activeAssignment(orderId),
       builder: (context, assignmentSnapshot) {
-        final assignment = assignmentSnapshot.data?.firstOrNull;
+        final assignment = assignmentSnapshot.data;
         if (assignment == null) return Container();
 
         return StreamBuilder<List<DeliveryPartnersRow>>(
-          stream: DeliveryPartnersTable().stream(
-            primaryKey: 'id',
-            queryFn: (q) => q.eq('id', assignment.deliveryPartnerId),
-          ),
+          stream: DeliveryService.watchPartner(assignment.deliveryPartnerId),
           builder: (context, partnerSnapshot) {
             final partner = partnerSnapshot.data?.firstOrNull;
             if (partner == null) return Container();
 
             return FutureBuilder<List<UsersRow>>(
-              future: UsersTable().querySingleRow(
-                queryFn: (q) => q.eq('id', partner.userId),
-              ),
+              future: DiscoveryService.instance.profile(partner.userId),
               builder: (context, userSnapshot) {
                 final user = userSnapshot.data?.firstOrNull;
                 return Card(
@@ -456,9 +446,7 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
 
   Widget _buildBusinessInfo(String businessId, OrdersRow order) {
     return FutureBuilder<List<BusinessesRow>>(
-      future: BusinessesTable().querySingleRow(
-        queryFn: (q) => q.eq('id', businessId),
-      ),
+      future: DiscoveryService.instance.businessesByIds([businessId]),
       builder: (context, snapshot) {
         final business = snapshot.data?.firstOrNull;
         if (business == null) return Container();
@@ -555,13 +543,7 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
         ),
         const SizedBox(height: 12),
         FutureBuilder<List<Map<String, dynamic>>>(
-          future: kUseShowcaseData
-              ? Future.value(ShowcaseCatalog.orderItemsWithProducts(order.id))
-              : SupaFlow.client
-                  .from('order_items')
-                  .select('*, products(*)')
-                  .eq('order_id', order.id)
-                  .then((v) => List<Map<String, dynamic>>.from(v)),
+          future: OrderService.instance.itemsWithProducts(order.id),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: LinearProgressIndicator());

@@ -24,4 +24,10 @@ class DiscoveryService {
 
   Future<List<UsersRow>> usersByIds(List<String> ids) =>
       _repository.usersByIds(ids);
+
+  Future<List<BusinessesRow>> businessesByIds(List<String> ids) =>
+      _repository.businessesByIds(ids);
+
+  Future<List<BusinessesRow>> ownedBy(String userId) =>
+      _repository.ownedBy(userId);
 }

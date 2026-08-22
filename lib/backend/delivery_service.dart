@@ -5,6 +5,21 @@ import 'package:degloor_one/shared/order_lifecycle.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
 class DeliveryService {
+  static Future<DeliveryAssignmentsRow?> activeAssignment(String orderId) async {
+    if (orderId.isEmpty) return null;
+    final rows = await DeliveryAssignmentsTable().querySingleRow(
+      queryFn: (q) => q.eq('order_id', orderId).neq('status', 'delivered'),
+    );
+    return rows.isEmpty ? null : rows.first;
+  }
+
+  static Stream<List<DeliveryPartnersRow>> watchPartner(String partnerId) {
+    return DeliveryPartnersTable().stream(
+      primaryKey: 'id',
+      queryFn: (q) => q.eq('id', partnerId),
+    );
+  }
+
   static Future<void> acceptOrder(String orderId) {
     return _rpc('accept_delivery_order', {'p_order_id': orderId});
   }

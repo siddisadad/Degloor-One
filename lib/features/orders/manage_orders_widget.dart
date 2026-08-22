@@ -1,7 +1,9 @@
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/delivery_service.dart';
+import 'package:degloor_one/backend/discovery_service.dart';
 import 'package:degloor_one/backend/order_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/backend/whatsapp_service.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/shared/order_lifecycle.dart';
@@ -34,6 +36,11 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
   final Map<String, String> _customerNames = {};
   final Map<String, String> _customerPhones = {};
   bool _loading = true;
+  bool _loadingMore = false;
+  bool _hasMore = true;
+  int _offset = 0;
+  int _loadToken = 0;
+  static const _pageSize = 20;
   BusinessesRow? _business;
   StreamSubscription<List<OrdersRow>>? _ordersSubscription;
 
@@ -53,19 +60,17 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
     }
 
     try {
-      final businesses = await BusinessesTable().queryRows(
-        queryFn: (q) => q.eq('owner_id', currentUser),
-      );
+      final businesses = await DiscoveryService.instance.ownedBy(currentUser);
 
       if (businesses.isNotEmpty) {
         _business = businesses.first;
         _listenToOrders();
-      } else {
+      } else if (mounted) {
         setState(() => _loading = false);
       }
     } catch (e) {
       AppLogger.error('Error fetching business', e);
-      setState(() => _loading = false);
+      if (mounted) setState(() => _loading = false);
     }
   }
 
@@ -74,43 +79,67 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
     _ordersSubscription?.cancel();
     _ordersSubscription = OrderService.instance
         .watchBusiness(_business!.id)
-        .listen((orders) async {
-      // Stream order is ascending by default in Supabase stream if not specified correctly,
-      // but we want newest first. Supabase .stream().order() works.
-      final sortedOrders = orders.toList()
-        ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        .listen((_) {
+      if (mounted) _loadPage(reset: true);
+    });
+    _loadPage(reset: true);
+  }
 
-      // Fetch customer names for new users
+  Future<void> _loadPage({bool reset = false}) async {
+    final business = _business;
+    if (business == null) return;
+    if (!reset && (_loadingMore || !_hasMore)) return;
+    final token = reset ? ++_loadToken : _loadToken;
+    if (reset) {
+      _offset = 0;
+      _hasMore = true;
+    }
+    if (!mounted) return;
+    setState(() {
+      _loading = reset && _orders.isEmpty;
+      _loadingMore = !reset;
+    });
+    try {
+      final page = await OrderService.instance.listForBusiness(
+        business.id,
+        page: PageQuery(limit: _pageSize, offset: _offset),
+      );
       final existingUserIds = _customerNames.keys.toSet();
-      final newUserIds = sortedOrders
-          .map((o) => o.userId)
+      final newUserIds = page.items
+          .map((order) => order.userId)
           .where((id) => id.length > 10 && !existingUserIds.contains(id))
           .toSet()
           .toList();
-
       if (newUserIds.isNotEmpty) {
-        try {
-          final users = await UsersTable().queryRows(
-            queryFn: (q) => q.inFilter('id', newUserIds),
-          );
-          for (var user in users) {
-            _customerNames[user.id] = user.fullName ?? 'Unknown Customer';
-            if (user.phoneNumber != null) {
-              _customerPhones[user.id] = user.phoneNumber!;
-            }
+        final users = await DiscoveryService.instance.usersByIds(newUserIds);
+        for (final user in users) {
+          _customerNames[user.id] = user.fullName ?? 'Unknown Customer';
+          if (user.phoneNumber != null) {
+            _customerPhones[user.id] = user.phoneNumber!;
           }
-        } catch (e) {
-          AppLogger.error('Error fetching customer names', e);
         }
       }
-
-      if (mounted) {
+      if (!mounted || token != _loadToken) return;
+      setState(() {
+        if (reset) {
+          _orders = page.items;
+        } else {
+          _orders.addAll(page.items);
+        }
+        _offset += _pageSize;
+        _hasMore = page.hasMore;
+        _loading = false;
+        _loadingMore = false;
+      });
+    } catch (e) {
+      AppLogger.error('Error fetching shop orders', e);
+      if (mounted && token == _loadToken) {
         setState(() {
-          _orders = sortedOrders;
           _loading = false;
+          _loadingMore = false;
         });
       }
-    });
+    }
   }
 
   Future<void> _updateOrderStatus(String orderId, String newStatus) async {
@@ -129,12 +158,18 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
             backgroundColor: FlutterFlowTheme.of(context).success,
           ),
         );
+        await _loadPage(reset: true);
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error updating order: $e'),
+            content: Text(
+              AppLogger.userFacingMessage(
+                e,
+                fallback: 'Unable to update the order. Please try again.',
+              ),
+            ),
             backgroundColor: FlutterFlowTheme.of(context).error,
           ),
         );
@@ -203,9 +238,21 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
                 else
                   Expanded(
                     child: ListView.separated(
-                      itemCount: _orders.length,
+                      itemCount: _orders.length + (_hasMore ? 1 : 0),
                       separatorBuilder: (context, index) => const SizedBox(height: 12.0),
                       itemBuilder: (context, index) {
+                        if (index >= _orders.length) {
+                          return TextButton(
+                            onPressed: _loadingMore ? null : () => _loadPage(),
+                            child: _loadingMore
+                                ? const SizedBox(
+                                    height: 18,
+                                    width: 18,
+                                    child: CircularProgressIndicator(strokeWidth: 2),
+                                  )
+                                : const Text('Load more'),
+                          );
+                        }
                         final order = _orders[index];
                         final customerName = _customerNames[order.userId] ?? 'Loading...';
 
@@ -443,6 +490,7 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
           backgroundColor: FlutterFlowTheme.of(context).success,
         ),
       );
+      await _loadPage(reset: true);
     }
   }
 
