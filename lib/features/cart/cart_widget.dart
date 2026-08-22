@@ -2,6 +2,7 @@ import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
+import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
@@ -234,8 +235,15 @@ class _CartWidgetState extends State<CartWidget> {
       key: scaffoldKey,
       backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
       appBar: AppBar(
-        backgroundColor: FlutterFlowTheme.of(context).secondaryBackground,
-        title: Text('Your Cart', style: FlutterFlowTheme.of(context).headlineSmall),
+        backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+        title: Text(
+          'Your cart',
+          style: FlutterFlowTheme.of(context).headlineMedium.override(
+                font: GoogleFonts.inter(fontWeight: FontWeight.w700),
+                color: FlutterFlowTheme.of(context).primaryText,
+                fontSize: 22,
+              ),
+        ),
         elevation: 0,
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
@@ -244,27 +252,12 @@ class _CartWidgetState extends State<CartWidget> {
           if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
           final items = snapshot.data!;
           if (items.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.shopping_cart_outlined, size: 64, color: FlutterFlowTheme.of(context).alternate),
-                  const SizedBox(height: 16),
-                  Text('Your cart is empty', style: FlutterFlowTheme.of(context).titleMedium),
-                  const SizedBox(height: 24),
-                  FFButtonWidget(
-                    onPressed: () => context.goNamed('CustomerHome'),
-                    text: 'Start Shopping',
-                    options: FFButtonOptions(
-                      width: 200,
-                      height: 44,
-                      color: FlutterFlowTheme.of(context).primary,
-                      textStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                      borderRadius: BorderRadius.circular(22),
-                    ),
-                  ),
-                ],
-              ),
+            return EmptyStateView(
+              icon: Icons.shopping_cart_outlined,
+              title: 'Your cart is empty',
+              description: 'Add milk, rice, or anything nearby and check out in a tap.',
+              buttonText: 'Browse shops',
+              onTap: () => context.goNamed('CustomerHome'),
             );
           }
 

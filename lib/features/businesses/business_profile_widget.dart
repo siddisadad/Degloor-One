@@ -627,17 +627,21 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                               children: [
                                 Row(
                                   children: [
-                                    Text(
-                                      business.name,
-                                      style: FlutterFlowTheme.of(context)
-                                          .headlineMedium
-                                          .override(
-                                            font: GoogleFonts.inter(
+                                    Expanded(
+                                      child: Text(
+                                        business.name,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: FlutterFlowTheme.of(context)
+                                            .headlineMedium
+                                            .override(
+                                              font: GoogleFonts.inter(
+                                                fontWeight: FontWeight.bold,
+                                              ),
                                               fontWeight: FontWeight.bold,
+                                              lineHeight: 1.3,
                                             ),
-                                            fontWeight: FontWeight.bold,
-                                            lineHeight: 1.3,
-                                          ),
+                                      ),
                                     ),
                                     if (business.isVerified ?? false)
                                       Icon(

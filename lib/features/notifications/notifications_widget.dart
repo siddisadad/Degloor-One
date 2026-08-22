@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_icon_button.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
@@ -142,17 +143,17 @@ class _NotificationsWidgetState extends State<NotificationsWidget> {
         key: scaffoldKey,
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         appBar: AppBar(
-          backgroundColor: FlutterFlowTheme.of(context).secondaryBackground,
+          backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
           automaticallyImplyLeading: false,
           leading: FlutterFlowIconButton(
             borderColor: Colors.transparent,
-            borderRadius: 30.0,
+            borderRadius: 8.0,
             borderWidth: 1.0,
-            buttonSize: 60.0,
+            buttonSize: 40.0,
             icon: Icon(
               Icons.arrow_back_rounded,
               color: FlutterFlowTheme.of(context).primaryText,
-              size: 30.0,
+              size: 22.0,
             ),
             onPressed: () async {
               context.safePop();
@@ -161,32 +162,30 @@ class _NotificationsWidgetState extends State<NotificationsWidget> {
           title: Text(
             'Notifications',
             style: FlutterFlowTheme.of(context).headlineMedium.override(
-                  font: GoogleFonts.inter(),
+                  font: GoogleFonts.inter(fontWeight: FontWeight.w700),
                   color: FlutterFlowTheme.of(context).primaryText,
                   fontSize: 22.0,
                 ),
           ),
           actions: [
             if (_notifications.isNotEmpty)
-              IconButton(
-                onPressed: _clearAll,
-                icon: const Icon(Icons.delete_sweep_rounded),
-                tooltip: 'Clear All',
-              ),
-            if (_notifications.any((n) => !n.isRead))
-              Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(0, 0, 12, 0),
-                child: TextButton(
-                  onPressed: _markAllAsRead,
-                  child: Text(
-                    'Mark all as read',
-                    style: FlutterFlowTheme.of(context).bodyMedium.override(
-                          font: GoogleFonts.inter(),
-                          color: FlutterFlowTheme.of(context).primary,
-                          fontWeight: FontWeight.w600,
-                        ),
+              PopupMenuButton<String>(
+                tooltip: 'More',
+                onSelected: (value) {
+                  if (value == 'read') _markAllAsRead();
+                  if (value == 'clear') _clearAll();
+                },
+                itemBuilder: (context) => [
+                  if (_notifications.any((n) => !n.isRead))
+                    const PopupMenuItem(
+                      value: 'read',
+                      child: Text('Mark all as read'),
+                    ),
+                  const PopupMenuItem(
+                    value: 'clear',
+                    child: Text('Clear all'),
                   ),
-                ),
+                ],
               ),
           ],
           centerTitle: false,
@@ -201,22 +200,12 @@ class _NotificationsWidgetState extends State<NotificationsWidget> {
                 ),
               )
             : _notifications.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.notifications_none_rounded,
-                          size: 64,
-                          color: FlutterFlowTheme.of(context).secondaryText,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'No notifications yet',
-                          style: FlutterFlowTheme.of(context).titleMedium,
-                        ),
-                      ],
-                    ),
+                ? EmptyStateView(
+                    icon: Icons.notifications_none_rounded,
+                    title: "You're all caught up",
+                    description: 'Order updates and local alerts will land here.',
+                    buttonText: 'Back to home',
+                    onTap: () => context.goNamed('CustomerHome'),
                   )
                 : ListView.builder(
                     padding: const EdgeInsets.symmetric(vertical: 8),

@@ -1,7 +1,7 @@
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/backend/location_service.dart';
 import 'package:degloor_one/l10n/app_localizations.dart';
-import 'package:degloor_one/components/business_card800502e0/business_card800502e0_widget.dart';
+import 'package:degloor_one/components/business_card/business_card_widget.dart';
 import 'package:degloor_one/components/button/button_widget.dart';
 import 'package:degloor_one/components/filter_chip/filter_chip_widget.dart';
 import 'package:degloor_one/components/text_field/text_field_widget.dart';
@@ -487,7 +487,7 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
                                                       .spaceBetween,
                                           children: [
                                             Text(
-                                              '${businesses.length} Businesses found',
+                                              '${businesses.length} shops within ${FFAppState.instance.discoveryRadius.toInt()} km',
                                               style: FlutterFlowTheme.of(
                                                           context)
                                                       .labelLarge.override(
@@ -522,37 +522,33 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
                                                 }.withoutNulls,
                                               );
                                             },
-                                            child:
-                                                BusinessCard800502e0Widget(
+                                            child: BusinessCardWidget(
                                               key: Key(
                                                   'search_${business.id}'),
-                                              address:
-                                                  business.addressText ??
-                                                      'Degloor',
+                                              name: business.name,
                                               category: _categoryIdToName[
-                                                          business
-                                                              .categoryId] ??
-                                                      'Local Business',
-                                              distance: business.distanceKm != null
-                                                  ? (business.distanceKm! < 1.0
+                                                      business.categoryId] ??
+                                                  'Local Business',
+                                              distance: business.distanceKm !=
+                                                      null
+                                                  ? (business.distanceKm! <
+                                                          1.0
                                                       ? '${(business.distanceKm! * 1000).toInt()} m'
                                                       : '${business.distanceKm!.toStringAsFixed(1)} km')
                                                   : 'Nearby',
                                               imgDesc: business.imageUrl ??
                                                   'https://images.unsplash.com/photo-1534723452862-4c874018d66d?auto=format&fit=crop&w=400&h=300&q=80',
-                                              isOpen: business.isOpen ?? false,
-                                              isVerified:
+                                              rating: (business.rating ?? 0.0)
+                                                  .toString(),
+                                              status:
+                                                  (business.isOpen ?? false)
+                                                      ? 'Open'
+                                                      : 'Closed',
+                                              verified:
                                                   business.isVerified ??
                                                       false,
-                                              name: business.name,
-                                              rating: (business.rating ??
-                                                          0.0)
-                                                      .toString(),
-                                              phoneNumber: business.phoneNumber,
-                                              whatsappNumber: business.whatsappNumber,
-                                              latitude: business.latitude,
-                                              longitude: business.longitude,
-                                              id: business.id,
+                                              isOpen:
+                                                  business.isOpen ?? false,
                                             ),
                                           );
                                         }),
@@ -603,75 +599,62 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
                                   );
                                 },
                               ),
-                              Container(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(32.0),
-                                  child: Container(
-                                    child: Container(
-                                      alignment: const AlignmentDirectional(0.0, 0.0),
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Icon(
-                                            Icons.search_off_rounded,
-                                            color: FlutterFlowTheme.of(context)
-                                                .onBackground,
-                                            size: 32.0,
-                                          ),
-                                          Text(
-                                            'Looking for more?',
-                                            style: FlutterFlowTheme.of(context)
-                                                .bodyMedium
-                                                .override(
-                                                  fontFamily: GoogleFonts.inter().fontFamily,
-                                                  color: FlutterFlowTheme.of(
-                                                          context)
-                                                      .secondaryText,
-                                                  letterSpacing: 0.0,
-                                                  lineHeight: 1.5,
-                                                ),
-                                          ),
-                                          if (nextDiscoveryRadius(FFAppState
-                                                  .instance.discoveryRadius) !=
-                                              null)
-                                            wrapWithModel(
-                                              model: _model.buttonModel,
-                                              updateCallback: () =>
-                                                  safeSetState(() {}),
-                                              child: ButtonWidget(
-                                                iconPresent: false,
-                                                iconEndPresent: false,
-                                                content:
-                                                    'Increase radius to ${nextDiscoveryRadius(FFAppState.instance.discoveryRadius)!.toInt()} km',
-                                                variant: 'outline',
-                                                size: 'small',
-                                                fullWidth: false,
-                                                loading: false,
-                                                disabled: false,
-                                                onTap: () async {
-                                                  final next =
-                                                      nextDiscoveryRadius(
-                                                          FFAppState.instance
-                                                              .discoveryRadius);
-                                                  if (next == null) return;
-                                                  setState(() {
-                                                    FFAppState.instance
-                                                            .discoveryRadius =
-                                                        next;
-                                                  });
-                                                  _performSearch(
-                                                      _currentSearchTerm,
-                                                      categoryId:
-                                                          _currentCategoryId);
-                                                },
-                                              ),
+                              if (_businesses.isEmpty &&
+                                  !_isLoading &&
+                                  nextDiscoveryRadius(FFAppState
+                                          .instance.discoveryRadius) !=
+                                      null)
+                                Padding(
+                                  padding: const EdgeInsets.all(16.0),
+                                  child: Column(
+                                    children: [
+                                      Text(
+                                        'Looking for more?',
+                                        style: FlutterFlowTheme.of(context)
+                                            .bodyMedium
+                                            .override(
+                                              fontFamily: GoogleFonts.inter()
+                                                  .fontFamily,
+                                              color: FlutterFlowTheme.of(
+                                                      context)
+                                                  .secondaryText,
                                             ),
-                                        ].divide(const SizedBox(height: 8.0)),
                                       ),
-                                    ),
+                                      const SizedBox(height: 8),
+                                      wrapWithModel(
+                                        model: _model.buttonModel,
+                                        updateCallback: () =>
+                                            safeSetState(() {}),
+                                        child: ButtonWidget(
+                                          iconPresent: false,
+                                          iconEndPresent: false,
+                                          content:
+                                              'Increase radius to ${nextDiscoveryRadius(FFAppState.instance.discoveryRadius)!.toInt()} km',
+                                          variant: 'outline',
+                                          size: 'small',
+                                          fullWidth: false,
+                                          loading: false,
+                                          disabled: false,
+                                          onTap: () async {
+                                            final next = nextDiscoveryRadius(
+                                                FFAppState.instance
+                                                    .discoveryRadius);
+                                            if (next == null) return;
+                                            setState(() {
+                                              FFAppState.instance
+                                                      .discoveryRadius =
+                                                  next;
+                                            });
+                                            _performSearch(
+                                                _currentSearchTerm,
+                                                categoryId:
+                                                    _currentCategoryId);
+                                          },
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                              ),
                             ].divide(const SizedBox(height: 16.0)),
                           ),
                         ),

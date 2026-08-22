@@ -1,11 +1,13 @@
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 import 'package:degloor_one/components/apply_job_sheet/apply_job_sheet_widget.dart';
+import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/components/job_card/job_card_widget.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_icon_button.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'jobs_marketplace_model.dart';
 export 'jobs_marketplace_model.dart';
 
@@ -90,29 +92,28 @@ class _JobsMarketplaceWidgetState extends State<JobsMarketplaceWidget> {
         key: scaffoldKey,
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         appBar: AppBar(
-          backgroundColor: FlutterFlowTheme.of(context).secondaryBackground,
+          backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
           automaticallyImplyLeading: false,
           leading: FlutterFlowIconButton(
             borderColor: Colors.transparent,
-            borderRadius: 30,
+            borderRadius: 8,
             borderWidth: 1,
-            buttonSize: 60,
+            buttonSize: 40,
             icon: Icon(
               Icons.arrow_back_rounded,
               color: FlutterFlowTheme.of(context).primaryText,
-              size: 24,
+              size: 22,
             ),
             onPressed: () async {
               context.safePop();
             },
           ),
           title: Text(
-            'Job Marketplace',
+            'Local jobs',
             style: FlutterFlowTheme.of(context).headlineMedium.override(
-                  fontFamily: 'Inter',
+                  font: GoogleFonts.inter(fontWeight: FontWeight.w700),
                   color: FlutterFlowTheme.of(context).primaryText,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+                  fontSize: 22,
                 ),
           ),
           actions: const [],
@@ -217,31 +218,28 @@ class _JobsMarketplaceWidgetState extends State<JobsMarketplaceWidget> {
                       return const Center(child: CircularProgressIndicator());
                     }
                     if (snapshot.hasError) {
-                      return Center(child: Text('Error: ${snapshot.error}'));
+                      return EmptyStateView(
+                        icon: Icons.wifi_off_rounded,
+                        title: 'Could not load jobs',
+                        description: 'Try again in a moment.',
+                        buttonText: 'Retry',
+                        onTap: () => setState(() {}),
+                      );
                     }
                     final jobs = snapshot.data ?? [];
                     if (jobs.isEmpty) {
-                      return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.search_off_rounded,
-                              size: 64,
-                              color: FlutterFlowTheme.of(context).secondaryText,
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'No jobs found',
-                              style: FlutterFlowTheme.of(context).titleMedium,
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Try adjusting your filters or search terms',
-                              style: FlutterFlowTheme.of(context).bodySmall,
-                            ),
-                          ],
-                        ),
+                      return EmptyStateView(
+                        icon: Icons.work_outline_rounded,
+                        title: 'No jobs found',
+                        description:
+                            'Try another search or check services nearby.',
+                        buttonText: 'Clear filters',
+                        onTap: () {
+                          setState(() {
+                            _model.searchBarController?.clear();
+                            _model.jobTypeFilter = 'All';
+                          });
+                        },
                       );
                     }
 
@@ -257,7 +255,9 @@ class _JobsMarketplaceWidgetState extends State<JobsMarketplaceWidget> {
                           child: JobCardWidget(
                             title: job['title'] ?? 'Job Title',
                             companyName: business?['name'] ?? 'Employer',
-                            location: business?['location'] ?? 'Degloor',
+                            location: business?['address_text'] ??
+                                business?['location'] ??
+                                'Degloor',
                             salary: job['salary_range'] ?? 'Salary Not Specified',
                             jobType: job['job_type'] ?? 'Type',
                             onActionPressed: () async => _applyForJob(job),

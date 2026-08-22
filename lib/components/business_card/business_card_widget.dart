@@ -18,7 +18,7 @@ class BusinessCardWidget extends StatefulWidget {
     bool? verified,
     bool? isOpen,
   })  : category = category ?? 'Hardware & Construction',
-        distance = distance ?? '0.8',
+        distance = distance ?? '0.8 km',
         imgDesc = imgDesc ??
             'https://dimg.dreamflow.cloud/v1/image/hardware%20store%20shelves',
         name = name ?? 'Business Name',
@@ -174,7 +174,7 @@ class _BusinessCardWidgetState extends State<BusinessCardWidget> {
                                 padding: const EdgeInsetsDirectional.fromSTEB(
                                     8.0, 2.0, 8.0, 2.0),
                                 child: Text(
-                                  'VERIFIED',
+                                  'Verified',
                                   style: FlutterFlowTheme.of(context)
                                       .labelSmall
                                       .override(
@@ -213,74 +213,92 @@ class _BusinessCardWidgetState extends State<BusinessCardWidget> {
                     ),
                     Row(
                       children: [
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.location_on_outlined,
-                              color: FlutterFlowTheme.of(context).secondaryText,
-                              size: 14.0,
-                            ),
-                            Text(
-                              valueOrDefault<String>(
-                                widget.distance,
-                                '0.8 km',
+                        Flexible(
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.location_on_outlined,
+                                color:
+                                    FlutterFlowTheme.of(context).secondaryText,
+                                size: 14.0,
                               ),
-                              style: FlutterFlowTheme.of(context)
-                                  .bodySmall
-                                  .override(
-                                    fontFamily: FlutterFlowTheme.of(context)
-                                        .bodySmallFamily,
-                                    color: FlutterFlowTheme.of(context)
-                                        .secondaryText,
-                                    useGoogleFonts: GoogleFonts.asMap()
-                                        .containsKey(FlutterFlowTheme.of(context)
-                                            .bodySmallFamily),
+                              Flexible(
+                                child: Text(
+                                  valueOrDefault<String>(
+                                    widget.distance,
+                                    '0.8 km',
                                   ),
-                            ),
-                          ].divide(SizedBox(
-                              width: FlutterFlowTheme.of(context)
-                                  .designToken
-                                  .spacing
-                                  .xs)),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: FlutterFlowTheme.of(context)
+                                      .bodySmall
+                                      .override(
+                                        fontFamily: FlutterFlowTheme.of(context)
+                                            .bodySmallFamily,
+                                        color: FlutterFlowTheme.of(context)
+                                            .secondaryText,
+                                        useGoogleFonts: GoogleFonts.asMap()
+                                            .containsKey(
+                                                FlutterFlowTheme.of(context)
+                                                    .bodySmallFamily),
+                                      ),
+                                ),
+                              ),
+                            ].divide(SizedBox(
+                                width: FlutterFlowTheme.of(context)
+                                    .designToken
+                                    .spacing
+                                    .xs)),
+                          ),
                         ),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.schedule_rounded,
-                              color: FlutterFlowTheme.of(context).secondaryText,
-                              size: 14.0,
-                            ),
-                            Text(
-                              valueOrDefault<String>(
-                                widget.status,
-                                'Open',
+                        Flexible(
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.schedule_rounded,
+                                color:
+                                    FlutterFlowTheme.of(context).secondaryText,
+                                size: 14.0,
                               ),
-                              style: FlutterFlowTheme.of(context)
-                                  .bodySmall
-                                  .override(
-                                    fontFamily: FlutterFlowTheme.of(context)
-                                        .bodySmallFamily,
-                                    color: valueOrDefault<Color>(
-                                      valueOrDefault<bool>(
-                                        widget.isOpen,
-                                        true,
-                                      )
-                                          ? FlutterFlowTheme.of(context).success
-                                          : FlutterFlowTheme.of(context).error,
-                                      FlutterFlowTheme.of(context).success,
-                                    ),
-                                    useGoogleFonts: GoogleFonts.asMap()
-                                        .containsKey(FlutterFlowTheme.of(context)
-                                            .bodySmallFamily),
+                              Flexible(
+                                child: Text(
+                                  valueOrDefault<String>(
+                                    widget.status,
+                                    'Open',
                                   ),
-                            ),
-                          ].divide(SizedBox(
-                              width: FlutterFlowTheme.of(context)
-                                  .designToken
-                                  .spacing
-                                  .xs)),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: FlutterFlowTheme.of(context)
+                                      .bodySmall
+                                      .override(
+                                        fontFamily: FlutterFlowTheme.of(context)
+                                            .bodySmallFamily,
+                                        color: valueOrDefault<Color>(
+                                          valueOrDefault<bool>(
+                                            widget.isOpen,
+                                            true,
+                                          )
+                                              ? FlutterFlowTheme.of(context)
+                                                  .success
+                                              : FlutterFlowTheme.of(context)
+                                                  .error,
+                                          FlutterFlowTheme.of(context).success,
+                                        ),
+                                        useGoogleFonts: GoogleFonts.asMap()
+                                            .containsKey(
+                                                FlutterFlowTheme.of(context)
+                                                    .bodySmallFamily),
+                                      ),
+                                ),
+                              ),
+                            ].divide(SizedBox(
+                                width: FlutterFlowTheme.of(context)
+                                    .designToken
+                                    .spacing
+                                    .xs)),
+                          ),
                         ),
                       ].divide(SizedBox(
                           width: FlutterFlowTheme.of(context)

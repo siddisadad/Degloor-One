@@ -81,14 +81,16 @@ class _UserProfileReportsWidgetState extends State<UserProfileReportsWidget> {
                           .toUpperCase();
 
                       return Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Column(
+                          Expanded(
+                            child: Column(
                             mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
                                 fullName,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                                 style: FlutterFlowTheme.of(context)
                                     .headlineMedium
                                     .override(
@@ -113,6 +115,8 @@ class _UserProfileReportsWidgetState extends State<UserProfileReportsWidget> {
                               ),
                             ],
                           ),
+                          ),
+                          const SizedBox(width: 12),
                           Container(
                             width: 48.0,
                             height: 48.0,
