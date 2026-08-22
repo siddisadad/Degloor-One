@@ -1,5 +1,6 @@
 import 'package:rxdart/rxdart.dart';
 
+import 'package:degloor_one/auth/password_recovery.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import '../base_auth_user_provider.dart';
 
@@ -89,6 +90,9 @@ Stream<BaseAuthUser> degloorOneSupabaseUserStream() {
           : supabaseAuthStream)
       .asyncMap<BaseAuthUser>(
     (authState) async {
+      if (authState?.event == AuthChangeEvent.passwordRecovery) {
+        PasswordRecovery.pending.value = true;
+      }
       final user = authState?.session?.user;
       String? role;
       if (user != null) {

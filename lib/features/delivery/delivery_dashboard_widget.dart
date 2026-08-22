@@ -1,7 +1,9 @@
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
+import 'package:degloor_one/backend/delivery_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/backend/whatsapp_service.dart';
 import 'package:degloor_one/backend/location_service.dart';
+import 'package:degloor_one/core/error_handler.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
@@ -89,122 +91,97 @@ class _DeliveryDashboardWidgetState extends State<DeliveryDashboardWidget> {
       return;
     }
 
-    await DeliveryAssignmentsTable().insert({
-      'order_id': orderId,
-      'delivery_partner_id': partner.id,
-      'status': 'assigned',
-    });
-    await OrdersTable().update(
-      data: {'status': 'shipping'},
-      matchingRows: (src) => src.eq('id', orderId),
-    );
-    // Log status history
-    await OrderStatusHistoryTable().insert({
-      'order_id': orderId,
-      'status': 'shipping',
-      'notes': 'Order accepted by delivery partner.',
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Order accepted!')),
-    );
-    if (mounted) {
+    try {
+      await DeliveryService.acceptOrder(orderId);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Order accepted!')),
+      );
       setState(() {});
+    } catch (e) {
+      AppLogger.error('Failed to accept order', e);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(DeliveryService.messageFor(e)),
+          backgroundColor: FlutterFlowTheme.of(context).error,
+        ),
+      );
     }
   }
 
-  Future<void> _confirmPickup(String assignmentId, String orderId) async {
-    await DeliveryAssignmentsTable().update(
-      data: {'status': 'picked_up'},
-      matchingRows: (src) => src.eq('id', assignmentId),
-    );
-    // Update order status as well
-    await OrdersTable().update(
-      data: {'status': 'out_for_delivery'},
-      matchingRows: (src) => src.eq('id', orderId),
-    );
-    // Log status history
-    await OrderStatusHistoryTable().insert({
-      'order_id': orderId,
-      'status': 'out_for_delivery',
-      'notes': 'Order picked up by delivery partner.',
-    });
-    if (mounted) {
+  Future<void> _confirmPickup(String assignmentId) async {
+    try {
+      await DeliveryService.confirmPickup(assignmentId);
+      if (!mounted) return;
       setState(() {});
+    } catch (e) {
+      AppLogger.error('Failed to confirm pickup', e);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(DeliveryService.messageFor(e)),
+          backgroundColor: FlutterFlowTheme.of(context).error,
+        ),
+      );
     }
   }
 
-  Future<void> _confirmDelivery(String assignmentId, String orderId) async {
-    final orderList = await OrdersTable().querySingleRow(
-      queryFn: (q) => q.eq('id', orderId),
-    );
-    if (orderList.isEmpty) return;
-    final order = orderList.first;
-    final correctOtp = order.deliveryOtp;
-
+  Future<void> _confirmDelivery(String orderId) async {
     final otpController = TextEditingController();
+    String? errorText;
     final verified = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Verify Delivery'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('Ask the customer for the 4-digit delivery OTP.'),
-            const SizedBox(height: 16),
-            TextField(
-              controller: otpController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'Enter OTP',
-                border: OutlineInputBorder(),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text('Verify Delivery'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('Ask the customer for the 4-digit delivery OTP.'),
+              const SizedBox(height: 16),
+              TextField(
+                controller: otpController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: 'Enter OTP',
+                  border: const OutlineInputBorder(),
+                  errorText: errorText,
+                ),
+                maxLength: 4,
               ),
-              maxLength: 4,
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                try {
+                  await DeliveryService.confirmDeliveryWithOtp(
+                    orderId: orderId,
+                    otp: otpController.text.trim(),
+                  );
+                  if (context.mounted) Navigator.pop(context, true);
+                } catch (e) {
+                  setDialogState(() => errorText = DeliveryService.messageFor(e));
+                }
+              },
+              child: const Text('Verify & Confirm'),
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              if (otpController.text == correctOtp) {
-                Navigator.pop(context, true);
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Invalid OTP. Please try again.')),
-                );
-              }
-            },
-            child: const Text('Verify & Confirm'),
-          ),
-        ],
       ),
     );
+    otpController.dispose();
 
-    if (verified != true) return;
-
-    await DeliveryAssignmentsTable().update(
-      data: {'status': 'delivered'},
-      matchingRows: (src) => src.eq('id', assignmentId),
+    if (verified != true || !mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Order delivered!')),
     );
-    await OrdersTable().update(
-      data: {'status': 'delivered'},
-      matchingRows: (src) => src.eq('id', orderId),
-    );
-    // Log status history
-    await OrderStatusHistoryTable().insert({
-      'order_id': orderId,
-      'status': 'delivered',
-      'notes': 'Order delivered successfully after OTP verification.',
-    });
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Order delivered!')),
-      );
-      setState(() {});
-    }
+    setState(() {});
   }
 
   @override
@@ -355,8 +332,8 @@ class _DeliveryDashboardWidgetState extends State<DeliveryDashboardWidget> {
                                       child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          Text('Order ID: ${order.id.substring(0, 8)}', style: const TextStyle(fontWeight: FontWeight.bold)),
-                                          Text('Total: ₹${order.totalAmount}'),
+                                          Text('Order ID: ${order.id}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                                          Text('Total: \$${order.totalAmount}'),
                                           Text('Status: ${assignment.status}'),
                                           if (order.userId.length > 10)
                                             FutureBuilder<List<UsersRow>>(
@@ -394,7 +371,7 @@ class _DeliveryDashboardWidgetState extends State<DeliveryDashboardWidget> {
                                           const SizedBox(height: 16),
                                           if (assignment.status == 'assigned')
                                             FFButtonWidget(
-                                              onPressed: () => _confirmPickup(assignment.id, order.id),
+                                              onPressed: () => _confirmPickup(assignment.id),
                                               text: 'Confirm Pickup',
                                               options: const FFButtonOptions(
                                                 width: double.infinity,
@@ -404,7 +381,7 @@ class _DeliveryDashboardWidgetState extends State<DeliveryDashboardWidget> {
                                             ),
                                           if (assignment.status == 'picked_up')
                                             FFButtonWidget(
-                                              onPressed: () => _confirmDelivery(assignment.id, order.id),
+                                              onPressed: () => _confirmDelivery(order.id),
                                               text: 'Confirm Delivery',
                                               options: const FFButtonOptions(
                                                 width: double.infinity,
@@ -449,7 +426,7 @@ class _DeliveryDashboardWidgetState extends State<DeliveryDashboardWidget> {
                               return Card(
                                 child: ListTile(
                                   title: Text('Order #${order.id.substring(0, 8)}'),
-                                  subtitle: Text('Amount: ₹${order.totalAmount}'),
+                                  subtitle: Text('Amount: \$${order.totalAmount}'),
                                   trailing: FFButtonWidget(
                                     onPressed: () => _acceptOrder(order.id, partner),
                                     text: 'Accept',

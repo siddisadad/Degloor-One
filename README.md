@@ -29,10 +29,20 @@ DEGLOOR ONE is a hyperlocal technology platform connecting customers, businesses
 ## 🏁 Getting Started
 
 ### 1. Database Setup
-Execute the SQL script located at `scratch/schema.sql` in your Supabase SQL Editor. This will create all necessary tables, relationships, and Row Level Security (RLS) policies.
+Execute the SQL scripts in the Supabase SQL Editor in this order:
+
+1. `scratch/schema.sql` — tables, relationships, and Row Level Security (RLS) policies.
+2. `scratch/secure_transactions.sql` — atomic `place_order` RPC with stock checks.
+3. `scratch/secure_delivery.sql` — exclusive order accept and server-side delivery OTP.
 
 ### 2. Environment Configuration
 Ensure your `lib/backend/supabase/supabase.dart` is updated with your specific Supabase URL and Anon Key.
+
+For **Forgot password**, add these Redirect URLs in the Supabase dashboard (Authentication → URL Configuration):
+
+- `degloorone://degloorone.com/resetPassword` (Android / iOS)
+- `http://localhost:*/resetPassword` (local web)
+- your production web origin + `/resetPassword`
 
 ### 3. Run the App
 ```bash

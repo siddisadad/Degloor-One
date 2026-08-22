@@ -1,5 +1,6 @@
 import 'package:degloor_one/backend/notification_service.dart';
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
+import 'package:degloor_one/backend/delivery_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/backend/whatsapp_service.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
@@ -331,12 +332,7 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
                                         ),
                                       if (order.status == 'ready')
                                         FFButtonWidget(
-                                          onPressed: () async {
-                                            final otpVerified = await _showOtpVerificationDialog(order);
-                                            if (otpVerified) {
-                                              await _updateOrderStatus(order.id, 'delivered');
-                                            }
-                                          },
+                                          onPressed: () => _showOtpVerificationDialog(order),
                                           text: 'Deliver (Verify OTP)',
                                           options: _buttonOptions(context, FlutterFlowTheme.of(context).tertiary),
                                         ),
@@ -434,14 +430,14 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
     }
   }
 
-  Future<bool> _showOtpVerificationDialog(OrdersRow order) async {
+  Future<void> _showOtpVerificationDialog(OrdersRow order) async {
     final otpController = TextEditingController();
-    bool isError = false;
+    String? errorText;
 
-    return await showDialog<bool>(
+    final verified = await showDialog<bool>(
       context: context,
       builder: (context) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
+        builder: (context, setDialogState) => AlertDialog(
           title: const Text('Verify Delivery OTP'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -456,7 +452,7 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
                 style: GoogleFonts.inter(fontSize: 24, fontWeight: FontWeight.bold, letterSpacing: 8),
                 decoration: InputDecoration(
                   hintText: '0000',
-                  errorText: isError ? 'Invalid OTP. Please try again.' : null,
+                  errorText: errorText,
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 ),
               ),
@@ -468,11 +464,15 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
               child: const Text('Cancel'),
             ),
             ElevatedButton(
-              onPressed: () {
-                if (otpController.text == order.deliveryOtp) {
-                  Navigator.pop(context, true);
-                } else {
-                  setState(() => isError = true);
+              onPressed: () async {
+                try {
+                  await DeliveryService.confirmDeliveryWithOtp(
+                    orderId: order.id,
+                    otp: otpController.text.trim(),
+                  );
+                  if (context.mounted) Navigator.pop(context, true);
+                } catch (e) {
+                  setDialogState(() => errorText = DeliveryService.messageFor(e));
                 }
               },
               child: const Text('Verify & Deliver'),
@@ -480,7 +480,17 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
           ],
         ),
       ),
-    ) ?? false;
+    );
+    otpController.dispose();
+
+    if (verified == true && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Order delivered after OTP verification'),
+          backgroundColor: FlutterFlowTheme.of(context).success,
+        ),
+      );
+    }
   }
 
   FFButtonOptions _buttonOptions(BuildContext context, Color color) {

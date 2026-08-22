@@ -11,8 +11,10 @@ This checklist must be completed by the Release Manager before the Degloor pilot
 - [ ] **Google Maps (Android)**: Verify `GOOGLE_MAPS_API_KEY` is set in `local.properties` on the build machine.
 - [ ] **Google Maps (iOS)**: Verify `GOOGLE_MAPS_API_KEY` is set in the `.xcconfig` on the build machine.
 - [ ] **Supabase Key**: Move Supabase URL/AnonKey to CI/CD environment variables or a secure configuration file.
+- [ ] **Password reset redirects**: Allow `degloorone://degloorone.com/resetPassword` and the production web `/resetPassword` URL in Supabase Auth URL Configuration.
 
 ## 3. Data Integrity & Security
+- [ ] **Secure delivery RPCs**: Apply `scratch/secure_delivery.sql` in the Supabase SQL editor so order accept and OTP verification run on the server.
 - [ ] **RLS Verification**: Run a manual check on the `users` table to ensure the `role` field cannot be updated by normal users via the API.
 - [ ] **Admin Account**: Manually set at least one user's role to `'admin'` in the Supabase dashboard to enable the Admin Panel.
 - [ ] **Verification Workflow**: Test the verification of one mock business from the Admin Panel to ensure it then appears in search.
