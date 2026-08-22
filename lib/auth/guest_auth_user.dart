@@ -1,5 +1,7 @@
 import 'base_auth_user_provider.dart';
 
+export 'base_auth_user_provider.dart';
+
 /// Local customer used while the FlutterFlow Supabase host is down.
 class GuestAuthUser extends BaseAuthUser {
   static const guestUid = '00000000-0000-4000-8000-000000000001';
