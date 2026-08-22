@@ -15,6 +15,7 @@ class ProductsTable extends SupabaseTable<ProductsRow> {
     int limit = 20,
     int offset = 0,
   }) async {
+    if (kUsesDeadFlutterFlowHost) return [];
     final response = await SupaFlow.client.rpc(
       'search_products_in_radius',
       params: {

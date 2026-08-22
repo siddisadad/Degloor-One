@@ -73,6 +73,10 @@ class _BusinessDashboardWidgetState extends State<BusinessDashboardWidget> {
       );
 
       // 3. Fetch Business Analytics
+      if (kUsesDeadFlutterFlowHost) {
+        safeSetState(() => _isLoading = false);
+        return;
+      }
       final analytics = await SupaFlow.client
           .from('business_analytics')
           .select('event_type')

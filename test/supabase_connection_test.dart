@@ -15,6 +15,23 @@ void main() {
     );
   });
 
+  test('table and search RPCs skip the dead host', () async {
+    final users = await UsersTable().queryRows(queryFn: (q) => q);
+    expect(users, isEmpty);
+    final businesses = await BusinessesTable().searchInRadius(
+      latitude: 18.55,
+      longitude: 77.58,
+      radiusKm: 10,
+    );
+    expect(businesses, isEmpty);
+    final products = await ProductsTable().searchInRadius(
+      latitude: 18.55,
+      longitude: 77.58,
+      radiusKm: 10,
+    );
+    expect(products, isEmpty);
+  });
+
   test('blocked http client never opens a socket', () async {
     final request = http.Request(
       'POST',

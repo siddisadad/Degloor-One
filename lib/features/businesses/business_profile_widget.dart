@@ -105,6 +105,7 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
   }
 
   Future<List<Map<String, dynamic>>> _fetchReviews() async {
+    if (kUsesDeadFlutterFlowHost) return [];
     final response = await SupaFlow.client
         .from('reviews')
         .select('*, users(full_name)')

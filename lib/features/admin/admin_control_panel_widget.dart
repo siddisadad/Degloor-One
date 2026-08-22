@@ -67,6 +67,7 @@ class _AdminControlPanelWidgetState extends State<AdminControlPanelWidget> {
   }
 
   Future<int> fetchCount(bool verified) async {
+    if (kUsesDeadFlutterFlowHost) return 0;
     final response = await SupaFlow.client
         .from('businesses')
         .select('id')
