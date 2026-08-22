@@ -14,12 +14,9 @@ class SupabaseConnection {
 
   /// FlutterFlow project that currently NXDOMAINs. A live `--dart-define`
   /// URL will not match, so real Auth calls still run.
-  static const deadFlutterFlowHost = 'uhaibenopzyzzuqjawlb.supabase.co';
+  static const deadFlutterFlowHost = kDeadFlutterFlowHost;
 
-  static bool get shouldSkipAuthRequest {
-    final host = Uri.tryParse(kSupabaseUrl)?.host ?? '';
-    return host == deadFlutterFlowHost;
-  }
+  static bool get shouldSkipAuthRequest => kUsesDeadFlutterFlowHost;
 
   /// Returns false when the request must not be sent (avoids Chrome
   /// `net::ERR_NAME_NOT_RESOLVED` on `/auth/v1/token`).

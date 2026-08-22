@@ -1,3 +1,4 @@
+import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 export 'database/database.dart';
@@ -5,7 +6,8 @@ export 'database/database.dart';
 /// FlutterFlow default. Override at build time when that project is paused
 /// or deleted (`net::ERR_NAME_NOT_RESOLVED` on `/auth/v1/recover`):
 /// `flutter run --dart-define=SUPABASE_URL=https://xxxx.supabase.co --dart-define=SUPABASE_ANON_KEY=eyJ...`
-const _kDefaultSupabaseUrl = 'https://uhaibenopzyzzuqjawlb.supabase.co';
+const kDeadFlutterFlowHost = 'uhaibenopzyzzuqjawlb.supabase.co';
+const _kDefaultSupabaseUrl = 'https://$kDeadFlutterFlowHost';
 const _kDefaultSupabaseAnonKey =
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVoYWliZW5vcHp5enp1cWphd2xiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYzMDM3NDksImV4cCI6MjEwMTg3OTc0OX0.bb6O2gBGsqtotv1AarJIVo7m1HHkNf5HM7eW3LD0O5s';
 
@@ -19,6 +21,20 @@ String get kSupabaseAnonKey {
   return fromEnv.isNotEmpty ? fromEnv : _kDefaultSupabaseAnonKey;
 }
 
+/// True when the compiled URL still points at the deleted FlutterFlow project.
+bool get kUsesDeadFlutterFlowHost {
+  final host = Uri.tryParse(kSupabaseUrl)?.host ?? '';
+  return host == kDeadFlutterFlowHost;
+}
+
+/// Throws immediately so Chrome never POSTs to a host that NXDOMAINs.
+class BlockedSupabaseHttpClient extends http.BaseClient {
+  @override
+  Future<http.StreamedResponse> send(http.BaseRequest request) {
+    throw http.ClientException('Failed to fetch', request.url);
+  }
+}
+
 class SupaFlow {
   SupaFlow._();
 
@@ -28,12 +44,21 @@ class SupaFlow {
   final _supabase = Supabase.instance.client;
   static SupabaseClient get client => instance._supabase;
 
-  static Future initialize() => Supabase.initialize(
-        url: kSupabaseUrl,
-        headers: {
-          'X-Client-Info': 'flutterflow',
-        },
-        anonKey: kSupabaseAnonKey,
-        debug: false,
-      );
+  static Future initialize() {
+    final skip = kUsesDeadFlutterFlowHost;
+    return Supabase.initialize(
+      url: kSupabaseUrl,
+      headers: {
+        'X-Client-Info': 'flutterflow',
+      },
+      anonKey: kSupabaseAnonKey,
+      debug: false,
+      httpClient: skip ? BlockedSupabaseHttpClient() : null,
+      authOptions: FlutterAuthClientOptions(
+        autoRefreshToken: !skip,
+        localStorage: skip ? const EmptyLocalStorage() : null,
+        detectSessionInUri: !skip,
+      ),
+    );
+  }
 }

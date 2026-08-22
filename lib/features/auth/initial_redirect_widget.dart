@@ -3,7 +3,6 @@ import 'package:degloor_one/auth/password_recovery.dart';
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
-import 'package:degloor_one/backend/location_service.dart';
 import 'package:degloor_one/backend/supabase/database/database.dart';
 
 import 'package:degloor_one/core/error_handler.dart';
@@ -29,15 +28,7 @@ class _InitialRedirectWidgetState extends State<InitialRedirectWidget> {
 
   void _startInitialization() {
     setState(() => _errorMessage = null);
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      try {
-        // Increased timeout to 8 seconds to allow for permission dialog interaction
-        await LocationService.updateCurrentLocation(context).timeout(
-          const Duration(seconds: 8),
-        );
-      } catch (e) {
-        AppLogger.error('Location update timed out or failed', e);
-      }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         _handleRedirect();
       }

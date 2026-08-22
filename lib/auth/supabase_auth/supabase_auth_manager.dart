@@ -19,6 +19,7 @@ class SupabaseAuthManager extends AuthManager
     with EmailSignInManager, GoogleSignInManager, PhoneSignInManager {
   @override
   Future signOut() {
+    if (SupabaseConnection.shouldSkipAuthRequest) return Future.value();
     return SupaFlow.client.auth.signOut();
   }
 
@@ -216,14 +217,16 @@ class SupabaseAuthManager extends AuthManager
     required BuildContext context,
     required String phoneNumber,
     required String smsCode,
-  }) =>
-      _signInOrCreateAccount(
-        context,
-        () => phoneVerifyCodeFunc(
-          phoneNumber: phoneNumber,
-          smsCode: smsCode,
-        ),
-      );
+  }) {
+    if (!SupabaseConnection.guard(context)) return Future.value();
+    return _signInOrCreateAccount(
+      context,
+      () => phoneVerifyCodeFunc(
+        phoneNumber: phoneNumber,
+        smsCode: smsCode,
+      ),
+    );
+  }
 
   /// Tries to sign in or create an account using Supabase Auth.
   /// Returns the User object if sign in was successful.

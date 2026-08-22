@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/backend/supabase/supabase_connection.dart';
 import 'package:degloor_one/core/error_handler.dart';
@@ -6,10 +7,28 @@ import 'package:degloor_one/core/error_handler.dart';
 void main() {
   test('default project url is the FlutterFlow host', () {
     expect(kSupabaseUrl, 'https://uhaibenopzyzzuqjawlb.supabase.co');
+    expect(kUsesDeadFlutterFlowHost, isTrue);
     expect(SupabaseConnection.shouldSkipAuthRequest, isTrue);
     expect(
       Uri.parse(kSupabaseUrl).host,
       SupabaseConnection.deadFlutterFlowHost,
+    );
+  });
+
+  test('blocked http client never opens a socket', () async {
+    final request = http.Request(
+      'POST',
+      Uri.parse('$kSupabaseUrl/auth/v1/token?grant_type=password'),
+    );
+    expect(
+      () => BlockedSupabaseHttpClient().send(request),
+      throwsA(
+        isA<http.ClientException>().having(
+          (e) => e.message,
+          'message',
+          contains('Failed to fetch'),
+        ),
+      ),
     );
   });
 
