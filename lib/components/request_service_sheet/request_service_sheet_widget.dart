@@ -150,13 +150,21 @@ class _RequestServiceSheetWidgetState extends State<RequestServiceSheetWidget> {
                       return;
                     }
 
-                    await ServiceMarketplaceService.instance.createRequest(
-                      userId: currentUserUid,
-                      providerId: widget.providerId,
-                      description:
-                          _model.descriptionTextController?.text ?? '',
-                      scheduledAt: _model.datePicked!,
-                    );
+                    try {
+                      await ServiceMarketplaceService.instance.createRequest(
+                        userId: currentUserUid,
+                        providerId: widget.providerId,
+                        description:
+                            _model.descriptionTextController?.text ?? '',
+                        scheduledAt: _model.datePicked!,
+                      );
+                    } catch (e) {
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Error: $e')),
+                      );
+                      return;
+                    }
 
                     if (!context.mounted) return;
                     Navigator.pop(context);

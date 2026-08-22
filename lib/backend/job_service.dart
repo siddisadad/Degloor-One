@@ -2,6 +2,7 @@ import 'package:degloor_one/backend/repositories/job_repository.dart';
 import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/page_query.dart';
+import 'package:degloor_one/shared/rpc_row.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
 class JobService {
@@ -81,27 +82,26 @@ class JobService {
       if (existing.isNotEmpty) {
         throw Exception('You have already applied for this job');
       }
+      return _repository.insertApplication({
+        'job_id': jobId,
+        'applicant_id': applicantId,
+        'experience_summary': summary,
+        'status': 'applied',
+      });
     }
 
-    if (!kUseShowcaseData) {
-      final response = await SupaFlow.client.rpc(
-        'apply_to_job',
-        params: {
-          'p_job_id': jobId,
-          'p_experience': summary,
-        },
-      );
-      if (response is Map<String, dynamic>) {
-        return JobApplicationsRow(response);
-      }
+    final response = await SupaFlow.client.rpc(
+      'apply_to_job',
+      params: {
+        'p_job_id': jobId,
+        'p_experience': summary,
+      },
+    );
+    final row = asRpcRow(response);
+    if (row == null) {
+      throw Exception('Failed to apply for this job');
     }
-
-    return _repository.insertApplication({
-      'job_id': jobId,
-      'applicant_id': applicantId,
-      'experience_summary': summary,
-      'status': 'applied',
-    });
+    return JobApplicationsRow(row);
   }
 
   Future<List<Map<String, dynamic>>> applicants(String jobId) =>

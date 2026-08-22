@@ -1,5 +1,6 @@
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/page_query.dart';
+import 'package:degloor_one/shared/rpc_row.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
 /// Data access for jobs and applications. Widgets should go through
@@ -24,8 +25,9 @@ class JobRepository {
         .select('*, businesses(name, location, address_text)')
         .eq('is_active', true);
 
-    if (search != null && search.trim().isNotEmpty) {
-      query = query.ilike('title', '%${search.trim()}%');
+    final needle = search == null ? '' : sanitizeIlike(search);
+    if (needle.isNotEmpty) {
+      query = query.ilike('title', '%$needle%');
     }
     if (jobType != null && jobType != 'All') {
       query = query.eq('job_type', jobType);

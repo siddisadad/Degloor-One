@@ -82,6 +82,9 @@ class _ServiceProviderProfileWidgetState
             }
 
             final provider = snapshot.data!;
+            if (provider.isEmpty || provider['id'] == null) {
+              return const Center(child: Text('Provider not found.'));
+            }
             final user = provider['users'];
             final category = provider['service_categories'];
             final displayName = ServiceProviderDisplay.name(user);

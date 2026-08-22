@@ -108,7 +108,7 @@ class _ManageServiceRequestsWidgetState
     });
   }
 
-  Future<void> _updateRequestStatus(String requestId, String newStatus, String? customerId) async {
+  Future<void> _updateRequestStatus(String requestId, String newStatus) async {
     try {
       await ServiceMarketplaceService.instance.updateStatus(
         requestId: requestId,
@@ -253,7 +253,7 @@ class _ManageServiceRequestsWidgetState
                                     children: [
                                       Expanded(
                                         child: FFButtonWidget(
-                                          onPressed: () => _updateRequestStatus(req.id, 'accepted', req.userId),
+                                          onPressed: () => _updateRequestStatus(req.id, 'accepted'),
                                           text: 'Accept',
                                           options: FFButtonOptions(
                                             height: 36,
@@ -266,7 +266,7 @@ class _ManageServiceRequestsWidgetState
                                       const SizedBox(width: 12),
                                       Expanded(
                                         child: FFButtonWidget(
-                                          onPressed: () => _updateRequestStatus(req.id, 'declined', req.userId),
+                                          onPressed: () => _updateRequestStatus(req.id, 'declined'),
                                           text: 'Decline',
                                           options: FFButtonOptions(
                                             height: 36,
@@ -283,7 +283,7 @@ class _ManageServiceRequestsWidgetState
                                 Padding(
                                   padding: const EdgeInsets.only(top: 16.0),
                                   child: FFButtonWidget(
-                                    onPressed: () => _updateRequestStatus(req.id, 'completed', req.userId),
+                                    onPressed: () => _updateRequestStatus(req.id, 'completed'),
                                     text: 'Mark as Completed',
                                     options: FFButtonOptions(
                                       width: double.infinity,

@@ -133,14 +133,23 @@ class _ManageJobsWidgetState extends State<ManageJobsWidget> {
               FFButtonWidget(
                 onPressed: () async {
                   if (titleController.text.isEmpty) return;
-                  await JobService.instance.post(
-                    businessId: _model.businessId!,
-                    posterId: currentUserUid,
-                    title: titleController.text,
-                    description: descriptionController.text,
-                    salaryRange: salaryController.text,
-                    jobType: jobType,
-                  );
+                  try {
+                    await JobService.instance.post(
+                      businessId: _model.businessId!,
+                      posterId: currentUserUid,
+                      title: titleController.text,
+                      description: descriptionController.text,
+                      salaryRange: salaryController.text,
+                      jobType: jobType,
+                    );
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Error: $e')),
+                      );
+                    }
+                    return;
+                  }
                   if (context.mounted) {
                     Navigator.pop(context);
                     setState(() {});

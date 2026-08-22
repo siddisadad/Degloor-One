@@ -3,6 +3,7 @@ import 'package:degloor_one/backend/repositories/service_marketplace_repository.
 import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/page_query.dart';
+import 'package:degloor_one/shared/rpc_row.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
 const _allowedRequestStatuses = {
@@ -56,29 +57,14 @@ class ServiceMarketplaceService {
       throw Exception('Please enter a description');
     }
 
-    if (!kUseShowcaseData) {
-      final response = await SupaFlow.client.rpc(
-        'create_service_request',
-        params: {
-          'p_provider_id': providerId,
-          'p_description': trimmed,
-          'p_scheduled_at': scheduledAt.toIso8601String(),
-        },
-      );
-      if (response is Map<String, dynamic>) {
-        return ServiceRequestsRow(response);
-      }
-    }
-
-    final row = await _repository.insertRequest({
-      'user_id': userId,
-      'provider_id': providerId,
-      'description': trimmed,
-      'scheduled_at': scheduledAt.toIso8601String(),
-      'status': 'pending',
-    });
-
     if (kUseShowcaseData) {
+      final row = await _repository.insertRequest({
+        'user_id': userId,
+        'provider_id': providerId,
+        'description': trimmed,
+        'scheduled_at': scheduledAt.toIso8601String(),
+        'status': 'pending',
+      });
       final providers = ShowcaseCatalog.query(
         'service_providers',
         ShowcaseQuery()..eq('id', providerId),
@@ -93,8 +79,22 @@ class ServiceMarketplaceService {
           type: 'service_request',
         );
       }
+      return row;
     }
-    return row;
+
+    final response = await SupaFlow.client.rpc(
+      'create_service_request',
+      params: {
+        'p_provider_id': providerId,
+        'p_description': trimmed,
+        'p_scheduled_at': scheduledAt.toIso8601String(),
+      },
+    );
+    final row = asRpcRow(response);
+    if (row == null) {
+      throw Exception('Failed to send the service request');
+    }
+    return ServiceRequestsRow(row);
   }
 
   Future<void> updateStatus({

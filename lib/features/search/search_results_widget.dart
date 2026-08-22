@@ -59,6 +59,7 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
   bool _onlyVerified = false;
   bool _onlyOpen = false;
   bool _minRating4 = false;
+  int _searchToken = 0;
 
   @override
   void initState() {
@@ -81,7 +82,8 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
   }
 
   Future<void> _performSearch(String? term, {String? categoryId, bool loadMore = false}) async {
-    if (_isLoading) return;
+    if (loadMore && _isLoading) return;
+    final token = loadMore ? _searchToken : ++_searchToken;
 
     setState(() {
       _isLoading = true;
@@ -113,6 +115,7 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
           ),
         );
         final newBusinesses = page.items;
+        if (!mounted || token != _searchToken) return;
 
         setState(() {
           _businesses.addAll(newBusinesses);
@@ -123,10 +126,12 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
           }
         });
       } catch (e) {
-        setState(() => _isLoading = false);
+        if (mounted && token == _searchToken) {
+          setState(() => _isLoading = false);
+        }
         AppLogger.error('Search error', e);
       }
-    } else {
+    } else if (mounted && token == _searchToken) {
       setState(() {
         _businesses = [];
         _isLoading = false;

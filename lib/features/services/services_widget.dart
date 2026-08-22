@@ -39,8 +39,11 @@ class _ServicesWidgetState extends State<ServicesWidget> {
     WidgetsBinding.instance.addPostFrameCallback((_) => _loadProviders());
   }
 
+  int _providersToken = 0;
+
   Future<void> _loadProviders({bool loadMore = false}) async {
-    if (_model.providersLoading) return;
+    if (loadMore && _model.providersLoading) return;
+    final token = loadMore ? _providersToken : ++_providersToken;
     setState(() {
       _model.providersLoading = true;
       if (!loadMore) {
@@ -54,7 +57,7 @@ class _ServicesWidgetState extends State<ServicesWidget> {
         categoryId: _model.selectedCategoryId,
         page: PageQuery(limit: 20, offset: _model.providersOffset),
       );
-      if (!mounted) return;
+      if (!mounted || token != _providersToken) return;
       setState(() {
         _model.providers.addAll(page.items);
         _model.providersOffset += 20;
@@ -62,7 +65,9 @@ class _ServicesWidgetState extends State<ServicesWidget> {
         _model.providersLoading = false;
       });
     } catch (_) {
-      if (mounted) setState(() => _model.providersLoading = false);
+      if (mounted && token == _providersToken) {
+        setState(() => _model.providersLoading = false);
+      }
     }
   }
 

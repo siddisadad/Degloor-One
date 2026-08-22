@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:degloor_one/backend/job_service.dart';
 import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/components/apply_job_sheet/apply_job_sheet_widget.dart';
@@ -29,6 +31,8 @@ class _JobsMarketplaceWidgetState extends State<JobsMarketplaceWidget> {
   bool _loading = false;
   bool _hasMore = true;
   int _offset = 0;
+  int _loadToken = 0;
+  Timer? _searchDebounce;
   static const _pageSize = 20;
 
   @override
@@ -39,20 +43,29 @@ class _JobsMarketplaceWidgetState extends State<JobsMarketplaceWidget> {
     _model.searchBarController ??= TextEditingController();
     _model.searchBarFocusNode ??= FocusNode();
 
-    _model.searchBarController!.addListener(() {
-      setState(() {});
-    });
+    _model.searchBarController!.addListener(_onSearchChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) => _loadJobs());
+  }
+
+  void _onSearchChanged() {
+    setState(() {});
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(const Duration(milliseconds: 300), () {
+      if (mounted) _loadJobs();
+    });
   }
 
   @override
   void dispose() {
+    _searchDebounce?.cancel();
+    _model.searchBarController?.removeListener(_onSearchChanged);
     _model.dispose();
     super.dispose();
   }
 
   Future<void> _loadJobs({bool loadMore = false}) async {
-    if (_loading) return;
+    if (loadMore && _loading) return;
+    final token = loadMore ? _loadToken : ++_loadToken;
     setState(() {
       _loading = true;
       if (!loadMore) {
@@ -67,7 +80,7 @@ class _JobsMarketplaceWidgetState extends State<JobsMarketplaceWidget> {
         jobType: _model.jobTypeFilter,
         page: PageQuery(limit: _pageSize, offset: _offset),
       );
-      if (!mounted) return;
+      if (!mounted || token != _loadToken) return;
       setState(() {
         _jobs.addAll(page.items);
         _offset += _pageSize;
@@ -75,7 +88,9 @@ class _JobsMarketplaceWidgetState extends State<JobsMarketplaceWidget> {
         _loading = false;
       });
     } catch (_) {
-      if (mounted) setState(() => _loading = false);
+      if (mounted && token == _loadToken) {
+        setState(() => _loading = false);
+      }
     }
   }
 
