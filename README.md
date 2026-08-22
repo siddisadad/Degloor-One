@@ -5,7 +5,7 @@ DEGLOOR ONE is a hyperlocal technology platform connecting customers, businesses
 ## 🚀 Key Features
 
 ### 🛒 Consumer Experience
-- **Discovery**: Radius-aware search and categorization for local businesses (2km - 25km).
+- **Discovery**: Radius-aware search and categorization for local businesses (5 / 10 / 15 km).
 - **Catalogue**: Browse digital storefronts with real-time product listings.
 - **Cart & Checkout**: Dynamic distance-based delivery fees with support for **UPI** and **Cash on Delivery**.
 - **Address Management**: Precise map-based pinning with automatic reverse geocoding.
@@ -38,13 +38,21 @@ Execute the SQL scripts in the Supabase SQL Editor in this order:
 5. `scratch/secure_platform.sql` — server-side pricing, order state machine, storage policies, delivery location, indexes.
 
 ### 2. Environment Configuration
-The FlutterFlow default host (`uhaibenopzyzzuqjawlb.supabase.co`) currently does not resolve (`net::ERR_NAME_NOT_RESOLVED`). Restore that project in the Supabase dashboard, or point the app at a live project:
+Dart-defines are owned by `lib/core/app_environment.dart`. The FlutterFlow default host (`uhaibenopzyzzuqjawlb.supabase.co`) currently does not resolve (`net::ERR_NAME_NOT_RESOLVED`). That dead host automatically enables guest login and the local showcase catalog.
+
+Point the app at a live project for real Auth and checkout:
 
 ```bash
-flutter run --dart-define=SUPABASE_URL=https://YOUR_REF.supabase.co --dart-define=SUPABASE_ANON_KEY=YOUR_ANON_KEY
+flutter run --dart-define=SUPABASE_URL=https://YOUR_REF.supabase.co --dart-define=SUPABASE_ANON_KEY=YOUR_ANON_KEY --dart-define=BYPASS_AUTH=false --dart-define=SHOWCASE_DATA=false
 ```
 
-You can also edit `lib/backend/supabase/supabase.dart`. After the project is live, add these **Forgot password** Redirect URLs (Authentication → URL Configuration):
+Demo / Cloud Agent builds can keep the defaults and run:
+
+```bash
+flutter run --dart-define=SHOWCASE_DATA=true --dart-define=BYPASS_AUTH=true
+```
+
+After the project is live, add these **Forgot password** Redirect URLs (Authentication → URL Configuration):
 
 - `degloorone://degloorone.com/resetPassword` (Android / iOS)
 - `http://localhost:*/resetPassword` (local web)

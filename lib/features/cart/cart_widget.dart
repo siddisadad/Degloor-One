@@ -1,7 +1,7 @@
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
-import 'package:degloor_one/shared/showcase_catalog.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:degloor_one/components/cached_remote_image.dart';
+import 'package:degloor_one/shared/otp_copy.dart';
 import 'package:degloor_one/backend/cart_service.dart';
 import 'package:degloor_one/backend/order_service.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
@@ -10,7 +10,6 @@ import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:degloor_one/core/error_handler.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'cart_model.dart';
 export 'cart_model.dart';
 
@@ -65,21 +64,10 @@ class _CartWidgetState extends State<CartWidget> {
         _model.currentBusiness = business.first;
       }
 
-      if (kUseShowcaseData) {
-        setState(() {
-          _model.cartItemsFuture = Future.value(
-            ShowcaseCatalog.cartItemsWithProducts(_model.currentCart!.id),
-          );
-        });
-        return;
-      }
-      final items = await SupaFlow.client
-          .from('cart_items')
-          .select('*, products(*)')
-          .eq('cart_id', _model.currentCart!.id);
-
+      final items = await CartService.itemsForCart(_model.currentCart!.id);
+      if (!mounted) return;
       setState(() {
-        _model.cartItemsFuture = Future.value(List<Map<String, dynamic>>.from(items));
+        _model.cartItemsFuture = Future.value(items);
       });
     } catch (e) {
       AppLogger.error('Error fetching cart', e);
@@ -196,7 +184,8 @@ class _CartWidgetState extends State<CartWidget> {
         title: Text(
           'Your cart',
           style: FlutterFlowTheme.of(context).headlineMedium.override(
-                font: GoogleFonts.inter(fontWeight: FontWeight.w700),
+                fontFamily: 'Inter',
+                fontWeight: FontWeight.w700,
                 color: FlutterFlowTheme.of(context).primaryText,
                 fontSize: 22,
               ),
@@ -228,43 +217,57 @@ class _CartWidgetState extends State<CartWidget> {
             children: [
               if (_model.currentBusiness != null)
                 Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Row(
-                    children: [
-                      Icon(Icons.store_rounded, color: FlutterFlowTheme.of(context).primary, size: 20),
-                      const SizedBox(width: 8),
-                      Text('Ordering from ${_model.currentBusiness!.name}',
-                           style: FlutterFlowTheme.of(context).bodyMedium.override(font: GoogleFonts.inter(fontWeight: FontWeight.bold))),
-                    ],
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: FlutterFlowTheme.of(context).primary.withValues(alpha: 0.06),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.store_rounded, color: FlutterFlowTheme.of(context).primary, size: 20),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Ordering from ${_model.currentBusiness!.name}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                  fontFamily: 'Inter',
+                                  fontWeight: FontWeight.w700,
+                                ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               Expanded(
                 child: ListView.separated(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
                   itemCount: items.length,
-                  separatorBuilder: (context, index) => const Divider(),
+                  separatorBuilder: (context, index) => const SizedBox(height: 10),
                   itemBuilder: (context, index) {
                     final item = items[index];
                     final product = item['products'] as Map<String, dynamic>;
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    return Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: FlutterFlowTheme.of(context).secondaryBackground,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: FlutterFlowTheme.of(context).alternate),
+                      ),
                       child: Row(
                         children: [
                           ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(10),
                             child: Container(
-                              width: 60,
-                              height: 60,
-                              color: FlutterFlowTheme.of(context).secondaryBackground,
+                              width: 64,
+                              height: 64,
+                              color: FlutterFlowTheme.of(context).primaryBackground,
                               child: product['image_url'] != null
-                                  ? CachedNetworkImage(
-                                      imageUrl: product['image_url'],
-                                      fit: BoxFit.cover,
-                                      errorWidget: (_, __, ___) => Icon(
-                                        Icons.image_not_supported_rounded,
-                                        color: FlutterFlowTheme.of(context).alternate,
-                                      ),
-                                    )
+                                  ? CachedRemoteImage(url: product['image_url'] as String)
                                   : Icon(Icons.image_not_supported_rounded, color: FlutterFlowTheme.of(context).alternate),
                             ),
                           ),
@@ -273,8 +276,24 @@ class _CartWidgetState extends State<CartWidget> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(product['name'], style: FlutterFlowTheme.of(context).bodyLarge.override(font: GoogleFonts.inter(fontWeight: FontWeight.w600))),
-                                Text('₹${product['price']}', style: FlutterFlowTheme.of(context).labelMedium.override(font: GoogleFonts.inter(), color: FlutterFlowTheme.of(context).primary)),
+                                Text(
+                                  '${product['name']}',
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: FlutterFlowTheme.of(context).bodyLarge.override(
+                                        fontFamily: 'Inter',
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  '₹${product['price']}',
+                                  style: FlutterFlowTheme.of(context).labelMedium.override(
+                                        fontFamily: 'Inter',
+                                        color: FlutterFlowTheme.of(context).primary,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                ),
                               ],
                             ),
                           ),
@@ -337,7 +356,13 @@ class _CartWidgetState extends State<CartWidget> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text('Subtotal', style: FlutterFlowTheme.of(context).bodyLarge),
-                          Text('₹$subtotal', style: FlutterFlowTheme.of(context).titleMedium.override(font: GoogleFonts.inter(fontWeight: FontWeight.bold))),
+                          Text(
+                            '₹$subtotal',
+                            style: FlutterFlowTheme.of(context).titleMedium.override(
+                                  fontFamily: 'Inter',
+                                  fontWeight: FontWeight.bold,
+                                ),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 8),
@@ -356,12 +381,25 @@ class _CartWidgetState extends State<CartWidget> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text('Total', style: FlutterFlowTheme.of(context).headlineSmall),
-                          Text('₹${(subtotal + _model.deliveryFee).toStringAsFixed(2)}',
-                              style: FlutterFlowTheme.of(context).headlineSmall.override(
-                                  font: GoogleFonts.inter(fontWeight: FontWeight.w800, color: FlutterFlowTheme.of(context).primary))),
+                          Text(
+                            '₹${(subtotal + _model.deliveryFee).toStringAsFixed(2)}',
+                            style: FlutterFlowTheme.of(context).headlineSmall.override(
+                                  fontFamily: 'Inter',
+                                  fontWeight: FontWeight.w800,
+                                  color: FlutterFlowTheme.of(context).primary,
+                                ),
+                          ),
                         ],
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 12),
+                      Text(
+                        OtpCopy.checkoutHint,
+                        style: FlutterFlowTheme.of(context).labelSmall.override(
+                              fontFamily: 'Inter',
+                              color: FlutterFlowTheme.of(context).secondaryText,
+                            ),
+                      ),
+                      const SizedBox(height: 16),
                       FFButtonWidget(
                         onPressed: _model.isPlacingOrder ? null : () => _placeOrder(items),
                         text: _model.isPlacingOrder ? 'Placing order...' : 'Place Order (COD)',

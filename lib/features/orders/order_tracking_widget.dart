@@ -4,6 +4,7 @@ import 'package:degloor_one/backend/order_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/shared/order_lifecycle.dart';
+import 'package:degloor_one/shared/otp_copy.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 import 'package:degloor_one/backend/whatsapp_service.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
@@ -327,7 +328,7 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Share this with the delivery partner only when you receive your order.',
+            OtpCopy.deliveryHint,
             textAlign: TextAlign.center,
             style: FlutterFlowTheme.of(context).labelSmall,
           ),

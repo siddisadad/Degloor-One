@@ -1,3 +1,4 @@
+import 'package:degloor_one/core/app_environment.dart';
 import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -6,44 +7,22 @@ export 'database/database.dart';
 /// FlutterFlow default. Override at build time when that project is paused
 /// or deleted (`net::ERR_NAME_NOT_RESOLVED` on `/auth/v1/recover`):
 /// `flutter run --dart-define=SUPABASE_URL=https://xxxx.supabase.co --dart-define=SUPABASE_ANON_KEY=eyJ...`
-const kDeadFlutterFlowHost = 'uhaibenopzyzzuqjawlb.supabase.co';
-const _kDefaultSupabaseUrl = 'https://$kDeadFlutterFlowHost';
-const _kDefaultSupabaseAnonKey =
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVoYWliZW5vcHp5enp1cWphd2xiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYzMDM3NDksImV4cCI6MjEwMTg3OTc0OX0.bb6O2gBGsqtotv1AarJIVo7m1HHkNf5HM7eW3LD0O5s';
+const kDeadFlutterFlowHost = AppEnvironment.deadFlutterFlowHost;
 
-String get kSupabaseUrl {
-  const fromEnv = String.fromEnvironment('SUPABASE_URL');
-  return fromEnv.isNotEmpty ? fromEnv : _kDefaultSupabaseUrl;
-}
+String get kSupabaseUrl => AppEnvironment.supabaseUrl;
 
-String get kSupabaseAnonKey {
-  const fromEnv = String.fromEnvironment('SUPABASE_ANON_KEY');
-  return fromEnv.isNotEmpty ? fromEnv : _kDefaultSupabaseAnonKey;
-}
+String get kSupabaseAnonKey => AppEnvironment.supabaseAnonKey;
 
 /// True when the compiled URL still points at the deleted FlutterFlow project.
-bool get kUsesDeadFlutterFlowHost {
-  final host = Uri.tryParse(kSupabaseUrl)?.host ?? '';
-  return host == kDeadFlutterFlowHost;
-}
+bool get kUsesDeadFlutterFlowHost => AppEnvironment.usesDeadFlutterFlowHost;
 
 /// Temporary guest mode so the app is usable while Auth is down.
 /// Override with `--dart-define=BYPASS_AUTH=true|false`.
-bool get kBypassAuth {
-  const flag = String.fromEnvironment('BYPASS_AUTH');
-  if (flag == 'true') return true;
-  if (flag == 'false') return false;
-  return kUsesDeadFlutterFlowHost;
-}
+bool get kBypassAuth => AppEnvironment.bypassAuth;
 
 /// Local Degloor catalog so screens have data while Auth/PostgREST are down.
 /// Override with `--dart-define=SHOWCASE_DATA=true|false`.
-bool get kUseShowcaseData {
-  const flag = String.fromEnvironment('SHOWCASE_DATA');
-  if (flag == 'true') return true;
-  if (flag == 'false') return false;
-  return kUsesDeadFlutterFlowHost;
-}
+bool get kUseShowcaseData => AppEnvironment.useShowcaseData;
 
 /// Throws immediately so Chrome never POSTs to a host that NXDOMAINs.
 class BlockedSupabaseHttpClient extends http.BaseClient {

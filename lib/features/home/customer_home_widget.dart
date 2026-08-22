@@ -181,7 +181,9 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final appState = Provider.of<FFAppState>(context);
+    final discoveryRadius = context.select<FFAppState, double>(
+      (state) => state.discoveryRadius,
+    );
     return GestureDetector(
       onTap: () {
         FocusScope.of(context).unfocus();
@@ -209,7 +211,7 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const BrandMark(size: 40),
+                        const BrandMark(size: 44),
                         const SizedBox(width: 10),
                         Expanded(
                           child: InkWell(
@@ -220,7 +222,17 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                           onTap: () async {
                             context.pushNamed('LocationRadiusSelector');
                           },
-                          child: Column(
+                          child: Container(
+                            padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+                            decoration: BoxDecoration(
+                              color: FlutterFlowTheme.of(context)
+                                  .secondaryBackground,
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: FlutterFlowTheme.of(context).alternate,
+                              ),
+                            ),
+                            child: Column(
                             mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -228,7 +240,7 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                                 children: [
                                   Icon(
                                     Icons.location_on_rounded,
-                                    color: FlutterFlowTheme.of(context).primary,
+                                    color: FlutterFlowTheme.of(context).secondary,
                                     size: 18.0,
                                   ),
                                   Expanded(
@@ -239,11 +251,8 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                                     style: FlutterFlowTheme.of(context)
                                         .titleMedium
                                         .override(
-                                          font: GoogleFonts.inter(
-                                            fontWeight: FlutterFlowTheme.of(context)
-                                                .titleMedium
-                                                .fontWeight,
-                                          ),
+                                          fontFamily: 'Inter',
+                                          fontWeight: FontWeight.w700,
                                           color: FlutterFlowTheme.of(context)
                                               .primaryText,
                                           letterSpacing: 0.0,
@@ -260,32 +269,21 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                                 ].divide(const SizedBox(width: 4.0)),
                               ),
                               Text(
-                                'Within ${appState.discoveryRadius.toInt()} km radius',
+                                'Within ${discoveryRadius.toInt()} km radius',
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style:
                                     FlutterFlowTheme.of(context).bodySmall.override(
-                                          font: GoogleFonts.inter(
-                                            fontWeight: FlutterFlowTheme.of(context)
-                                                .bodySmall
-                                                .fontWeight,
-                                            fontStyle: FlutterFlowTheme.of(context)
-                                                .bodySmall
-                                                .fontStyle,
-                                          ),
+                                          fontFamily: 'Inter',
+                                          fontWeight: FontWeight.w500,
                                           color: FlutterFlowTheme.of(context)
                                               .secondaryText,
                                           letterSpacing: 0.0,
-                                          fontWeight: FlutterFlowTheme.of(context)
-                                              .bodySmall
-                                              .fontWeight,
-                                          fontStyle: FlutterFlowTheme.of(context)
-                                              .bodySmall
-                                              .fontStyle,
                                           lineHeight: 1.5,
                                         ),
                               ),
-                            ].divide(const SizedBox(height: 4.0)),
+                            ].divide(const SizedBox(height: 2.0)),
+                          ),
                           ),
                           ),
                         ),
@@ -576,11 +574,11 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                             Padding(
                               padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
                               child: DiscoveryRadiusBar(
-                                selectedKm: appState.discoveryRadius,
+                                selectedKm: discoveryRadius,
                                 openNow: _model.openNow,
                                 onChanged: (radius) {
                                   setState(() {
-                                    appState.discoveryRadius = radius;
+                                    FFAppState.instance.discoveryRadius = radius;
                                     _fetchBusinesses();
                                   });
                                 },

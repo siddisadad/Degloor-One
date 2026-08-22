@@ -4,7 +4,6 @@ import 'dart:async';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:degloor_one/l10n/app_localizations.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import 'auth/guest_auth_user.dart';
 import 'auth/password_recovery.dart';
@@ -203,12 +202,13 @@ class _MyAppState extends State<MyApp> {
       theme: ThemeData(
         brightness: Brightness.light,
         useMaterial3: true,
+        fontFamily: 'Inter',
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF1976D2),
-          primary: const Color(0xFF1976D2),
+          seedColor: const Color(0xFF0D2B5C),
+          primary: const Color(0xFF0D2B5C),
+          secondary: const Color(0xFFFF9800),
           surface: Colors.white,
         ),
-        textTheme: GoogleFonts.interTextTheme(),
         appBarTheme: const AppBarTheme(
           centerTitle: true,
           backgroundColor: Colors.white,
@@ -223,12 +223,13 @@ class _MyAppState extends State<MyApp> {
       darkTheme: ThemeData(
         brightness: Brightness.dark,
         useMaterial3: true,
+        fontFamily: 'Inter',
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF1976D2),
-          primary: const Color(0xFF1976D2),
+          seedColor: const Color(0xFF0D2B5C),
+          primary: const Color(0xFF0D2B5C),
+          secondary: const Color(0xFFFF9800),
           brightness: Brightness.dark,
         ),
-        textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme),
         appBarTheme: const AppBarTheme(
           centerTitle: true,
           elevation: 0,
