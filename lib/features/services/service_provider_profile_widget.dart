@@ -1,5 +1,6 @@
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/components/request_service_sheet/request_service_sheet_widget.dart';
+import 'package:degloor_one/features/services/service_provider_display.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_icon_button.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
@@ -73,6 +74,7 @@ class _ServiceProviderProfileWidgetState
             final provider = snapshot.data!;
             final user = provider['users'];
             final category = provider['service_categories'];
+            final displayName = ServiceProviderDisplay.name(user);
 
             return CustomScrollView(
               slivers: [
@@ -81,7 +83,7 @@ class _ServiceProviderProfileWidgetState
                   pinned: true,
                   flexibleSpace: FlexibleSpaceBar(
                     background: CachedNetworkImage(
-                      imageUrl: user['avatar_url'] ?? 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=400&h=300&q=80',
+                      imageUrl: ServiceProviderDisplay.avatarUrl(user),
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -112,11 +114,11 @@ class _ServiceProviderProfileWidgetState
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  user['full_name'] ?? 'Provider Name',
+                                  displayName,
                                   style: FlutterFlowTheme.of(context).headlineMedium,
                                 ),
                                 Text(
-                                  category['name'] ?? 'Specialist',
+                                  ServiceProviderDisplay.categoryName(category),
                                   style: FlutterFlowTheme.of(context).titleMedium.override(
                                         font: GoogleFonts.inter(),
                                         color: FlutterFlowTheme.of(context).primary,
@@ -132,9 +134,11 @@ class _ServiceProviderProfileWidgetState
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
-                            _buildStatItem('Rating', '4.5 ★'),
                             _buildStatItem('Experience', '${provider['experience_years'] ?? 0} Years'),
-                            _buildStatItem('Hourly Rate', '₹${provider['hourly_rate']}/hr'),
+                            _buildStatItem(
+                              'Hourly Rate',
+                              ServiceProviderDisplay.hourlyRateLabel(provider['hourly_rate']),
+                            ),
                           ],
                         ),
                         const Divider(height: 48),
@@ -163,7 +167,7 @@ class _ServiceProviderProfileWidgetState
                                   padding: MediaQuery.viewInsetsOf(context),
                                   child: RequestServiceSheetWidget(
                                     providerId: provider['id'],
-                                    providerName: user['full_name'] ?? 'Provider',
+                                    providerName: displayName,
                                   ),
                                 );
                               },

@@ -153,7 +153,8 @@ class _RequestServiceSheetWidgetState extends State<RequestServiceSheetWidget> {
                     await ServiceRequestsTable().insert({
                       'user_id': currentUserUid,
                       'provider_id': widget.providerId,
-                      'description': _model.descriptionTextController.text,
+                      'description':
+                          _model.descriptionTextController?.text ?? '',
                       'scheduled_at': _model.datePicked?.toIso8601String(),
                       'status': 'pending',
                     });
