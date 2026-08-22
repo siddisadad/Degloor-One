@@ -1,5 +1,6 @@
 import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/core/error_handler.dart';
 import 'package:degloor_one/shared/order_lifecycle.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
@@ -82,12 +83,11 @@ class DeliveryService {
   }
 
   static String messageFor(Object error) {
-    if (error is PostgrestException && error.message.isNotEmpty) {
-      return error.message;
+    final raw = error.toString().toLowerCase();
+    if (raw.contains('delivery') && raw.contains('otp')) {
+      return 'The delivery code is invalid or has expired.';
     }
-    final raw = error.toString();
-    final match = RegExp(r'(?:Exception:|ERROR:)\s*(.+)').firstMatch(raw);
-    return match?.group(1)?.trim() ?? 'Something went wrong. Please try again.';
+    return AppLogger.userFacingMessage(error);
   }
 
   static Future<void> _rpc(String name, Map<String, dynamic> params) async {

@@ -49,6 +49,7 @@ class _CartWidgetState extends State<CartWidget> {
     try {
       final carts = await CartService.cartsForUser(userId);
       if (carts.isEmpty) {
+        if (!mounted) return;
         setState(() {
           _model.cartItemsFuture = Future.value([]);
           _model.currentCart = null;
@@ -81,35 +82,71 @@ class _CartWidgetState extends State<CartWidget> {
   Future<void> _fetchAddresses() async {
     final userId = currentUserUid;
     if (userId == '') return;
-    final addresses = await AddressesTable().queryRows(queryFn: (q) => q.eq('user_id', userId));
-    setState(() {
-      _model.addressesFuture = Future.value(addresses);
-      if (addresses.isNotEmpty) {
-        _model.selectedAddress = addresses.firstWhere((a) => a.isDefault, orElse: () => addresses.first);
-      }
-    });
-    _updateDeliveryFee();
-  }
-
-  Future<void> _updateDeliveryFee() async {
-    if (_model.currentBusiness != null && _model.selectedAddress != null) {
-      final fee = await OrdersTable().calculateDeliveryFee(
-        businessId: _model.currentBusiness!.id,
-        addressId: _model.selectedAddress!.id,
+    try {
+      final addresses = await AddressesTable().queryRows(
+        queryFn: (q) => q.eq('user_id', userId),
       );
+      if (!mounted) return;
       setState(() {
-        _model.deliveryFee = fee;
+        _model.addressesFuture = Future.value(addresses);
+        if (addresses.isNotEmpty) {
+          _model.selectedAddress = addresses.firstWhere(
+            (a) => a.isDefault,
+            orElse: () => addresses.first,
+          );
+        }
+      });
+      await _updateDeliveryFee();
+    } catch (e) {
+      AppLogger.error('Error fetching addresses', e);
+      if (!mounted) return;
+      setState(() {
+        _model.addressesFuture = Future.value([]);
       });
     }
   }
 
-  Future<void> _updateQuantity(String itemId, int newQty) async {
-    if (newQty <= 0) {
-      await CartItemsTable().delete(matchingRows: (q) => q.eq('id', itemId));
-    } else {
-      await CartItemsTable().update(data: {'quantity': newQty}, matchingRows: (q) => q.eq('id', itemId));
+  Future<void> _updateDeliveryFee() async {
+    if (_model.currentBusiness == null || _model.selectedAddress == null) {
+      return;
     }
-    _fetchCartData();
+    try {
+      final fee = await OrdersTable().calculateDeliveryFee(
+        businessId: _model.currentBusiness!.id,
+        addressId: _model.selectedAddress!.id,
+      );
+      if (!mounted) return;
+      setState(() {
+        _model.deliveryFee = fee;
+      });
+    } catch (e) {
+      AppLogger.error('Error calculating delivery fee', e);
+    }
+  }
+
+  Future<void> _updateQuantity(String itemId, int newQty) async {
+    try {
+      await CartService.updateQuantity(itemId: itemId, quantity: newQty);
+      await _fetchCartData();
+    } catch (e) {
+      AppLogger.event(
+        'CART_QTY_FAILED',
+        fields: {'item_id': itemId, 'quantity': newQty},
+        error: e,
+      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            AppLogger.userFacingMessage(
+              e,
+              fallback: 'Unable to update the cart. Please try again.',
+            ),
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   Future<void> _placeOrder(List<Map<String, dynamic>> items) async {
@@ -154,11 +191,23 @@ class _CartWidgetState extends State<CartWidget> {
         }.withoutNulls,
       );
     } catch (e) {
-      AppLogger.error('Failed to place order', e);
+      AppLogger.event(
+        'ORDER_CREATE_FAILED',
+        fields: {
+          'user_id': currentUserUid,
+          'cart_id': _model.currentCart?.id,
+        },
+        error: e,
+      );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to place order: $e'),
+            content: Text(
+              AppLogger.userFacingMessage(
+                e,
+                fallback: 'Unable to place the order. Please try again.',
+              ),
+            ),
             backgroundColor: Colors.red,
           ),
         );

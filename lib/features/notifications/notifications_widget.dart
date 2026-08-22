@@ -70,6 +70,7 @@ class _NotificationsWidgetState extends State<NotificationsWidget> {
       _offset = 0;
       _hasMore = true;
     }
+    if (!mounted) return;
     setState(() {
       _isLoading = reset && _notifications.isEmpty;
       _loadingMore = !reset;
@@ -148,6 +149,7 @@ class _NotificationsWidgetState extends State<NotificationsWidget> {
         if (user == '') return;
 
         await NotificationService.instance.clearAll(user);
+        if (mounted) _loadPage(reset: true);
       } catch (e) {
         AppLogger.error('Error clearing notifications', e);
       }
@@ -242,14 +244,18 @@ class _NotificationsWidgetState extends State<NotificationsWidget> {
                     itemBuilder: (context, index) {
                       if (index >= _notifications.length) {
                         return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                           child: TextButton(
                             onPressed: _loadingMore
                                 ? null
                                 : () => _loadPage(),
-                            child: Text(
-                              _loadingMore ? 'Loading...' : 'Load more',
-                            ),
+                            child: _loadingMore
+                                ? const SizedBox(
+                                    height: 18,
+                                    width: 18,
+                                    child: CircularProgressIndicator(strokeWidth: 2),
+                                  )
+                                : const Text('Load more'),
                           ),
                         );
                       }

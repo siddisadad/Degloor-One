@@ -15,10 +15,15 @@ class NotificationRepository {
   }
 
   Future<int> unreadCount(String userId) async {
-    final rows = await NotificationsTable().queryRows(
-      queryFn: (q) => q.eq('user_id', userId).eq('is_read', false),
-    );
-    return rows.length;
+    if (userId.isEmpty) return 0;
+    if (kUseShowcaseData) {
+      final rows = await NotificationsTable().queryRows(
+        queryFn: (q) => q.eq('user_id', userId).eq('is_read', false),
+      );
+      return rows.length;
+    }
+    final result = await SupaFlow.client.rpc('unread_notification_count');
+    return (result as num?)?.toInt() ?? 0;
   }
 
   Future<void> markRead({

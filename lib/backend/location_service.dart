@@ -10,6 +10,9 @@ import 'package:degloor_one/flutter_flow/lat_lng.dart';
 import 'package:degloor_one/core/error_handler.dart';
 
 class LocationService {
+  static DateTime? _lastPartnerSync;
+  static const _partnerMinInterval = Duration(seconds: 15);
+
   static Future<void> updateCurrentLocation(BuildContext context) async {
     bool serviceEnabled;
     LocationPermission permission;
@@ -79,6 +82,11 @@ class LocationService {
   }
 
   static Future<void> syncPartnerLocation(String partnerId) async {
+    final now = DateTime.now();
+    if (_lastPartnerSync != null &&
+        now.difference(_lastPartnerSync!) < _partnerMinInterval) {
+      return;
+    }
     try {
       final Position position = await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(accuracy: LocationAccuracy.medium),
@@ -89,8 +97,13 @@ class LocationService {
         longitude: position.longitude,
         partnerId: partnerId,
       );
+      _lastPartnerSync = now;
     } catch (e) {
-      // Internal error handling logic could go here
+      AppLogger.event(
+        'DELIVERY_LOCATION_FAILED',
+        fields: {'partner_id': partnerId},
+        error: e,
+      );
     }
   }
 }

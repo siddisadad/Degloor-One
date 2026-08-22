@@ -16,13 +16,13 @@ String get kSupabaseAnonKey => AppEnvironment.supabaseAnonKey;
 /// True when the compiled URL still points at the deleted FlutterFlow project.
 bool get kUsesDeadFlutterFlowHost => AppEnvironment.usesDeadFlutterFlowHost;
 
-/// Temporary guest mode so the app is usable while Auth is down.
-/// Override with `--dart-define=BYPASS_AUTH=true|false`.
+/// Guest mode. Requires `APP_ENV=development` and `BYPASS_AUTH=true`.
 bool get kBypassAuth => AppEnvironment.bypassAuth;
 
-/// Local Degloor catalog so screens have data while Auth/PostgREST are down.
-/// Override with `--dart-define=SHOWCASE_DATA=true|false`.
+/// Local Degloor catalog. Requires `APP_ENV=development` and `SHOWCASE_DATA=true`.
 bool get kUseShowcaseData => AppEnvironment.useShowcaseData;
+
+AppFlavor get kAppFlavor => AppEnvironment.flavor;
 
 /// Throws immediately so Chrome never POSTs to a host that NXDOMAINs.
 class BlockedSupabaseHttpClient extends http.BaseClient {

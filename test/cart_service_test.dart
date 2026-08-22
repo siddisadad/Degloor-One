@@ -75,4 +75,57 @@ void main() {
       isTrue,
     );
   });
+
+  test('updateQuantity changes an owned line and rejects another user', () async {
+    await CartService.updateQuantity(
+      itemId: 'ci-rice',
+      quantity: 3,
+      userId: GuestAuthUser.guestUid,
+    );
+    final items = await CartService.itemsForCart(ShowcaseCatalog.cartGuest);
+    final rice = items.firstWhere(
+      (item) => item['product_id'] == ShowcaseCatalog.prodRice,
+    );
+    expect(rice['quantity'], 3);
+
+    await expectLater(
+      CartService.updateQuantity(
+        itemId: 'ci-rice',
+        quantity: 4,
+        userId: ShowcaseCatalog.customer2,
+      ),
+      throwsA(
+        predicate(
+          (error) => error.toString().contains('CART_UNAUTHORIZED'),
+        ),
+      ),
+    );
+  });
+
+  test('removeItem and clearCart empty the guest basket', () async {
+    await CartService.removeItem(
+      itemId: 'ci-milk',
+      userId: GuestAuthUser.guestUid,
+    );
+    final items = await CartService.itemsForCart(ShowcaseCatalog.cartGuest);
+    expect(
+      items.any((item) => item['id'] == 'ci-milk'),
+      isFalse,
+    );
+
+    await CartService.clearCart(userId: GuestAuthUser.guestUid);
+    final carts = await CartService.cartsForUser(GuestAuthUser.guestUid);
+    expect(carts, isEmpty);
+  });
+
+  test('invalid quantity is rejected without writing', () async {
+    final result = await CartService.addProduct(
+      userId: GuestAuthUser.guestUid,
+      businessId: ShowcaseCatalog.bizPatil,
+      productId: ShowcaseCatalog.prodRice,
+      quantity: 0,
+    );
+    expect(result.added, isFalse);
+    expect(result.message, 'Please choose a valid quantity.');
+  });
 }
