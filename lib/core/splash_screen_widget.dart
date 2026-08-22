@@ -1,3 +1,4 @@
+import 'package:degloor_one/components/brand_mark.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:flutter/material.dart';
@@ -64,48 +65,7 @@ class _SplashScreenWidgetState extends State<SplashScreenWidget> {
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Container(
-                    width: 120.0,
-                    height: 120.0,
-                    decoration: BoxDecoration(
-                      color: FlutterFlowTheme.of(context).primaryText,
-                      borderRadius: BorderRadius.circular(24.0),
-                    ),
-                    alignment: const AlignmentDirectional(0.0, 0.0),
-                    child: Icon(
-                      Icons.location_on_rounded,
-                      color: FlutterFlowTheme.of(context).primaryBackground,
-                      size: 64.0,
-                    ),
-                  ),
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'DEGLOOR ONE',
-                        style: FlutterFlowTheme.of(context)
-                            .headlineLarge
-                            .override(
-                              font: GoogleFonts.inter(
-                                fontWeight: FontWeight.w800,
-                              ),
-                              color: FlutterFlowTheme.of(context).primaryText,
-                              lineHeight: 1.2,
-                            ),
-                      ),
-                      Text(
-                        'Everything Local. One App.',
-                        style: FlutterFlowTheme.of(context)
-                            .titleMedium
-                            .override(
-                              font: GoogleFonts.inter(),
-                              color: FlutterFlowTheme.of(context).secondaryText,
-                              lineHeight: 1.4,
-                            ),
-                      ),
-                    ].divide(const SizedBox(height: 16.0)),
-                  ),
+                  const BrandMark(size: 112, showWordmark: true),
                 ].divide(const SizedBox(height: 32.0)),
               ),
             ),

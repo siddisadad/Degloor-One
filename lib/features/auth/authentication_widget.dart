@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/backend/supabase/supabase_connection.dart';
+import 'package:degloor_one/components/brand_mark.dart';
 import 'package:degloor_one/components/social_button/social_button_widget.dart';
 import 'package:degloor_one/components/supabase_unreachable_banner.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -99,48 +100,11 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const SizedBox(height: 80),
-                // Logo Section
-                Column(
-                  children: [
-                    Container(
-                      width: 100,
-                      height: 100,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(24),
-                        boxShadow: [
-                          BoxShadow(
-                            blurRadius: 20,
-                            color: Colors.black.withValues(alpha: 0.1),
-                            offset: const Offset(0, 10),
-                          )
-                        ],
-                      ),
-                      child: Center(
-                        child: Icon(
-                          Icons.location_on_rounded,
-                          color: FlutterFlowTheme.of(context).primary,
-                          size: 50,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    Text(
-                      'DEGLOOR ONE',
-                      style: FlutterFlowTheme.of(context).headlineMedium.override(
-                        fontFamily: 'Inter',
-                        color: Colors.white,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    Text(
-                      'Everything Local. One App.',
-                      style: FlutterFlowTheme.of(context).titleMedium.override(
-                        fontFamily: 'Inter',
-                        color: Colors.white.withValues(alpha: 0.8),
-                      ),
-                    ),
-                  ],
+                BrandMark(
+                  size: 96,
+                  showWordmark: true,
+                  wordmarkColor: Colors.white,
+                  taglineColor: Colors.white.withValues(alpha: 0.82),
                 ),
                 const SizedBox(height: 40),
                 // Login Card

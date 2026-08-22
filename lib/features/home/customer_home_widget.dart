@@ -18,7 +18,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:degloor_one/app_state.dart';
 import 'package:degloor_one/backend/location_service.dart';
+import 'package:degloor_one/components/brand_mark.dart';
 import 'package:degloor_one/components/discovery_radius_bar.dart';
+import 'package:degloor_one/components/home_feature_shortcuts.dart';
 import 'package:degloor_one/core/error_handler.dart';
 import 'customer_home_model.dart';
 export 'customer_home_model.dart';
@@ -291,36 +293,6 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                             reverse: true,
                             child: Row(
                           children: [
-                            FlutterFlowIconButton(
-                              borderColor: Colors.transparent,
-                              borderRadius: 8.0,
-                              buttonSize: 44.0,
-                              fillColor:
-                                  FlutterFlowTheme.of(context).secondaryBackground,
-                              icon: Icon(
-                                Icons.handyman_outlined,
-                                color: FlutterFlowTheme.of(context).primaryText,
-                                size: 24.0,
-                              ),
-                              onPressed: () {
-                                context.pushNamed('Services');
-                              },
-                            ),
-                            FlutterFlowIconButton(
-                              borderColor: Colors.transparent,
-                              borderRadius: 8.0,
-                              buttonSize: 44.0,
-                              fillColor:
-                                  FlutterFlowTheme.of(context).secondaryBackground,
-                              icon: Icon(
-                                Icons.work_outline_rounded,
-                                color: FlutterFlowTheme.of(context).primaryText,
-                                size: 24.0,
-                              ),
-                              onPressed: () {
-                                context.pushNamed('JobsMarketplace');
-                              },
-                            ),
                             Stack(
                               children: [
                                 FlutterFlowIconButton(
@@ -378,6 +350,7 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                                 context.pushNamed('Notifications');
                               },
                             ),
+                            if (!kBypassAuth)
                             FlutterFlowIconButton(
                               borderColor: Colors.transparent,
                               borderRadius: 8.0,
@@ -499,90 +472,131 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      InkWell(
-                        splashColor: Colors.transparent,
-                        focusColor: Colors.transparent,
-                        hoverColor: Colors.transparent,
-                        highlightColor: Colors.transparent,
-                        onTap: () async {
-                          context.pushNamed('SearchResults');
-                        },
-                        child: Container(
+                      if (kUseShowcaseData)
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
                           decoration: BoxDecoration(
-                            color:
-                                FlutterFlowTheme.of(context).secondaryBackground,
-                            boxShadow: [
-                              FlutterFlowTheme.of(context).designToken.shadow.sm,
-                            ],
+                            color: FlutterFlowTheme.of(context)
+                                .primary
+                                .withValues(alpha: 0.08),
                             borderRadius: BorderRadius.circular(
-                                FlutterFlowTheme.of(context)
-                                    .designToken
-                                    .radius
-                                    .lg),
-                            border: Border.all(
-                              color: FlutterFlowTheme.of(context).alternate,
+                              FlutterFlowTheme.of(context).designToken.radius.lg,
                             ),
                           ),
-                          child: Padding(
-                            padding: EdgeInsets.all(FlutterFlowTheme.of(context)
-                                .designToken
-                                .spacing
-                                .md),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.search_rounded,
-                                  color: FlutterFlowTheme.of(context).onSurface,
-                                  size: 24.0,
+                          child: Row(
+                            children: [
+                              const BrandMark(size: 32),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  'Demo catalog is on — shops, cart, orders, jobs, and services are ready to tap.',
+                                  style: FlutterFlowTheme.of(context)
+                                      .bodySmall
+                                      .override(
+                                        font: GoogleFonts.inter(
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                        color: FlutterFlowTheme.of(context)
+                                            .primaryText,
+                                      ),
                                 ),
-                                Expanded(
-                                  child: Text(
-                                    'What do you need? (e.g. Electrician)',
-                                    style: FlutterFlowTheme.of(context).bodyLarge,
-                                  ),
-                                ),
-                                Icon(
-                                  Icons.tune_rounded,
-                                  color: FlutterFlowTheme.of(context).primary,
-                                  size: 20.0,
-                                ),
-                              ].divide(SizedBox(
-                                  width: FlutterFlowTheme.of(context)
-                                      .designToken
-                                      .spacing
-                                      .md)),
-                            ),
+                              ),
+                            ],
                           ),
                         ),
-                      ),
                       Container(
                         decoration: BoxDecoration(
-                          color: FlutterFlowTheme.of(context)
-                              .secondaryBackground,
+                          color:
+                              FlutterFlowTheme.of(context).secondaryBackground,
+                          boxShadow: [
+                            FlutterFlowTheme.of(context).designToken.shadow.sm,
+                          ],
                           borderRadius: BorderRadius.circular(
-                            FlutterFlowTheme.of(context).designToken.radius.lg,
-                          ),
+                              FlutterFlowTheme.of(context)
+                                  .designToken
+                                  .radius
+                                  .lg),
                           border: Border.all(
                             color: FlutterFlowTheme.of(context).alternate,
                           ),
                         ),
-                        padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
-                        child: DiscoveryRadiusBar(
-                          selectedKm: appState.discoveryRadius,
-                          openNow: _model.openNow,
-                          onChanged: (radius) {
-                            setState(() {
-                              appState.discoveryRadius = radius;
-                              _fetchBusinesses();
-                            });
-                          },
-                          onOpenNowToggle: () {
-                            setState(() {
-                              _model.openNow = !_model.openNow;
-                              _fetchBusinesses();
-                            });
-                          },
+                        child: Column(
+                          children: [
+                            InkWell(
+                              splashColor: Colors.transparent,
+                              focusColor: Colors.transparent,
+                              hoverColor: Colors.transparent,
+                              highlightColor: Colors.transparent,
+                              onTap: () async {
+                                context.pushNamed('SearchResults');
+                              },
+                              child: Padding(
+                                padding: EdgeInsets.all(
+                                    FlutterFlowTheme.of(context)
+                                        .designToken
+                                        .spacing
+                                        .md),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.search_rounded,
+                                      color: FlutterFlowTheme.of(context)
+                                          .onSurface,
+                                      size: 24.0,
+                                    ),
+                                    Expanded(
+                                      child: Text(
+                                        'Search shops, services, or jobs',
+                                        style: FlutterFlowTheme.of(context)
+                                            .bodyLarge,
+                                      ),
+                                    ),
+                                    Icon(
+                                      Icons.tune_rounded,
+                                      color:
+                                          FlutterFlowTheme.of(context).primary,
+                                      size: 20.0,
+                                    ),
+                                  ].divide(SizedBox(
+                                      width: FlutterFlowTheme.of(context)
+                                          .designToken
+                                          .spacing
+                                          .md)),
+                                ),
+                              ),
+                            ),
+                            Divider(
+                              height: 1,
+                              thickness: 1,
+                              color: FlutterFlowTheme.of(context).alternate,
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
+                              child: DiscoveryRadiusBar(
+                                selectedKm: appState.discoveryRadius,
+                                openNow: _model.openNow,
+                                onChanged: (radius) {
+                                  setState(() {
+                                    appState.discoveryRadius = radius;
+                                    _fetchBusinesses();
+                                  });
+                                },
+                                onOpenNowToggle: () {
+                                  setState(() {
+                                    _model.openNow = !_model.openNow;
+                                    _fetchBusinesses();
+                                  });
+                                },
+                              ),
+                            ),
+                          ],
                         ),
+                      ),
+                      HomeFeatureShortcuts(
+                        onServices: () => context.pushNamed('Services'),
+                        onJobs: () => context.pushNamed('JobsMarketplace'),
+                        onOrders: () => context.pushNamed('CustomerOrders'),
                       ),
                     ].divide(SizedBox(
                         height:
