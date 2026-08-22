@@ -38,6 +38,12 @@ Execute the SQL scripts in the Supabase SQL Editor in this order:
 ### 2. Environment Configuration
 Ensure your `lib/backend/supabase/supabase.dart` is updated with your specific Supabase URL and Anon Key.
 
+For **Forgot password**, add these Redirect URLs in the Supabase dashboard (Authentication → URL Configuration):
+
+- `degloorone://degloorone.com/resetPassword` (Android / iOS)
+- `http://localhost:*/resetPassword` (local web)
+- your production web origin + `/resetPassword`
+
 ### 3. Run the App
 ```bash
 flutter pub get

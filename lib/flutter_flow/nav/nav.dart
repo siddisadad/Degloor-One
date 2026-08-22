@@ -98,6 +98,18 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           builder: (context, params) => const PhoneAuthWidget(),
         ),
         FFRoute(
+          name: ForgotPasswordWidget.routeName,
+          path: ForgotPasswordWidget.routePath,
+          builder: (context, params) => ForgotPasswordWidget(
+            email: params.getParam<String>('email', ParamType.string),
+          ),
+        ),
+        FFRoute(
+          name: ResetPasswordWidget.routeName,
+          path: ResetPasswordWidget.routePath,
+          builder: (context, params) => const ResetPasswordWidget(),
+        ),
+        FFRoute(
           name: OtpVerificationWidget.routeName,
           path: OtpVerificationWidget.routePath,
           builder: (context, params) => OtpVerificationWidget(

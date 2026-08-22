@@ -63,32 +63,33 @@ class SupabaseAuthManager extends AuthManager
     );
   }
 
-  Future updatePassword({
+  Future<bool> updatePassword({
     required String newPassword,
     required BuildContext context,
   }) async {
     try {
       if (!loggedIn) {
         AppLogger.error('update password attempted with no logged in user!');
-        return;
+        return false;
       }
       await currentUser?.updatePassword(newPassword);
     } on AuthException catch (e) {
-      if (!context.mounted) return;
+      if (!context.mounted) return false;
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: ${e.message}')),
       );
-      return;
+      return false;
     }
-    if (!context.mounted) return;
+    if (!context.mounted) return false;
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Password updated successfully')),
     );
+    return true;
   }
 
   @override
-  Future resetPassword({
+  Future<bool> resetPassword({
     required String email,
     required BuildContext context,
     String? redirectTo,
@@ -97,17 +98,15 @@ class SupabaseAuthManager extends AuthManager
       await SupaFlow.client.auth
           .resetPasswordForEmail(email, redirectTo: redirectTo);
     } on AuthException catch (e) {
-      if (!context.mounted) return;
+      if (!context.mounted) return false;
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: ${e.message}')),
       );
-      return null;
+      return false;
     }
-    if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Password reset email sent')),
-    );
+    if (!context.mounted) return false;
+    return true;
   }
 
   @override

@@ -2,6 +2,10 @@
 export 'package:degloor_one/core/splash_screen_widget.dart' show SplashScreenWidget;
 export 'package:degloor_one/features/auth/authentication_widget.dart'
     show AuthenticationWidget;
+export 'package:degloor_one/features/auth/forgot_password_widget.dart'
+    show ForgotPasswordWidget;
+export 'package:degloor_one/features/auth/reset_password_widget.dart'
+    show ResetPasswordWidget;
 export 'package:degloor_one/features/auth/phone_auth_widget.dart' show PhoneAuthWidget;
 export 'package:degloor_one/features/auth/otp_verification_widget.dart'
     show OtpVerificationWidget;

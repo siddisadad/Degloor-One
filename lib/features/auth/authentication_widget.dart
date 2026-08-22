@@ -163,8 +163,15 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
                             alignment: Alignment.centerRight,
                             child: InkWell(
                               onTap: () {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Password reset feature coming soon in Phase 1.1'))
+                                final email = _model.textFieldModel1
+                                        .inputTextController?.text
+                                        .trim() ??
+                                    '';
+                                context.pushNamed(
+                                  'ForgotPassword',
+                                  queryParameters: {
+                                    if (email.contains('@')) 'email': email,
+                                  },
                                 );
                               },
                               child: Text(
