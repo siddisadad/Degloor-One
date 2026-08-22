@@ -194,10 +194,6 @@ class _BusinessRegistrationWidgetState
                             trailingIconPresent: false,
                             hint: 'e.g., Maharashtra Hardware & Steel',
                             value: '',
-                            onChange: (val) {
-                              _model.textFieldModel1.inputTextController?.text =
-                                  val;
-                            },
                             onSubmit: (_) {},
                             variant: 'outlined',
                             error: false,
@@ -220,10 +216,6 @@ class _BusinessRegistrationWidgetState
                             trailingIconPresent: false,
                             hint: 'Full legal name of proprietor',
                             value: '',
-                            onChange: (val) {
-                              _model.textFieldModel2.inputTextController?.text =
-                                  val;
-                            },
                             onSubmit: (_) {},
                             variant: 'outlined',
                             error: false,
@@ -291,10 +283,6 @@ class _BusinessRegistrationWidgetState
                             hint:
                                 'Briefly describe your products or services...',
                             value: '',
-                            onChange: (val) {
-                              _model.textFieldModel3.inputTextController?.text =
-                                  val;
-                            },
                             onSubmit: (_) {},
                             variant: 'outlined',
                             error: false,
@@ -331,10 +319,6 @@ class _BusinessRegistrationWidgetState
                             trailingIconPresent: false,
                             hint: '+91 98765 43210',
                             value: '',
-                            onChange: (val) {
-                              _model.textFieldModel4.inputTextController?.text =
-                                  val;
-                            },
                             onSubmit: (_) {},
                             variant: 'outlined',
                             error: false,
@@ -357,10 +341,6 @@ class _BusinessRegistrationWidgetState
                             trailingIconPresent: false,
                             hint: 'For customer enquiries',
                             value: '',
-                            onChange: (val) {
-                              _model.textFieldModel5.inputTextController?.text =
-                                  val;
-                            },
                             onSubmit: (_) {},
                             variant: 'outlined',
                             error: false,
@@ -407,10 +387,6 @@ class _BusinessRegistrationWidgetState
                             trailingIconPresent: false,
                             hint: 'Shop No., Building Name, Main Road...',
                             value: '',
-                            onChange: (val) {
-                              _model.textFieldModel6.inputTextController?.text =
-                                  val;
-                            },
                             onSubmit: (_) {},
                             variant: 'outlined',
                             error: false,
@@ -432,10 +408,6 @@ class _BusinessRegistrationWidgetState
                                   trailingIconPresent: false,
                                   hint: 'Type here...',
                                   value: 'Degloor',
-                                  onChange: (val) {
-                                    _model.textFieldModel7.inputTextController
-                                        ?.text = val;
-                                  },
                                   onSubmit: (_) {},
                                   variant: 'outlined',
                                   error: false,
@@ -456,10 +428,6 @@ class _BusinessRegistrationWidgetState
                                   trailingIconPresent: false,
                                   hint: 'e.g., Shivaji Chowk',
                                   value: '',
-                                  onChange: (val) {
-                                    _model.textFieldModel8.inputTextController
-                                        ?.text = val;
-                                  },
                                   onSubmit: (_) {},
                                   variant: 'outlined',
                                   error: false,
