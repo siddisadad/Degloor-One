@@ -1,5 +1,6 @@
 import 'package:rxdart/rxdart.dart';
 
+import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/auth/password_recovery.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import '../base_auth_user_provider.dart';
@@ -84,6 +85,10 @@ class DegloorOneSupabaseUser extends BaseAuthUser {
 /// user is already authenticated. So we add a default null user to the stream,
 /// if we need to interact with the [currentUser] before logging in.
 Stream<BaseAuthUser> degloorOneSupabaseUserStream() {
+  if (kBypassAuth) {
+    installGuestSession();
+    return Stream<BaseAuthUser>.value(currentUser!);
+  }
   final supabaseAuthStream = SupaFlow.client.auth.onAuthStateChange.debounce(
       (authState) => authState.event == AuthChangeEvent.tokenRefreshed
           ? TimerStream(authState, const Duration(seconds: 1))

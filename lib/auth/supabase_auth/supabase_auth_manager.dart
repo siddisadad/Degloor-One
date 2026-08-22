@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:degloor_one/auth/auth_manager.dart';
+import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/backend/supabase/supabase_connection.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
@@ -19,7 +20,10 @@ class SupabaseAuthManager extends AuthManager
     with EmailSignInManager, GoogleSignInManager, PhoneSignInManager {
   @override
   Future signOut() {
-    if (SupabaseConnection.shouldSkipAuthRequest) return Future.value();
+    if (kBypassAuth) {
+      installGuestSession();
+      return Future.value();
+    }
     return SupaFlow.client.auth.signOut();
   }
 

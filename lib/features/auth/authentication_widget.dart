@@ -35,6 +35,12 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
   void initState() {
     super.initState();
     _model = createModel(context, () => AuthenticationModel());
+    if (kBypassAuth) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) context.goNamed('CustomerHome');
+      });
+      return;
+    }
     if (SupabaseConnection.shouldSkipAuthRequest) {
       _serverWarning = SupabaseConnection.unreachableMessage;
     } else {

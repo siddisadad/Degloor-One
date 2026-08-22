@@ -27,6 +27,15 @@ bool get kUsesDeadFlutterFlowHost {
   return host == kDeadFlutterFlowHost;
 }
 
+/// Temporary guest mode so the app is usable while Auth is down.
+/// Override with `--dart-define=BYPASS_AUTH=true|false`.
+bool get kBypassAuth {
+  const flag = String.fromEnvironment('BYPASS_AUTH');
+  if (flag == 'true') return true;
+  if (flag == 'false') return false;
+  return kUsesDeadFlutterFlowHost;
+}
+
 /// Throws immediately so Chrome never POSTs to a host that NXDOMAINs.
 class BlockedSupabaseHttpClient extends http.BaseClient {
   @override
