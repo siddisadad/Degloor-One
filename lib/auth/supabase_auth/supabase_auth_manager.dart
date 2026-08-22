@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:degloor_one/auth/auth_manager.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/backend/supabase/supabase_connection.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:degloor_one/core/error_handler.dart';
@@ -101,7 +102,18 @@ class SupabaseAuthManager extends AuthManager
       if (!context.mounted) return false;
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${e.message}')),
+        SnackBar(
+          content: Text(
+            SupabaseConnection.messageFor(e, authMessage: e.message),
+          ),
+        ),
+      );
+      return false;
+    } catch (e) {
+      if (!context.mounted) return false;
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(SupabaseConnection.messageFor(e))),
       );
       return false;
     }
@@ -281,7 +293,13 @@ class SupabaseAuthManager extends AuthManager
       if (!context.mounted) return null;
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error: An unexpected error occurred. Please try again.')),
+        SnackBar(
+          content: Text(
+            SupabaseConnection.looksUnreachable(e)
+                ? SupabaseConnection.unreachableMessage
+                : 'Error: An unexpected error occurred. Please try again.',
+          ),
+        ),
       );
       return null;
     }
