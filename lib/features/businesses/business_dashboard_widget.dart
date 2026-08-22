@@ -3,6 +3,7 @@ import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 import 'package:degloor_one/l10n/app_localizations.dart';
+import 'package:degloor_one/components/brand_mark.dart';
 import '/components/action_tile/action_tile_widget.dart';
 import '/components/completeness_card/completeness_card_widget.dart';
 import '/components/stat_card/stat_card_widget.dart';
@@ -907,6 +908,8 @@ class _BusinessDashboardWidgetState extends State<BusinessDashboardWidget> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
+                            const BrandMark(size: 56),
+                            const SizedBox(height: 8),
                             Text(
                               'DEGLOOR ONE Business Portal',
                               style: FlutterFlowTheme.of(context)

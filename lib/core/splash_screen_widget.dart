@@ -44,29 +44,27 @@ class _SplashScreenWidgetState extends State<SplashScreenWidget> {
       },
       child: Scaffold(
         key: scaffoldKey,
-        backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+        backgroundColor: const Color(0xFF0A1B3D),
         body: Stack(
           alignment: const AlignmentDirectional(0.0, 0.0),
           children: [
             Container(
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 gradient: RadialGradient(
                   colors: [
-                    FlutterFlowTheme.of(context).secondaryBackground,
-                    FlutterFlowTheme.of(context).primaryBackground
+                    Color(0xFF16356A),
+                    Color(0xFF0A1B3D),
                   ],
-                  stops: const [0.0, 1.0],
+                  stops: [0.0, 1.0],
                 ),
               ),
             ),
-            Align(
-              alignment: const AlignmentDirectional(0.0, 0.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const BrandMark(size: 112, showWordmark: true),
-                ].divide(const SizedBox(height: 32.0)),
+            const Align(
+              alignment: AlignmentDirectional(0.0, 0.0),
+              child: BrandMark(
+                size: 220,
+                showWordmark: true,
+                taglineColor: Color(0xCCFFFFFF),
               ),
             ),
             Align(
@@ -82,8 +80,8 @@ class _SplashScreenWidgetState extends State<SplashScreenWidget> {
                       lineWidth: 2.0,
                       animation: true,
                       animateFromLastPercent: true,
-                      progressColor: FlutterFlowTheme.of(context).primary,
-                      backgroundColor: FlutterFlowTheme.of(context).alternate,
+                      progressColor: const Color(0xFFFF9800),
+                      backgroundColor: Colors.white24,
                     ),
                     const SizedBox(height: 16.0),
                     Row(
@@ -95,7 +93,7 @@ class _SplashScreenWidgetState extends State<SplashScreenWidget> {
                               .labelSmall
                               .override(
                                 font: GoogleFonts.inter(),
-                                color: FlutterFlowTheme.of(context).onBackground,
+                                color: Colors.white70,
                               ),
                         ),
                         Text(
@@ -106,7 +104,7 @@ class _SplashScreenWidgetState extends State<SplashScreenWidget> {
                                 font: GoogleFonts.inter(
                                   fontWeight: FontWeight.w600,
                                 ),
-                                color: FlutterFlowTheme.of(context).secondaryText,
+                                color: Colors.white,
                               ),
                         ),
                       ].divide(const SizedBox(width: 4.0)),
