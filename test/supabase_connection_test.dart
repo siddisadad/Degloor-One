@@ -46,4 +46,23 @@ void main() {
       'Error: Invalid login credentials',
     );
   });
+
+  test('AuthRetryableFetchException message is treated as unreachable', () {
+    const fetch =
+        'ClientException: Failed to fetch, uri=https://uhaibenopzyzzuqjawlb.supabase.co/auth/v1/token?grant_type=password';
+    expect(
+      SupabaseConnection.messageFor(
+        Exception('AuthRetryableFetchException(message: $fetch)'),
+        authMessage: fetch,
+      ),
+      SupabaseConnection.unreachableMessage,
+    );
+    expect(
+      SupabaseConnection.messageFor(
+        Exception('AuthException'),
+        authMessage: fetch,
+      ),
+      SupabaseConnection.unreachableMessage,
+    );
+  });
 }

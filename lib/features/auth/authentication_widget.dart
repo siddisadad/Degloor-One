@@ -1,4 +1,8 @@
+import 'dart:async';
+
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
+import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/backend/supabase/supabase_connection.dart';
 import 'package:degloor_one/components/social_button/social_button_widget.dart';
 import 'package:degloor_one/components/text_field/text_field_widget.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
@@ -23,11 +27,28 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
   late AuthenticationModel _model;
   final scaffoldKey = GlobalKey<ScaffoldState>();
   bool _isLoading = false;
+  String? _serverWarning;
 
   @override
   void initState() {
     super.initState();
     _model = createModel(context, () => AuthenticationModel());
+    WidgetsBinding.instance.addPostFrameCallback((_) => _probeServer());
+  }
+
+  Future<void> _probeServer() async {
+    try {
+      await SupaFlow.client
+          .from('users')
+          .select('id')
+          .limit(1)
+          .timeout(const Duration(seconds: 4));
+    } catch (e) {
+      if (!mounted) return;
+      if (SupabaseConnection.looksUnreachable(e) || e is TimeoutException) {
+        setState(() => _serverWarning = SupabaseConnection.unreachableMessage);
+      }
+    }
   }
 
   @override
@@ -130,6 +151,29 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
+                          if (_serverWarning != null) ...[
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: FlutterFlowTheme.of(context)
+                                    .error
+                                    .withValues(alpha: 0.08),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: FlutterFlowTheme.of(context).error,
+                                ),
+                              ),
+                              child: Text(
+                                _serverWarning!,
+                                style: FlutterFlowTheme.of(context)
+                                    .bodySmall
+                                    .override(
+                                      color: FlutterFlowTheme.of(context).error,
+                                    ),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                          ],
                           // Inputs
                           wrapWithModel(
                             model: _model.textFieldModel1,
