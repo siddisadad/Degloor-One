@@ -70,6 +70,7 @@ class _NotificationsWidgetState extends State<NotificationsWidget> {
       _offset = 0;
       _hasMore = true;
     }
+    if (!mounted) return;
     setState(() {
       _isLoading = reset && _notifications.isEmpty;
       _loadingMore = !reset;

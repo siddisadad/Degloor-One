@@ -22,4 +22,11 @@ void main() {
       'Unable to place the order. Please try again.',
     );
   });
+
+  test('generic sanitizer does not steal phone OTP errors', () {
+    expect(
+      AppLogger.userFacingMessage(Exception('Invalid OTP')),
+      'Invalid OTP',
+    );
+  });
 }

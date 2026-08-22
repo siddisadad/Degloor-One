@@ -83,6 +83,10 @@ class DeliveryService {
   }
 
   static String messageFor(Object error) {
+    final raw = error.toString().toLowerCase();
+    if (raw.contains('delivery') && raw.contains('otp')) {
+      return 'The delivery code is invalid or has expired.';
+    }
     return AppLogger.userFacingMessage(error);
   }
 

@@ -90,13 +90,6 @@ class AppLogger {
     if (raw.contains('Cart is empty')) {
       return 'Your cart is empty.';
     }
-    if (raw.contains('Invalid delivery OTP') || raw.contains('OTP')) {
-      if (raw.toLowerCase().contains('invalid') ||
-          raw.toLowerCase().contains('expired') ||
-          raw.toLowerCase().contains('consumed')) {
-        return 'The delivery code is invalid or has expired.';
-      }
-    }
     if (_looksInternal(raw)) return fallback;
 
     final match = RegExp(r'(?:Exception:|ERROR:)\s*(.+)').firstMatch(raw);

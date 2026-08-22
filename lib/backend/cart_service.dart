@@ -168,7 +168,7 @@ class CartService {
         fields: {
           'user_id': userId,
           'product_id': productId,
-          'cart_id': businessId,
+          'business_id': businessId,
         },
         error: e,
       );
@@ -193,7 +193,7 @@ class CartService {
     if (row == null) {
       return CartAddResult.failure('CART_PRODUCT');
     }
-    if (row['ok'] == false && row['code'] == 'needs_replacement') {
+    if (row['ok'] != true && row['code'] == 'needs_replacement') {
       return CartAddResult.needsConfirm;
     }
     if (row['ok'] == true) return CartAddResult.success;

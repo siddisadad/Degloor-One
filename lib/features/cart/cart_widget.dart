@@ -49,6 +49,7 @@ class _CartWidgetState extends State<CartWidget> {
     try {
       final carts = await CartService.cartsForUser(userId);
       if (carts.isEmpty) {
+        if (!mounted) return;
         setState(() {
           _model.cartItemsFuture = Future.value([]);
           _model.currentCart = null;
@@ -81,25 +82,45 @@ class _CartWidgetState extends State<CartWidget> {
   Future<void> _fetchAddresses() async {
     final userId = currentUserUid;
     if (userId == '') return;
-    final addresses = await AddressesTable().queryRows(queryFn: (q) => q.eq('user_id', userId));
-    setState(() {
-      _model.addressesFuture = Future.value(addresses);
-      if (addresses.isNotEmpty) {
-        _model.selectedAddress = addresses.firstWhere((a) => a.isDefault, orElse: () => addresses.first);
-      }
-    });
-    _updateDeliveryFee();
+    try {
+      final addresses = await AddressesTable().queryRows(
+        queryFn: (q) => q.eq('user_id', userId),
+      );
+      if (!mounted) return;
+      setState(() {
+        _model.addressesFuture = Future.value(addresses);
+        if (addresses.isNotEmpty) {
+          _model.selectedAddress = addresses.firstWhere(
+            (a) => a.isDefault,
+            orElse: () => addresses.first,
+          );
+        }
+      });
+      await _updateDeliveryFee();
+    } catch (e) {
+      AppLogger.error('Error fetching addresses', e);
+      if (!mounted) return;
+      setState(() {
+        _model.addressesFuture = Future.value([]);
+      });
+    }
   }
 
   Future<void> _updateDeliveryFee() async {
-    if (_model.currentBusiness != null && _model.selectedAddress != null) {
+    if (_model.currentBusiness == null || _model.selectedAddress == null) {
+      return;
+    }
+    try {
       final fee = await OrdersTable().calculateDeliveryFee(
         businessId: _model.currentBusiness!.id,
         addressId: _model.selectedAddress!.id,
       );
+      if (!mounted) return;
       setState(() {
         _model.deliveryFee = fee;
       });
+    } catch (e) {
+      AppLogger.error('Error calculating delivery fee', e);
     }
   }
 

@@ -115,12 +115,13 @@ CREATE POLICY "Users insert own analytics" ON business_analytics
 -- Cart RPCs
 -- ==========================================
 
-CREATE OR REPLACE FUNCTION add_to_cart(
+DROP FUNCTION IF EXISTS add_to_cart(UUID, INT, BOOLEAN);
+CREATE FUNCTION add_to_cart(
   p_product_id UUID,
   p_quantity INT DEFAULT 1,
   p_replace_other_business BOOLEAN DEFAULT FALSE
 )
-RETURNS JSONB
+RETURNS TABLE(ok BOOLEAN, code TEXT, cart_id UUID, item_id UUID, quantity INT)
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public
@@ -171,7 +172,8 @@ BEGIN
 
   IF v_other IS NOT NULL THEN
     IF NOT COALESCE(p_replace_other_business, FALSE) THEN
-      RETURN jsonb_build_object('ok', FALSE, 'code', 'needs_replacement');
+      RETURN QUERY SELECT FALSE, 'needs_replacement'::TEXT, NULL::UUID, NULL::UUID, NULL::INT;
+      RETURN;
     END IF;
     DELETE FROM carts
     WHERE user_id = auth.uid() AND business_id <> v_business_id;
@@ -210,12 +212,7 @@ BEGIN
     UPDATE cart_items SET quantity = v_new_qty WHERE id = v_item_id;
   END IF;
 
-  RETURN jsonb_build_object(
-    'ok', TRUE,
-    'cart_id', v_cart_id,
-    'item_id', v_item_id,
-    'quantity', v_new_qty
-  );
+  RETURN QUERY SELECT TRUE, NULL::TEXT, v_cart_id, v_item_id, v_new_qty;
 END;
 $$;
 

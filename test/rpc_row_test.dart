@@ -13,6 +13,11 @@ void main() {
     expect(asRpcRow(null), isNull);
     expect(asRpcRow(<dynamic>[]), isNull);
     expect(asRpcRow('uuid-only'), isNull);
+    expect(asRpcRow('{"ok":true,"code":null}'), {'ok': true, 'code': null});
+    expect(
+      asRpcRow('[{"ok":false,"code":"needs_replacement"}]'),
+      {'ok': false, 'code': 'needs_replacement'},
+    );
   });
 
   test('sanitizeIlike strips wildcard characters', () {
