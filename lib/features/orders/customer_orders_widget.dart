@@ -129,6 +129,7 @@ class _CustomerOrdersWidgetState extends State<CustomerOrdersWidget> {
               }
             },
             child: ListView.separated(
+            physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.all(16),
             itemCount: orders.length,
             separatorBuilder: (context, index) => const SizedBox(height: 12),

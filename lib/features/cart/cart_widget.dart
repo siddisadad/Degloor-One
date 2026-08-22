@@ -38,7 +38,14 @@ class _CartWidgetState extends State<CartWidget> {
 
   Future<void> _fetchCartData() async {
     final userId = currentUserUid;
-    if (userId == '') return;
+    if (userId == '') {
+      if (!mounted) return;
+      setState(() {
+        _model.cartItemsFuture = Future.value([]);
+        _model.currentCart = null;
+      });
+      return;
+    }
 
     try {
       final carts = await CartService.cartsForUser(userId);
@@ -76,6 +83,10 @@ class _CartWidgetState extends State<CartWidget> {
       });
     } catch (e) {
       AppLogger.error('Error fetching cart', e);
+      if (!mounted) return;
+      setState(() {
+        _model.cartItemsFuture = Future.value([]);
+      });
     }
   }
 

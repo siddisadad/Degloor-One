@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:degloor_one/auth/guest_auth_user.dart';
@@ -47,8 +48,18 @@ class ShowcaseCatalog {
   static const orderDelivered = 'order-delivered';
 
   static final Map<String, List<Map<String, dynamic>>> _tables = {};
+  static final StreamController<void> _changes =
+      StreamController<void>.broadcast();
   static bool _ready = false;
   static int _seq = 200;
+
+  static Stream<void> get changes => _changes.stream;
+
+  static void notifyChanged() {
+    if (!_changes.isClosed) {
+      _changes.add(null);
+    }
+  }
 
   static String nextId(String prefix) => '$prefix-${_seq++}';
 
@@ -117,6 +128,7 @@ class ShowcaseCatalog {
     row['created_at'] ??= _now;
     _tables.putIfAbsent(tableName, () => []);
     _tables[tableName]!.add(row);
+    notifyChanged();
     return Map<String, dynamic>.from(row);
   }
 
@@ -131,6 +143,7 @@ class ShowcaseCatalog {
       row.addAll(data);
       updated.add(Map<String, dynamic>.from(row));
     }
+    if (updated.isNotEmpty) notifyChanged();
     return updated;
   }
 
@@ -149,6 +162,7 @@ class ShowcaseCatalog {
       }
     }
     _tables[tableName] = kept;
+    if (removed.isNotEmpty) notifyChanged();
     return removed;
   }
 

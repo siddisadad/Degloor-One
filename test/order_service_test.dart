@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/backend/delivery_service.dart';
@@ -66,5 +68,35 @@ void main() {
       ),
       throwsA(isA<Exception>()),
     );
+  });
+
+  test('showcase order stream updates after delivery OTP', () async {
+    final statuses = <String>[];
+    final delivered = Completer<void>();
+    final sub = OrdersTable()
+        .stream(
+          primaryKey: 'id',
+          queryFn: (q) => q.eq('id', ShowcaseCatalog.orderOut),
+        )
+        .listen((rows) {
+      if (rows.isEmpty) return;
+      statuses.add(rows.first.status);
+      if (rows.first.status == OrderLifecycle.delivered &&
+          !delivered.isCompleted) {
+        delivered.complete();
+      }
+    });
+
+    await Future<void>.delayed(Duration.zero);
+    expect(statuses, isNotEmpty);
+    expect(statuses.first, isNot(OrderLifecycle.delivered));
+
+    await DeliveryService.confirmDeliveryWithOtp(
+      orderId: ShowcaseCatalog.orderOut,
+      otp: '4821',
+    );
+    await delivered.future.timeout(const Duration(seconds: 2));
+    expect(statuses.last, OrderLifecycle.delivered);
+    await sub.cancel();
   });
 }
