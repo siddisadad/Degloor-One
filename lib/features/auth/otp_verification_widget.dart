@@ -1,5 +1,6 @@
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/supabase/supabase_connection.dart';
+import 'package:degloor_one/components/brand_mark.dart';
 import 'package:degloor_one/components/supabase_unreachable_banner.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
@@ -72,6 +73,8 @@ class _OtpVerificationWidgetState extends State<OtpVerificationWidget> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                const SizedBox(height: 8),
+                const BrandMark(size: 56, showWordmark: true, compact: true),
                 const SizedBox(height: 20),
                 Text(
                   'Verification Code',
