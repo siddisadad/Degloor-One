@@ -33,10 +33,15 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
   void initState() {
     super.initState();
     _model = createModel(context, () => AuthenticationModel());
-    WidgetsBinding.instance.addPostFrameCallback((_) => _probeServer());
+    if (SupabaseConnection.shouldSkipAuthRequest) {
+      _serverWarning = SupabaseConnection.unreachableMessage;
+    } else {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _probeServer());
+    }
   }
 
   Future<void> _probeServer() async {
+    if (SupabaseConnection.shouldSkipAuthRequest) return;
     try {
       await SupaFlow.client
           .from('users')

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/core/error_handler.dart';
 
 /// Maps low-level HTTP / DNS failures from the Supabase client into a
@@ -10,6 +11,24 @@ class SupabaseConnection {
   static const unreachableMessage =
       'Cannot reach the Degloor One server. Restore the Supabase project '
       'or set SUPABASE_URL / SUPABASE_ANON_KEY to a live project.';
+
+  /// FlutterFlow project that currently NXDOMAINs. A live `--dart-define`
+  /// URL will not match, so real Auth calls still run.
+  static const deadFlutterFlowHost = 'uhaibenopzyzzuqjawlb.supabase.co';
+
+  static bool get shouldSkipAuthRequest {
+    final host = Uri.tryParse(kSupabaseUrl)?.host ?? '';
+    return host == deadFlutterFlowHost;
+  }
+
+  /// Returns false when the request must not be sent (avoids Chrome
+  /// `net::ERR_NAME_NOT_RESOLVED` on `/auth/v1/token`).
+  static bool guard(BuildContext context) {
+    if (!shouldSkipAuthRequest) return true;
+    AppLogger.log('Skipped Auth request: FlutterFlow Supabase host is down');
+    showSnackBar(context, Exception('failed to fetch'));
+    return false;
+  }
 
   static bool looksUnreachable(Object error) => AppLogger.isUnreachable(error);
 

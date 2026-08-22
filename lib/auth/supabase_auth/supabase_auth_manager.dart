@@ -89,6 +89,7 @@ class SupabaseAuthManager extends AuthManager
     required BuildContext context,
     String? redirectTo,
   }) async {
+    if (!SupabaseConnection.guard(context)) return false;
     try {
       await SupaFlow.client.auth
           .resetPasswordForEmail(email, redirectTo: redirectTo);
@@ -112,25 +113,34 @@ class SupabaseAuthManager extends AuthManager
     BuildContext context,
     String email,
     String password,
-  ) =>
-      _signInOrCreateAccount(
-        context,
-        () => emailSignInFunc(email, password),
-      );
+  ) {
+    if (!SupabaseConnection.guard(context)) {
+      return Future<BaseAuthUser?>.value();
+    }
+    return _signInOrCreateAccount(
+      context,
+      () => emailSignInFunc(email, password),
+    );
+  }
 
   @override
   Future<BaseAuthUser?> createAccountWithEmail(
     BuildContext context,
     String email,
     String password,
-  ) =>
-      _signInOrCreateAccount(
-        context,
-        () => emailCreateAccountFunc(email, password),
-      );
+  ) {
+    if (!SupabaseConnection.guard(context)) {
+      return Future<BaseAuthUser?>.value();
+    }
+    return _signInOrCreateAccount(
+      context,
+      () => emailCreateAccountFunc(email, password),
+    );
+  }
 
   @override
   Future<BaseAuthUser?> signInWithGoogle(BuildContext context) async {
+    if (!SupabaseConnection.guard(context)) return null;
     try {
       final googleSignIn = GoogleSignIn(
         clientId: kIsWeb ? null : null, // Set your Web Client ID here if not using meta tag
@@ -178,6 +188,7 @@ class SupabaseAuthManager extends AuthManager
     required String phoneNumber,
     required void Function(BuildContext) onCodeSent,
   }) async {
+    if (!SupabaseConnection.guard(context)) return;
     try {
       await phoneSignInFunc(phoneNumber);
       if (!context.mounted) return;
