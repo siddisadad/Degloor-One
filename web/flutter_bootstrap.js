@@ -1,7 +1,22 @@
 {{flutter_js}}
 {{flutter_build_config}}
 
-// HTML renderer was removed in Flutter 3.29. Use the default CanvasKit/Skwasm
-// engine so initializeEngine does not stall on a dead `renderer: "html"` option
-// while Chrome focus/blur floods flutter/lifecycle.
+// Swallow window focus/blur until Dart binds flutter/lifecycle. Chrome fires
+// those while CanvasKit loads; the engine forwards them and ChannelBuffers
+// prints "message ... discarded before it could be handled".
+(function () {
+  var hold = true;
+  function swallow(event) {
+    if (hold) {
+      event.stopImmediatePropagation();
+    }
+  }
+  window.addEventListener('focus', swallow, true);
+  window.addEventListener('blur', swallow, true);
+  document.addEventListener('visibilitychange', swallow, true);
+  window.__degloorReleaseLifecycle = function () {
+    hold = false;
+  };
+})();
+
 _flutter.loader.load();
