@@ -29,6 +29,7 @@ class DegloorOneSupabaseUser extends BaseAuthUser {
 
   @override
   Future? updateEmail(String email) async {
+    if (kUsesDeadFlutterFlowHost) return;
     final response =
         await SupaFlow.client.auth.updateUser(UserAttributes(email: email));
     if (response.user != null) {
@@ -38,6 +39,7 @@ class DegloorOneSupabaseUser extends BaseAuthUser {
 
   @override
   Future? updatePassword(String newPassword) async {
+    if (kUsesDeadFlutterFlowHost) return;
     final response = await SupaFlow.client.auth.updateUser(
       UserAttributes(password: newPassword),
     );
@@ -62,6 +64,7 @@ class DegloorOneSupabaseUser extends BaseAuthUser {
 
   @override
   Future refreshUser() async {
+    if (kUsesDeadFlutterFlowHost) return;
     await SupaFlow.client.auth.refreshSession().then((_) async {
       user = SupaFlow.client.auth.currentUser;
       if (user != null) {
@@ -95,7 +98,7 @@ Stream<BaseAuthUser> degloorOneSupabaseUserStream() {
       }
       final user = authState?.session?.user;
       String? role;
-      if (user != null) {
+      if (user != null && !kUsesDeadFlutterFlowHost) {
         final rows = await UsersTable().queryRows(
           queryFn: (q) => q.eq('id', user.id),
         );
