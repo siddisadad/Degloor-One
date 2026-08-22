@@ -190,6 +190,13 @@ class _UserProfileReportsWidgetState extends State<UserProfileReportsWidget> {
                         'My Cart',
                         onTap: () => context.pushNamed('Cart'),
                       ),
+                      _buildOption(
+                        context,
+                        _model.profileOptionModel10,
+                        Icons.handyman_outlined,
+                        'Find Services',
+                        onTap: () => context.pushNamed('Services'),
+                      ),
                     ].divide(const SizedBox(height: 12)),
                   ),
 

@@ -38,11 +38,14 @@ class _ServiceProviderProfileWidgetState
     super.initState();
     _model = createModel(context, () => ServiceProviderProfileModel());
 
-    _model.providerFuture = SupaFlow.client
-        .from('service_providers')
-        .select('*, users(full_name, avatar_url, phone_number), service_categories(name)')
-        .eq('id', widget.providerId)
-        .single();
+    if (widget.providerId.isNotEmpty) {
+      _model.providerFuture = SupaFlow.client
+          .from('service_providers')
+          .select(
+              '*, users(full_name, avatar_url, phone_number), service_categories(name)')
+          .eq('id', widget.providerId)
+          .single();
+    }
   }
 
   @override
@@ -61,7 +64,9 @@ class _ServiceProviderProfileWidgetState
       child: Scaffold(
         key: scaffoldKey,
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-        body: FutureBuilder<Map<String, dynamic>>(
+        body: widget.providerId.isEmpty
+            ? const Center(child: Text('Provider not found.'))
+            : FutureBuilder<Map<String, dynamic>>(
           future: _model.providerFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
