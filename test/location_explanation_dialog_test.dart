@@ -15,13 +15,13 @@ void main() {
     addTearDown(() => tester.binding.setSurfaceSize(null));
 
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: Scaffold(
           body: Align(
             alignment: Alignment.bottomCenter,
             child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: 592, maxHeight: 307.5),
-              child: LocationExplanationDialog(),
+              constraints: const BoxConstraints(maxWidth: 592, maxHeight: 307.5),
+              child: const LocationExplanationDialog(),
             ),
           ),
         ),
