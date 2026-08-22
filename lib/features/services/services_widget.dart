@@ -1,6 +1,7 @@
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/components/category_item/category_item_widget.dart';
 import 'package:degloor_one/components/request_service_sheet/request_service_sheet_widget.dart';
+import 'package:degloor_one/features/services/service_provider_display.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
@@ -189,6 +190,7 @@ class _ServicesWidgetState extends State<ServicesWidget> {
                         final provider = providers[index];
                         final user = provider['users'];
                         final category = provider['service_categories'];
+                        final displayName = ServiceProviderDisplay.name(user);
 
                         return InkWell(
                           onTap: () => context.pushNamed(
@@ -212,7 +214,7 @@ class _ServicesWidgetState extends State<ServicesWidget> {
                                   ClipRRect(
                                     borderRadius: BorderRadius.circular(8.0),
                                     child: CachedNetworkImage(
-                                      imageUrl: user['avatar_url'] ?? 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=100&h=100&q=80',
+                                      imageUrl: ServiceProviderDisplay.avatarUrl(user),
                                       width: 60.0,
                                       height: 60.0,
                                       fit: BoxFit.cover,
@@ -224,19 +226,18 @@ class _ServicesWidgetState extends State<ServicesWidget> {
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          user['full_name'] ?? 'Unknown Provider',
+                                          displayName,
                                           style: FlutterFlowTheme.of(context).titleSmall,
                                         ),
                                         Text(
-                                          category['name'] ?? 'General',
+                                          ServiceProviderDisplay.categoryName(category),
                                           style: FlutterFlowTheme.of(context).labelSmall,
                                         ),
-                                        Row(
-                                          children: [
-                                            const Icon(Icons.star_rounded, color: Colors.orange, size: 16.0),
-                                            Text(' 4.5', style: FlutterFlowTheme.of(context).bodySmall),
-                                            Text(' • ₹${provider['hourly_rate']}/hr', style: FlutterFlowTheme.of(context).bodySmall),
-                                          ],
+                                        Text(
+                                          ServiceProviderDisplay.hourlyRateLabel(
+                                            provider['hourly_rate'],
+                                          ),
+                                          style: FlutterFlowTheme.of(context).bodySmall,
                                         ),
                                       ],
                                     ),
@@ -253,7 +254,7 @@ class _ServicesWidgetState extends State<ServicesWidget> {
                                             padding: MediaQuery.viewInsetsOf(context),
                                             child: RequestServiceSheetWidget(
                                               providerId: provider['id'],
-                                              providerName: user['full_name'] ?? 'Provider',
+                                              providerName: displayName,
                                             ),
                                           );
                                         },
