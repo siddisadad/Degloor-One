@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
+import 'package:degloor_one/backend/notification_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_icon_button.dart';
@@ -43,11 +44,8 @@ class _NotificationsWidgetState extends State<NotificationsWidget> {
     }
 
     _notificationsSubscription?.cancel();
-    _notificationsSubscription = NotificationsTable()
-        .stream(
-          primaryKey: 'id',
-          queryFn: (q) => q.eq('user_id', user).order('created_at'),
-        )
+    _notificationsSubscription = NotificationService.repository
+        .watchForUser(user)
         .listen((notifications) {
       if (mounted) {
         setState(() {

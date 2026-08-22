@@ -21,6 +21,14 @@ class OrderLifecycle {
     cancelled,
   };
 
+  static const ownerDirectTransitions = <String, Set<String>>{
+    pending: {accepted, cancelled},
+    accepted: {ready, cancelled},
+    ready: {cancelled},
+  };
+
+  static const terminal = {delivered, cancelled};
+
   static String normalizeStatus(String status) {
     switch (status.toLowerCase().trim()) {
       case 'placed':
@@ -40,6 +48,32 @@ class OrderLifecycle {
         return unpaid;
       default:
         return status.toLowerCase().trim();
+    }
+  }
+
+  static bool isTerminal(String status) =>
+      terminal.contains(normalizeStatus(status));
+
+  static bool canTransition({
+    required String from,
+    required String to,
+  }) {
+    final current = normalizeStatus(from);
+    final next = normalizeStatus(to);
+    return ownerDirectTransitions[current]?.contains(next) ?? false;
+  }
+
+  static bool canCustomerCancel(String status) =>
+      normalizeStatus(status) == pending;
+
+  static bool canOwnerCancel(String status) {
+    switch (normalizeStatus(status)) {
+      case pending:
+      case accepted:
+      case ready:
+        return true;
+      default:
+        return false;
     }
   }
 

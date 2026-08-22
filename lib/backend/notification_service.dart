@@ -1,7 +1,11 @@
+import 'package:degloor_one/backend/repositories/notification_repository.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/core/error_handler.dart';
+import 'package:degloor_one/shared/showcase_catalog.dart';
 
 class NotificationService {
+  static final repository = NotificationRepository();
+
   static Future<void> sendNotification({
     required String userId,
     required String title,
@@ -9,14 +13,26 @@ class NotificationService {
     String? type,
   }) async {
     try {
-      await NotificationsTable().insert({
-        'user_id': userId,
-        'title': title,
-        'message': message,
-        'type': type ?? 'general',
-        'is_read': false,
-        'created_at': DateTime.now().toIso8601String(),
-      });
+      if (kUseShowcaseData) {
+        ShowcaseCatalog.insert('notifications', {
+          'user_id': userId,
+          'title': title,
+          'message': message,
+          'type': type ?? 'general',
+          'is_read': false,
+          'created_at': DateTime.now().toIso8601String(),
+        });
+        return;
+      }
+      await SupaFlow.client.rpc(
+        'notify_user',
+        params: {
+          'p_user_id': userId,
+          'p_title': title,
+          'p_message': message,
+          'p_type': type ?? 'general',
+        },
+      );
     } catch (e) {
       AppLogger.error('Failed to send notification', e);
     }

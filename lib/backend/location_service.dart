@@ -4,8 +4,9 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:degloor_one/app_state.dart';
-import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/backend/delivery_service.dart';
 import 'package:degloor_one/components/location_explanation_dialog.dart';
+import 'package:degloor_one/flutter_flow/lat_lng.dart';
 import 'package:degloor_one/core/error_handler.dart';
 
 class LocationService {
@@ -83,12 +84,9 @@ class LocationService {
         locationSettings: const LocationSettings(accuracy: LocationAccuracy.medium),
       );
 
-      await DeliveryPartnersTable().update(
-        data: {
-          'current_latitude': position.latitude,
-          'current_longitude': position.longitude,
-        },
-        matchingRows: (src) => src.eq('id', partnerId),
+      await DeliveryService.updatePartnerLocation(
+        latitude: position.latitude,
+        longitude: position.longitude,
       );
     } catch (e) {
       // Internal error handling logic could go here

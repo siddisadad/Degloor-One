@@ -1,4 +1,7 @@
 -- DEGLOOR ONE - Secure Transactions (RPCs)
+-- place_order is replaced by scratch/secure_platform.sql with server-side
+-- pricing, delivery fee, history, and notifications. Keep this file so
+-- older checklists still have a stock-safe checkout RPC.
 
 -- Function to place an order securely with inventory check
 -- This should be called via Supabase RPC

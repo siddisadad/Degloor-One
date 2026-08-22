@@ -1,5 +1,6 @@
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/delivery_service.dart';
+import 'package:degloor_one/backend/order_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/shared/order_lifecycle.dart';
@@ -82,10 +83,9 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
           elevation: 0,
         ),
         body: StreamBuilder<List<OrdersRow>>(
-          stream: OrdersTable().stream(
-            primaryKey: 'id',
-            queryFn: (q) =>
-                q.eq('id', widget.orderId).eq('user_id', currentUserUid),
+          stream: OrderService.instance.watchUserOrder(
+            orderId: widget.orderId,
+            userId: currentUserUid,
           ),
           builder: (context, snapshot) {
             if (!snapshot.hasData) {
@@ -134,6 +134,30 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
                                   ),
                             ),
                           ],
+                        ),
+                      ),
+                    if (OrderLifecycle.canCustomerCancel(order.status))
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: FFButtonWidget(
+                          onPressed: () async {
+                            await OrderService.instance.cancelOrder(
+                              orderId: order.id,
+                              actorUserId: currentUserUid,
+                              reason: 'Cancelled by customer',
+                            );
+                          },
+                          text: 'Cancel order',
+                          options: FFButtonOptions(
+                            width: double.infinity,
+                            height: 48,
+                            color: FlutterFlowTheme.of(context).error,
+                            textStyle: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                            ),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
                       ),
                     // Status Stepper

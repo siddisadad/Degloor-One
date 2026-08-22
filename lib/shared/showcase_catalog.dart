@@ -112,6 +112,10 @@ class ShowcaseCatalog {
         return q.ascending ? cmp : -cmp;
       });
     }
+    final start = q.offsetCount ?? 0;
+    if (start > 0) {
+      rows = start >= rows.length ? <Map<String, dynamic>>[] : rows.sublist(start);
+    }
     if (q.limitCount != null && rows.length > q.limitCount!) {
       rows = rows.take(q.limitCount!).toList();
     }
