@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:degloor_one/components/auth_page_header.dart';
 import 'package:degloor_one/components/brand_mark.dart';
 import 'package:degloor_one/components/home_feature_shortcuts.dart';
 
@@ -115,6 +116,31 @@ void main() {
     expect(tester.takeException(), isNull);
     expect(find.text('DEGLOOR ONE'), findsOneWidget);
     expect(find.text('Degloor, Maharashtra'), findsOneWidget);
+  });
+
+  testWidgets('auth page header shows brand, title, and subtitle',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(360, 320));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Padding(
+            padding: EdgeInsets.all(24),
+            child: AuthPageHeader(
+              title: 'Forgot password',
+              subtitle: 'Enter the email on your account.',
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('DEGLOOR ONE'), findsOneWidget);
+    expect(find.text('Forgot password'), findsOneWidget);
+    expect(find.text('Enter the email on your account.'), findsOneWidget);
   });
 
   testWidgets('home shortcuts expose services, jobs, and orders',

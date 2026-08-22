@@ -56,13 +56,20 @@ class _SocialButtonWidgetState extends State<SocialButtonWidget> {
       child: Container(
         decoration: BoxDecoration(
           color: FlutterFlowTheme.of(context).secondaryBackground,
-          borderRadius: BorderRadius.circular(12.0),
+          borderRadius: BorderRadius.circular(14.0),
           border: Border.all(
             color: FlutterFlowTheme.of(context).alternate,
           ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 10,
+              offset: const Offset(0, 3),
+            ),
+          ],
         ),
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 14.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [

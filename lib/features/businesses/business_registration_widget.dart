@@ -139,7 +139,7 @@ class _BusinessRegistrationWidgetState
                                   ),
                             ),
                             Text(
-                              'Phase 1: DEGLOOR ONE',
+                              'Everything Local. One App.',
                               style: FlutterFlowTheme.of(context)
                                   .bodySmall
                                   .override(

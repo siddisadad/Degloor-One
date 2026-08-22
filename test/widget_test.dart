@@ -28,6 +28,6 @@ void main() {
 
     expect(find.byType(Image), findsWidgets);
     expect(find.text('Everything Local. One App.'), findsOneWidget);
-    expect(find.textContaining('DEGLOOR ONE'), findsWidgets);
+    expect(find.text('Degloor, Maharashtra'), findsOneWidget);
   });
 }

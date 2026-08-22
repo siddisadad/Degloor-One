@@ -16,12 +16,14 @@ class HomeFeatureShortcuts extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = FlutterFlowTheme.of(context);
     return Row(
       children: [
         Expanded(
           child: _ShortcutTile(
             icon: Icons.handyman_rounded,
             label: 'Services',
+            accent: theme.primary,
             onTap: onServices,
           ),
         ),
@@ -30,6 +32,7 @@ class HomeFeatureShortcuts extends StatelessWidget {
           child: _ShortcutTile(
             icon: Icons.work_rounded,
             label: 'Jobs',
+            accent: theme.secondary,
             onTap: onJobs,
           ),
         ),
@@ -38,6 +41,7 @@ class HomeFeatureShortcuts extends StatelessWidget {
           child: _ShortcutTile(
             icon: Icons.receipt_long_rounded,
             label: 'Orders',
+            accent: const Color(0xFF2E7D6B),
             onTap: onOrders,
           ),
         ),
@@ -50,11 +54,13 @@ class _ShortcutTile extends StatelessWidget {
   const _ShortcutTile({
     required this.icon,
     required this.label,
+    required this.accent,
     required this.onTap,
   });
 
   final IconData icon;
   final String label;
+  final Color accent;
   final VoidCallback onTap;
 
   @override
@@ -62,32 +68,33 @@ class _ShortcutTile extends StatelessWidget {
     final theme = FlutterFlowTheme.of(context);
     return Material(
       color: theme.secondaryBackground,
-      borderRadius: BorderRadius.circular(14),
+      elevation: 0,
+      borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: theme.alternate),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: theme.alternate.withValues(alpha: 0.9)),
           ),
           child: Column(
             children: [
               Container(
-                width: 36,
-                height: 36,
+                width: 40,
+                height: 40,
                 decoration: BoxDecoration(
-                  color: theme.primary.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(10),
+                  color: accent.withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(icon, color: theme.primary, size: 20),
+                child: Icon(icon, color: accent, size: 22),
               ),
               const SizedBox(height: 8),
               Text(
                 label,
                 style: theme.labelMedium.override(
-                  font: GoogleFonts.inter(fontWeight: FontWeight.w600),
+                  font: GoogleFonts.inter(fontWeight: FontWeight.w700),
                   color: theme.primaryText,
                 ),
               ),

@@ -935,7 +935,7 @@ class _BusinessDashboardWidgetState extends State<BusinessDashboardWidget> {
                                   ),
                             ),
                             Text(
-                              'Deshmukh Technologies • Phase 1',
+                              'Deshmukh Technologies • Degloor',
                               style: FlutterFlowTheme.of(context)
                                   .labelSmall
                                   .override(

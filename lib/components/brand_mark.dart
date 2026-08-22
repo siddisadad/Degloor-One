@@ -26,30 +26,51 @@ class BrandMark extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = FlutterFlowTheme.of(context);
-    final mark = ClipRRect(
-      borderRadius: BorderRadius.circular(size * 0.22),
-      child: Image.asset(
-        kBrandImageAsset,
-        width: size,
-        height: size,
-        fit: BoxFit.cover,
-        filterQuality: FilterQuality.high,
-        semanticLabel: kBrandName,
+    final glow = !compact && showWordmark;
+    final mark = Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(size * 0.22),
+        boxShadow: [
+          if (glow)
+            BoxShadow(
+              color: const Color(0xFFFF9800).withValues(alpha: 0.32),
+              blurRadius: size * 0.28,
+              spreadRadius: 1,
+            ),
+          BoxShadow(
+            color: const Color(0xFF0A1B3D).withValues(alpha: glow ? 0.28 : 0.16),
+            blurRadius: size * 0.16,
+            offset: Offset(0, size * 0.05),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(size * 0.22),
+        child: Image.asset(
+          kBrandImageAsset,
+          width: size,
+          height: size,
+          fit: BoxFit.cover,
+          filterQuality: FilterQuality.high,
+          semanticLabel: kBrandName,
+        ),
       ),
     );
 
     if (!showWordmark) return mark;
 
+    final titleColor = wordmarkColor ?? theme.primaryText;
+    final accent = taglineColor ?? theme.secondary;
     final titleStyle = (compact ? theme.titleMedium : theme.headlineMedium)
         .override(
       font: GoogleFonts.inter(fontWeight: FontWeight.w800),
-      color: wordmarkColor ?? theme.primaryText,
-      fontSize: compact ? 18 : 28,
-      letterSpacing: compact ? 0.2 : 0.4,
+      color: titleColor,
+      fontSize: compact ? 17 : 28,
+      letterSpacing: compact ? 0.15 : 0.4,
     );
     final taglineStyle = theme.bodySmall.override(
-      font: GoogleFonts.inter(fontWeight: FontWeight.w500),
-      color: taglineColor ?? theme.secondaryText,
+      font: GoogleFonts.inter(fontWeight: FontWeight.w600),
+      color: accent,
     );
 
     if (compact) {
@@ -62,7 +83,7 @@ class BrandMark extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             mark,
-            const SizedBox(width: 10),
+            const SizedBox(width: 12),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
@@ -86,12 +107,27 @@ class BrandMark extends StatelessWidget {
       );
     }
 
+    final onDark = (taglineColor ?? titleColor).computeLuminance() > 0.7;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         mark,
-        const SizedBox(height: 12),
-        Text(kBrandTagline, style: taglineStyle),
+        const SizedBox(height: 16),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+          decoration: BoxDecoration(
+            color: onDark
+                ? Colors.white.withValues(alpha: 0.12)
+                : theme.primary.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(
+              color: onDark
+                  ? Colors.white.withValues(alpha: 0.2)
+                  : theme.secondary.withValues(alpha: 0.28),
+            ),
+          ),
+          child: Text(kBrandTagline, style: taglineStyle),
+        ),
       ],
     );
   }

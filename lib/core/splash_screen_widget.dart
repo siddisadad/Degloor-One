@@ -62,9 +62,10 @@ class _SplashScreenWidgetState extends State<SplashScreenWidget> {
             const Align(
               alignment: AlignmentDirectional(0.0, 0.0),
               child: BrandMark(
-                size: 220,
+                size: 196,
                 showWordmark: true,
-                taglineColor: Color(0xCCFFFFFF),
+                wordmarkColor: Colors.white,
+                taglineColor: Color(0xFFFFCC80),
               ),
             ),
             Align(
@@ -115,36 +116,43 @@ class _SplashScreenWidgetState extends State<SplashScreenWidget> {
             ),
             Align(
               alignment: const AlignmentDirectional(1.0, -1.0),
-              child: Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Container(
-                  height: 34.0,
-                  decoration: BoxDecoration(
-                    color: FlutterFlowTheme.of(context).secondaryBackground,
-                    borderRadius: BorderRadius.circular(8.0),
-                    border: Border.all(
-                      color: FlutterFlowTheme.of(context).alternate,
+              child: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
                     ),
-                  ),
-                  alignment: const AlignmentDirectional(0.0, 0.0),
-                  child: Padding(
-                    padding: const EdgeInsetsDirectional.fromSTEB(12.0, 0.0, 12.0, 0.0),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.18),
+                      ),
+                    ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
+                        const Icon(
+                          Icons.location_on_rounded,
+                          size: 14,
+                          color: Color(0xFFFF9800),
+                        ),
+                        const SizedBox(width: 6),
                         Text(
-                          'Phase 1: DEGLOOR ONE',
+                          'Degloor, Maharashtra',
                           style: FlutterFlowTheme.of(context)
                               .labelMedium
                               .override(
-                                font: GoogleFonts.inter(),
-                                color: FlutterFlowTheme.of(context).secondaryText,
-                                fontSize: 14.0,
-                                lineHeight: 1.4,
+                                font: GoogleFonts.inter(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                color: Colors.white,
+                                fontSize: 13.0,
                               ),
                         ),
-                      ].divide(const SizedBox(width: 6.0)),
+                      ],
                     ),
                   ),
                 ),

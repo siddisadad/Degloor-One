@@ -68,7 +68,26 @@ class _UserProfileReportsWidgetState extends State<UserProfileReportsWidget> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const BrandMark(size: 48, showWordmark: true, compact: true),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.fromLTRB(12, 10, 14, 10),
+                    decoration: BoxDecoration(
+                      color: FlutterFlowTheme.of(context)
+                          .primary
+                          .withValues(alpha: 0.06),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: FlutterFlowTheme.of(context)
+                            .primary
+                            .withValues(alpha: 0.08),
+                      ),
+                    ),
+                    child: const BrandMark(
+                      size: 48,
+                      showWordmark: true,
+                      compact: true,
+                    ),
+                  ),
                   const SizedBox(height: 20),
                   // User Profile Section
                   FutureBuilder<List<UsersRow>>(

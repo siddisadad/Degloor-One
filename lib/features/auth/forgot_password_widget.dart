@@ -1,7 +1,7 @@
 import 'package:degloor_one/auth/password_recovery.dart';
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/supabase/supabase_connection.dart';
-import 'package:degloor_one/components/brand_mark.dart';
+import 'package:degloor_one/components/auth_page_header.dart';
 import 'package:degloor_one/components/supabase_unreachable_banner.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_icon_button.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
@@ -88,22 +88,10 @@ class _ForgotPasswordWidgetState extends State<ForgotPasswordWidget> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 8),
-        const BrandMark(size: 56, showWordmark: true, compact: true),
-        const SizedBox(height: 20),
-        Text(
-          'Forgot password',
-          style: FlutterFlowTheme.of(context).headlineMedium.override(
-                fontFamily: 'Inter',
-                fontWeight: FontWeight.w800,
-              ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Enter the email on your account. We will send a link to set a new password.',
-          style: FlutterFlowTheme.of(context).bodyMedium.override(
-                fontFamily: 'Inter',
-                color: FlutterFlowTheme.of(context).secondaryText,
-              ),
+        const AuthPageHeader(
+          title: 'Forgot password',
+          subtitle:
+              'Enter the email on your account. We will send a link to set a new password.',
         ),
         const SizedBox(height: 24),
         const SupabaseUnreachableBanner(),
@@ -163,27 +151,11 @@ class _ForgotPasswordWidgetState extends State<ForgotPasswordWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 20),
-        Icon(
-          Icons.mark_email_read_outlined,
-          size: 56,
-          color: FlutterFlowTheme.of(context).primary,
-        ),
-        const SizedBox(height: 20),
-        Text(
-          'Check your email',
-          style: FlutterFlowTheme.of(context).headlineMedium.override(
-                fontFamily: 'Inter',
-                fontWeight: FontWeight.w800,
-              ),
-        ),
         const SizedBox(height: 8),
-        Text(
-          'If an account exists for ${_model.emailController.text.trim()}, you will receive a reset link shortly. Open it on this device to choose a new password.',
-          style: FlutterFlowTheme.of(context).bodyMedium.override(
-                fontFamily: 'Inter',
-                color: FlutterFlowTheme.of(context).secondaryText,
-              ),
+        AuthPageHeader(
+          title: 'Check your email',
+          subtitle:
+              'If an account exists for ${_model.emailController.text.trim()}, you will receive a reset link shortly. Open it on this device to choose a new password.',
         ),
         const SizedBox(height: 32),
         FFButtonWidget(

@@ -209,7 +209,7 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const BrandMark(size: 40),
+                        const BrandMark(size: 44),
                         const SizedBox(width: 10),
                         Expanded(
                           child: InkWell(
@@ -220,7 +220,17 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                           onTap: () async {
                             context.pushNamed('LocationRadiusSelector');
                           },
-                          child: Column(
+                          child: Container(
+                            padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+                            decoration: BoxDecoration(
+                              color: FlutterFlowTheme.of(context)
+                                  .secondaryBackground,
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: FlutterFlowTheme.of(context).alternate,
+                              ),
+                            ),
+                            child: Column(
                             mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -228,7 +238,7 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                                 children: [
                                   Icon(
                                     Icons.location_on_rounded,
-                                    color: FlutterFlowTheme.of(context).primary,
+                                    color: FlutterFlowTheme.of(context).secondary,
                                     size: 18.0,
                                   ),
                                   Expanded(
@@ -240,9 +250,7 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                                         .titleMedium
                                         .override(
                                           font: GoogleFonts.inter(
-                                            fontWeight: FlutterFlowTheme.of(context)
-                                                .titleMedium
-                                                .fontWeight,
+                                            fontWeight: FontWeight.w700,
                                           ),
                                           color: FlutterFlowTheme.of(context)
                                               .primaryText,
@@ -266,26 +274,16 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                                 style:
                                     FlutterFlowTheme.of(context).bodySmall.override(
                                           font: GoogleFonts.inter(
-                                            fontWeight: FlutterFlowTheme.of(context)
-                                                .bodySmall
-                                                .fontWeight,
-                                            fontStyle: FlutterFlowTheme.of(context)
-                                                .bodySmall
-                                                .fontStyle,
+                                            fontWeight: FontWeight.w500,
                                           ),
                                           color: FlutterFlowTheme.of(context)
                                               .secondaryText,
                                           letterSpacing: 0.0,
-                                          fontWeight: FlutterFlowTheme.of(context)
-                                              .bodySmall
-                                              .fontWeight,
-                                          fontStyle: FlutterFlowTheme.of(context)
-                                              .bodySmall
-                                              .fontStyle,
                                           lineHeight: 1.5,
                                         ),
                               ),
-                            ].divide(const SizedBox(height: 4.0)),
+                            ].divide(const SizedBox(height: 2.0)),
+                          ),
                           ),
                           ),
                         ),
