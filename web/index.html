@@ -54,6 +54,17 @@
   
   <!-- Google Maps API - Replace YOUR_GOOGLE_MAPS_WEB_API_KEY with a real key to enable maps -->
   <!-- <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_WEB_API_KEY"></script> -->
+  <script>
+    window.__degloorGoogleMapsReady = function () {
+      try {
+        return typeof google !== 'undefined' &&
+          !!google.maps &&
+          !!google.maps.MapTypeId;
+      } catch (e) {
+        return false;
+      }
+    };
+  </script>
 </head>
 <body>
   

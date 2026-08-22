@@ -18,6 +18,7 @@ import 'package:degloor_one/index.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:degloor_one/core/error_handler.dart';
+import 'package:degloor_one/core/google_maps_js.dart';
 import 'business_registration_model.dart';
 export 'business_registration_model.dart';
 
@@ -533,13 +534,16 @@ class _BusinessRegistrationWidgetState
                                           if (userLoc != null) {
                                             _model.mapGoogleMapsCenter =
                                                 userLoc;
-                                            final controller = await _model
-                                                .mapGoogleMapsController.future;
-                                            await controller.animateCamera(
-                                              CameraUpdate.newLatLng(
-                                                userLoc.toGoogleMaps(),
-                                              ),
-                                            );
+                                            if (isGoogleMapsJsReady()) {
+                                              final controller = await _model
+                                                  .mapGoogleMapsController
+                                                  .future;
+                                              await controller.animateCamera(
+                                                CameraUpdate.newLatLng(
+                                                  userLoc.toGoogleMaps(),
+                                                ),
+                                              );
+                                            }
                                             safeSetState(() {});
                                           }
                                         },

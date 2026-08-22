@@ -7,6 +7,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:degloor_one/core/google_maps_js.dart';
 import 'lat_lng.dart' as latlng;
 
 export 'dart:async' show Completer;
@@ -124,6 +125,7 @@ class _FlutterFlowGoogleMapState extends State<FlutterFlowGoogleMap> {
   late LatLng currentMapCenter;
 
   void initializeMarkerBitmap() {
+    if (kIsWeb && !isGoogleMapsJsReady()) return;
     final markerImage = widget.markerImage;
 
     if (markerImage == null) {
@@ -191,6 +193,10 @@ class _FlutterFlowGoogleMapState extends State<FlutterFlowGoogleMap> {
 
   @override
   Widget build(BuildContext context) {
+    if (kIsWeb && !isGoogleMapsJsReady()) {
+      return const _GoogleMapsUnavailablePlaceholder();
+    }
+
     final mapHasGesturePreference = widget.mapTakesGesturePreference &&
         widget.allowInteraction &&
         widget.allowZoom;
@@ -253,6 +259,37 @@ class _FlutterFlowGoogleMapState extends State<FlutterFlowGoogleMap> {
             child: googleMapWidget,
           )
         : googleMapWidget;
+  }
+}
+
+class _GoogleMapsUnavailablePlaceholder extends StatelessWidget {
+  const _GoogleMapsUnavailablePlaceholder();
+
+  @override
+  Widget build(BuildContext context) {
+    return const ColoredBox(
+      color: Color(0xFFE8EEF2),
+      child: Center(
+        child: Padding(
+          padding: EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.map_outlined, size: 40, color: Color(0xFF607D8B)),
+              SizedBox(height: 8),
+              Text(
+                'Map preview unavailable',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Color(0xFF455A64),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 

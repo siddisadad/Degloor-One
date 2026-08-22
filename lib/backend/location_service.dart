@@ -26,6 +26,7 @@ class LocationService {
       final proceed = await showModalBottomSheet<bool>(
         context: context,
         backgroundColor: Colors.transparent,
+        isScrollControlled: true,
         builder: (context) => const LocationExplanationDialog(),
       );
 

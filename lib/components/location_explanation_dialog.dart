@@ -9,7 +9,8 @@ class LocationExplanationDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(24),
+      constraints: const BoxConstraints(maxHeight: 420),
+      padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
       decoration: BoxDecoration(
         color: FlutterFlowTheme.of(context).secondaryBackground,
         borderRadius: const BorderRadius.only(
@@ -17,61 +18,68 @@ class LocationExplanationDialog extends StatelessWidget {
           topRight: Radius.circular(20),
         ),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 50,
-            height: 4,
-            decoration: BoxDecoration(
-              color: FlutterFlowTheme.of(context).alternate,
-              borderRadius: BorderRadius.circular(2),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 50,
+              height: 4,
+              decoration: BoxDecoration(
+                color: FlutterFlowTheme.of(context).alternate,
+                borderRadius: BorderRadius.circular(2),
+              ),
             ),
-          ),
-          const SizedBox(height: 24),
-          Icon(
-            Icons.location_on_rounded,
-            color: FlutterFlowTheme.of(context).primary,
-            size: 64,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Enable Location',
-            style: FlutterFlowTheme.of(context).headlineSmall.override(
-                  fontFamily: GoogleFonts.inter().fontFamily,
+            const SizedBox(height: 16),
+            Icon(
+              Icons.location_on_rounded,
+              color: FlutterFlowTheme.of(context).primary,
+              size: 48,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Enable Location',
+              style: FlutterFlowTheme.of(context).headlineSmall.override(
+                    fontFamily: GoogleFonts.inter().fontFamily,
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'We need your location to find businesses within your radius and calculate accurate delivery fees.',
+              textAlign: TextAlign.center,
+              style: FlutterFlowTheme.of(context).bodyMedium.override(
+                    fontFamily: GoogleFonts.inter().fontFamily,
+                    color: FlutterFlowTheme.of(context).secondaryText,
+                  ),
+            ),
+            const SizedBox(height: 20),
+            FFButtonWidget(
+              onPressed: () => Navigator.pop(context, true),
+              text: 'Grant Permission',
+              options: FFButtonOptions(
+                width: double.infinity,
+                height: 50,
+                color: FlutterFlowTheme.of(context).primary,
+                textStyle: const TextStyle(
+                  color: Colors.white,
                   fontWeight: FontWeight.bold,
                 ),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            'We need your location to find businesses within your radius and calculate accurate delivery fees.',
-            textAlign: TextAlign.center,
-            style: FlutterFlowTheme.of(context).bodyMedium.override(
-                  fontFamily: GoogleFonts.inter().fontFamily,
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            const SizedBox(height: 4),
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text(
+                'Not Now',
+                style: TextStyle(
                   color: FlutterFlowTheme.of(context).secondaryText,
                 ),
-          ),
-          const SizedBox(height: 32),
-          FFButtonWidget(
-            onPressed: () => Navigator.pop(context, true),
-            text: 'Grant Permission',
-            options: FFButtonOptions(
-              width: double.infinity,
-              height: 50,
-              color: FlutterFlowTheme.of(context).primary,
-              textStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-              borderRadius: BorderRadius.circular(12),
+              ),
             ),
-          ),
-          const SizedBox(height: 12),
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(
-              'Not Now',
-              style: TextStyle(color: FlutterFlowTheme.of(context).secondaryText),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

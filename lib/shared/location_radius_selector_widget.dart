@@ -10,6 +10,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as google_maps;
 import 'package:degloor_one/app_state.dart';
 import 'package:degloor_one/backend/location_service.dart';
+import 'package:degloor_one/core/google_maps_js.dart';
 import 'location_radius_selector_model.dart';
 export 'location_radius_selector_model.dart';
 
@@ -218,7 +219,8 @@ class _LocationRadiusSelectorWidgetState
                             setState(() {
                               _model.mapGoogleMapsCenter = FFAppState.instance.userLocation;
                             });
-                            if (_model.mapGoogleMapsCenter != null) {
+                            if (_model.mapGoogleMapsCenter != null &&
+                                isGoogleMapsJsReady()) {
                               final controller = await _model.mapGoogleMapsController.future;
                               controller.animateCamera(CameraUpdate.newLatLng(
                                 google_maps.LatLng(
@@ -519,7 +521,8 @@ class _LocationRadiusSelectorWidgetState
                         setState(() {
                           _model.mapGoogleMapsCenter = FFAppState.instance.userLocation;
                         });
-                        if (_model.mapGoogleMapsCenter != null) {
+                        if (_model.mapGoogleMapsCenter != null &&
+                            isGoogleMapsJsReady()) {
                           final controller = await _model.mapGoogleMapsController.future;
                           controller.animateCamera(CameraUpdate.newLatLng(
                             google_maps.LatLng(
