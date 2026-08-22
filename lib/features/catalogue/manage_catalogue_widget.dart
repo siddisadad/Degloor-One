@@ -1,4 +1,5 @@
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
+import 'package:degloor_one/components/cached_remote_image.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_icon_button.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
@@ -303,7 +304,7 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
                           child: isEditingUploading
                               ? const Center(child: CircularProgressIndicator())
                               : currentImageUrl != null
-                                  ? Image.network(currentImageUrl!, fit: BoxFit.cover)
+                                  ? CachedRemoteImage(url: currentImageUrl!)
                                   : const Icon(Icons.image_not_supported_rounded, size: 40),
                         ),
                       ),
@@ -498,7 +499,7 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
                                             : _model.uploadedImageUrl != null
                                                 ? ClipRRect(
                                                     borderRadius: BorderRadius.circular(8),
-                                                    child: Image.network(_model.uploadedImageUrl!, fit: BoxFit.cover),
+                                                    child: CachedRemoteImage(url: _model.uploadedImageUrl!),
                                                   )
                                                 : Icon(Icons.add_a_photo_rounded, color: FlutterFlowTheme.of(context).secondaryText),
                                       ),
@@ -718,7 +719,7 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
                                       height: 48,
                                       color: FlutterFlowTheme.of(context).primaryBackground,
                                       child: product.imageUrl != null
-                                          ? Image.network(product.imageUrl!, fit: BoxFit.cover)
+                                          ? CachedRemoteImage(url: product.imageUrl!)
                                           : Icon(Icons.image_not_supported_rounded, color: FlutterFlowTheme.of(context).alternate),
                                     ),
                                   ),

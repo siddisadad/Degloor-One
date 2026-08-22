@@ -1,7 +1,7 @@
 import 'package:degloor_one/auth/password_recovery.dart';
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/supabase/supabase_connection.dart';
-import 'package:degloor_one/components/brand_mark.dart';
+import 'package:degloor_one/components/auth_page_header.dart';
 import 'package:degloor_one/components/supabase_unreachable_banner.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_icon_button.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
@@ -74,9 +74,11 @@ class _ForgotPasswordWidgetState extends State<ForgotPasswordWidget> {
           ),
         ),
         body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            child: _emailSent ? _buildSentState() : _buildForm(),
+          child: AuthPageScaffold(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: _emailSent ? _buildSentState() : _buildForm(),
+            ),
           ),
         ),
       ),
@@ -87,23 +89,10 @@ class _ForgotPasswordWidgetState extends State<ForgotPasswordWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 8),
-        const BrandMark(size: 56, showWordmark: true, compact: true),
-        const SizedBox(height: 20),
-        Text(
-          'Forgot password',
-          style: FlutterFlowTheme.of(context).headlineMedium.override(
-                fontFamily: 'Inter',
-                fontWeight: FontWeight.w800,
-              ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Enter the email on your account. We will send a link to set a new password.',
-          style: FlutterFlowTheme.of(context).bodyMedium.override(
-                fontFamily: 'Inter',
-                color: FlutterFlowTheme.of(context).secondaryText,
-              ),
+        const AuthPageHeader(
+          title: 'Forgot password',
+          subtitle:
+              'Enter the email on your account. We will send a link to set a new password.',
         ),
         const SizedBox(height: 24),
         const SupabaseUnreachableBanner(),

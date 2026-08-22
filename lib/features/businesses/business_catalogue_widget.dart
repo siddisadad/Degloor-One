@@ -1,4 +1,5 @@
 import 'package:degloor_one/backend/cart_service.dart';
+import 'package:degloor_one/components/cached_remote_image.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_icon_button.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
@@ -187,7 +188,7 @@ class _BusinessCatalogueWidgetState extends State<BusinessCatalogueWidget> with 
                     height: 80,
                     color: FlutterFlowTheme.of(context).primaryBackground,
                     child: product.imageUrl != null
-                        ? Image.network(product.imageUrl!, fit: BoxFit.cover)
+                        ? CachedRemoteImage(url: product.imageUrl!)
                         : Icon(Icons.image_not_supported_rounded, color: FlutterFlowTheme.of(context).alternate),
                   ),
                 ),

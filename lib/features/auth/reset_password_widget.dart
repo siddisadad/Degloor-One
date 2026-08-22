@@ -1,7 +1,7 @@
 import 'package:degloor_one/auth/password_recovery.dart';
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/supabase/supabase_connection.dart';
-import 'package:degloor_one/components/brand_mark.dart';
+import 'package:degloor_one/components/auth_page_header.dart';
 import 'package:degloor_one/components/supabase_unreachable_banner.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_icon_button.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
@@ -72,9 +72,11 @@ class _ResetPasswordWidgetState extends State<ResetPasswordWidget> {
           ),
         ),
         body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            child: _canSetPassword ? _buildForm() : _buildExpired(),
+          child: AuthPageScaffold(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: _canSetPassword ? _buildForm() : _buildExpired(),
+            ),
           ),
         ),
       ),
@@ -85,23 +87,10 @@ class _ResetPasswordWidgetState extends State<ResetPasswordWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 8),
-        const BrandMark(size: 56, showWordmark: true, compact: true),
-        const SizedBox(height: 20),
-        Text(
-          'Link expired',
-          style: FlutterFlowTheme.of(context).headlineMedium.override(
-                fontFamily: 'Inter',
-                fontWeight: FontWeight.w800,
-              ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'This reset link is invalid or has already been used. Request a new one to continue.',
-          style: FlutterFlowTheme.of(context).bodyMedium.override(
-                fontFamily: 'Inter',
-                color: FlutterFlowTheme.of(context).secondaryText,
-              ),
+        const AuthPageHeader(
+          title: 'Link expired',
+          subtitle:
+              'This reset link is invalid or has already been used. Request a new one to continue.',
         ),
         const SizedBox(height: 32),
         FFButtonWidget(
@@ -128,23 +117,9 @@ class _ResetPasswordWidgetState extends State<ResetPasswordWidget> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 8),
-          const BrandMark(size: 56, showWordmark: true, compact: true),
-          const SizedBox(height: 20),
-          Text(
-            'Set a new password',
-            style: FlutterFlowTheme.of(context).headlineMedium.override(
-                  fontFamily: 'Inter',
-                  fontWeight: FontWeight.w800,
-                ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Choose a password with at least 6 characters.',
-            style: FlutterFlowTheme.of(context).bodyMedium.override(
-                  fontFamily: 'Inter',
-                  color: FlutterFlowTheme.of(context).secondaryText,
-                ),
+          const AuthPageHeader(
+            title: 'Set a new password',
+            subtitle: 'Choose a password with at least 6 characters.',
           ),
           const SizedBox(height: 24),
           const SupabaseUnreachableBanner(),

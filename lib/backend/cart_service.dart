@@ -1,6 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/showcase_catalog.dart';
+
+class CartAddResult {
+  const CartAddResult._({
+    required this.added,
+    this.needsReplacement = false,
+    this.message,
+  });
+
+  final bool added;
+  final bool needsReplacement;
+  final String? message;
+
+  static const signedOut = CartAddResult._(
+    added: false,
+    message: 'Please sign in to add items to cart',
+  );
+
+  static const needsConfirm = CartAddResult._(
+    added: false,
+    needsReplacement: true,
+  );
+
+  static const success = CartAddResult._(
+    added: true,
+    message: 'Added to cart',
+  );
+
+  factory CartAddResult.failure(Object error) => CartAddResult._(
+        added: false,
+        message: 'Error adding to cart: $error',
+      );
+}
 
 class CartService {
   static Future<void> addToCart({
@@ -12,36 +45,97 @@ class CartService {
     final userId = currentUserUid;
     if (userId == '') {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please sign in to add items to cart')),
+        SnackBar(content: Text(CartAddResult.signedOut.message!)),
       );
       return;
     }
 
     try {
-      // 1. Check for existing cart from different business
-      final existingCarts = await cartsForUser(userId);
+      var result = await addProduct(
+        userId: userId,
+        businessId: businessId,
+        productId: productId,
+        quantity: quantity,
+      );
 
-      if (existingCarts.isNotEmpty && existingCarts.first.businessId != businessId) {
+      if (result.needsReplacement) {
         if (!context.mounted) return;
         final confirm = await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
             title: const Text('Replace Cart?'),
-            content: const Text('Your cart contains items from another business. Would you like to clear it and add this item instead?'),
+            content: const Text(
+              'Your cart contains items from another business. Would you like to clear it and add this item instead?',
+            ),
             actions: [
-              TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
-              TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Clear and Add')),
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('Clear and Add'),
+              ),
             ],
           ),
         );
 
         if (confirm != true) return;
+        result = await addProduct(
+          userId: userId,
+          businessId: businessId,
+          productId: productId,
+          quantity: quantity,
+          replaceOtherBusiness: true,
+        );
+      }
 
-        // Clear existing cart
+      if (!context.mounted) return;
+      if (result.added) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(result.message ?? 'Added to cart'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else if (result.message != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(result.message!),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error adding to cart: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  /// Data-only add so tests and UI share the same cart rules.
+  static Future<CartAddResult> addProduct({
+    required String userId,
+    required String businessId,
+    required String productId,
+    int quantity = 1,
+    bool replaceOtherBusiness = false,
+  }) async {
+    if (userId.isEmpty) return CartAddResult.signedOut;
+
+    try {
+      final existingCarts = await cartsForUser(userId);
+
+      if (existingCarts.isNotEmpty &&
+          existingCarts.first.businessId != businessId) {
+        if (!replaceOtherBusiness) return CartAddResult.needsConfirm;
         await CartsTable().delete(matchingRows: (q) => q.eq('user_id', userId));
       }
 
-      // 2. Get or Create Cart
       String cartId;
       final currentCart = await CartsTable().queryRows(
         queryFn: (q) => q.eq('user_id', userId).eq('business_id', businessId),
@@ -58,7 +152,6 @@ class CartService {
         cartId = currentCart.first.id;
       }
 
-      // 3. Add or Update Item
       final existingItems = await CartItemsTable().queryRows(
         queryFn: (q) => q.eq('cart_id', cartId).eq('product_id', productId),
       );
@@ -77,22 +170,28 @@ class CartService {
         });
       }
 
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Added to cart'), backgroundColor: Colors.green),
-      );
+      return CartAddResult.success;
     } catch (e) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error adding to cart: $e'), backgroundColor: Colors.red),
-      );
+      return CartAddResult.failure(e);
     }
   }
 
   static Future<List<CartsRow>> cartsForUser(String userId) {
     return CartsTable().queryRows(
-      queryFn: (q) => q.eq('user_id', userId).order('created_at', ascending: false),
+      queryFn: (q) =>
+          q.eq('user_id', userId).order('created_at', ascending: false),
     );
+  }
+
+  static Future<List<Map<String, dynamic>>> itemsForCart(String cartId) async {
+    if (kUseShowcaseData) {
+      return ShowcaseCatalog.cartItemsWithProducts(cartId);
+    }
+    final items = await SupaFlow.client
+        .from('cart_items')
+        .select('*, products(*)')
+        .eq('cart_id', cartId);
+    return List<Map<String, dynamic>>.from(items);
   }
 
   static Future<int> getCartItemCount() async {
