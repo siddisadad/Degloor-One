@@ -1,5 +1,6 @@
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/address_service.dart';
+import 'package:degloor_one/shared/address_draft.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_google_map.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
@@ -74,12 +75,14 @@ class _AddAddressWidgetState extends State<AddAddressWidget> {
 
       try {
         await AddressService.instance.add(
-          userId: currentUserUid,
-          title: _model.titleTextController?.text ?? '',
-          addressText: _model.addressTextController?.text ?? '',
-          latitude: _model.mapCenter!.latitude,
-          longitude: _model.mapCenter!.longitude,
-          isDefault: _model.isDefault,
+          AddressDraft.fromForm(
+            userId: currentUserUid,
+            title: _model.titleTextController?.text ?? '',
+            addressText: _model.addressTextController?.text ?? '',
+            latitude: _model.mapCenter!.latitude,
+            longitude: _model.mapCenter!.longitude,
+            isDefault: _model.isDefault,
+          ),
         );
       } catch (e) {
         AppLogger.error('Error saving address', e);

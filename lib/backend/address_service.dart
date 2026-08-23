@@ -1,6 +1,8 @@
 import 'package:degloor_one/backend/repositories/address_repository.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/core/error_handler.dart';
+import 'package:degloor_one/shared/address_default_flag.dart';
+import 'package:degloor_one/shared/address_draft.dart';
 import 'package:degloor_one/shared/saved_address.dart';
 
 class AddressService {
@@ -47,47 +49,30 @@ class AddressService {
     return SavedAddress.fromRow(row);
   }
 
-  Future<SavedAddress> add({
-    required String userId,
-    required String title,
-    required String addressText,
-    required double latitude,
-    required double longitude,
-    bool isDefault = false,
-  }) async {
-    if (userId.isEmpty) {
+  Future<SavedAddress> add(AddressDraft draft) async {
+    if (draft.userId.isEmpty) {
       throw Exception(_signInMessage);
     }
-    if (latitude < -90 ||
-        latitude > 90 ||
-        longitude < -180 ||
-        longitude > 180) {
-      throw Exception('Please pick a location on the map');
-    }
-    final trimmedTitle = title.trim();
-    final trimmedAddress = addressText.trim();
-    if (trimmedTitle.isEmpty) {
-      throw Exception('Please enter a title');
-    }
-    if (trimmedAddress.isEmpty) {
-      throw Exception('Please enter address details');
-    }
+    final normalized = AddressDraft.fromForm(
+      userId: draft.userId,
+      title: draft.title,
+      addressText: draft.addressText,
+      latitude: draft.latitude,
+      longitude: draft.longitude,
+      isDefault: draft.isDefault,
+    );
 
-    final existing = await _repository.forUser(userId);
-    final makeDefault = isDefault || existing.isEmpty;
+    final existing = await _repository.forUser(normalized.userId);
+    final makeDefault = normalized.isDefault || existing.isEmpty;
 
-    final row = await _repository.insert({
-      'user_id': userId,
-      'title': trimmedTitle,
-      'address_text': trimmedAddress,
-      'latitude': latitude,
-      'longitude': longitude,
-      'is_default': makeDefault,
-    });
+    final row = await _repository.insert(
+      normalized,
+      defaultFlag: AddressDefaultFlag(makeDefault),
+    );
 
     if (makeDefault) {
       await _repository.clearDefaultsExcept(
-        userId: userId,
+        userId: normalized.userId,
         exceptId: row.id,
       );
     }

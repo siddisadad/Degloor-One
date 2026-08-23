@@ -2,6 +2,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/backend/address_service.dart';
 import 'package:degloor_one/backend/supabase/database/tables/addresses_table.dart';
+import 'package:degloor_one/shared/address_default_flag.dart';
+import 'package:degloor_one/shared/address_draft.dart';
 import 'package:degloor_one/shared/saved_address.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
@@ -62,12 +64,14 @@ void main() {
 
   test('add default unsets the previous default', () async {
     final added = await AddressService.instance.add(
-      userId: GuestAuthUser.guestUid,
-      title: 'Parents',
-      addressText: 'Near temple, Degloor',
-      latitude: 18.55,
-      longitude: 77.58,
-      isDefault: true,
+      const AddressDraft(
+        userId: GuestAuthUser.guestUid,
+        title: 'Parents',
+        addressText: 'Near temple, Degloor',
+        latitude: 18.55,
+        longitude: 77.58,
+        defaultFlag: AddressDefaultFlag(true),
+      ),
     );
     final rows =
         await AddressService.instance.listForUser(GuestAuthUser.guestUid);
@@ -77,11 +81,13 @@ void main() {
 
   test('first saved address becomes the default', () async {
     final added = await AddressService.instance.add(
-      userId: ShowcaseCatalog.customer2,
-      title: 'Home',
-      addressText: 'Degloor',
-      latitude: 18.55,
-      longitude: 77.58,
+      const AddressDraft(
+        userId: ShowcaseCatalog.customer2,
+        title: 'Home',
+        addressText: 'Degloor',
+        latitude: 18.55,
+        longitude: 77.58,
+      ),
     );
     expect(added.isDefault, isTrue);
     final rows =
@@ -128,11 +134,13 @@ void main() {
   test('add rejects invalid coordinates', () async {
     await expectLater(
       AddressService.instance.add(
-        userId: GuestAuthUser.guestUid,
-        title: 'Home',
-        addressText: 'Degloor',
-        latitude: 120,
-        longitude: 77.58,
+        const AddressDraft(
+          userId: GuestAuthUser.guestUid,
+          title: 'Home',
+          addressText: 'Degloor',
+          latitude: 120,
+          longitude: 77.58,
+        ),
       ),
       throwsA(
         isA<Exception>().having(
@@ -147,11 +155,13 @@ void main() {
   test('add and setDefault require sign-in', () async {
     await expectLater(
       AddressService.instance.add(
-        userId: '',
-        title: 'Home',
-        addressText: 'Degloor',
-        latitude: 18.55,
-        longitude: 77.58,
+        const AddressDraft(
+          userId: '',
+          title: 'Home',
+          addressText: 'Degloor',
+          latitude: 18.55,
+          longitude: 77.58,
+        ),
       ),
       throwsA(
         isA<Exception>().having(
