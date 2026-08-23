@@ -6,6 +6,7 @@ import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/core/error_handler.dart';
 import 'package:degloor_one/shared/catalog_product.dart';
 import 'package:degloor_one/shared/product_category.dart';
+import 'package:degloor_one/shared/product_category_draft.dart';
 import 'package:degloor_one/shared/shop.dart';
 import 'package:degloor_one/shared/shop_hours.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
@@ -226,10 +227,12 @@ class BusinessService {
         }
       }
       if (categoryId == null) {
-        final created = await _repository.insertProductCategory({
-          'business_id': shop.id,
-          'name': trimmedCategory,
-        });
+        final created = await _repository.insertProductCategory(
+          ProductCategoryDraft(
+            businessId: shop.id,
+            name: trimmedCategory,
+          ),
+        );
         categoryId = created.id;
       }
     }
