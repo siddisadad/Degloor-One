@@ -5,6 +5,7 @@ import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/catalog_product.dart';
 import 'package:degloor_one/shared/catalog_product_draft.dart';
+import 'package:degloor_one/shared/catalog_product_stock.dart';
 import 'package:degloor_one/shared/product_category.dart';
 import 'package:degloor_one/shared/shop.dart';
 import 'package:degloor_one/shared/shop_hours.dart';
@@ -104,6 +105,35 @@ void main() {
         .productCategories(GuestAuthUser.guestUid);
     expect(categories, everyElement(isA<ProductCategory>()));
     expect(categories.map((row) => row.name), contains('Spices'));
+  });
+
+  test('owner stock write is a quantity only', () async {
+    await BusinessService.instance.updateStock(
+      userId: GuestAuthUser.guestUid,
+      productId: ShowcaseCatalog.prodMilk,
+      stock: const CatalogProductStock(9),
+    );
+    final milk = ShowcaseCatalog.query(
+      'products',
+      ShowcaseQuery()..eq('id', ShowcaseCatalog.prodMilk),
+    ).single;
+    expect(milk['stock_quantity'], 9);
+    expect(milk['name'], isNotEmpty);
+
+    await expectLater(
+      BusinessService.instance.updateStock(
+        userId: GuestAuthUser.guestUid,
+        productId: ShowcaseCatalog.prodMilk,
+        stock: const CatalogProductStock(-2),
+      ),
+      throwsA(
+        isA<Exception>().having(
+          (error) => error.toString(),
+          'message',
+          contains('valid stock'),
+        ),
+      ),
+    );
   });
 
   test('product mutations stay scoped to the owner', () async {

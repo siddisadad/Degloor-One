@@ -2,6 +2,7 @@ import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/catalog_product.dart';
 import 'package:degloor_one/shared/catalog_product_draft.dart';
+import 'package:degloor_one/shared/catalog_product_stock.dart';
 import 'package:degloor_one/shared/product_category.dart';
 import 'package:degloor_one/shared/product_category_draft.dart';
 import 'package:degloor_one/shared/shop_hours.dart';
@@ -75,10 +76,21 @@ class BusinessRepository {
   Future<void> updateProduct({
     required String productId,
     required String businessId,
-    required Map<String, dynamic> data,
+    required CatalogProductDraft draft,
   }) async {
     await ProductsTable().update(
-      data: data,
+      data: draft.toUpdateJson(),
+      matchingRows: (q) => q.eq('id', productId).eq('business_id', businessId),
+    );
+  }
+
+  Future<void> updateStock({
+    required String productId,
+    required String businessId,
+    required CatalogProductStock stock,
+  }) async {
+    await ProductsTable().update(
+      data: stock.toUpdateJson(),
       matchingRows: (q) => q.eq('id', productId).eq('business_id', businessId),
     );
   }
