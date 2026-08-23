@@ -4,6 +4,7 @@ import 'package:degloor_one/backend/repositories/business_repository.dart';
 import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/core/error_handler.dart';
+import 'package:degloor_one/shared/shop.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
 class ProfileCompleteness {
@@ -28,7 +29,7 @@ class BusinessService {
 
   static final instance = BusinessService();
 
-  static ProfileCompleteness completeness(BusinessesRow? shop) {
+  static ProfileCompleteness completeness(Shop? shop) {
     if (shop == null) return ProfileCompleteness.empty;
     var score = 0;
     if (shop.name.trim().isNotEmpty) score += 10;
@@ -55,12 +56,13 @@ class BusinessService {
   static const _missingShopMessage = 'No shop found for this account';
   static const _missingProductMessage = 'Product not found';
 
-  Future<List<BusinessesRow>> ownedBy(String userId) {
-    if (userId.isEmpty) return Future.value(const []);
-    return _repository.ownedBy(userId);
+  Future<List<Shop>> ownedBy(String userId) async {
+    if (userId.isEmpty) return const [];
+    final rows = await _repository.ownedBy(userId);
+    return rows.map(Shop.fromRow).toList();
   }
 
-  Future<BusinessesRow> requireOwned(String userId) async {
+  Future<Shop> requireOwned(String userId) async {
     if (userId.isEmpty) {
       throw Exception(_signInMessage);
     }
@@ -68,10 +70,10 @@ class BusinessService {
     if (shops.isEmpty) {
       throw Exception(_missingShopMessage);
     }
-    return shops.first;
+    return Shop.fromRow(shops.first);
   }
 
-  Future<BusinessesRow> requireOwnedBusiness({
+  Future<Shop> requireOwnedBusiness({
     required String userId,
     required String businessId,
   }) async {
@@ -82,10 +84,10 @@ class BusinessService {
     if (shop == null || shop.ownerId != userId) {
       throw Exception(_missingShopMessage);
     }
-    return shop;
+    return Shop.fromRow(shop);
   }
 
-  Future<BusinessesRow> register({
+  Future<Shop> register({
     required String userId,
     required String name,
     required String ownerName,
@@ -141,7 +143,7 @@ class BusinessService {
         ShowcaseQuery()..eq('id', userId),
       );
     }
-    return row;
+    return Shop.fromRow(row);
   }
 
   Future<void> updateProfile({

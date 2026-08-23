@@ -8,6 +8,7 @@ import 'package:degloor_one/auth/base_auth_user_provider.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/shop.dart';
 import 'package:degloor_one/features/main_scaffold.dart';
 import 'package:degloor_one/features/catalogue/product_detail_widget.dart';
 import 'package:degloor_one/index.dart';
@@ -340,7 +341,9 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           name: EditBusinessProfileWidget.routeName,
           path: EditBusinessProfileWidget.routePath,
           builder: (context, params) => EditBusinessProfileWidget(
-            business: params.getParam<BusinessesRow>('business', ParamType.supabaseRow)!,
+            business: Shop.fromParam(
+              params.getParam('business', ParamType.supabaseRow),
+            ),
           ),
           requireAuth: true,
         ),

@@ -5,6 +5,7 @@ import 'package:degloor_one/backend/order_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/shared/placed_order.dart';
+import 'package:degloor_one/shared/shop.dart';
 import 'package:degloor_one/backend/whatsapp_service.dart';
 import 'package:degloor_one/components/degloor_app_bar.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
@@ -44,7 +45,7 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
   int _offset = 0;
   int _loadToken = 0;
   static const _pageSize = 20;
-  BusinessesRow? _business;
+  Shop? _business;
   StreamSubscription<List<PlacedOrder>>? _ordersSubscription;
 
   @override

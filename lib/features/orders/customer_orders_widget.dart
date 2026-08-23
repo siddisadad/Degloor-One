@@ -1,7 +1,6 @@
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/discovery_service.dart';
 import 'package:degloor_one/backend/order_service.dart';
-import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/components/cached_remote_image.dart';
 import 'package:degloor_one/components/degloor_app_bar.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
@@ -9,6 +8,7 @@ import 'package:degloor_one/components/load_more_control.dart';
 import 'package:degloor_one/components/order_list_card.dart';
 import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/shared/placed_order.dart';
+import 'package:degloor_one/shared/shop.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:flutter/material.dart';
@@ -101,7 +101,7 @@ class _CustomerOrdersWidgetState extends State<CustomerOrdersWidget> {
     }
   }
 
-  Widget _shopThumb(BusinessesRow? shop) {
+  Widget _shopThumb(Shop? shop) {
     final theme = FlutterFlowTheme.of(context);
     final imageUrl = shop?.imageUrl;
     return ClipRRect(

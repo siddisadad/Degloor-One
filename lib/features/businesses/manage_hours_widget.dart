@@ -8,6 +8,7 @@ import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:degloor_one/core/error_handler.dart';
+import 'package:degloor_one/shared/shop.dart';
 import 'manage_hours_model.dart';
 export 'manage_hours_model.dart';
 
@@ -27,7 +28,7 @@ class _ManageHoursWidgetState extends State<ManageHoursWidget> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   bool _loading = true;
-  BusinessesRow? _business;
+  Shop? _business;
   List<BusinessHoursRow> _hours = [];
   final List<String> _weekDays = [
     'Sunday',

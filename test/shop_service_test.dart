@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/backend/shop_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/shop.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
 BusinessHoursRow _hours({
@@ -142,6 +143,15 @@ void main() {
       events.where((row) => row.eventType == 'PROFILE_VIEW'),
       hasLength(18),
     );
+  });
+
+  test('byId returns the Patil shop domain type', () async {
+    final shop = await ShopService.instance.byId(ShowcaseCatalog.bizPatil);
+    expect(shop, isA<Shop>());
+    expect(shop, isNot(isA<BusinessesRow>()));
+    expect(shop?.id, ShowcaseCatalog.bizPatil);
+    expect(shop?.name, isNotEmpty);
+    expect(await ShopService.instance.byId(''), isNull);
   });
 
   test('productById returns Patil milk on showcase', () async {

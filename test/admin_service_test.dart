@@ -2,6 +2,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/backend/admin_service.dart';
 import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
+import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/shop.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
 void main() {
@@ -28,6 +30,8 @@ void main() {
 
     final queue =
         await AdminService.instance.verificationQueue(ShowcaseCatalog.adminId);
+    expect(queue, everyElement(isA<Shop>()));
+    expect(queue, isNot(anyElement(isA<BusinessesRow>())));
     expect(queue.map((row) => row.id), contains(ShowcaseCatalog.bizPending));
 
     await AdminService.instance.verifyBusiness(

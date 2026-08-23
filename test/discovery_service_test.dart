@@ -4,6 +4,7 @@ import 'package:degloor_one/backend/discovery_service.dart';
 import 'package:degloor_one/backend/repositories/discovery_repository.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/page_query.dart';
+import 'package:degloor_one/shared/shop.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
 void main() {
@@ -22,6 +23,8 @@ void main() {
     );
     expect(first.items, hasLength(3));
     expect(first.hasMore, isTrue);
+    expect(first.items, everyElement(isA<Shop>()));
+    expect(first.items, isNot(anyElement(isA<BusinessesRow>())));
 
     final second = await DiscoveryService.instance.search(
       DiscoverySearch(
@@ -61,6 +64,8 @@ void main() {
       ShowcaseCatalog.bizPatil,
     ]);
     expect(shops, hasLength(1));
+    expect(shops, everyElement(isA<Shop>()));
+    expect(shops, isNot(anyElement(isA<BusinessesRow>())));
     expect(shops.first.name, isNotEmpty);
   });
 

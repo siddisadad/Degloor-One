@@ -14,6 +14,7 @@ import 'package:degloor_one/flutter_flow/flutter_flow_icon_button.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/core/error_handler.dart';
+import 'package:degloor_one/shared/shop.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'business_dashboard_model.dart';
@@ -36,7 +37,7 @@ class _BusinessDashboardWidgetState extends State<BusinessDashboardWidget> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   bool _isLoading = true;
-  BusinessesRow? _business;
+  Shop? _business;
   int _totalReviews = 0;
   int _profileViews = 0;
   int _callClicks = 0;

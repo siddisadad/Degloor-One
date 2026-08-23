@@ -10,6 +10,7 @@ import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:degloor_one/core/error_handler.dart';
+import 'package:degloor_one/shared/shop.dart';
 import 'manage_catalogue_model.dart';
 export 'manage_catalogue_model.dart';
 
@@ -29,7 +30,7 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
   List<ProductsRow> _products = [];
   List<ProductCategoriesRow> _businessCategories = [];
   bool _loading = true;
-  BusinessesRow? _business;
+  Shop? _business;
 
   @override
   void initState() {
