@@ -10,6 +10,8 @@ import 'package:degloor_one/l10n/app_localizations.dart';
 
 import 'package:degloor_one/backend/discovery_service.dart';
 import 'package:degloor_one/backend/repositories/discovery_repository.dart';
+import 'package:degloor_one/backend/service_marketplace_service.dart';
+import 'package:degloor_one/features/services/service_provider_display.dart';
 import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -37,6 +39,7 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   Future<List<BusinessCategoriesRow>>? _categoriesFuture;
+  Future<List<Map<String, dynamic>>>? _servicesFuture;
   final Map<String, String> _categoryIdToName = {};
 
   void _onAppStateChanged() {
@@ -68,7 +71,14 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
       }
     });
     _fetchBusinesses();
+    _fetchServices();
     _resolveLocation();
+  }
+
+  void _fetchServices() {
+    _servicesFuture = ServiceMarketplaceService.instance
+        .providers(page: const PageQuery(limit: 6))
+        .then((page) => page.items);
   }
 
   Future<void> _resolveLocation() async {
@@ -172,6 +182,8 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
         child: RefreshIndicator(
           onRefresh: () async {
             _fetchBusinesses();
+            _fetchServices();
+            setState(() {});
           },
           color: DegloorTheme.primary,
           child: CustomScrollView(
@@ -288,7 +300,7 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                     DegloorTheme.spacingLG,
                   ),
                   child: HomeFeatureShortcuts(
-                    onServices: () => context.pushNamed('Services'),
+                    onServices: () => context.goNamed('Services'),
                     onJobs: () => context.pushNamed('JobsMarketplace'),
                     onOrders: () => context.pushNamed('CustomerOrders'),
                   ),
@@ -333,6 +345,110 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                           ),
                         );
                       },
+                    ),
+                    const SizedBox(height: DegloorTheme.spacingLG),
+                  ],
+                ),
+              ),
+
+              SliverToBoxAdapter(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: DegloorTheme.spacingMD),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('Local Services',
+                              style: DegloorTheme.headingMedium),
+                          TextButton(
+                            onPressed: () => context.goNamed('Services'),
+                            child: const Text('See all'),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: DegloorTheme.spacingSM),
+                    SizedBox(
+                      height: 118,
+                      child: FutureBuilder<List<Map<String, dynamic>>>(
+                        future: _servicesFuture,
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData) {
+                            return const SizedBox();
+                          }
+                          final providers = snapshot.data!;
+                          if (providers.isEmpty) {
+                            return const SizedBox();
+                          }
+                          return ListView.separated(
+                            scrollDirection: Axis.horizontal,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: DegloorTheme.spacingMD),
+                            itemCount: providers.length,
+                            separatorBuilder: (_, __) =>
+                                const SizedBox(width: 12),
+                            itemBuilder: (context, index) {
+                              final provider = providers[index];
+                              final name = ServiceProviderDisplay.name(
+                                  provider['users']);
+                              final category =
+                                  ServiceProviderDisplay.categoryName(
+                                      provider['service_categories']);
+                              return InkWell(
+                                onTap: () => context.pushNamed(
+                                  'ServiceProviderProfile',
+                                  queryParameters: {
+                                    'providerId': '${provider['id']}',
+                                  },
+                                ),
+                                borderRadius: BorderRadius.circular(
+                                    DegloorTheme.radiusMD),
+                                child: Container(
+                                  width: 150,
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: DegloorTheme.cardBackground,
+                                    borderRadius: BorderRadius.circular(
+                                        DegloorTheme.radiusMD),
+                                    border: Border.all(
+                                        color: DegloorTheme.border),
+                                    boxShadow: DegloorTheme.softShadow,
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      const Icon(
+                                        Icons.handyman_rounded,
+                                        color: DegloorTheme.primary,
+                                        size: 22,
+                                      ),
+                                      const SizedBox(height: 10),
+                                      Text(
+                                        name,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: DegloorTheme.titleMedium
+                                            .copyWith(fontSize: 14),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        category,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: DegloorTheme.bodySmall,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      ),
                     ),
                     const SizedBox(height: DegloorTheme.spacingLG),
                   ],

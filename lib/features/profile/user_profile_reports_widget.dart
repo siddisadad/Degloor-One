@@ -133,7 +133,7 @@ class _UserProfileReportsWidgetState extends State<UserProfileReportsWidget> {
                       _activityCard(
                         Icons.handyman_rounded,
                         'Services',
-                        () => context.pushNamed('Services'),
+                        () => context.goNamed('Services'),
                       ),
                       const SizedBox(width: 12),
                       _activityCard(

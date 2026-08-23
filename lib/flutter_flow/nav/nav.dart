@@ -152,6 +152,15 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
             StatefulShellBranch(
               routes: [
                 GoRoute(
+                  name: ServicesWidget.routeName,
+                  path: ServicesWidget.routePath,
+                  builder: (context, state) => const ServicesWidget(),
+                ),
+              ],
+            ),
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
                   name: CartWidget.routeName,
                   path: CartWidget.routePath,
                   builder: (context, state) => const CartWidget(),
@@ -272,11 +281,6 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           path: DeliveryDashboardWidget.routePath,
           builder: (context, params) => const DeliveryDashboardWidget(),
           requireAuth: true,
-        ),
-        FFRoute(
-          name: ServicesWidget.routeName,
-          path: ServicesWidget.routePath,
-          builder: (context, params) => const ServicesWidget(),
         ),
         FFRoute(
           name: ServiceProviderProfileWidget.routeName,
