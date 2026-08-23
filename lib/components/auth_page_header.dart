@@ -1,5 +1,5 @@
 import 'package:degloor_one/components/brand_mark.dart';
-import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
+import 'package:degloor_one/core/degloor_theme.dart';
 import 'package:flutter/material.dart';
 
 /// Centers auth forms so they stay readable on wide web layouts.
@@ -38,7 +38,6 @@ class AuthPageHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = FlutterFlowTheme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -46,30 +45,20 @@ class AuthPageHeader extends StatelessWidget {
           width: double.infinity,
           padding: const EdgeInsets.fromLTRB(12, 10, 14, 10),
           decoration: BoxDecoration(
-            color: theme.primary.withValues(alpha: 0.06),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: theme.primary.withValues(alpha: 0.08),
-            ),
+            color: DegloorTheme.accent,
+            borderRadius: BorderRadius.circular(DegloorTheme.radiusLG),
+            border: Border.all(color: DegloorTheme.border),
           ),
           child: const BrandMark(size: 48, showWordmark: true, compact: true),
         ),
         const SizedBox(height: 22),
-        Text(
-          title,
-          style: theme.headlineMedium.override(
-            fontFamily: 'Inter',
-            fontWeight: FontWeight.w800,
-            color: theme.primaryText,
-          ),
-        ),
+        Text(title, style: DegloorTheme.headingLarge),
         const SizedBox(height: 8),
         Text(
           subtitle,
-          style: theme.bodyMedium.override(
-            fontFamily: 'Inter',
-            color: theme.secondaryText,
-            lineHeight: 1.45,
+          style: DegloorTheme.bodyMedium.copyWith(
+            color: DegloorTheme.textSecondary,
+            height: 1.45,
           ),
         ),
       ],

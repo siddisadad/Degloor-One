@@ -369,6 +369,9 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                               style: DegloorTheme.headingMedium),
                           TextButton(
                             onPressed: () => context.goNamed('Services'),
+                            style: TextButton.styleFrom(
+                              foregroundColor: DegloorTheme.primary,
+                            ),
                             child: const Text('See all'),
                           ),
                         ],
@@ -467,6 +470,9 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                           Text('Popular Near You', style: DegloorTheme.headingMedium),
                           TextButton(
                             onPressed: () => context.pushNamed('SearchResults'),
+                            style: TextButton.styleFrom(
+                              foregroundColor: DegloorTheme.primary,
+                            ),
                             child: const Text('See all'),
                           ),
                         ],

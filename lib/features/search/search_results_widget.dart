@@ -1,5 +1,4 @@
 import 'package:degloor_one/core/degloor_theme.dart';
-import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/backend/discovery_service.dart';
 import 'package:degloor_one/backend/location_service.dart';
 import 'package:degloor_one/shared/page_query.dart';
@@ -7,8 +6,10 @@ import 'package:degloor_one/l10n/app_localizations.dart';
 import 'package:degloor_one/components/business_card/business_card_widget.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/app_state.dart';
+import 'package:degloor_one/components/degloor_filter_chip.dart';
 import 'package:degloor_one/components/discovery_radius_bar.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
+import 'package:degloor_one/components/load_more_control.dart';
 import 'package:degloor_one/core/error_handler.dart';
 import 'package:degloor_one/shared/discovery_radius.dart';
 import 'package:degloor_one/shared/shop.dart';
@@ -177,26 +178,34 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 children: [
-                  _filterChip(
-                    '${FFAppState.instance.discoveryRadius.toInt()} km',
-                    true,
+                  DegloorFilterChip(
+                    label: '${FFAppState.instance.discoveryRadius.toInt()} km',
+                    selected: true,
                     onTap: _showRadiusSheet,
-                    hasIcon: true,
                   ),
-                  _filterChip(
-                    AppLocalizations.of(context)!.verified,
-                    _onlyVerified,
-                    onTap: () => setState(() { _onlyVerified = !_onlyVerified; _performSearch(_currentSearchTerm); }),
+                  DegloorFilterChip(
+                    label: AppLocalizations.of(context)!.verified,
+                    selected: _onlyVerified,
+                    onTap: () => setState(() {
+                      _onlyVerified = !_onlyVerified;
+                      _performSearch(_currentSearchTerm);
+                    }),
                   ),
-                  _filterChip(
-                    AppLocalizations.of(context)!.openNow,
-                    _onlyOpen,
-                    onTap: () => setState(() { _onlyOpen = !_onlyOpen; _performSearch(_currentSearchTerm); }),
+                  DegloorFilterChip(
+                    label: AppLocalizations.of(context)!.openNow,
+                    selected: _onlyOpen,
+                    onTap: () => setState(() {
+                      _onlyOpen = !_onlyOpen;
+                      _performSearch(_currentSearchTerm);
+                    }),
                   ),
-                  _filterChip(
-                    'Rating 4.0+',
-                    _minRating4,
-                    onTap: () => setState(() { _minRating4 = !_minRating4; _performSearch(_currentSearchTerm); }),
+                  DegloorFilterChip(
+                    label: 'Rating 4.0+',
+                    selected: _minRating4,
+                    onTap: () => setState(() {
+                      _minRating4 = !_minRating4;
+                      _performSearch(_currentSearchTerm);
+                    }),
                   ),
                 ],
               ),
@@ -215,11 +224,11 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
                           separatorBuilder: (context, index) => const SizedBox(height: 12),
                           itemBuilder: (context, index) {
                             if (index == _businesses.length) {
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 16),
-                                child: TextButton(
-                                  onPressed: () => _performSearch(_currentSearchTerm, loadMore: true),
-                                  child: const Text('Load More'),
+                              return LoadMoreControl(
+                                loading: _isLoading,
+                                onPressed: () => _performSearch(
+                                  _currentSearchTerm,
+                                  loadMore: true,
                                 ),
                               );
                             }
@@ -243,26 +252,6 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _filterChip(String label, bool isSelected, {required VoidCallback onTap, bool hasIcon = false}) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 8),
-      child: FilterChip(
-        label: Text(label),
-        selected: isSelected,
-        onSelected: (_) => onTap(),
-        backgroundColor: Colors.white,
-        selectedColor: DegloorTheme.primary.withValues(alpha: 0.1),
-        checkmarkColor: DegloorTheme.primary,
-        labelStyle: TextStyle(
-          color: isSelected ? DegloorTheme.primary : DegloorTheme.textSecondary,
-          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-          fontSize: 12,
-        ),
-        shape: StadiumBorder(side: BorderSide(color: isSelected ? DegloorTheme.primary : DegloorTheme.border)),
       ),
     );
   }

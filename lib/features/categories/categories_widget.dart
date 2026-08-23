@@ -4,7 +4,6 @@ import 'package:degloor_one/shared/shop_category.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/components/modern/modern_category_item.dart';
 import 'package:degloor_one/core/degloor_theme.dart';
-import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:flutter/material.dart';
 import 'categories_model.dart';
@@ -91,9 +90,9 @@ class _CategoriesWidgetState extends State<CategoriesWidget> {
                     );
                   }
                   if (!snapshot.hasData) {
-                    return Center(
+                    return const Center(
                       child: CircularProgressIndicator(
-                        color: FlutterFlowTheme.of(context).primary,
+                        color: DegloorTheme.primary,
                       ),
                     );
                   }
