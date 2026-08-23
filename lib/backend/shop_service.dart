@@ -7,6 +7,7 @@ import 'package:degloor_one/core/error_handler.dart';
 import 'package:degloor_one/shared/catalog_product.dart';
 import 'package:degloor_one/shared/marketplace_joins.dart';
 import 'package:degloor_one/shared/shop.dart';
+import 'package:degloor_one/shared/shop_hours.dart';
 
 class ShopEvents {
   static const profileView = 'PROFILE_VIEW';
@@ -103,14 +104,15 @@ class ShopService {
     return row?.name;
   }
 
-  Future<List<BusinessHoursRow>> hours(String businessId) {
-    return _repository.hoursFor(businessId);
+  Future<List<ShopHours>> hours(String businessId) async {
+    final rows = await _repository.hoursFor(businessId);
+    return rows.map(ShopHours.fromRow).toList();
   }
 
   /// Weekday is Sunday=0 (`DateTime.weekday % 7`). Overnight windows
   /// (`close <= open`) wrap midnight. Empty / closed / missing times are closed.
   static bool isOpenFromHours(
-    List<BusinessHoursRow> hours, {
+    List<ShopHours> hours, {
     DateTime? now,
   }) {
     final at = now ?? DateTime.now();
@@ -119,8 +121,8 @@ class ShopService {
     for (final row in hours) {
       if (row.dayOfWeek != dayOfWeek) continue;
       if (row.isClosed) return false;
-      final open = row.openTime?.time;
-      final close = row.closeTime?.time;
+      final open = row.openTime;
+      final close = row.closeTime;
       if (open == null || close == null) return false;
       final openMinutes = open.hour * 60 + open.minute;
       final closeMinutes = close.hour * 60 + close.minute;
@@ -152,7 +154,10 @@ class ShopService {
       final hoursById = await _repository.hoursForMany(businessIds);
       return {
         for (final id in businessIds)
-          id: isOpenFromHours(hoursById[id] ?? const [], now: at),
+          id: isOpenFromHours(
+            (hoursById[id] ?? const []).map(ShopHours.fromRow).toList(),
+            now: at,
+          ),
       };
     } catch (error) {
       AppLogger.error('Error checking multiple business open statuses', error);

@@ -4,23 +4,29 @@ import 'package:degloor_one/backend/shop_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/catalog_product.dart';
 import 'package:degloor_one/shared/shop.dart';
+import 'package:degloor_one/shared/shop_hours.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
-BusinessHoursRow _hours({
+DateTime _clock(String raw) {
+  final parts = raw.split(':');
+  return DateTime(1970, 1, 1, int.parse(parts[0]), int.parse(parts[1]));
+}
+
+ShopHours _hours({
   required int day,
   required String open,
   required String close,
   bool closed = false,
 }) {
-  return BusinessHoursRow({
-    'id': 'h-$day-$open',
-    'business_id': 'biz',
-    'day_of_week': day,
-    'open_time': open,
-    'close_time': close,
-    'is_closed': closed,
-    'created_at': '2026-01-01T00:00:00.000Z',
-  });
+  return ShopHours(
+    id: 'h-$day-$open',
+    businessId: 'biz',
+    dayOfWeek: day,
+    openTime: _clock(open),
+    closeTime: _clock(close),
+    isClosed: closed,
+    createdAt: DateTime.utc(2026, 1, 1),
+  );
 }
 
 void main() {
@@ -203,6 +209,13 @@ void main() {
       events.where((row) => row.eventType == ShopEvents.profileView),
       hasLength(18),
     );
+  });
+
+  test('hours returns shop hours instead of table rows', () async {
+    final hours = await ShopService.instance.hours(ShowcaseCatalog.bizPatil);
+    expect(hours, isNotEmpty);
+    expect(hours, everyElement(isA<ShopHours>()));
+    expect(hours, isNot(anyElement(isA<BusinessHoursRow>())));
   });
 
   test('isOpenFromHours handles same-day, overnight, and closed rows', () {

@@ -4,8 +4,8 @@ import 'package:degloor_one/components/photo_item/photo_item_widget.dart';
 import 'package:degloor_one/components/review_card/review_card_widget.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/index.dart';
-import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/marketplace_joins.dart';
+import 'package:degloor_one/shared/shop_hours.dart';
 import 'business_profile_widget.dart' show BusinessProfileWidget;
 import 'package:flutter/material.dart';
 
@@ -37,7 +37,7 @@ class BusinessProfileModel extends FlutterFlowModel<BusinessProfileWidget> {
   String? categoryName;
   bool? isOpen;
   String? statusMessage;
-  List<BusinessHoursRow>? weeklyHours;
+  List<ShopHours>? weeklyHours;
   Map<int, int> ratingDistribution = {5: 0, 4: 0, 3: 0, 2: 0, 1: 0};
 
   @override

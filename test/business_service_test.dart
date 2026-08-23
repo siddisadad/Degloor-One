@@ -5,6 +5,7 @@ import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/catalog_product.dart';
 import 'package:degloor_one/shared/shop.dart';
+import 'package:degloor_one/shared/shop_hours.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
 Shop _shop({
@@ -100,6 +101,8 @@ void main() {
     final hours =
         await BusinessService.instance.hours(GuestAuthUser.guestUid);
     expect(hours, hasLength(7));
+    expect(hours, everyElement(isA<ShopHours>()));
+    expect(hours, isNot(anyElement(isA<BusinessHoursRow>())));
     hours.first.isClosed = true;
 
     await BusinessService.instance.saveHours(
