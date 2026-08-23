@@ -210,7 +210,7 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
             textInputAction: TextInputAction.search,
             onSubmitted: (_) => _runSearch(),
             decoration: InputDecoration(
-              hintText: l10n?.searchPlaceholder ?? 'Search hardware, food...',
+              hintText: l10n?.searchPlaceholder ?? 'Search anything...',
               hintStyle: DegloorTheme.bodyMedium.copyWith(
                 color: DegloorTheme.textSecondary,
               ),

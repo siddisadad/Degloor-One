@@ -19,7 +19,7 @@ void main() {
     );
 
     expect(find.byType(Image), findsOneWidget);
-    expect(find.text('Everything Local. One App.'), findsOneWidget);
+    expect(find.text('Everything local, in one app.'), findsOneWidget);
     final image = tester.widget<Image>(find.byType(Image));
     expect((image.image as AssetImage).assetName, kBrandImageAsset);
   });

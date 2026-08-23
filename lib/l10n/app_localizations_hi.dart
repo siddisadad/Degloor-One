@@ -66,7 +66,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get noResultsFound => 'कोई परिणाम नहीं मिला';
 
   @override
-  String get searchPlaceholder => 'हार्डवेयर, भोजन खोजें...';
+  String get searchPlaceholder => 'कुछ भी खोजें...';
 
   @override
   String get call => 'कॉल करें';

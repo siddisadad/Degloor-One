@@ -1,5 +1,4 @@
 import 'package:degloor_one/core/degloor_theme.dart';
-import 'package:degloor_one/components/home_feature_shortcuts.dart';
 import 'package:degloor_one/components/modern/hero_banner.dart';
 import 'package:degloor_one/components/modern/modern_category_item.dart';
 import 'package:degloor_one/components/modern/modern_business_card.dart';
@@ -124,7 +123,6 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
               latitude: userLoc.latitude,
               longitude: userLoc.longitude,
               radiusKm: radius,
-              openNow: true,
               page: const PageQuery(limit: 8),
             ),
           )
@@ -167,6 +165,12 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
     );
   }
 
+  String get _locationLabel {
+    final name = _model.locationName.trim();
+    if (name.isEmpty) return 'Degloor';
+    return name.split(',').first.trim();
+  }
+
   @override
   void dispose() {
     FFAppState.instance.removeListener(_onAppStateChanged);
@@ -176,9 +180,8 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final discoveryRadius = context.select<FFAppState, double>(
-      (state) => state.discoveryRadius,
-    );
+    final l10n = AppLocalizations.of(context);
+    context.select<FFAppState, double>((state) => state.discoveryRadius);
 
     return Scaffold(
       backgroundColor: DegloorTheme.background,
@@ -192,7 +195,6 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
           color: DegloorTheme.primary,
           child: CustomScrollView(
             slivers: [
-              // 1. App Bar with Location & User
               SliverAppBar(
                 floating: true,
                 pinned: false,
@@ -207,33 +209,34 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.location_on_rounded, color: DegloorTheme.secondary, size: 20),
+                        const Icon(
+                          Icons.location_on_rounded,
+                          color: DegloorTheme.secondary,
+                          size: 20,
+                        ),
                         const SizedBox(width: 4),
                         Flexible(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                _model.locationName,
-                                style: DegloorTheme.titleMedium.copyWith(height: 1.2),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              Text(
-                                '${discoveryRadius.toInt()} km radius',
-                                style: DegloorTheme.bodySmall,
-                              ),
-                            ],
+                          child: Text(
+                            _locationLabel,
+                            style: DegloorTheme.titleMedium.copyWith(height: 1.2),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        const Icon(Icons.keyboard_arrow_down_rounded, color: DegloorTheme.textSecondary, size: 18),
+                        const Icon(
+                          Icons.keyboard_arrow_down_rounded,
+                          color: DegloorTheme.textSecondary,
+                          size: 18,
+                        ),
                       ],
                     ),
                   ),
                 ),
                 actions: [
                   IconButton(
-                    icon: const Icon(Icons.notifications_outlined, color: DegloorTheme.textPrimary),
+                    icon: const Icon(
+                      Icons.notifications_outlined,
+                      color: DegloorTheme.textPrimary,
+                    ),
                     onPressed: () => context.pushNamed('Notifications'),
                   ),
                   Padding(
@@ -245,16 +248,21 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                         height: 36,
                         decoration: BoxDecoration(
                           color: DegloorTheme.primary,
-                          borderRadius: BorderRadius.circular(DegloorTheme.radiusSM),
+                          borderRadius:
+                              BorderRadius.circular(DegloorTheme.radiusSM),
                         ),
                         child: Center(
                           child: FutureBuilder<List<UserProfile>>(
                             future: _model.userProfileFuture,
                             builder: (context, snapshot) {
-                              final name = snapshot.data?.firstOrNull?.fullName ?? 'U';
+                              final name =
+                                  snapshot.data?.firstOrNull?.fullName ?? 'U';
                               return Text(
                                 name.isNotEmpty ? name[0].toUpperCase() : 'U',
-                                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               );
                             },
                           ),
@@ -264,304 +272,328 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                   ),
                 ],
               ),
-
-              // 2. Search Bar
+              SliverToBoxAdapter(child: _searchBar(l10n)),
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.all(DegloorTheme.spacingMD),
-                  child: InkWell(
-                    onTap: () => context.pushNamed('SearchResults'),
-                    borderRadius: BorderRadius.circular(DegloorTheme.radiusMD),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(DegloorTheme.radiusMD),
-                        boxShadow: DegloorTheme.softShadow,
-                        border: Border.all(color: DegloorTheme.border),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.search_rounded, color: DegloorTheme.textSecondary),
-                          const SizedBox(width: 12),
-                          Text(
-                            AppLocalizations.of(context)?.searchPlaceholder ??
-                                'What are you looking for?',
-                            style: DegloorTheme.bodyLarge.copyWith(color: DegloorTheme.textSecondary),
-                          ),
-                        ],
-                      ),
-                    ),
+                  padding: const EdgeInsets.only(bottom: DegloorTheme.spacingLG),
+                  child: HeroBanner(
+                    onExplore: () => context.pushNamed('SearchResults'),
                   ),
                 ),
               ),
-
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    DegloorTheme.spacingMD,
-                    0,
-                    DegloorTheme.spacingMD,
-                    DegloorTheme.spacingLG,
-                  ),
-                  child: HomeFeatureShortcuts(
-                    onServices: () => context.pushNamed('LocalServices'),
-                    onJobs: () => context.pushNamed('JobsMarketplace'),
-                    onOrders: () => context.pushNamed('CustomerOrders'),
-                  ),
-                ),
-              ),
-
-              // 3. Hero Promotion
+              SliverToBoxAdapter(child: _categories(l10n)),
+              SliverToBoxAdapter(child: _nearbyBusinesses(l10n)),
+              SliverToBoxAdapter(child: _popularProducts()),
+              SliverToBoxAdapter(child: _servicesNearYou()),
               const SliverToBoxAdapter(
-                child: Padding(
-                  padding: EdgeInsets.only(bottom: DegloorTheme.spacingLG),
-                  child: HeroBanner(),
-                ),
+                child: SizedBox(height: DegloorTheme.spacingXL),
               ),
-
-              // 4. Categories
-              SliverToBoxAdapter(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: DegloorTheme.spacingMD),
-                      child: Text(AppLocalizations.of(context)!.categories, style: DegloorTheme.headingMedium),
-                    ),
-                    const SizedBox(height: DegloorTheme.spacingMD),
-                    FutureBuilder<List<ShopCategory>>(
-                      future: _categoriesFuture,
-                      builder: (context, snapshot) {
-                        if (!snapshot.hasData) return const SizedBox(height: 100);
-                        final categories = snapshot.data!;
-                        return SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          padding: const EdgeInsets.symmetric(horizontal: DegloorTheme.spacingMD),
-                          child: Row(
-                            children: categories.map((cat) => Padding(
-                              padding: const EdgeInsets.only(right: 20),
-                              child: ModernCategoryItem(
-                                label: cat.name,
-                                icon: getIconFromData(cat.iconName),
-                                onTap: () => context.pushNamed('SearchResults', queryParameters: {'categoryId': cat.id}),
-                              ),
-                            )).toList(),
-                          ),
-                        );
-                      },
-                    ),
-                    const SizedBox(height: DegloorTheme.spacingLG),
-                  ],
-                ),
-              ),
-
-              SliverToBoxAdapter(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: DegloorTheme.spacingMD),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text('Local Services',
-                              style: DegloorTheme.headingMedium),
-                          TextButton(
-                            onPressed: () => context.pushNamed('LocalServices'),
-                            style: TextButton.styleFrom(
-                              foregroundColor: DegloorTheme.primary,
-                            ),
-                            child: const Text('See all'),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: DegloorTheme.spacingSM),
-                    SizedBox(
-                      height: 118,
-                      child: FutureBuilder<List<ServiceProviderCard>>(
-                        future: _servicesFuture,
-                        builder: (context, snapshot) {
-                          if (!snapshot.hasData) {
-                            return const SizedBox();
-                          }
-                          final providers = snapshot.data!;
-                          if (providers.isEmpty) {
-                            return const SizedBox();
-                          }
-                          return ListView.separated(
-                            scrollDirection: Axis.horizontal,
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: DegloorTheme.spacingMD),
-                            itemCount: providers.length,
-                            separatorBuilder: (_, __) =>
-                                const SizedBox(width: 12),
-                            itemBuilder: (context, index) {
-                              final provider = providers[index];
-                              return InkWell(
-                                onTap: () => context.pushNamed(
-                                  'ServiceProviderProfile',
-                                  queryParameters: {
-                                    'providerId': provider.id,
-                                  },
-                                ),
-                                borderRadius: BorderRadius.circular(
-                                    DegloorTheme.radiusMD),
-                                child: Container(
-                                  width: 150,
-                                  padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    color: DegloorTheme.cardBackground,
-                                    borderRadius: BorderRadius.circular(
-                                        DegloorTheme.radiusMD),
-                                    border: Border.all(
-                                        color: DegloorTheme.border),
-                                    boxShadow: DegloorTheme.softShadow,
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      const Icon(
-                                        Icons.handyman_rounded,
-                                        color: DegloorTheme.primary,
-                                        size: 22,
-                                      ),
-                                      const SizedBox(height: 10),
-                                      Text(
-                                        provider.displayName,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: DegloorTheme.titleMedium
-                                            .copyWith(fontSize: 14),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        provider.categoryName,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: DegloorTheme.bodySmall,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: DegloorTheme.spacingLG),
-                  ],
-                ),
-              ),
-
-              // 5. Popular Near You (Horizontal)
-              SliverToBoxAdapter(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: DegloorTheme.spacingMD),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text('Popular Near You', style: DegloorTheme.headingMedium),
-                          TextButton(
-                            onPressed: () => context.pushNamed('SearchResults'),
-                            style: TextButton.styleFrom(
-                              foregroundColor: DegloorTheme.primary,
-                            ),
-                            child: const Text('See all'),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: DegloorTheme.spacingSM),
-                    SizedBox(
-                      height: 210,
-                      child: FutureBuilder<List<Shop>>(
-                        future: _model.openNowBusinessesFuture,
-                        builder: (context, snapshot) {
-                          if (!snapshot.hasData) return const SizedBox();
-                          final businesses = snapshot.data!;
-                          return ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            padding: const EdgeInsets.symmetric(horizontal: DegloorTheme.spacingMD),
-                            itemCount: businesses.length,
-                            itemBuilder: (context, index) {
-                              final biz = businesses[index];
-                              return ModernBusinessCard(
-                                name: biz.name,
-                                imageUrl: biz.imageUrl ?? 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=400&q=80',
-                                category: _categoryIdToName[biz.categoryId] ?? 'Shop',
-                                rating: biz.rating ?? 0.0,
-                                distance: biz.distanceKm != null ? '${biz.distanceKm!.toStringAsFixed(1)} km' : 'Nearby',
-                                onTap: () => context.pushNamed('BusinessProfile', queryParameters: {'businessId': biz.id}),
-                              );
-                            },
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: DegloorTheme.spacingLG),
-                  ],
-                ),
-              ),
-
-              // 6. Recommended Products (Grid)
-              SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: DegloorTheme.spacingMD),
-                sliver: SliverToBoxAdapter(
-                  child: Text('Recommended for You', style: DegloorTheme.headingMedium),
-                ),
-              ),
-              SliverPadding(
-                padding: const EdgeInsets.all(DegloorTheme.spacingMD),
-                sliver: FutureBuilder<List<CatalogProduct>>(
-                  future: _model.recommendedProductsFuture,
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData) {
-                      return const SliverToBoxAdapter(child: Center(child: CircularProgressIndicator()));
-                    }
-                    final products = snapshot.data!;
-                    if (products.isEmpty) {
-                      return const SliverToBoxAdapter(child: SizedBox(height: 100, child: Center(child: Text('No recommendations yet'))));
-                    }
-                    return SliverGrid(
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        childAspectRatio: 0.75,
-                        crossAxisSpacing: DegloorTheme.spacingMD,
-                        mainAxisSpacing: DegloorTheme.spacingMD,
-                      ),
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) {
-                          final prod = products[index];
-                          return ModernProductCard(
-                            name: prod.name,
-                            price: prod.price ?? 0.0,
-                            imageUrl: prod.imageUrl ?? 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=400&q=80',
-                            onTap: () => context.pushNamed(
-                              ProductDetailWidget.routeName,
-                              pathParameters: {'productId': prod.id},
-                            ),
-                          );
-                        },
-                        childCount: products.length,
-                      ),
-                    );
-                  },
-                ),
-              ),
-
-              const SliverToBoxAdapter(child: SizedBox(height: DegloorTheme.spacingXL)),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _searchBar(AppLocalizations? l10n) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        DegloorTheme.spacingMD,
+        0,
+        DegloorTheme.spacingMD,
+        DegloorTheme.spacingMD,
+      ),
+      child: InkWell(
+        onTap: () => context.pushNamed('SearchResults'),
+        borderRadius: BorderRadius.circular(DegloorTheme.radiusMD),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(DegloorTheme.radiusMD),
+            boxShadow: DegloorTheme.softShadow,
+            border: Border.all(color: DegloorTheme.border),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.search_rounded, color: DegloorTheme.textSecondary),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  l10n?.searchPlaceholder ?? 'Search anything...',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: DegloorTheme.bodyLarge
+                      .copyWith(color: DegloorTheme.textSecondary),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _sectionHeader(String title, {VoidCallback? onSeeAll}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: DegloorTheme.spacingMD),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: DegloorTheme.headingMedium,
+            ),
+          ),
+          if (onSeeAll != null)
+            TextButton(
+              onPressed: onSeeAll,
+              style: TextButton.styleFrom(
+                foregroundColor: DegloorTheme.primary,
+                visualDensity: VisualDensity.compact,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: Text(AppLocalizations.of(context)?.seeAll ?? 'See all'),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _categories(AppLocalizations? l10n) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _sectionHeader(l10n?.categories ?? 'Categories'),
+        const SizedBox(height: DegloorTheme.spacingMD),
+        FutureBuilder<List<ShopCategory>>(
+          future: _categoriesFuture,
+          builder: (context, snapshot) {
+            final shopCategories = snapshot.data ?? const <ShopCategory>[];
+            return SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(
+                horizontal: DegloorTheme.spacingMD,
+              ),
+              child: Row(
+                children: [
+                  for (final cat in shopCategories)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 20),
+                      child: ModernCategoryItem(
+                        label: cat.name,
+                        icon: getIconFromData(cat.iconName),
+                        onTap: () => context.pushNamed(
+                          'SearchResults',
+                          queryParameters: {'categoryId': cat.id},
+                        ),
+                      ),
+                    ),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 20),
+                    child: ModernCategoryItem(
+                      label: l10n?.services ?? 'Services',
+                      icon: const Icon(Icons.handyman_rounded),
+                      onTap: () => context.pushNamed('LocalServices'),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 20),
+                    child: ModernCategoryItem(
+                      label: 'Jobs',
+                      icon: const Icon(Icons.work_rounded),
+                      onTap: () => context.pushNamed('JobsMarketplace'),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+        const SizedBox(height: DegloorTheme.spacingLG),
+      ],
+    );
+  }
+
+  Widget _nearbyBusinesses(AppLocalizations? l10n) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _sectionHeader(
+          l10n?.nearbyBusinesses ?? 'Nearby Businesses',
+          onSeeAll: () => context.pushNamed('SearchResults'),
+        ),
+        const SizedBox(height: DegloorTheme.spacingSM),
+        SizedBox(
+          height: 210,
+          child: FutureBuilder<List<Shop>>(
+            future: _model.openNowBusinessesFuture,
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) return const SizedBox();
+              final businesses = snapshot.data!;
+              if (businesses.isEmpty) return const SizedBox();
+              return ListView.builder(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: DegloorTheme.spacingMD,
+                ),
+                itemCount: businesses.length,
+                itemBuilder: (context, index) {
+                  final biz = businesses[index];
+                  return ModernBusinessCard(
+                    name: biz.name,
+                    imageUrl: biz.imageUrl ??
+                        'https://images.unsplash.com/photo-1542838132-92c53300491e'
+                            '?auto=format&fit=crop&w=400&q=80',
+                    category: _categoryIdToName[biz.categoryId] ?? 'Shop',
+                    rating: biz.rating ?? 0.0,
+                    distance: biz.distanceKm != null
+                        ? '${biz.distanceKm!.toStringAsFixed(1)} km'
+                        : 'Nearby',
+                    onTap: () => context.pushNamed(
+                      'BusinessProfile',
+                      queryParameters: {'businessId': biz.id},
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: DegloorTheme.spacingLG),
+      ],
+    );
+  }
+
+  Widget _popularProducts() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _sectionHeader(
+          'Popular Products',
+          onSeeAll: () => context.pushNamed('SearchResults'),
+        ),
+        const SizedBox(height: DegloorTheme.spacingSM),
+        SizedBox(
+          height: 230,
+          child: FutureBuilder<List<CatalogProduct>>(
+            future: _model.recommendedProductsFuture,
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) return const SizedBox();
+              final products = snapshot.data!;
+              if (products.isEmpty) return const SizedBox();
+              return ListView.separated(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: DegloorTheme.spacingMD,
+                ),
+                itemCount: products.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 12),
+                itemBuilder: (context, index) {
+                  final prod = products[index];
+                  return SizedBox(
+                    width: 164,
+                    child: ModernProductCard(
+                      name: prod.name,
+                      price: prod.price ?? 0.0,
+                      imageUrl: prod.imageUrl ??
+                          'https://images.unsplash.com/photo-1546069901-ba9599a7e63c'
+                              '?auto=format&fit=crop&w=400&q=80',
+                      onTap: () => context.pushNamed(
+                        ProductDetailWidget.routeName,
+                        pathParameters: {'productId': prod.id},
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: DegloorTheme.spacingLG),
+      ],
+    );
+  }
+
+  Widget _servicesNearYou() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _sectionHeader(
+          'Services Near You',
+          onSeeAll: () => context.pushNamed('LocalServices'),
+        ),
+        const SizedBox(height: DegloorTheme.spacingSM),
+        SizedBox(
+          height: 118,
+          child: FutureBuilder<List<ServiceProviderCard>>(
+            future: _servicesFuture,
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) return const SizedBox();
+              final providers = snapshot.data!;
+              if (providers.isEmpty) return const SizedBox();
+              return ListView.separated(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: DegloorTheme.spacingMD,
+                ),
+                itemCount: providers.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 12),
+                itemBuilder: (context, index) {
+                  final provider = providers[index];
+                  return InkWell(
+                    onTap: () => context.pushNamed(
+                      'ServiceProviderProfile',
+                      queryParameters: {'providerId': provider.id},
+                    ),
+                    borderRadius:
+                        BorderRadius.circular(DegloorTheme.radiusMD),
+                    child: Container(
+                      width: 150,
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: DegloorTheme.cardBackground,
+                        borderRadius:
+                            BorderRadius.circular(DegloorTheme.radiusMD),
+                        border: Border.all(color: DegloorTheme.border),
+                        boxShadow: DegloorTheme.softShadow,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Icon(
+                            Icons.handyman_rounded,
+                            color: DegloorTheme.primary,
+                            size: 22,
+                          ),
+                          const SizedBox(height: 10),
+                          Text(
+                            provider.displayName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: DegloorTheme.titleMedium
+                                .copyWith(fontSize: 14),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            provider.categoryName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: DegloorTheme.bodySmall,
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: DegloorTheme.spacingLG),
+      ],
     );
   }
 }

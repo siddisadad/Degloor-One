@@ -217,7 +217,7 @@ abstract class AppLocalizations {
   /// No description provided for @searchPlaceholder.
   ///
   /// In en, this message translates to:
-  /// **'Search hardware, food...'**
+  /// **'Search anything...'**
   String get searchPlaceholder;
 
   /// No description provided for @call.
