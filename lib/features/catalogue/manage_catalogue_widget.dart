@@ -173,6 +173,32 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
                   Expanded(child: TextField(controller: _model.stockQuantityTextController, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Initial Stock'))),
                 ],
               ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _model.productCategoryTextController,
+                decoration: const InputDecoration(
+                  labelText: 'Category',
+                  hintText: 'e.g. Dairy',
+                ),
+              ),
+              if (_businessCategories.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final category in _businessCategories)
+                      ActionChip(
+                        label: Text(category.name),
+                        onPressed: () {
+                          _model.productCategoryTextController?.text =
+                              category.name;
+                          setState(() {});
+                        },
+                      ),
+                  ],
+                ),
+              ],
               const SizedBox(height: 16),
               FFButtonWidget(
                 onPressed: _addProduct,

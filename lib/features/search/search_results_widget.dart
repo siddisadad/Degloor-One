@@ -5,6 +5,7 @@ import 'package:degloor_one/backend/discovery_service.dart';
 import 'package:degloor_one/backend/location_service.dart';
 import 'package:degloor_one/components/business_card/business_card_widget.dart';
 import 'package:degloor_one/components/degloor_app_bar.dart';
+import 'package:degloor_one/components/degloor_filter_chip.dart';
 import 'package:degloor_one/components/discovery_radius_bar.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/components/modern/modern_product_list_item.dart';
@@ -265,9 +266,9 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
                 child: Row(
                   children: [
                     for (final scope in MasterSearchScope.values)
-                      _filterChip(
-                        _scopeLabel(scope),
-                        _scope == scope,
+                      DegloorFilterChip(
+                        label: _scopeLabel(scope),
+                        selected: _scope == scope,
                         onTap: () {
                           setState(() => _scope = scope);
                           _runSearch();
@@ -284,30 +285,30 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 children: [
-                  _filterChip(
-                    '${FFAppState.instance.discoveryRadius.toInt()} km',
-                    true,
+                  DegloorFilterChip(
+                    label: '${FFAppState.instance.discoveryRadius.toInt()} km',
+                    selected: true,
                     onTap: _showRadiusSheet,
                   ),
-                  _filterChip(
-                    l10n?.verified ?? 'Verified',
-                    _onlyVerified,
+                  DegloorFilterChip(
+                    label: l10n?.verified ?? 'Verified',
+                    selected: _onlyVerified,
                     onTap: () {
                       setState(() => _onlyVerified = !_onlyVerified);
                       _runSearch();
                     },
                   ),
-                  _filterChip(
-                    l10n?.openNow ?? 'Open Now',
-                    _onlyOpen,
+                  DegloorFilterChip(
+                    label: l10n?.openNow ?? 'Open Now',
+                    selected: _onlyOpen,
                     onTap: () {
                       setState(() => _onlyOpen = !_onlyOpen);
                       _runSearch();
                     },
                   ),
-                  _filterChip(
-                    'Rating 4.0+',
-                    _minRating4,
+                  DegloorFilterChip(
+                    label: 'Rating 4.0+',
+                    selected: _minRating4,
                     onTap: () {
                       setState(() => _minRating4 = !_minRating4);
                       _runSearch();
@@ -616,30 +617,6 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
                 color: DegloorTheme.textSecondary,
               ),
             ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _filterChip(String label, bool isSelected, {required VoidCallback onTap}) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 8),
-      child: FilterChip(
-        label: Text(label),
-        selected: isSelected,
-        onSelected: (_) => onTap(),
-        showCheckmark: false,
-        backgroundColor: Colors.white,
-        selectedColor: DegloorTheme.accent,
-        labelStyle: TextStyle(
-          color: isSelected ? DegloorTheme.primary : DegloorTheme.textSecondary,
-          fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-          fontSize: 12,
-        ),
-        shape: StadiumBorder(
-          side: BorderSide(
-            color: isSelected ? DegloorTheme.primary : DegloorTheme.border,
           ),
         ),
       ),
