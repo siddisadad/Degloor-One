@@ -99,10 +99,15 @@ void main() {
 
     await tester.pumpWidget(
       const MaterialApp(
-        home: SizedBox(
-          width: 48,
-          height: 48,
-          child: CachedRemoteImage(url: 'https://example.com/x.jpg'),
+        home: Scaffold(
+          body: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              width: 48,
+              height: 48,
+              child: CachedRemoteImage(url: 'https://example.com/x.jpg'),
+            ),
+          ),
         ),
       ),
     );
