@@ -1,5 +1,5 @@
-import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
+import 'package:degloor_one/shared/catalog_product.dart';
 import 'package:degloor_one/shared/shop.dart';
 import 'package:degloor_one/shared/user_profile.dart';
 import 'customer_home_widget.dart' show CustomerHomeWidget;
@@ -10,7 +10,7 @@ class CustomerHomeModel extends FlutterFlowModel<CustomerHomeWidget> {
 
   Future<List<UserProfile>>? userProfileFuture;
   Future<List<Shop>>? openNowBusinessesFuture;
-  Future<List<ProductsRow>>? recommendedProductsFuture;
+  Future<List<CatalogProduct>>? recommendedProductsFuture;
   String locationName = 'Degloor, Maharashtra';
   bool openNow = false;
 

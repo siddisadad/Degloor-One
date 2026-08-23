@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/backend/shop_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/catalog_product.dart';
 import 'package:degloor_one/shared/shop.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
@@ -28,6 +29,8 @@ void main() {
   test('Patil catalogue lists milk, rice, and category names', () async {
     final catalog =
         await ShopService.instance.catalog(ShowcaseCatalog.bizPatil);
+    expect(catalog.products, everyElement(isA<CatalogProduct>()));
+    expect(catalog.products, isNot(anyElement(isA<ProductsRow>())));
     expect(
       catalog.products.map((row) => row.id),
       containsAll([ShowcaseCatalog.prodMilk, ShowcaseCatalog.prodRice]),
@@ -157,7 +160,8 @@ void main() {
   test('productById returns Patil milk on showcase', () async {
     final product =
         await ShopService.instance.productById(ShowcaseCatalog.prodMilk);
-    expect(product, isNotNull);
+    expect(product, isA<CatalogProduct>());
+    expect(product, isNot(isA<ProductsRow>()));
     expect(product!.id, ShowcaseCatalog.prodMilk);
     expect(product.name, 'Fresh Milk (1L)');
     expect(product.businessId, ShowcaseCatalog.bizPatil);

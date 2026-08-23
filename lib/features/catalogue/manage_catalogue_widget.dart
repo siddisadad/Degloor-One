@@ -10,6 +10,7 @@ import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:degloor_one/core/error_handler.dart';
+import 'package:degloor_one/shared/catalog_product.dart';
 import 'package:degloor_one/shared/shop.dart';
 import 'manage_catalogue_model.dart';
 export 'manage_catalogue_model.dart';
@@ -27,7 +28,7 @@ class ManageCatalogueWidget extends StatefulWidget {
 class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
   late ManageCatalogueModel _model;
   final scaffoldKey = GlobalKey<ScaffoldState>();
-  List<ProductsRow> _products = [];
+  List<CatalogProduct> _products = [];
   List<ProductCategoriesRow> _businessCategories = [];
   bool _loading = true;
   Shop? _business;
@@ -231,7 +232,7 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
     await _fetchProducts();
   }
 
-  Future<void> _editProduct(ProductsRow product) async {
+  Future<void> _editProduct(CatalogProduct product) async {
     final nameC = TextEditingController(text: product.name);
     final priceC = TextEditingController(text: product.price.toString());
     final stockC = TextEditingController(text: (product.stockQuantity ?? 0).toString());
