@@ -5,6 +5,7 @@ import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/core/error_handler.dart';
 import 'package:degloor_one/shared/catalog_product.dart';
+import 'package:degloor_one/shared/catalog_product_draft.dart';
 import 'package:degloor_one/shared/product_category.dart';
 import 'package:degloor_one/shared/product_category_draft.dart';
 import 'package:degloor_one/shared/shop.dart';
@@ -197,27 +198,22 @@ class BusinessService {
 
   Future<CatalogProduct> addProduct({
     required String userId,
-    required String name,
-    required double price,
-    String categoryName = '',
-    String? imageUrl,
-    int stockQuantity = 0,
-    bool trackInventory = false,
+    required CatalogProductDraft draft,
   }) async {
     final shop = await requireOwned(userId);
-    final trimmedName = name.trim();
+    final trimmedName = draft.name.trim();
     if (trimmedName.isEmpty) {
       throw Exception('Please enter a product name');
     }
-    if (price < 0) {
+    if (draft.price < 0) {
       throw Exception('Please enter a valid price');
     }
-    if (stockQuantity < 0) {
+    if (draft.stockQuantity < 0) {
       throw Exception('Please enter a valid stock quantity');
     }
 
     String? categoryId;
-    final trimmedCategory = categoryName.trim();
+    final trimmedCategory = draft.categoryName.trim();
     if (trimmedCategory.isNotEmpty) {
       final existing = await _repository.productCategoriesFor(shop.id);
       for (final category in existing) {
@@ -237,27 +233,17 @@ class BusinessService {
       }
     }
 
-    final row = await _repository.insertProduct({
-      'business_id': shop.id,
-      'category_id': categoryId,
-      'name': trimmedName,
-      'price': price,
-      'image_url': imageUrl,
-      'is_available': true,
-      'stock_quantity': stockQuantity,
-      'track_inventory': trackInventory,
-    });
-    return CatalogProduct.fromRow(row);
+    return _repository.insertProduct(
+      draft: draft,
+      businessId: shop.id,
+      categoryId: categoryId,
+    );
   }
 
   Future<void> updateProduct({
     required String userId,
     required String productId,
-    required String name,
-    required double price,
-    int stockQuantity = 0,
-    bool trackInventory = false,
-    String? imageUrl,
+    required CatalogProductDraft draft,
   }) async {
     final shop = await requireOwned(userId);
     final existing = await _repository.productForBusiness(
@@ -267,23 +253,16 @@ class BusinessService {
     if (existing == null) {
       throw Exception(_missingProductMessage);
     }
-    final trimmedName = name.trim();
-    if (trimmedName.isEmpty) {
+    if (draft.name.trim().isEmpty) {
       throw Exception('Please enter a product name');
     }
-    if (price < 0) {
+    if (draft.price < 0) {
       throw Exception('Please enter a valid price');
     }
     await _repository.updateProduct(
       productId: productId,
       businessId: shop.id,
-      data: {
-        'name': trimmedName,
-        'price': price,
-        'stock_quantity': stockQuantity < 0 ? 0 : stockQuantity,
-        'track_inventory': trackInventory,
-        'image_url': imageUrl,
-      },
+      data: draft.toUpdateJson(),
     );
   }
 
