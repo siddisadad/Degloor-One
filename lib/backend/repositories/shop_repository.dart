@@ -1,5 +1,6 @@
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/marketplace_joins.dart';
+import 'package:degloor_one/shared/shop_review_draft.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
 /// Public shop reads and customer review/report writes. Widgets should go
@@ -76,14 +77,6 @@ class ShopRepository {
     );
   }
 
-  Future<List<ReviewsRow>> reviewsFor(String businessId) {
-    if (businessId.isEmpty) return Future.value(const []);
-    return ReviewsTable().queryRows(
-      queryFn: (q) =>
-          q.eq('business_id', businessId).order('created_at', ascending: false),
-    );
-  }
-
   Future<List<ShopReview>> reviewsWithUsers(String businessId) async {
     if (businessId.isEmpty) return const [];
     if (kUseShowcaseData) {
@@ -101,7 +94,7 @@ class ShopRepository {
         .toList();
   }
 
-  Future<ReviewsRow?> reviewByUser({
+  Future<ShopReview?> reviewByUser({
     required String userId,
     required String businessId,
   }) async {
@@ -110,11 +103,14 @@ class ShopRepository {
       queryFn: (q) => q.eq('user_id', userId).eq('business_id', businessId),
       limit: 1,
     );
-    return rows.isEmpty ? null : rows.first;
+    return rows.isEmpty
+        ? null
+        : ShopReview.fromJoin(Map<String, dynamic>.from(rows.first.data));
   }
 
-  Future<ReviewsRow> insertReview(Map<String, dynamic> data) {
-    return ReviewsTable().insert(data);
+  Future<ShopReview> insertReview(ShopReviewDraft draft) async {
+    final row = await ReviewsTable().insert(draft.toInsertJson());
+    return ShopReview.fromJoin(Map<String, dynamic>.from(row.data));
   }
 
   Future<ComplaintsRow> insertComplaint(Map<String, dynamic> data) {
