@@ -62,7 +62,7 @@ void main() {
         name: 'Curd',
         price: 40,
         categoryName: 'dairy',
-        stockQuantity: 6,
+        stock: CatalogProductStock(6),
         trackInventory: true,
       ),
     );

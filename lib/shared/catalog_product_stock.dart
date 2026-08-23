@@ -6,9 +6,14 @@ class CatalogProductStock {
   final int quantity;
 
   /// Parse owner form text. Quantity stays off the widget.
+  /// Blank input is zero stock, not an error.
   factory CatalogProductStock.parse(String text) {
-    final quantity = int.tryParse(text.trim());
-    if (quantity == null) {
+    final trimmed = text.trim();
+    if (trimmed.isEmpty) {
+      return const CatalogProductStock(0);
+    }
+    final quantity = int.tryParse(trimmed);
+    if (quantity == null || quantity < 0) {
       throw Exception('Please enter a valid stock quantity');
     }
     return CatalogProductStock(quantity);

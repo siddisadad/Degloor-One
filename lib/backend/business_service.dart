@@ -209,7 +209,7 @@ class BusinessService {
     if (draft.price < 0) {
       throw Exception('Please enter a valid price');
     }
-    if (draft.stockQuantity < 0) {
+    if (draft.stock.quantity < 0) {
       throw Exception('Please enter a valid stock quantity');
     }
 

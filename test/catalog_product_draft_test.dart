@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:degloor_one/shared/catalog_product_draft.dart';
+import 'package:degloor_one/shared/catalog_product_stock.dart';
 
 void main() {
   test('product drafts only serialize insert fields', () {
@@ -7,7 +8,7 @@ void main() {
       name: 'Turmeric',
       price: 25,
       imageUrl: 'https://img',
-      stockQuantity: 4,
+      stock: CatalogProductStock(4),
       trackInventory: true,
     );
     expect(
@@ -43,8 +44,12 @@ void main() {
       categoryName: 'Dairy',
     );
     expect(draft.price, 40);
-    expect(draft.stockQuantity, 6);
+    expect(draft.stock.quantity, 6);
     expect(draft.categoryName, 'Dairy');
+    expect(
+      CatalogProductDraft.fromForm(name: 'Curd', priceText: '40').stock.quantity,
+      0,
+    );
     expect(
       () => CatalogProductDraft.fromForm(name: 'Curd', priceText: 'free'),
       throwsA(
@@ -52,6 +57,20 @@ void main() {
           (error) => error.toString(),
           'message',
           contains('valid price'),
+        ),
+      ),
+    );
+    expect(
+      () => CatalogProductDraft.fromForm(
+        name: 'Curd',
+        priceText: '40',
+        stockText: '-3',
+      ),
+      throwsA(
+        isA<Exception>().having(
+          (error) => error.toString(),
+          'message',
+          contains('valid stock'),
         ),
       ),
     );

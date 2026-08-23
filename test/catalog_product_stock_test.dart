@@ -23,6 +23,17 @@ void main() {
 
   test('stock parse stays off the widget and rejects junk', () {
     expect(CatalogProductStock.parse('8').quantity, 8);
+    expect(CatalogProductStock.parse('').quantity, 0);
+    expect(
+      () => CatalogProductStock.parse('-3'),
+      throwsA(
+        isA<Exception>().having(
+          (error) => error.toString(),
+          'message',
+          contains('valid stock'),
+        ),
+      ),
+    );
     expect(
       () => CatalogProductStock.parse('plenty'),
       throwsA(
