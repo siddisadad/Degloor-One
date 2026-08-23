@@ -3,6 +3,8 @@ import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/backend/delivery_service.dart';
 import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/delivery_assignment.dart';
+import 'package:degloor_one/shared/delivery_partner.dart';
 import 'package:degloor_one/shared/order_lifecycle.dart';
 import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/shared/placed_order.dart';
@@ -55,6 +57,8 @@ void main() {
     final assignment = await DeliveryService.instance.activeAssignment(
       ShowcaseCatalog.orderOut,
     );
+    expect(assignment, isA<DeliveryAssignment>());
+    expect(assignment, isNot(isA<DeliveryAssignmentsRow>()));
     expect(assignment?.id, 'da-1');
     expect(
       await DeliveryService.instance.activeAssignment('order-pending'),
@@ -83,6 +87,8 @@ void main() {
     final rider = await DeliveryService.instance.partnerForUser(
       ShowcaseCatalog.riderId,
     );
+    expect(rider, isA<DeliveryPartner>());
+    expect(rider, isNot(isA<DeliveryPartnersRow>()));
     expect(rider?.id, 'dp-amit');
     expect(rider?.isVerified, isTrue);
 
@@ -106,6 +112,8 @@ void main() {
   test('active assignment for the rider is the out-for-delivery job', () async {
     ShowcaseCatalog.reset();
     final assignment = await DeliveryService.instance.activeForPartner('dp-amit');
+    expect(assignment, isA<DeliveryAssignment>());
+    expect(assignment, isNot(isA<DeliveryAssignmentsRow>()));
     expect(assignment?.id, 'da-1');
     expect(assignment?.orderId, ShowcaseCatalog.orderOut);
   });
@@ -115,6 +123,8 @@ void main() {
     final created = await DeliveryService.instance.registerPartner(
       GuestAuthUser.guestUid,
     );
+    expect(created, isA<DeliveryPartner>());
+    expect(created, isNot(isA<DeliveryPartnersRow>()));
     expect(created.isVerified, isFalse);
     await expectLater(
       DeliveryService.instance.setAvailability(
@@ -160,6 +170,8 @@ void main() {
     final partners = await DeliveryService.instance
         .watchPartner(assignment!.deliveryPartnerId)
         .first;
+    expect(partners, everyElement(isA<DeliveryPartner>()));
+    expect(partners, isNot(anyElement(isA<DeliveryPartnersRow>())));
     expect(partners.single.id, 'dp-amit');
   });
 

@@ -3,7 +3,6 @@ import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/delivery_service.dart';
 import 'package:degloor_one/backend/discovery_service.dart';
 import 'package:degloor_one/backend/order_service.dart';
-import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/components/cached_remote_image.dart';
 import 'package:degloor_one/components/degloor_app_bar.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
@@ -12,6 +11,8 @@ import 'package:degloor_one/backend/whatsapp_service.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
+import 'package:degloor_one/shared/delivery_assignment.dart';
+import 'package:degloor_one/shared/delivery_partner.dart';
 import 'package:degloor_one/shared/join_rows.dart';
 import 'package:degloor_one/shared/placed_order.dart';
 import 'package:degloor_one/shared/shop.dart';
@@ -377,13 +378,13 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
   }
 
   Widget _buildDeliveryPartnerInfo(String orderId) {
-    return FutureBuilder<DeliveryAssignmentsRow?>(
+    return FutureBuilder<DeliveryAssignment?>(
       future: DeliveryService.instance.activeAssignment(orderId),
       builder: (context, assignmentSnapshot) {
         final assignment = assignmentSnapshot.data;
         if (assignment == null) return Container();
 
-        return StreamBuilder<List<DeliveryPartnersRow>>(
+        return StreamBuilder<List<DeliveryPartner>>(
           stream: DeliveryService.instance.watchPartner(assignment.deliveryPartnerId),
           builder: (context, partnerSnapshot) {
             final partner = partnerSnapshot.data?.firstOrNull;

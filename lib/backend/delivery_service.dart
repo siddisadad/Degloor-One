@@ -5,6 +5,8 @@ import 'package:degloor_one/core/api/api_client.dart';
 import 'package:degloor_one/core/api/delivery_api.dart';
 import 'package:degloor_one/core/api/order_api.dart';
 import 'package:degloor_one/core/error_handler.dart';
+import 'package:degloor_one/shared/delivery_assignment.dart';
+import 'package:degloor_one/shared/delivery_partner.dart';
 import 'package:degloor_one/shared/order_lifecycle.dart';
 import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/shared/placed_order.dart';
@@ -18,15 +20,17 @@ class DeliveryService {
 
   static final instance = DeliveryService();
 
-  Future<DeliveryPartnersRow?> partnerForUser(String userId) {
-    return _repository.partnerForUser(userId);
+  Future<DeliveryPartner?> partnerForUser(String userId) async {
+    final row = await _repository.partnerForUser(userId);
+    return row == null ? null : DeliveryPartner.fromRow(row);
   }
 
-  Future<DeliveryPartnersRow> registerPartner(String userId) {
+  Future<DeliveryPartner> registerPartner(String userId) async {
     if (userId.isEmpty) {
       throw Exception('Please sign in to register as a delivery partner');
     }
-    return _repository.registerPartner(userId);
+    final row = await _repository.registerPartner(userId);
+    return DeliveryPartner.fromRow(row);
   }
 
   Future<void> setAvailability({
@@ -49,8 +53,9 @@ class DeliveryService {
     await _repository.setAvailability(partnerId: partnerId, available: true);
   }
 
-  Future<DeliveryAssignmentsRow?> activeForPartner(String partnerId) {
-    return _repository.activeForPartner(partnerId);
+  Future<DeliveryAssignment?> activeForPartner(String partnerId) async {
+    final row = await _repository.activeForPartner(partnerId);
+    return row == null ? null : DeliveryAssignment.fromRow(row);
   }
 
   Future<PageResult<PlacedOrder>> readyOrders({
@@ -63,12 +68,15 @@ class DeliveryService {
     );
   }
 
-  Future<DeliveryAssignmentsRow?> activeAssignment(String orderId) {
-    return _repository.activeAssignment(orderId);
+  Future<DeliveryAssignment?> activeAssignment(String orderId) async {
+    final row = await _repository.activeAssignment(orderId);
+    return row == null ? null : DeliveryAssignment.fromRow(row);
   }
 
-  Stream<List<DeliveryPartnersRow>> watchPartner(String partnerId) {
-    return _repository.watchPartner(partnerId);
+  Stream<List<DeliveryPartner>> watchPartner(String partnerId) {
+    return _repository
+        .watchPartner(partnerId)
+        .map((rows) => rows.map(DeliveryPartner.fromRow).toList());
   }
 
   Future<void> acceptOrder(String orderId) {
