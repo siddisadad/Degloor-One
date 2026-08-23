@@ -9,6 +9,42 @@ import 'package:degloor_one/shared/order_lifecycle.dart';
 import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
+class OrderOwnerActions {
+  const OrderOwnerActions({
+    required this.canAccept,
+    required this.canMarkReady,
+    required this.canCounterDeliver,
+    required this.canCancel,
+    required this.isTerminal,
+  });
+
+  final bool canAccept;
+  final bool canMarkReady;
+  final bool canCounterDeliver;
+  final bool canCancel;
+  final bool isTerminal;
+
+  String get acceptStatus => OrderLifecycle.accepted;
+  String get readyStatus => OrderLifecycle.ready;
+  String get cancelStatus => OrderLifecycle.cancelled;
+}
+
+class OrderCustomerActions {
+  const OrderCustomerActions({
+    required this.canCancel,
+    required this.isCancelled,
+    required this.showDeliveryOtp,
+    required this.showStepper,
+    required this.stepperIndex,
+  });
+
+  final bool canCancel;
+  final bool isCancelled;
+  final bool showDeliveryOtp;
+  final bool showStepper;
+  final int stepperIndex;
+}
+
 class OrderService {
   OrderService({OrderRepository? repository})
       : _repository = repository ?? OrderRepository();
@@ -16,6 +52,38 @@ class OrderService {
   final OrderRepository _repository;
 
   static final instance = OrderService();
+
+  OrderOwnerActions ownerActions(String status) {
+    return OrderOwnerActions(
+      canAccept: OrderLifecycle.canTransition(
+        from: status,
+        to: OrderLifecycle.accepted,
+      ),
+      canMarkReady: OrderLifecycle.canTransition(
+        from: status,
+        to: OrderLifecycle.ready,
+      ),
+      canCounterDeliver:
+          OrderLifecycle.normalizeStatus(status) == OrderLifecycle.ready,
+      canCancel: OrderLifecycle.canOwnerCancel(status),
+      isTerminal: OrderLifecycle.isTerminal(status),
+    );
+  }
+
+  OrderCustomerActions customerActions(String status) {
+    final current = OrderLifecycle.normalizeStatus(status);
+    return OrderCustomerActions(
+      canCancel: OrderLifecycle.canCustomerCancel(current),
+      isCancelled: current == OrderLifecycle.cancelled,
+      showDeliveryOtp: current != OrderLifecycle.pending &&
+          current != OrderLifecycle.delivered &&
+          current != OrderLifecycle.cancelled,
+      showStepper: current != OrderLifecycle.cancelled,
+      stepperIndex: OrderLifecycle.stepperIndex(current),
+    );
+  }
+
+  String statusLabel(String status) => OrderLifecycle.label(status);
 
   Future<PageResult<OrdersRow>> listForUser(
     String userId, {

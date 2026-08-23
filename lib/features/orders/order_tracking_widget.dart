@@ -8,7 +8,6 @@ import 'package:degloor_one/components/cached_remote_image.dart';
 import 'package:degloor_one/components/degloor_app_bar.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/components/order_status_chip.dart';
-import 'package:degloor_one/shared/order_lifecycle.dart';
 import 'package:degloor_one/backend/whatsapp_service.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
@@ -50,8 +49,6 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
     super.dispose();
   }
 
-  int _getStatusIndex(String status) => OrderLifecycle.stepperIndex(status);
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -83,8 +80,9 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
             }
 
             final order = snapshot.data!.first;
-            final statusIndex = _getStatusIndex(order.status);
-            final isCancelled = order.status.toLowerCase() == 'cancelled';
+            final actions = OrderService.instance.customerActions(order.status);
+            final statusIndex = actions.stepperIndex;
+            final isCancelled = actions.isCancelled;
 
             return Align(
               alignment: Alignment.topCenter,
@@ -144,7 +142,7 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
                           ],
                         ),
                       ),
-                    if (OrderLifecycle.canCustomerCancel(order.status))
+                    if (actions.canCancel)
                       Padding(
                         padding: const EdgeInsets.only(bottom: 16),
                         child: FFButtonWidget(
@@ -186,12 +184,12 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
                         ),
                       ),
                     // Status Stepper
-                    if (!isCancelled) _buildStatusStepper(statusIndex),
+                    if (actions.showStepper) _buildStatusStepper(statusIndex),
 
                     const SizedBox(height: 32),
 
                     // OTP is fetched via RPC so partners cannot read it from the orders row.
-                    if (order.status.toLowerCase() != 'pending' && order.status.toLowerCase() != 'delivered' && order.status.toLowerCase() != 'cancelled')
+                    if (actions.showDeliveryOtp)
                       FutureBuilder<String?>(
                         future: DeliveryService.fetchMyDeliveryOtp(order.id),
                         builder: (context, otpSnapshot) =>

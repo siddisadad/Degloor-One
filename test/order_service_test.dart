@@ -301,6 +301,50 @@ void main() {
     expect(items.first['products'], isA<Map<String, dynamic>>());
   });
 
+  test('ownerActions follows Degloor owner transitions', () {
+    final pending = OrderService.instance.ownerActions(OrderLifecycle.pending);
+    expect(pending.canAccept, isTrue);
+    expect(pending.canMarkReady, isFalse);
+    expect(pending.canCounterDeliver, isFalse);
+    expect(pending.canCancel, isTrue);
+    expect(pending.isTerminal, isFalse);
+
+    final ready = OrderService.instance.ownerActions(OrderLifecycle.ready);
+    expect(ready.canAccept, isFalse);
+    expect(ready.canMarkReady, isFalse);
+    expect(ready.canCounterDeliver, isTrue);
+    expect(ready.canCancel, isTrue);
+
+    final shipping = OrderService.instance.ownerActions(OrderLifecycle.shipping);
+    expect(shipping.canAccept, isFalse);
+    expect(shipping.canCancel, isFalse);
+    expect(shipping.isTerminal, isFalse);
+
+    final delivered =
+        OrderService.instance.ownerActions(OrderLifecycle.delivered);
+    expect(delivered.isTerminal, isTrue);
+    expect(delivered.canCancel, isFalse);
+    expect(delivered.canCounterDeliver, isFalse);
+  });
+
+  test('customerActions only cancel pending and show OTP after accept', () {
+    final pending =
+        OrderService.instance.customerActions(OrderLifecycle.pending);
+    expect(pending.canCancel, isTrue);
+    expect(pending.showDeliveryOtp, isFalse);
+    expect(pending.showStepper, isTrue);
+
+    final ready = OrderService.instance.customerActions(OrderLifecycle.ready);
+    expect(ready.canCancel, isFalse);
+    expect(ready.showDeliveryOtp, isTrue);
+
+    final cancelled = OrderService.instance.customerActions('CANCELLED');
+    expect(cancelled.isCancelled, isTrue);
+    expect(cancelled.showStepper, isFalse);
+    expect(cancelled.showDeliveryOtp, isFalse);
+    expect(OrderService.instance.statusLabel(OrderLifecycle.ready), 'Ready');
+  });
+
   test('pending count is scoped to the shop and pending status', () async {
     expect(
       await OrderService.instance.pendingCount(ShowcaseCatalog.bizPatil),

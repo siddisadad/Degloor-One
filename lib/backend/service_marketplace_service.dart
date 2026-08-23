@@ -7,12 +7,39 @@ import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/shared/rpc_row.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
-const _allowedRequestStatuses = {
-  'pending',
-  'accepted',
-  'declined',
-  'completed',
-};
+class ServiceRequestStatus {
+  static const pending = 'pending';
+  static const accepted = 'accepted';
+  static const declined = 'declined';
+  static const completed = 'completed';
+
+  static const all = {pending, accepted, declined, completed};
+}
+
+class ServiceRequestActions {
+  const ServiceRequestActions({
+    required this.canAccept,
+    required this.canDecline,
+    required this.canComplete,
+  });
+
+  final bool canAccept;
+  final bool canDecline;
+  final bool canComplete;
+
+  String get acceptStatus => ServiceRequestStatus.accepted;
+  String get declineStatus => ServiceRequestStatus.declined;
+  String get completeStatus => ServiceRequestStatus.completed;
+
+  factory ServiceRequestActions.forStatus(String? status) {
+    final current = (status ?? ServiceRequestStatus.pending).toLowerCase();
+    return ServiceRequestActions(
+      canAccept: current == ServiceRequestStatus.pending,
+      canDecline: current == ServiceRequestStatus.pending,
+      canComplete: current == ServiceRequestStatus.accepted,
+    );
+  }
+}
 
 class ServiceMarketplaceService {
   ServiceMarketplaceService({ServiceMarketplaceRepository? repository})
@@ -21,6 +48,9 @@ class ServiceMarketplaceService {
   final ServiceMarketplaceRepository _repository;
 
   static final instance = ServiceMarketplaceService();
+
+  ServiceRequestActions requestActions(String? status) =>
+      ServiceRequestActions.forStatus(status);
 
   Future<List<ServiceCategoriesRow>> categories() async {
     final native = await NativeServiceBridge.getCategories();
@@ -116,7 +146,7 @@ class ServiceMarketplaceService {
         'provider_id': providerId,
         'description': trimmed,
         'scheduled_at': scheduledAt.toIso8601String(),
-        'status': 'pending',
+        'status': ServiceRequestStatus.pending,
       });
       final providers = ShowcaseCatalog.query(
         'service_providers',
@@ -156,7 +186,7 @@ class ServiceMarketplaceService {
     required String actorUserId,
   }) async {
     final status = nextStatus.trim().toLowerCase();
-    if (!_allowedRequestStatuses.contains(status)) {
+    if (!ServiceRequestStatus.all.contains(status)) {
       throw Exception('Invalid service request status');
     }
 
@@ -201,8 +231,11 @@ class ServiceMarketplaceService {
 
     final current = '${request['status']}'.toLowerCase();
     final allowed = switch (current) {
-      'pending' => {'accepted', 'declined'},
-      'accepted' => {'completed'},
+      ServiceRequestStatus.pending => {
+          ServiceRequestStatus.accepted,
+          ServiceRequestStatus.declined,
+        },
+      ServiceRequestStatus.accepted => {ServiceRequestStatus.completed},
       _ => <String>{},
     };
     if (!allowed.contains(nextStatus)) {

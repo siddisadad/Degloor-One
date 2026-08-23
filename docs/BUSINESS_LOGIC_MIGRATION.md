@@ -133,6 +133,8 @@ Critical Supabase RPCs are **not removed**. They remain the live fallback until 
 
 Shop open-now math lives on `ShopService.isOpenNow` / `isOpenFromHours` (Sunday=0, overnight wrap). Cart display totals use `CartService.subtotal`; checkout goes through `OrderService.placeOrderFromCart`, which strips client prices. Payable amounts still come from showcase catalog or Java/RPC.
 
+Order and service-request buttons use `OrderService.ownerActions` / `customerActions` and `ServiceMarketplaceService.requestActions`. Widgets do not decide Degloor transitions.
+
 ---
 
 ## Remaining blockers (live cutover)
