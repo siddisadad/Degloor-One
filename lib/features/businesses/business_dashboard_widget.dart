@@ -1,4 +1,5 @@
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
+import 'package:degloor_one/backend/business_service.dart';
 import 'package:degloor_one/backend/discovery_service.dart';
 import 'package:degloor_one/backend/order_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
@@ -87,37 +88,8 @@ class _BusinessDashboardWidgetState extends State<BusinessDashboardWidget> {
     }
   }
 
-  double _calculateCompleteness() {
-    if (_business == null) return 0.0;
-    int score = 0;
-    const int total = 100;
-
-    // 1. Basic Info (25%)
-    if (_business!.name.trim().isNotEmpty) score += 10;
-    if ((_business!.description ?? '').trim().isNotEmpty) score += 15;
-
-    // 2. Contact & Category (20%)
-    if ((_business!.categoryId ?? '').isNotEmpty) score += 10;
-    if ((_business!.whatsappNumber ?? '').trim().isNotEmpty) score += 10;
-
-    // 3. Location (35%)
-    if ((_business!.addressText ?? '').trim().isNotEmpty) score += 15;
-    if ((_business!.latitude ?? 0) != 0 && (_business!.longitude ?? 0) != 0) score += 20;
-
-    // 4. Visuals (20%)
-    if ((_business!.imageUrl ?? '').trim().isNotEmpty) score += 20;
-
-    return score / total;
-  }
-
-  String _getCompletenessHint() {
-    if (_business == null) return '';
-    if ((_business!.imageUrl ?? '').isEmpty) return 'Add business photos to reach 100%';
-    if ((_business!.description ?? '').isEmpty) return 'Describe what you provide to help customers find you';
-    if ((_business!.addressText ?? '').isEmpty) return 'Add your shop address for better visibility';
-    if ((_business!.latitude ?? 0) == 0) return 'Pin your location on the map for accurate delivery';
-    return 'Your profile looks great!';
-  }
+  ProfileCompleteness get _completeness =>
+      BusinessService.completeness(_business);
 
   @override
   void dispose() {
@@ -486,9 +458,9 @@ class _BusinessDashboardWidgetState extends State<BusinessDashboardWidget> {
                         model: _model.completenessCardModel,
                         updateCallback: () => safeSetState(() {}),
                         child: CompletenessCardWidget(
-                          hint: _getCompletenessHint(),
-                          percent: '${(_calculateCompleteness() * 100).toInt()}',
-                          progressVal: _calculateCompleteness(),
+                          hint: _completeness.hint,
+                          percent: '${_completeness.percent}',
+                          progressVal: _completeness.ratio,
                         ),
                       ),
                       Container(

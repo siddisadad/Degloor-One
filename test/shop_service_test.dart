@@ -111,6 +111,23 @@ void main() {
     );
   });
 
+  test('summarizeEvents counts types and daily buckets', () async {
+    final events = await ShopService.instance.eventsFor(
+      userId: GuestAuthUser.guestUid,
+      businessId: ShowcaseCatalog.bizPatil,
+    );
+    final summary = ShopService.summarizeEvents(events);
+    expect(summary.profileViews, 18);
+    expect(summary.callClicks, 5);
+    expect(summary.whatsappClicks, 7);
+    expect(summary.directionsClicks, 3);
+    expect(summary.inquiries, 12);
+    expect(summary.conversionRate, closeTo(12 / 18 * 100, 0.001));
+    expect(summary.dailyCounts, isNotEmpty);
+    expect(summary.peakDaily, greaterThan(0));
+    expect(ShopService.summarizeEvents(const []).profileViews, 0);
+  });
+
   test('eventsFor returns owner-scoped analytics', () async {
     final events = await ShopService.instance.eventsFor(
       userId: GuestAuthUser.guestUid,

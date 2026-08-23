@@ -135,6 +135,8 @@ Shop open-now math lives on `ShopService.isOpenNow` / `isOpenFromHours` (Sunday=
 
 Order and service-request buttons use `OrderService.ownerActions` / `customerActions` and `ServiceMarketplaceService.requestActions`. Widgets do not decide Degloor transitions.
 
+Shop insights counts live on `ShopService.summarizeEvents`. Profile completeness lives on `BusinessService.completeness`.
+
 ---
 
 ## Remaining blockers (live cutover)

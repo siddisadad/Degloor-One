@@ -2,7 +2,35 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/backend/business_service.dart';
 import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
+import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
+
+BusinessesRow _shop({
+  String name = 'Shop',
+  String? description,
+  String? categoryId,
+  String? whatsapp,
+  String? address,
+  double? lat,
+  double? lng,
+  String? image,
+}) {
+  return BusinessesRow({
+    'id': 'biz-test',
+    'name': name,
+    'description': description,
+    'category_id': categoryId,
+    'whatsapp_number': whatsapp,
+    'address_text': address,
+    'latitude': lat,
+    'longitude': lng,
+    'image_url': image,
+    'is_open': true,
+    'is_verified': true,
+    'rating': 0,
+    'created_at': '2026-01-01T00:00:00.000Z',
+  });
+}
 
 void main() {
   setUp(ShowcaseCatalog.reset);
@@ -120,5 +148,40 @@ void main() {
     final shop =
         await BusinessService.instance.requireOwned(GuestAuthUser.guestUid);
     expect(shop.name, 'Patil Kirana Plus');
+  });
+
+  test('completeness scores filled vs missing shop fields', () {
+    expect(BusinessService.completeness(null).ratio, 0);
+    expect(BusinessService.completeness(_shop(name: '')).ratio, 0);
+
+    final full = BusinessService.completeness(
+      _shop(
+        name: 'Patil',
+        description: 'Groceries',
+        categoryId: 'c1',
+        whatsapp: '+91',
+        address: 'Main Road',
+        lat: 18.55,
+        lng: 77.58,
+        image: 'https://img',
+      ),
+    );
+    expect(full.ratio, 1);
+    expect(full.percent, 100);
+    expect(full.hint, 'Your profile looks great!');
+
+    final noPhoto = BusinessService.completeness(
+      _shop(
+        name: 'Patil',
+        description: 'Groceries',
+        categoryId: 'c1',
+        whatsapp: '+91',
+        address: 'Main Road',
+        lat: 18.55,
+        lng: 77.58,
+      ),
+    );
+    expect(noPhoto.percent, 80);
+    expect(noPhoto.hint, contains('photos'));
   });
 }

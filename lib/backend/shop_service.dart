@@ -16,6 +16,38 @@ class ShopEvents {
   static const productView = 'PRODUCT_VIEW';
 }
 
+class ShopEventSummary {
+  const ShopEventSummary({
+    required this.profileViews,
+    required this.callClicks,
+    required this.whatsappClicks,
+    required this.directionsClicks,
+    required this.dailyCounts,
+  });
+
+  static const empty = ShopEventSummary(
+    profileViews: 0,
+    callClicks: 0,
+    whatsappClicks: 0,
+    directionsClicks: 0,
+    dailyCounts: {},
+  );
+
+  final int profileViews;
+  final int callClicks;
+  final int whatsappClicks;
+  final int directionsClicks;
+  final Map<String, int> dailyCounts;
+
+  int get inquiries => callClicks + whatsappClicks;
+
+  double get conversionRate =>
+      profileViews > 0 ? inquiries / profileViews * 100 : 0;
+
+  int get peakDaily =>
+      dailyCounts.values.fold(0, (max, count) => count > max ? count : max);
+}
+
 class ShopCatalog {
   const ShopCatalog({
     required this.products,
@@ -288,5 +320,38 @@ class ShopService {
         return true;
       }
     }).toList();
+  }
+
+  static ShopEventSummary summarizeEvents(List<BusinessAnalyticsRow> events) {
+    var profileViews = 0;
+    var callClicks = 0;
+    var whatsappClicks = 0;
+    var directionsClicks = 0;
+    final dailyCounts = <String, int>{};
+    for (final event in events) {
+      switch (event.eventType) {
+        case ShopEvents.profileView:
+          profileViews++;
+        case ShopEvents.callClick:
+          callClicks++;
+        case ShopEvents.whatsappClick:
+          whatsappClicks++;
+        case ShopEvents.directionsClick:
+          directionsClicks++;
+      }
+      try {
+        final at = event.createdAt;
+        final key =
+            '${at.month.toString().padLeft(2, '0')}/${at.day.toString().padLeft(2, '0')}';
+        dailyCounts[key] = (dailyCounts[key] ?? 0) + 1;
+      } catch (_) {}
+    }
+    return ShopEventSummary(
+      profileViews: profileViews,
+      callClicks: callClicks,
+      whatsappClicks: whatsappClicks,
+      directionsClicks: directionsClicks,
+      dailyCounts: dailyCounts,
+    );
   }
 }
