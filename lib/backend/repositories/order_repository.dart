@@ -1,5 +1,7 @@
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/join_rows.dart';
 import 'package:degloor_one/shared/page_query.dart';
+import 'package:degloor_one/shared/showcase_catalog.dart';
 
 /// Data access for orders. Widgets should go through [OrderService].
 class OrderRepository {
@@ -78,6 +80,20 @@ class OrderRepository {
     return OrderItemsTable().queryRows(
       queryFn: (q) => q.eq('order_id', orderId),
     );
+  }
+
+  Future<List<OrderLine>> itemsWithProducts(String orderId) async {
+    if (orderId.isEmpty) return const [];
+    if (kUseShowcaseData) {
+      return ShowcaseCatalog.orderItemsWithProducts(orderId)
+          .map(OrderLine.fromJoin)
+          .toList();
+    }
+    final items = await SupaFlow.client
+        .from('order_items')
+        .select('*, products(*)')
+        .eq('order_id', orderId);
+    return List<Map<String, dynamic>>.from(items).map(OrderLine.fromJoin).toList();
   }
 
   Future<List<OrderStatusHistoryRow>> historyFor(String orderId) {

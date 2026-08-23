@@ -5,6 +5,7 @@ import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/core/api/api_client.dart';
 import 'package:degloor_one/core/api/cart_api.dart';
 import 'package:degloor_one/core/error_handler.dart';
+import 'package:degloor_one/shared/join_rows.dart';
 import 'package:degloor_one/shared/rpc_row.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
@@ -350,45 +351,31 @@ class CartService {
     );
   }
 
-  static Future<List<Map<String, dynamic>>> itemsForCart(String cartId) async {
+  static Future<List<CartLine>> itemsForCart(String cartId) async {
     if (kUseShowcaseData) {
-      return ShowcaseCatalog.cartItemsWithProducts(cartId);
+      return ShowcaseCatalog.cartItemsWithProducts(cartId)
+          .map(CartLine.fromJoin)
+          .toList();
     }
     final items = await SupaFlow.client
         .from('cart_items')
         .select('*, products(*)')
         .eq('cart_id', cartId);
-    return List<Map<String, dynamic>>.from(items);
+    return List<Map<String, dynamic>>.from(items).map(CartLine.fromJoin).toList();
   }
 
   /// Display-only basket total. Checkout ignores these prices.
-  static double subtotal(List<Map<String, dynamic>> items) {
+  static double subtotal(List<CartLine> items) {
     var total = 0.0;
     for (final item in items) {
-      final product = item['products'];
-      final price = product is Map
-          ? (product['price'] as num?)?.toDouble() ?? 0
-          : 0.0;
-      final quantity = (item['quantity'] as num?)?.toInt() ?? 0;
-      total += price * quantity;
+      total += (item.product?.price ?? 0) * item.quantity;
     }
     return total;
   }
 
   /// Checkout payload. Prices stay off the wire; the server / catalog wins.
-  static List<Map<String, dynamic>> checkoutItems(
-    List<Map<String, dynamic>> items,
-  ) {
-    return [
-      for (final item in items)
-        {
-          'product_id': item['product_id'] ??
-              (item['products'] is Map
-                  ? (item['products'] as Map)['id']
-                  : null),
-          'quantity': item['quantity'],
-        },
-    ];
+  static List<Map<String, dynamic>> checkoutItems(List<CartLine> items) {
+    return [for (final item in items) item.toCheckoutItem()];
   }
 
   static Future<int> getCartItemCount() async {

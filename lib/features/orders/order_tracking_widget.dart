@@ -12,6 +12,7 @@ import 'package:degloor_one/backend/whatsapp_service.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
+import 'package:degloor_one/shared/join_rows.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:degloor_one/core/error_handler.dart';
@@ -601,7 +602,7 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
               ),
         ),
         const SizedBox(height: 12),
-        FutureBuilder<List<Map<String, dynamic>>>(
+        FutureBuilder<List<OrderLine>>(
           future: OrderService.instance.itemsWithProducts(order.id),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
@@ -610,21 +611,20 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
             final items = snapshot.data ?? [];
             return Column(
               children: items.map((item) {
-                final product = item['products'] as Map<String, dynamic>?;
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 4.0),
                   child: Row(
                     children: [
                       Expanded(
                         child: Text(
-                          '${item['quantity']}× ${product?['name'] ?? 'Item'}',
+                          '${item.quantity}× ${item.product?.name ?? 'Item'}',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
                       const SizedBox(width: 12),
                       Text(
-                        '₹${((item['price_at_purchase'] as num) * (item['quantity'] as num)).toStringAsFixed(2)}',
+                        '₹${item.lineTotal.toStringAsFixed(2)}',
                       ),
                     ],
                   ),

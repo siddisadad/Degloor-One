@@ -6,6 +6,7 @@ import 'package:degloor_one/backend/delivery_service.dart';
 import 'package:degloor_one/backend/order_service.dart';
 import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/join_rows.dart';
 import 'package:degloor_one/shared/order_lifecycle.dart';
 import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
@@ -177,14 +178,14 @@ void main() {
       addressId: 'addr-home',
       cartId: ShowcaseCatalog.cartGuest,
       items: [
-        {
+        CartLine.fromJoin({
           'product_id': ShowcaseCatalog.prodRice,
           'quantity': 1,
           'products': {
             'id': ShowcaseCatalog.prodRice,
             'price': 1.0,
           },
-        },
+        }),
       ],
     );
 
@@ -298,7 +299,9 @@ void main() {
       ShowcaseCatalog.orderOut,
     );
     expect(items, isNotEmpty);
-    expect(items.first['products'], isA<Map<String, dynamic>>());
+    expect(items.first.product, isA<JoinedProduct>());
+    expect(items.first.product?.name, isNotEmpty);
+    expect(items.first.priceAtPurchase, greaterThan(0));
   });
 
   test('ownerActions follows Degloor owner transitions', () {
