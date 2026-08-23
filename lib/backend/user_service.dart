@@ -1,5 +1,5 @@
 import 'package:degloor_one/backend/repositories/user_repository.dart';
-import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/user_profile.dart';
 
 class UserService {
   UserService({UserRepository? repository})
@@ -9,18 +9,20 @@ class UserService {
 
   static final instance = UserService();
 
-  Future<UsersRow?> byId(String userId) {
-    if (userId.isEmpty) return Future<UsersRow?>.value();
-    return _repository.byId(userId);
+  Future<UserProfile?> byId(String userId) async {
+    if (userId.isEmpty) return null;
+    final row = await _repository.byId(userId);
+    return row == null ? null : UserProfile.fromRow(row);
   }
 
-  Future<List<UsersRow>> byIds(List<String> ids) {
+  Future<List<UserProfile>> byIds(List<String> ids) async {
     final unique = ids.where((id) => id.isNotEmpty).toSet().toList();
-    if (unique.isEmpty) return Future.value(const []);
-    return _repository.byIds(unique);
+    if (unique.isEmpty) return const [];
+    final rows = await _repository.byIds(unique);
+    return rows.map(UserProfile.fromRow).toList();
   }
 
-  Future<List<UsersRow>> profile(String userId) async {
+  Future<List<UserProfile>> profile(String userId) async {
     final row = await byId(userId);
     return row == null ? const [] : [row];
   }
@@ -31,7 +33,7 @@ class UserService {
     return row?.role;
   }
 
-  Future<UsersRow> ensureOnSignIn({
+  Future<UserProfile> ensureOnSignIn({
     required String userId,
     String? email,
     String? phone,
@@ -42,8 +44,8 @@ class UserService {
       throw Exception('Please sign in to continue');
     }
     final existing = await _repository.byId(userId);
-    if (existing != null) return existing;
-    return _repository.insert({
+    if (existing != null) return UserProfile.fromRow(existing);
+    final created = await _repository.insert({
       'id': userId,
       'email': email,
       'phone_number': phone,
@@ -51,9 +53,10 @@ class UserService {
       'avatar_url': avatarUrl,
       'role': 'customer',
     });
+    return UserProfile.fromRow(created);
   }
 
-  Future<UsersRow> updateProfile({
+  Future<UserProfile> updateProfile({
     required String userId,
     String? fullName,
     String? phoneNumber,
@@ -77,7 +80,7 @@ class UserService {
     if (updated == null) {
       throw Exception('Unable to update your profile. Please try again.');
     }
-    return updated;
+    return UserProfile.fromRow(updated);
   }
 
   Future<void> probeReachable({

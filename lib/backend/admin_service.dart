@@ -1,6 +1,7 @@
 import 'package:degloor_one/backend/notification_service.dart';
 import 'package:degloor_one/backend/repositories/admin_repository.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/user_profile.dart';
 
 class AdminCounts {
   const AdminCounts({required this.pending, required this.verified});
@@ -20,7 +21,7 @@ class AdminService {
   static const _signInMessage = 'Please sign in to continue';
   static const _adminMessage = 'Admin access required';
 
-  Future<UsersRow> requireAdmin(String userId) async {
+  Future<UserProfile> requireAdmin(String userId) async {
     if (userId.isEmpty) {
       throw Exception(_signInMessage);
     }
@@ -28,7 +29,7 @@ class AdminService {
     if (user == null || user.role != 'admin') {
       throw Exception(_adminMessage);
     }
-    return user;
+    return UserProfile.fromRow(user);
   }
 
   Future<AdminCounts> counts(String adminUserId) async {

@@ -4,6 +4,7 @@ import 'package:degloor_one/backend/shop_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/backend/user_service.dart';
 import 'package:degloor_one/shared/page_query.dart';
+import 'package:degloor_one/shared/user_profile.dart';
 
 export 'package:degloor_one/backend/repositories/discovery_repository.dart'
     show DiscoverySearch;
@@ -32,10 +33,10 @@ class DiscoveryService {
     return _repository.categories();
   }
 
-  Future<List<UsersRow>> profile(String userId) =>
+  Future<List<UserProfile>> profile(String userId) =>
       UserService.instance.profile(userId);
 
-  Future<List<UsersRow>> usersByIds(List<String> ids) =>
+  Future<List<UserProfile>> usersByIds(List<String> ids) =>
       UserService.instance.byIds(ids);
 
   Future<List<BusinessesRow>> businessesByIds(List<String> ids) =>

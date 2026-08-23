@@ -3,6 +3,7 @@ import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/shop_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/backend/user_service.dart';
+import 'package:degloor_one/shared/user_profile.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/app_state.dart';
 import 'package:degloor_one/components/button/button_widget.dart';
@@ -75,7 +76,7 @@ class _UserProfileReportsWidgetState extends State<UserProfileReportsWidget> {
                     Container(
                       color: Colors.white,
                       padding: const EdgeInsets.all(DegloorTheme.spacingLG),
-                      child: FutureBuilder<List<UsersRow>>(
+                      child: FutureBuilder<List<UserProfile>>(
                         future: _model.userProfileFuture,
                         builder: (context, snapshot) {
                           final user = snapshot.data?.firstOrNull;
@@ -339,7 +340,7 @@ class _UserProfileReportsWidgetState extends State<UserProfileReportsWidget> {
     );
   }
 
-  Future<void> _editPersonalInfo(UsersRow? user) async {
+  Future<void> _editPersonalInfo(UserProfile? user) async {
     if (currentUserUid.length < 10) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please sign in to update your profile')),
@@ -407,7 +408,7 @@ class _PersonalInfoSheet extends StatefulWidget {
     required this.userId,
   });
 
-  final UsersRow? user;
+  final UserProfile? user;
   final String email;
   final String userId;
 
