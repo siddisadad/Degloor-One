@@ -1,4 +1,5 @@
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/address_draft.dart';
 
 /// Data access for saved customer addresses. Widgets should go through
 /// [AddressService].
@@ -22,8 +23,8 @@ class AddressRepository {
     return rows.isEmpty ? null : rows.first;
   }
 
-  Future<AddressesRow> insert(Map<String, dynamic> data) {
-    return AddressesTable().insert(data);
+  Future<AddressesRow> insert(AddressDraft draft, {bool? isDefault}) {
+    return AddressesTable().insert(draft.toInsertJson(isDefault: isDefault));
   }
 
   Future<void> clearDefaults(String userId) async {
