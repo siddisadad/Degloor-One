@@ -7,7 +7,7 @@ class ModernProductCard extends StatelessWidget {
   const ModernProductCard({
     required this.name,
     required this.price,
-    required this.imageUrl,
+    this.imageUrl,
     required this.onTap,
     this.discountLabel,
     super.key,
@@ -15,7 +15,7 @@ class ModernProductCard extends StatelessWidget {
 
   final String name;
   final double price;
-  final String imageUrl;
+  final String? imageUrl;
   final VoidCallback onTap;
   final String? discountLabel;
 
@@ -35,28 +35,23 @@ class ModernProductCard extends StatelessWidget {
                   borderRadius: const BorderRadius.vertical(
                     top: Radius.circular(DegloorTheme.radiusMD),
                   ),
-                  child: CachedNetworkImage(
-                    imageUrl: imageUrl,
-                    height: 140,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    memCacheWidth: memCachePx(context, 164),
-                    memCacheHeight: memCachePx(context, 140),
-                    placeholder: (context, url) => Container(
-                      height: 140,
-                      width: double.infinity,
-                      color: DegloorTheme.accent,
-                    ),
-                    errorWidget: (context, url, error) => Container(
-                      height: 140,
-                      width: double.infinity,
-                      color: DegloorTheme.accent,
-                      child: const Icon(
-                        Icons.image_not_supported_rounded,
-                        color: DegloorTheme.textSecondary,
-                      ),
-                    ),
-                  ),
+                  child: imageUrl == null || imageUrl!.isEmpty
+                      ? degloorImageFallback(
+                          width: double.infinity,
+                          height: 140,
+                        )
+                      : CachedNetworkImage(
+                          imageUrl: imageUrl!,
+                          height: 140,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          memCacheWidth: memCachePx(context, 164),
+                          memCacheHeight: memCachePx(context, 140),
+                          placeholder: (context, url) =>
+                              degloorImageFallback(width: double.infinity, height: 140),
+                          errorWidget: (context, url, error) =>
+                              degloorImageFallback(width: double.infinity, height: 140),
+                        ),
                 ),
                 if (discountLabel != null)
                   Positioned(

@@ -9,7 +9,6 @@ import 'package:degloor_one/components/cached_remote_image.dart';
 import 'package:degloor_one/components/degloor_app_bar.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
-import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
 import 'package:degloor_one/shared/join_rows.dart';
 import 'package:flutter/material.dart';
 import 'package:degloor_one/core/error_handler.dart';
@@ -235,15 +234,10 @@ class _CartWidgetState extends State<CartWidget> {
     return Scaffold(
       key: scaffoldKey,
       backgroundColor: DegloorTheme.background,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        title: Text('Your Cart', style: DegloorTheme.headingMedium),
-        elevation: 0,
-        automaticallyImplyLeading: false,
-        leading: degloorBackLeading(
-          context,
-          show: widget.showBack ? true : null,
-        ),
+      appBar: degloorAppBar(
+        context,
+        title: 'Your Cart',
+        showBack: widget.showBack,
       ),
       body: FutureBuilder<List<CartLine>>(
         future: _model.cartItemsFuture,
@@ -443,15 +437,29 @@ class _CartWidgetState extends State<CartWidget> {
                       ],
                     ),
                     const SizedBox(height: 20),
-                    FFButtonWidget(
-                      onPressed: _model.isPlacingOrder ? null : () => _placeOrder(items),
-                      text: _model.isPlacingOrder ? 'Processing...' : 'Place Order (COD)',
-                      options: FFButtonOptions(
-                        width: double.infinity,
-                        height: 54,
-                        color: DegloorTheme.primary,
-                        textStyle: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-                        borderRadius: BorderRadius.circular(DegloorTheme.radiusMD),
+                    FilledButton(
+                      onPressed: _model.isPlacingOrder
+                          ? null
+                          : () => _placeOrder(items),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: DegloorTheme.primary,
+                        foregroundColor: Colors.white,
+                        disabledBackgroundColor:
+                            DegloorTheme.primary.withValues(alpha: 0.5),
+                        minimumSize: const Size(double.infinity, 54),
+                        shape: RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.circular(DegloorTheme.radiusMD),
+                        ),
+                      ),
+                      child: Text(
+                        _model.isPlacingOrder
+                            ? 'Processing...'
+                            : 'Place Order (COD)',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ],

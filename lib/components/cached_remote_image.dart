@@ -1,6 +1,22 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:degloor_one/core/degloor_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:flutter/material.dart';
+
+/// Local tile used when a listing has no remote photo.
+Widget degloorImageFallback({
+  double? width,
+  double? height,
+  IconData icon = Icons.image_not_supported_rounded,
+}) {
+  return Container(
+    width: width,
+    height: height,
+    color: DegloorTheme.accent,
+    alignment: Alignment.center,
+    child: Icon(icon, color: DegloorTheme.textSecondary),
+  );
+}
 
 /// Decode-size hint so list images do not keep a full-resolution bitmap.
 int memCachePx(BuildContext context, double logicalSize) {

@@ -93,15 +93,19 @@ class _ServiceProviderProfileWidgetState
                   expandedHeight: 250,
                   pinned: true,
                   flexibleSpace: FlexibleSpaceBar(
-                    background: CachedNetworkImage(
-                      imageUrl: provider.avatarImageUrl(
-                        width: 400,
-                        height: 300,
-                      ),
-                      fit: BoxFit.cover,
-                      memCacheWidth: memCachePx(context, 400),
-                      memCacheHeight: memCachePx(context, 250),
-                    ),
+                    background: provider.photoUrl == null
+                        ? degloorImageFallback(
+                            icon: Icons.person_rounded,
+                          )
+                        : CachedNetworkImage(
+                            imageUrl: provider.photoUrl!,
+                            fit: BoxFit.cover,
+                            memCacheWidth: memCachePx(context, 400),
+                            memCacheHeight: memCachePx(context, 250),
+                            errorWidget: (_, __, ___) => degloorImageFallback(
+                              icon: Icons.person_rounded,
+                            ),
+                          ),
                   ),
                   leading: FlutterFlowIconButton(
                     borderColor: Colors.transparent,

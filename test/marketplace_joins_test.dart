@@ -50,10 +50,8 @@ void main() {
     expect(provider.displayName, 'Unknown Provider');
     expect(provider.categoryName, 'General');
     expect(provider.hourlyRateLabel, '₹99.50/hr');
-    expect(
-      provider.avatarImageUrl(width: 400, height: 300),
-      contains('w=400&h=300'),
-    );
+    expect(provider.photoUrl, isNull);
+    expect(provider.avatarImageUrl(width: 400, height: 300), isEmpty);
     expect(
       const ServiceProviderCard(id: 'sp-none').hourlyRateLabel,
       'Rate on request',

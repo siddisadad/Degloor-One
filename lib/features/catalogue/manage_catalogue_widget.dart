@@ -5,10 +5,10 @@ import 'package:degloor_one/components/modern/modern_product_list_item.dart';
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/business_service.dart';
 import 'package:degloor_one/components/degloor_app_bar.dart';
+import 'package:degloor_one/components/degloor_filter_chip.dart';
 import 'package:degloor_one/shared/product_category.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
-import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:degloor_one/core/error_handler.dart';
@@ -186,9 +186,11 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
                   runSpacing: 8,
                   children: [
                     for (final category in _businessCategories)
-                      ActionChip(
-                        label: Text(category.name),
-                        onPressed: () {
+                      DegloorFilterChip(
+                        label: category.name,
+                        selected: _model.productCategoryTextController?.text ==
+                            category.name,
+                        onTap: () {
                           _model.productCategoryTextController?.text =
                               category.name;
                           setState(() {});
@@ -198,10 +200,17 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
                 ),
               ],
               const SizedBox(height: 16),
-              FFButtonWidget(
+              FilledButton(
                 onPressed: _addProduct,
-                text: 'Add to Catalogue',
-                options: FFButtonOptions(width: double.infinity, height: 44, color: DegloorTheme.primary, borderRadius: BorderRadius.circular(12)),
+                style: FilledButton.styleFrom(
+                  backgroundColor: DegloorTheme.primary,
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size(double.infinity, 44),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(DegloorTheme.radiusMD),
+                  ),
+                ),
+                child: const Text('Add to Catalogue'),
               ),
             ],
           ),
@@ -304,7 +313,7 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
             ]),
             SwitchListTile(title: const Text('Track Inventory'), value: trackInv, onChanged: (v) => setMod(() => trackInv = v)),
             const SizedBox(height: 24),
-            FFButtonWidget(
+            FilledButton(
               onPressed: () async {
                 await BusinessService.instance.updateProduct(
                   userId: currentUserUid,
@@ -320,8 +329,15 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
                 if (context.mounted) Navigator.pop(context);
                 await _fetchProducts();
               },
-              text: 'Save Changes',
-              options: FFButtonOptions(height: 50, color: DegloorTheme.primary, borderRadius: BorderRadius.circular(12)),
+              style: FilledButton.styleFrom(
+                backgroundColor: DegloorTheme.primary,
+                foregroundColor: Colors.white,
+                minimumSize: const Size(double.infinity, 50),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(DegloorTheme.radiusMD),
+                ),
+              ),
+              child: const Text('Save Changes'),
             ),
           ],
         ),

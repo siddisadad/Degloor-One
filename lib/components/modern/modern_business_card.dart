@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 class ModernBusinessCard extends StatelessWidget {
   const ModernBusinessCard({
     required this.name,
-    required this.imageUrl,
+    this.imageUrl,
     required this.category,
     required this.rating,
     required this.distance,
@@ -15,7 +15,7 @@ class ModernBusinessCard extends StatelessWidget {
   });
 
   final String name;
-  final String imageUrl;
+  final String? imageUrl;
   final String category;
   final double rating;
   final String distance;
@@ -38,27 +38,30 @@ class ModernBusinessCard extends StatelessWidget {
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(DegloorTheme.radiusMD),
                 ),
-                child: CachedNetworkImage(
-                  imageUrl: imageUrl,
-                  height: 120,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                  memCacheWidth: memCachePx(context, 220),
-                  memCacheHeight: memCachePx(context, 120),
-                  placeholder: (context, url) => Container(
-                    color: DegloorTheme.background,
-                    child: const Center(
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(DegloorTheme.primary),
+                child: imageUrl == null || imageUrl!.isEmpty
+                    ? degloorImageFallback(
+                        width: double.infinity,
+                        height: 120,
+                        icon: Icons.storefront_rounded,
+                      )
+                    : CachedNetworkImage(
+                        imageUrl: imageUrl!,
+                        height: 120,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        memCacheWidth: memCachePx(context, 220),
+                        memCacheHeight: memCachePx(context, 120),
+                        placeholder: (context, url) => Container(
+                          color: DegloorTheme.accent,
+                          height: 120,
+                        ),
+                        errorWidget: (context, url, error) =>
+                            degloorImageFallback(
+                          width: double.infinity,
+                          height: 120,
+                          icon: Icons.storefront_rounded,
+                        ),
                       ),
-                    ),
-                  ),
-                  errorWidget: (context, url, error) => Container(
-                    color: DegloorTheme.background,
-                    child: const Icon(Icons.error, color: DegloorTheme.textSecondary),
-                  ),
-                ),
               ),
               Padding(
                 padding: const EdgeInsets.all(DegloorTheme.spacingSM),
