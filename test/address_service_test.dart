@@ -71,6 +71,75 @@ void main() {
     expect(rows.firstWhere((row) => row.id == 'addr-home').isDefault, isFalse);
   });
 
+  test('first saved address becomes the default', () async {
+    final added = await AddressService.instance.add(
+      userId: ShowcaseCatalog.customer2,
+      title: 'Home',
+      addressText: 'Degloor',
+      latitude: 18.55,
+      longitude: 77.58,
+    );
+    expect(added.isDefault, isTrue);
+    final rows =
+        await AddressService.instance.listForUser(ShowcaseCatalog.customer2);
+    expect(rows.where((row) => row.isDefault).single.id, added.id);
+  });
+
+  test('deleting the default promotes another address', () async {
+    await AddressService.instance.delete(
+      id: 'addr-home',
+      userId: GuestAuthUser.guestUid,
+    );
+    final rows =
+        await AddressService.instance.listForUser(GuestAuthUser.guestUid);
+    expect(rows.map((row) => row.id), ['addr-work']);
+    expect(rows.single.isDefault, isTrue);
+  });
+
+  test('delivery fee is scoped to the caller address', () async {
+    expect(
+      await AddressService.instance.deliveryFee(
+        userId: GuestAuthUser.guestUid,
+        businessId: ShowcaseCatalog.bizPatil,
+        addressId: 'addr-home',
+      ),
+      25,
+    );
+    await expectLater(
+      AddressService.instance.deliveryFee(
+        userId: ShowcaseCatalog.customer2,
+        businessId: ShowcaseCatalog.bizPatil,
+        addressId: 'addr-home',
+      ),
+      throwsA(
+        isA<Exception>().having(
+          (error) => error.toString(),
+          'message',
+          contains('Address not found'),
+        ),
+      ),
+    );
+  });
+
+  test('add rejects invalid coordinates', () async {
+    await expectLater(
+      AddressService.instance.add(
+        userId: GuestAuthUser.guestUid,
+        title: 'Home',
+        addressText: 'Degloor',
+        latitude: 120,
+        longitude: 77.58,
+      ),
+      throwsA(
+        isA<Exception>().having(
+          (error) => error.toString(),
+          'message',
+          contains('location'),
+        ),
+      ),
+    );
+  });
+
   test('add and setDefault require sign-in', () async {
     await expectLater(
       AddressService.instance.add(

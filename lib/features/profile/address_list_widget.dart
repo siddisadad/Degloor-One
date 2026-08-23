@@ -30,12 +30,17 @@ class _AddressListWidgetState extends State<AddressListWidget> {
   void initState() {
     super.initState();
     _model = createModel(context, () => AddressListModel());
-    _fetchAddresses();
+    _addressesFuture = AddressService.instance.listForUser(currentUserUid);
   }
 
   void _fetchAddresses() {
+    final next = AddressService.instance.listForUser(currentUserUid);
+    if (!mounted) {
+      _addressesFuture = next;
+      return;
+    }
     setState(() {
-      _addressesFuture = AddressService.instance.listForUser(currentUserUid);
+      _addressesFuture = next;
     });
   }
 
@@ -122,6 +127,18 @@ class _AddressListWidgetState extends State<AddressListWidget> {
                     ),
                   );
                 }
+                if (snapshot.hasError) {
+                  return EmptyStateView(
+                    icon: Icons.error_outline_rounded,
+                    title: 'Could not load addresses',
+                    description: AppLogger.userFacingMessage(
+                      snapshot.error,
+                      fallback: 'Please try again.',
+                    ),
+                    buttonText: 'Try again',
+                    onTap: _fetchAddresses,
+                  );
+                }
                 final addresses = snapshot.data ?? [];
                 if (addresses.isEmpty) {
                   return EmptyStateView(
@@ -194,10 +211,11 @@ class _AddressListWidgetState extends State<AddressListWidget> {
                             if (val == 'default') _setDefaultAddress(addr.id);
                           },
                           itemBuilder: (context) => [
-                            const PopupMenuItem(
-                              value: 'default',
-                              child: Text('Set as Default'),
-                            ),
+                            if (!addr.isDefault)
+                              const PopupMenuItem(
+                                value: 'default',
+                                child: Text('Set as Default'),
+                              ),
                             const PopupMenuItem(
                               value: 'delete',
                               child: Text(
