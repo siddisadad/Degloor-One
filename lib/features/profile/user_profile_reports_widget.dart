@@ -1,11 +1,12 @@
 import 'package:degloor_one/core/degloor_theme.dart';
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
-import 'package:degloor_one/backend/discovery_service.dart';
 import 'package:degloor_one/backend/shop_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/backend/user_service.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/app_state.dart';
 import 'package:degloor_one/components/button/button_widget.dart';
+import 'package:degloor_one/core/error_handler.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:flutter/material.dart';
 import 'user_profile_reports_model.dart';
@@ -31,11 +32,14 @@ class _UserProfileReportsWidgetState extends State<UserProfileReportsWidget> {
     super.initState();
     _model = createModel(context, () => UserProfileReportsModel());
     if (loggedIn && currentUserUid.length > 10) {
-      _model.userProfileFuture =
-          DiscoveryService.instance.profile(currentUserUid);
+      _reloadProfile();
       _model.complaintsFuture =
           ShopService.instance.complaintsForUser(currentUserUid);
     }
+  }
+
+  void _reloadProfile() {
+    _model.userProfileFuture = UserService.instance.profile(currentUserUid);
   }
 
   @override
@@ -117,7 +121,7 @@ class _UserProfileReportsWidgetState extends State<UserProfileReportsWidget> {
                                   Icons.edit_outlined,
                                   color: DegloorTheme.primary,
                                 ),
-                                onPressed: () {},
+                                onPressed: () => _editPersonalInfo(user),
                               ),
                             ],
                           );
@@ -177,7 +181,11 @@ class _UserProfileReportsWidgetState extends State<UserProfileReportsWidget> {
                       Icons.person_outline_rounded,
                       'Personal Information',
                       'Name, Email, Phone',
-                      () {},
+                      () async {
+                        final rows = await _model.userProfileFuture;
+                        if (!mounted) return;
+                        await _editPersonalInfo(rows?.firstOrNull);
+                      },
                     ),
                     _settingsTile(
                       Icons.location_on_outlined,
@@ -331,6 +339,28 @@ class _UserProfileReportsWidgetState extends State<UserProfileReportsWidget> {
     );
   }
 
+  Future<void> _editPersonalInfo(UsersRow? user) async {
+    if (currentUserUid.length < 10) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please sign in to update your profile')),
+      );
+      return;
+    }
+    final saved = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      builder: (sheetContext) => _PersonalInfoSheet(
+        user: user,
+        email: user?.email ?? currentUserEmail,
+        userId: currentUserUid,
+      ),
+    );
+    if (saved == true && mounted) {
+      _reloadProfile();
+      setState(() {});
+    }
+  }
+
   void _showLanguageSelector(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -365,6 +395,109 @@ class _UserProfileReportsWidgetState extends State<UserProfileReportsWidget> {
         trailing: isSelected
             ? const Icon(Icons.check, color: DegloorTheme.primary)
             : null,
+      ),
+    );
+  }
+}
+
+class _PersonalInfoSheet extends StatefulWidget {
+  const _PersonalInfoSheet({
+    required this.user,
+    required this.email,
+    required this.userId,
+  });
+
+  final UsersRow? user;
+  final String email;
+  final String userId;
+
+  @override
+  State<_PersonalInfoSheet> createState() => _PersonalInfoSheetState();
+}
+
+class _PersonalInfoSheetState extends State<_PersonalInfoSheet> {
+  late final TextEditingController _nameController;
+  late final TextEditingController _phoneController;
+  bool _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: widget.user?.fullName ?? '');
+    _phoneController =
+        TextEditingController(text: widget.user?.phoneNumber ?? '');
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _phoneController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _save() async {
+    setState(() => _saving = true);
+    try {
+      await UserService.instance.updateProfile(
+        userId: widget.userId,
+        fullName: _nameController.text,
+        phoneNumber: _phoneController.text,
+      );
+      if (mounted) Navigator.pop(context, true);
+    } catch (error) {
+      if (!mounted) return;
+      setState(() => _saving = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            AppLogger.userFacingMessage(
+              error,
+              fallback: 'Unable to update your profile. Please try again.',
+            ),
+          ),
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        24,
+        24,
+        24,
+        MediaQuery.of(context).viewInsets.bottom + 24,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text('Personal information', style: DegloorTheme.headingMedium),
+          const SizedBox(height: 8),
+          Text(widget.email, style: DegloorTheme.bodySmall),
+          const SizedBox(height: 16),
+          TextField(
+            controller: _nameController,
+            decoration: const InputDecoration(labelText: 'Full name'),
+            textCapitalization: TextCapitalization.words,
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _phoneController,
+            decoration: const InputDecoration(labelText: 'Phone'),
+            keyboardType: TextInputType.phone,
+          ),
+          const SizedBox(height: 20),
+          FilledButton(
+            onPressed: _saving ? null : _save,
+            style: FilledButton.styleFrom(
+              backgroundColor: DegloorTheme.primary,
+              minimumSize: const Size.fromHeight(48),
+            ),
+            child: Text(_saving ? 'Saving...' : 'Save'),
+          ),
+        ],
       ),
     );
   }
