@@ -1,5 +1,7 @@
 import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/catalog_product.dart';
+import 'package:degloor_one/shared/catalog_product_draft.dart';
 import 'package:degloor_one/shared/product_category.dart';
 import 'package:degloor_one/shared/product_category_draft.dart';
 import 'package:degloor_one/shared/shop_hours.dart';
@@ -59,8 +61,15 @@ class BusinessRepository {
     return rows.isEmpty ? null : rows.first;
   }
 
-  Future<ProductsRow> insertProduct(Map<String, dynamic> data) {
-    return ProductsTable().insert(data);
+  Future<CatalogProduct> insertProduct({
+    required CatalogProductDraft draft,
+    required String businessId,
+    String? categoryId,
+  }) async {
+    final row = await ProductsTable().insert(
+      draft.toInsertJson(businessId: businessId, categoryId: categoryId),
+    );
+    return CatalogProduct.fromRow(row);
   }
 
   Future<void> updateProduct({

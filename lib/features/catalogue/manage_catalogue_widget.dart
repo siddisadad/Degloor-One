@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:degloor_one/core/error_handler.dart';
 import 'package:degloor_one/shared/catalog_product.dart';
+import 'package:degloor_one/shared/catalog_product_draft.dart';
 import 'package:degloor_one/shared/shop.dart';
 import 'manage_catalogue_model.dart';
 export 'manage_catalogue_model.dart';
@@ -91,23 +92,18 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
 
   Future<void> _addProduct() async {
     if (_business == null) return;
-    final name = _model.productNameTextController.text;
-    final priceStr = _model.productPriceTextController.text;
-    if (name.isEmpty || priceStr.isEmpty) return;
-    final price = double.tryParse(priceStr);
-    if (price == null) return;
-    final stock = int.tryParse(_model.stockQuantityTextController.text) ?? 0;
-
     setState(() => _loading = true);
     try {
       await BusinessService.instance.addProduct(
         userId: currentUserUid,
-        name: name,
-        price: price,
-        categoryName: _model.productCategoryTextController.text,
-        imageUrl: _model.uploadedImageUrl,
-        stockQuantity: stock,
-        trackInventory: _model.trackInventory,
+        draft: CatalogProductDraft.fromForm(
+          name: _model.productNameTextController.text,
+          priceText: _model.productPriceTextController.text,
+          categoryName: _model.productCategoryTextController.text,
+          imageUrl: _model.uploadedImageUrl,
+          stockText: _model.stockQuantityTextController.text,
+          trackInventory: _model.trackInventory,
+        ),
       );
       _model.productNameTextController?.clear();
       _model.productPriceTextController?.clear();
@@ -288,7 +284,17 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
             const SizedBox(height: 24),
             FFButtonWidget(
               onPressed: () async {
-                await BusinessService.instance.updateProduct(userId: currentUserUid, productId: product.id, name: nameC.text, price: double.parse(priceC.text), stockQuantity: int.parse(stockC.text), trackInventory: trackInv);
+                await BusinessService.instance.updateProduct(
+                  userId: currentUserUid,
+                  productId: product.id,
+                  draft: CatalogProductDraft.fromForm(
+                    name: nameC.text,
+                    priceText: priceC.text,
+                    stockText: stockC.text,
+                    trackInventory: trackInv,
+                    imageUrl: product.imageUrl,
+                  ),
+                );
                 if (context.mounted) Navigator.pop(context);
                 await _fetchProducts();
               },

@@ -4,6 +4,7 @@ import 'package:degloor_one/backend/business_service.dart';
 import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/catalog_product.dart';
+import 'package:degloor_one/shared/catalog_product_draft.dart';
 import 'package:degloor_one/shared/product_category.dart';
 import 'package:degloor_one/shared/shop.dart';
 import 'package:degloor_one/shared/shop_hours.dart';
@@ -56,11 +57,13 @@ void main() {
   test('add product reuses a category without lowercasing the name', () async {
     final added = await BusinessService.instance.addProduct(
       userId: GuestAuthUser.guestUid,
-      name: 'Curd',
-      price: 40,
-      categoryName: 'dairy',
-      stockQuantity: 6,
-      trackInventory: true,
+      draft: const CatalogProductDraft(
+        name: 'Curd',
+        price: 40,
+        categoryName: 'dairy',
+        stockQuantity: 6,
+        trackInventory: true,
+      ),
     );
     expect(added, isA<CatalogProduct>());
     expect(added, isNot(isA<ProductsRow>()));
@@ -79,9 +82,11 @@ void main() {
   test('add product creates a typed category for a new name', () async {
     final added = await BusinessService.instance.addProduct(
       userId: GuestAuthUser.guestUid,
-      name: 'Turmeric',
-      price: 25,
-      categoryName: 'Spices',
+      draft: const CatalogProductDraft(
+        name: 'Turmeric',
+        price: 25,
+        categoryName: 'Spices',
+      ),
     );
     expect(added.categoryId, isNotEmpty);
 
