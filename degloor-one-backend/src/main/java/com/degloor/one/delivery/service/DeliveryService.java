@@ -107,13 +107,13 @@ public class DeliveryService {
 
     public MyOrdersResponse myOrders(UserAccount user) {
         DeliveryPartner partner = requirePartner(user);
-        List<OrderResponse> assigned = assignments.findByDeliveryPartnerIdAndStatusNot(partner.getId(), "delivered")
+        List<UUID> assignedIds = assignments.findByDeliveryPartnerIdAndStatusNot(partner.getId(), "delivered")
                 .stream()
-                .map(a -> toOrder(orders.findById(a.getOrderId()).orElseThrow()))
+                .map(DeliveryAssignment::getOrderId)
                 .toList();
-        List<OrderResponse> ready = orders.findByStatusOrderByCreatedAtDesc(OrderStatus.READY, PageRequest.of(0, 50))
+        List<OrderResponse> assigned = orders.findAllById(assignedIds).stream().map(this::toOrder).toList();
+        List<OrderResponse> ready = orders.findUnassignedByStatus(OrderStatus.READY, PageRequest.of(0, 50))
                 .stream()
-                .filter(o -> !assignments.existsByOrderId(o.getId()))
                 .map(this::toOrder)
                 .toList();
         return new MyOrdersResponse(PartnerResponse.from(partner), assigned, ready);

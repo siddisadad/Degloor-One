@@ -46,11 +46,13 @@ public class MarketplaceService {
     }
 
     public List<CategoryResponse> categories() {
-        return categories.findAll().stream().map(CategoryResponse::from).toList();
+        return categories.findAllByOrderByNameAsc().stream().map(CategoryResponse::from).toList();
     }
 
     public List<ProviderResponse> providers(UUID categoryId) {
-        List<ServiceProvider> rows = categoryId == null ? providers.findAll() : providers.findByCategoryId(categoryId);
+        List<ServiceProvider> rows = categoryId == null
+                ? providers.findAllByOrderByIdAsc()
+                : providers.findByCategoryIdOrderByIdAsc(categoryId);
         return rows.stream().map(ProviderResponse::from).toList();
     }
 

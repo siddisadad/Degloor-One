@@ -29,7 +29,10 @@ import com.degloor.one.user.entity.Address;
 import com.degloor.one.user.entity.UserAccount;
 import com.degloor.one.user.service.UserService;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
@@ -92,10 +95,16 @@ public class OrderService {
             throw BusinessException.badRequest("INVALID_LOCATION", "Shop location is missing");
         }
 
+        Map<UUID, Product> catalog = products.findAllById(
+                        items.stream().map(CartItem::getProductId).toList())
+                .stream()
+                .collect(Collectors.toMap(Product::getId, Function.identity()));
         double subtotal = 0;
         for (CartItem item : items) {
-            Product product = products.findById(item.getProductId())
-                    .orElseThrow(() -> BusinessException.notFound("PRODUCT_NOT_FOUND", "Product not found"));
+            Product product = catalog.get(item.getProductId());
+            if (product == null) {
+                throw BusinessException.notFound("PRODUCT_NOT_FOUND", "Product not found");
+            }
             if (!product.getBusinessId().equals(shop.getId())) {
                 throw BusinessException.badRequest("CART_PRODUCT", "Cart contains items from another shop");
             }
@@ -126,7 +135,7 @@ public class OrderService {
         otpService.generateAndStore(order);
 
         for (CartItem item : items) {
-            Product product = products.findById(item.getProductId()).orElseThrow();
+            Product product = catalog.get(item.getProductId());
             OrderItem line = new OrderItem();
             line.setOrderId(order.getId());
             line.setProductId(product.getId());
@@ -232,13 +241,18 @@ public class OrderService {
     }
 
     private void restoreStock(ShopOrder order) {
-        for (OrderItem item : orderItems.findByOrderId(order.getId())) {
-            products.findById(item.getProductId()).ifPresent(product -> {
-                if (product.isTrackInventory()) {
-                    product.setStockQuantity(product.getStockQuantity() + item.getQuantity());
-                    products.save(product);
-                }
-            });
+        List<OrderItem> lines = orderItems.findByOrderId(order.getId());
+        Map<UUID, Product> catalog = products.findAllById(
+                        lines.stream().map(OrderItem::getProductId).toList())
+                .stream()
+                .collect(Collectors.toMap(Product::getId, Function.identity()));
+        for (OrderItem item : lines) {
+            Product product = catalog.get(item.getProductId());
+            if (product == null || !product.isTrackInventory()) {
+                continue;
+            }
+            product.setStockQuantity(product.getStockQuantity() + item.getQuantity());
+            products.save(product);
         }
     }
 

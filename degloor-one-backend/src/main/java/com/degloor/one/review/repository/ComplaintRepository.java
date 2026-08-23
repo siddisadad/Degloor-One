@@ -10,4 +10,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface ComplaintRepository extends JpaRepository<Complaint, UUID> {
     List<Complaint> findByUserIdOrderByCreatedAtDesc(UUID userId);
     Page<Complaint> findAllByOrderByCreatedAtDesc(Pageable pageable);
+    long countByStatusNot(String status);
 }

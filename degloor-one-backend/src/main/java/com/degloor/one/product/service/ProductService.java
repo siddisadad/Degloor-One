@@ -10,14 +10,13 @@ import com.degloor.one.product.entity.Product;
 import com.degloor.one.product.entity.ProductCategory;
 import com.degloor.one.product.repository.ProductCategoryRepository;
 import com.degloor.one.product.repository.ProductRepository;
+import com.degloor.one.product.repository.ProductSpecifications;
 import com.degloor.one.user.entity.UserAccount;
 import java.util.List;
-import java.util.Locale;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,32 +47,14 @@ public class ProductService {
             int size,
             String sort
     ) {
-        Specification<Product> spec = Specification.where(null);
-        if (q != null && !q.isBlank()) {
-            String needle = q.toLowerCase(Locale.ROOT);
-            spec = spec.and((root, query, cb) -> cb.like(cb.lower(root.get("name")), "%" + needle + "%"));
-        }
-        if (businessId != null) {
-            spec = spec.and((root, query, cb) -> cb.equal(root.get("businessId"), businessId));
-        }
-        if (categoryId != null) {
-            spec = spec.and((root, query, cb) -> cb.equal(root.get("categoryId"), categoryId));
-        }
-        if (minPrice != null) {
-            spec = spec.and((root, query, cb) -> cb.ge(root.get("price"), minPrice));
-        }
-        if (maxPrice != null) {
-            spec = spec.and((root, query, cb) -> cb.le(root.get("price"), maxPrice));
-        }
-        if (available != null) {
-            spec = spec.and((root, query, cb) -> cb.equal(root.get("available"), available));
-        }
         Sort sortSpec = "price".equalsIgnoreCase(sort)
                 ? Sort.by("price").ascending()
                 : "priceDesc".equalsIgnoreCase(sort)
                 ? Sort.by("price").descending()
                 : Sort.by("name").ascending();
-        Page<Product> result = products.findAll(spec, PageRequest.of(Math.max(page, 0), Math.min(Math.max(size, 1), 100), sortSpec));
+        Page<Product> result = products.findAll(
+                ProductSpecifications.search(q, businessId, categoryId, minPrice, maxPrice, available),
+                PageRequest.of(Math.max(page, 0), Math.min(Math.max(size, 1), 100), sortSpec));
         return PageResponse.from(result.map(ProductResponse::from));
     }
 

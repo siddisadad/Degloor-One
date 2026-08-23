@@ -10,10 +10,11 @@ import com.degloor.one.job.entity.JobApplication;
 import com.degloor.one.job.entity.JobPosting;
 import com.degloor.one.job.repository.JobApplicationRepository;
 import com.degloor.one.job.repository.JobPostingRepository;
+import com.degloor.one.job.repository.JobSpecifications;
 import com.degloor.one.user.entity.UserAccount;
 import java.util.List;
-import java.util.Locale;
 import java.util.UUID;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,11 +31,10 @@ public class JobService {
     }
 
     public List<JobResponse> search(String q, String category) {
-        return jobs.findByActiveTrueOrderByCreatedAtDesc().stream()
-                .filter(j -> category == null || category.isBlank() || category.equalsIgnoreCase(j.getCategory()))
-                .filter(j -> q == null || q.isBlank()
-                        || j.getTitle().toLowerCase(Locale.ROOT).contains(q.toLowerCase(Locale.ROOT))
-                        || j.getDescription().toLowerCase(Locale.ROOT).contains(q.toLowerCase(Locale.ROOT)))
+        return jobs.findAll(
+                        JobSpecifications.search(q, category),
+                        Sort.by(Sort.Direction.DESC, "createdAt"))
+                .stream()
                 .map(JobResponse::from)
                 .toList();
     }
