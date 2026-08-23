@@ -79,7 +79,7 @@ class _NotificationsWidgetState extends State<NotificationsWidget> {
     try {
       final page = await NotificationService.instance.listForUser(
         user,
-        page: PageQuery(limit: _pageSize, offset: _offset),
+        page: PageQuery(offset: _offset),
       );
       if (!mounted || token != _loadToken) return;
       setState(() {

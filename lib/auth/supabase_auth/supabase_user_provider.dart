@@ -3,7 +3,6 @@ import 'package:rxdart/rxdart.dart';
 import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/auth/password_recovery.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
-import '../base_auth_user_provider.dart';
 
 export '../base_auth_user_provider.dart';
 

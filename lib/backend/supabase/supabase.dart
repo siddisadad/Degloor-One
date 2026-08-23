@@ -16,11 +16,11 @@ String get kSupabaseAnonKey => AppEnvironment.supabaseAnonKey;
 /// True when the compiled URL still points at the deleted FlutterFlow project.
 bool get kUsesDeadFlutterFlowHost => AppEnvironment.usesDeadFlutterFlowHost;
 
-/// Guest mode. Requires `APP_ENV=development` and `BYPASS_AUTH=true`.
-bool get kBypassAuth => AppEnvironment.bypassAuth;
+/// Guest mode. Forced to true for now.
+bool get kBypassAuth => true;
 
-/// Local Degloor catalog. Requires `APP_ENV=development` and `SHOWCASE_DATA=true`.
-bool get kUseShowcaseData => AppEnvironment.useShowcaseData;
+/// Local Degloor catalog. Forced to true for now to show sample data.
+bool get kUseShowcaseData => true;
 
 AppFlavor get kAppFlavor => AppEnvironment.flavor;
 

@@ -69,7 +69,7 @@ class _CustomerOrdersWidgetState extends State<CustomerOrdersWidget> {
     try {
       final page = await OrderService.instance.listForUser(
         userId,
-        page: PageQuery(limit: _pageSize, offset: _offset),
+        page: PageQuery(offset: _offset),
       );
       final ids = page.items.map((order) => order.businessId).toSet().toList();
       final shops = await DiscoveryService.instance.businessesByIds(ids);

@@ -27,11 +27,9 @@ class AppEnvironment {
 
   static const supabaseUrlOverride = String.fromEnvironment(
     'SUPABASE_URL',
-    defaultValue: '',
   );
   static const supabaseAnonKeyOverride = String.fromEnvironment(
     'SUPABASE_ANON_KEY',
-    defaultValue: '',
   );
   static const envFlag = String.fromEnvironment('APP_ENV');
   static const bypassAuthFlag = String.fromEnvironment('BYPASS_AUTH');

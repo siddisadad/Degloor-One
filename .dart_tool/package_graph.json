@@ -39,7 +39,7 @@
         "google_maps_flutter_web",
         "google_sign_in",
         "gotrue",
-        "hive",
+        "http",
         "image_picker",
         "intl",
         "json_path",
@@ -567,14 +567,6 @@
         "clock",
         "meta",
         "path"
-      ]
-    },
-    {
-      "name": "hive",
-      "version": "2.2.3",
-      "dependencies": [
-        "crypto",
-        "meta"
       ]
     },
     {

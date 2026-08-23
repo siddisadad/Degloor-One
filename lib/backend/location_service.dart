@@ -50,7 +50,7 @@ class LocationService {
       Position? position;
       try {
         position = await Geolocator.getCurrentPosition(
-          locationSettings: LocationSettings(
+          locationSettings: const LocationSettings(
             accuracy: LocationAccuracy.high,
             timeLimit: Duration(seconds: kIsWeb ? 4 : 10),
           ),

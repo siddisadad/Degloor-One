@@ -105,7 +105,7 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
     try {
       final page = await OrderService.instance.listForBusiness(
         business.id,
-        page: PageQuery(limit: _pageSize, offset: _offset),
+        page: PageQuery(offset: _offset),
       );
       final existingUserIds = _customerNames.keys.toSet();
       final newUserIds = page.items
