@@ -5,6 +5,7 @@ import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/catalog_product.dart';
 import 'package:degloor_one/shared/listing_complaint.dart';
+import 'package:degloor_one/shared/listing_complaint_draft.dart';
 import 'package:degloor_one/shared/marketplace_joins.dart';
 import 'package:degloor_one/shared/product_category.dart';
 import 'package:degloor_one/shared/shop.dart';
@@ -133,7 +134,13 @@ void main() {
     expect(created, isA<ListingComplaint>());
     expect(created, isNot(isA<ComplaintsRow>()));
     expect(created.subject, 'Closed early');
-    expect(created.status, 'pending');
+    expect(created.status, ListingComplaintDraft.pending);
+    final stored = ShowcaseCatalog.query(
+      'complaints',
+      ShowcaseQuery()..eq('id', created.id),
+    ).single;
+    expect(stored['status'], ListingComplaintDraft.pending);
+    expect(stored.containsKey('resolution'), isFalse);
     final complaints = await ShopService.instance
         .complaintsForUser(GuestAuthUser.guestUid);
     expect(complaints, hasLength(2));
