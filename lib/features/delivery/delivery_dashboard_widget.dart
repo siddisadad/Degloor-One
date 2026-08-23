@@ -2,7 +2,6 @@ import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/delivery_service.dart';
 import 'package:degloor_one/backend/discovery_service.dart';
 import 'package:degloor_one/backend/order_service.dart';
-import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/backend/whatsapp_service.dart';
 import 'package:degloor_one/backend/location_service.dart';
 import 'package:degloor_one/components/degloor_app_bar.dart';
@@ -13,6 +12,8 @@ import 'package:degloor_one/core/error_handler.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
+import 'package:degloor_one/shared/delivery_assignment.dart';
+import 'package:degloor_one/shared/delivery_partner.dart';
 import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/shared/placed_order.dart';
 import 'package:degloor_one/shared/shop.dart';
@@ -39,8 +40,8 @@ class _DeliveryDashboardWidgetState extends State<DeliveryDashboardWidget> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
   Timer? _locationTimer;
 
-  DeliveryPartnersRow? _partner;
-  DeliveryAssignmentsRow? _assignment;
+  DeliveryPartner? _partner;
+  DeliveryAssignment? _assignment;
   PlacedOrder? _activeOrder;
   UserProfile? _customer;
   final Map<String, Shop> _shops = {};
@@ -123,7 +124,7 @@ class _DeliveryDashboardWidgetState extends State<DeliveryDashboardWidget> {
         return;
       }
 
-      DeliveryAssignmentsRow? assignment = _assignment;
+      DeliveryAssignment? assignment = _assignment;
       PlacedOrder? activeOrder = _activeOrder;
       UserProfile? customer = _customer;
       if (reset) {
