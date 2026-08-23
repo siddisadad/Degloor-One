@@ -63,7 +63,7 @@ class _UserProfileReportsWidgetState extends State<UserProfileReportsWidget> {
         appBar: AppBar(
           backgroundColor: Colors.white,
           automaticallyImplyLeading: false,
-          leading: degloorBackButton(
+          leading: degloorBackLeading(
             context,
             color: DegloorTheme.textPrimary,
           ),

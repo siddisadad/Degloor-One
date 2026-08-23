@@ -25,11 +25,15 @@ class SearchResultsWidget extends StatefulWidget {
     this.searchTerm,
     this.categoryId,
     this.openNow,
+    this.showBack = true,
   });
 
   final String? searchTerm;
   final String? categoryId;
   final bool? openNow;
+
+  /// Pushed search (Home, categories) shows back. The Explore tab does not.
+  final bool showBack;
 
   static String routeName = 'SearchResults';
   static String routePath = '/searchResults';
@@ -192,11 +196,13 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
           elevation: 0,
           surfaceTintColor: Colors.transparent,
           automaticallyImplyLeading: false,
-          leading: degloorBackButton(
-            context,
-            color: DegloorTheme.textPrimary,
-          ),
-          titleSpacing: 0,
+          leading: widget.showBack
+              ? degloorBackButton(
+                  context,
+                  color: DegloorTheme.textPrimary,
+                )
+              : null,
+          titleSpacing: widget.showBack ? 0 : 16,
           title: TextField(
             controller: _searchController,
             focusNode: _searchFocus,
@@ -349,15 +355,8 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
         onTap: () => LocationService.updateCurrentLocation(context),
       );
     }
-    if (_searchController.text.trim().isEmpty &&
-        _scope == MasterSearchScope.all &&
-        _recent.isNotEmpty &&
-        _result.shops.isEmpty) {
-      return _recentList();
-    }
     if (_result.isEmpty && !_isLoading) {
-      if (_searchController.text.trim().isEmpty &&
-          _scope == MasterSearchScope.all) {
+      if (_searchController.text.trim().isEmpty && _recent.isNotEmpty) {
         return _recentList();
       }
       return EmptyStateView(
@@ -371,6 +370,10 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
     return ListView(
       padding: const EdgeInsets.all(DegloorTheme.spacingMD),
       children: [
+        if (_searchController.text.trim().isEmpty && _recent.isNotEmpty) ...[
+          _recentContent(),
+          const SizedBox(height: 16),
+        ],
         if (_scope == MasterSearchScope.all ||
             _scope == MasterSearchScope.shops)
           ..._shopSection(),
@@ -397,6 +400,13 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
     }
     return ListView(
       padding: const EdgeInsets.all(DegloorTheme.spacingMD),
+      children: [_recentContent()],
+    );
+  }
+
+  Widget _recentContent() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [

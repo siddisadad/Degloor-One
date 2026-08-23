@@ -230,7 +230,7 @@ class _CartWidgetState extends State<CartWidget> {
         title: Text('Your Cart', style: DegloorTheme.headingMedium),
         elevation: 0,
         automaticallyImplyLeading: false,
-        leading: degloorBackButton(context),
+        leading: degloorBackLeading(context),
       ),
       body: FutureBuilder<List<CartLine>>(
         future: _model.cartItemsFuture,

@@ -4,26 +4,53 @@ import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-/// Pop the current page, or open Home when this screen is a root (Explore tab,
-/// admin desk, widget tests without GoRouter).
+/// True when this page is stacked on another route (not a tab root).
+bool degloorCanPop(BuildContext context) {
+  final navigator = Navigator.maybeOf(context);
+  if (navigator != null && navigator.canPop()) {
+    return true;
+  }
+  try {
+    return context.canPop();
+  } catch (_) {
+    return false;
+  }
+}
+
+/// Pop the current page, or open Home when this screen is a stack root.
 void degloorNavigateBack(
   BuildContext context, {
   String fallbackRoute = 'CustomerHome',
 }) {
-  final navigator = Navigator.maybeOf(context);
-  if (navigator != null && navigator.canPop()) {
-    navigator.pop();
-    return;
-  }
-  try {
-    if (context.canPop()) {
-      context.pop();
+  if (degloorCanPop(context)) {
+    final navigator = Navigator.maybeOf(context);
+    if (navigator != null && navigator.canPop()) {
+      navigator.pop();
       return;
     }
+    try {
+      context.pop();
+      return;
+    } catch (_) {}
+  }
+  try {
     context.goNamed(fallbackRoute);
   } catch (_) {
     // No GoRouter in isolated widget tests.
   }
+}
+
+/// Back control, or null on tab roots that cannot pop.
+Widget? degloorBackLeading(
+  BuildContext context, {
+  Color? color,
+  double size = 22,
+  bool? show,
+}) {
+  if (!(show ?? degloorCanPop(context))) {
+    return null;
+  }
+  return degloorBackButton(context, color: color, size: size);
 }
 
 /// Leading back control used by inner Degloor pages.

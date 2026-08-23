@@ -55,4 +55,20 @@ void main() {
     expect(find.byIcon(Icons.arrow_back_rounded), findsOneWidget);
     expect(find.text('Order placed'), findsOneWidget);
   });
+
+  testWidgets('tab-style pages hide back when they cannot pop', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (context) => Scaffold(
+            appBar: AppBar(leading: degloorBackLeading(context)),
+            body: const Text('Tab root'),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Tab root'), findsOneWidget);
+    expect(find.byIcon(Icons.arrow_back_rounded), findsNothing);
+  });
 }
