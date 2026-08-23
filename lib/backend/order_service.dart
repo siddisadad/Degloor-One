@@ -1,3 +1,4 @@
+import 'package:degloor_one/backend/cart_service.dart';
 import 'package:degloor_one/backend/notification_service.dart';
 import 'package:degloor_one/backend/repositories/order_repository.dart';
 import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
@@ -134,6 +135,25 @@ class OrderService {
       throw Exception('Failed to place order (no response from server)');
     }
     return response.toString();
+  }
+
+  /// Widget checkout: strips client prices before [placeOrder].
+  Future<String> placeOrderFromCart({
+    required String userId,
+    required String businessId,
+    required String addressId,
+    required List<Map<String, dynamic>> items,
+    String paymentMethod = 'COD',
+    String? cartId,
+  }) {
+    return placeOrder(
+      userId: userId,
+      businessId: businessId,
+      addressId: addressId,
+      items: CartService.checkoutItems(items),
+      paymentMethod: paymentMethod,
+      cartId: cartId,
+    );
   }
 
   Future<void> cancelOrder({
