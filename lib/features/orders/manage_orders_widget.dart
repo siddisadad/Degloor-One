@@ -9,7 +9,6 @@ import 'package:degloor_one/components/degloor_app_bar.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/components/load_more_control.dart';
 import 'package:degloor_one/components/order_list_card.dart';
-import 'package:degloor_one/shared/order_lifecycle.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
@@ -158,7 +157,7 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Order status updated to ${OrderLifecycle.label(newStatus)}',
+              'Order status updated to ${OrderService.instance.statusLabel(newStatus)}',
             ),
             backgroundColor: FlutterFlowTheme.of(context).success,
           ),
@@ -257,6 +256,8 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
                                 );
                               }
                               final order = _orders[index];
+                              final actions =
+                                  OrderService.instance.ownerActions(order.status);
                               final customerName =
                                   _customerNames[order.userId] ?? 'Loading…';
                               return OrderListCard(
@@ -266,8 +267,8 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
                                 totalAmount: order.totalAmount,
                                 status: order.status,
                                 subtitle: _customerPhones[order.userId],
-                                footer: !OrderLifecycle.isTerminal(order.status)
-                                    ? _orderActions(order)
+                                footer: !actions.isTerminal
+                                    ? _orderActions(order, actions)
                                     : _buildInfoRow(
                                         'Customer',
                                         customerName,
@@ -290,7 +291,7 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
     );
   }
 
-  Widget _orderActions(OrdersRow order) {
+  Widget _orderActions(OrdersRow order, OrderOwnerActions actions) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -305,34 +306,27 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
           spacing: 8,
           runSpacing: 8,
           children: [
-            if (OrderLifecycle.canTransition(
-              from: order.status,
-              to: OrderLifecycle.accepted,
-            ))
+            if (actions.canAccept)
               FFButtonWidget(
                 onPressed: () =>
-                    _updateOrderStatus(order.id, OrderLifecycle.accepted),
+                    _updateOrderStatus(order.id, actions.acceptStatus),
                 text: 'Accept',
                 options: _buttonOptions(
                   context,
                   FlutterFlowTheme.of(context).success,
                 ),
               ),
-            if (OrderLifecycle.canTransition(
-              from: order.status,
-              to: OrderLifecycle.ready,
-            ))
+            if (actions.canMarkReady)
               FFButtonWidget(
                 onPressed: () =>
-                    _updateOrderStatus(order.id, OrderLifecycle.ready),
+                    _updateOrderStatus(order.id, actions.readyStatus),
                 text: 'Mark ready',
                 options: _buttonOptions(
                   context,
                   FlutterFlowTheme.of(context).primary,
                 ),
               ),
-            if (OrderLifecycle.normalizeStatus(order.status) ==
-                OrderLifecycle.ready)
+            if (actions.canCounterDeliver)
               FFButtonWidget(
                 onPressed: () => _showOtpVerificationDialog(order),
                 text: 'Deliver with OTP',
@@ -341,7 +335,7 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
                   FlutterFlowTheme.of(context).secondary,
                 ),
               ),
-            if (OrderLifecycle.canOwnerCancel(order.status))
+            if (actions.canCancel)
               FFButtonWidget(
                 onPressed: () async {
                   final confirm = await showDialog<bool>(
@@ -364,10 +358,7 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
                     ),
                   );
                   if (confirm == true) {
-                    await _updateOrderStatus(
-                      order.id,
-                      OrderLifecycle.cancelled,
-                    );
+                    await _updateOrderStatus(order.id, actions.cancelStatus);
                   }
                 },
                 text: 'Cancel',

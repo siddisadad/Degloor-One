@@ -177,6 +177,8 @@ class _ManageServiceRequestsWidgetState
                     itemBuilder: (context, index) {
                       final req = _requests[index];
                       final customerName = _customerNames[req.userId] ?? 'Loading...';
+                      final actions = ServiceMarketplaceService.instance
+                          .requestActions(req.status);
 
                       return Card(
                         clipBehavior: Clip.antiAliasWithSaveLayer,
@@ -219,7 +221,10 @@ class _ManageServiceRequestsWidgetState
                                             ),
                                           ),
                                         ),
-                                      _buildStatusBadge(req.status ?? 'pending'),
+                                      _buildStatusBadge(
+                                        req.status ??
+                                            ServiceRequestStatus.pending,
+                                      ),
                                     ],
                                   ),
                                 ],
@@ -246,14 +251,17 @@ class _ManageServiceRequestsWidgetState
                                   ),
                                 ],
                               ),
-                              if (req.status == 'pending')
+                              if (actions.canAccept)
                                 Padding(
                                   padding: const EdgeInsets.only(top: 16.0),
                                   child: Row(
                                     children: [
                                       Expanded(
                                         child: FFButtonWidget(
-                                          onPressed: () => _updateRequestStatus(req.id, 'accepted'),
+                                          onPressed: () => _updateRequestStatus(
+                                            req.id,
+                                            ServiceRequestStatus.accepted,
+                                          ),
                                           text: 'Accept',
                                           options: FFButtonOptions(
                                             height: 36,
@@ -266,7 +274,10 @@ class _ManageServiceRequestsWidgetState
                                       const SizedBox(width: 12),
                                       Expanded(
                                         child: FFButtonWidget(
-                                          onPressed: () => _updateRequestStatus(req.id, 'declined'),
+                                          onPressed: () => _updateRequestStatus(
+                                            req.id,
+                                            ServiceRequestStatus.declined,
+                                          ),
                                           text: 'Decline',
                                           options: FFButtonOptions(
                                             height: 36,
@@ -279,11 +290,14 @@ class _ManageServiceRequestsWidgetState
                                     ],
                                   ),
                                 ),
-                              if (req.status == 'accepted')
+                              if (actions.canComplete)
                                 Padding(
                                   padding: const EdgeInsets.only(top: 16.0),
                                   child: FFButtonWidget(
-                                    onPressed: () => _updateRequestStatus(req.id, 'completed'),
+                                    onPressed: () => _updateRequestStatus(
+                                      req.id,
+                                      ServiceRequestStatus.completed,
+                                    ),
                                     text: 'Mark as Completed',
                                     options: FFButtonOptions(
                                       width: double.infinity,

@@ -143,6 +143,25 @@ void main() {
     );
   });
 
+  test('requestActions only allow pending accept/decline and accepted complete',
+      () {
+    final pending =
+        ServiceMarketplaceService.instance.requestActions('pending');
+    expect(pending.canAccept, isTrue);
+    expect(pending.canDecline, isTrue);
+    expect(pending.canComplete, isFalse);
+
+    final accepted =
+        ServiceMarketplaceService.instance.requestActions('accepted');
+    expect(accepted.canAccept, isFalse);
+    expect(accepted.canComplete, isTrue);
+
+    final done =
+        ServiceMarketplaceService.instance.requestActions('completed');
+    expect(done.canAccept, isFalse);
+    expect(done.canComplete, isFalse);
+  });
+
   test('seeded pending request can be accepted by the provider', () async {
     await ServiceMarketplaceService.instance.updateStatus(
       requestId: 'sr-1',
