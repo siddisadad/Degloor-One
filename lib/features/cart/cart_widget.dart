@@ -1,5 +1,6 @@
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
-import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/backend/address_service.dart';
+import 'package:degloor_one/backend/discovery_service.dart';
 import 'package:degloor_one/components/cached_remote_image.dart';
 import 'package:degloor_one/shared/otp_copy.dart';
 import 'package:degloor_one/backend/cart_service.dart';
@@ -59,10 +60,11 @@ class _CartWidgetState extends State<CartWidget> {
 
       _model.currentCart = carts.first;
 
-      // Fetch Business details
-      final business = await BusinessesTable().querySingleRow(queryFn: (q) => q.eq('id', _model.currentCart!.businessId));
-      if (business.isNotEmpty) {
-        _model.currentBusiness = business.first;
+      final shops = await DiscoveryService.instance.businessesByIds([
+        _model.currentCart!.businessId,
+      ]);
+      if (shops.isNotEmpty) {
+        _model.currentBusiness = shops.first;
       }
 
       final items = await CartService.itemsForCart(_model.currentCart!.id);
@@ -81,20 +83,20 @@ class _CartWidgetState extends State<CartWidget> {
 
   Future<void> _fetchAddresses() async {
     final userId = currentUserUid;
-    if (userId == '') return;
+    if (userId == '') {
+      if (!mounted) return;
+      setState(() {
+        _model.addressesFuture = Future.value([]);
+        _model.selectedAddress = null;
+      });
+      return;
+    }
     try {
-      final addresses = await AddressesTable().queryRows(
-        queryFn: (q) => q.eq('user_id', userId),
-      );
+      final addresses = await AddressService.instance.listForUser(userId);
       if (!mounted) return;
       setState(() {
         _model.addressesFuture = Future.value(addresses);
-        if (addresses.isNotEmpty) {
-          _model.selectedAddress = addresses.firstWhere(
-            (a) => a.isDefault,
-            orElse: () => addresses.first,
-          );
-        }
+        _model.selectedAddress = AddressService.pickDefault(addresses);
       });
       await _updateDeliveryFee();
     } catch (e) {
@@ -111,7 +113,8 @@ class _CartWidgetState extends State<CartWidget> {
       return;
     }
     try {
-      final fee = await OrdersTable().calculateDeliveryFee(
+      final fee = await AddressService.instance.deliveryFee(
+        userId: currentUserUid,
         businessId: _model.currentBusiness!.id,
         addressId: _model.selectedAddress!.id,
       );
@@ -157,6 +160,10 @@ class _CartWidgetState extends State<CartWidget> {
 
     setState(() => _model.isPlacingOrder = true);
     try {
+      await AddressService.instance.requireForUser(
+        userId: currentUserUid,
+        id: _model.selectedAddress!.id,
+      );
       // Use secure RPC for order placement and inventory management
       final List<Map<String, dynamic>> rpcItems = items.map((item) {
         final product = item['products'] as Map<String, dynamic>;
