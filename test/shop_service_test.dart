@@ -109,6 +109,53 @@ void main() {
     );
   });
 
+  test('productById returns Patil milk on showcase', () async {
+    final product =
+        await ShopService.instance.productById(ShowcaseCatalog.prodMilk);
+    expect(product, isNotNull);
+    expect(product!.id, ShowcaseCatalog.prodMilk);
+    expect(product.name, 'Fresh Milk (1L)');
+    expect(product.businessId, ShowcaseCatalog.bizPatil);
+    expect(product.price, 60);
+    expect(product.isAvailable, isTrue);
+  });
+
+  test('productById returns null for an unknown product', () async {
+    expect(await ShopService.instance.productById('prod-missing'), isNull);
+    expect(await ShopService.instance.productById(''), isNull);
+  });
+
+  test('trackEvent inserts a product view on showcase', () async {
+    await ShopService.instance.trackEvent(
+      businessId: ShowcaseCatalog.bizPatil,
+      eventType: ShopEvents.productView,
+      userId: GuestAuthUser.guestUid,
+      metadata: {'product_id': ShowcaseCatalog.prodMilk},
+    );
+    final events = await ShopService.instance.eventsFor(
+      userId: GuestAuthUser.guestUid,
+      businessId: ShowcaseCatalog.bizPatil,
+    );
+    final views = events.where((row) => row.eventType == ShopEvents.productView);
+    expect(views, hasLength(1));
+    expect(views.single.businessId, ShowcaseCatalog.bizPatil);
+  });
+
+  test('trackEvent ignores empty ids', () async {
+    await ShopService.instance.trackEvent(
+      businessId: '',
+      eventType: ShopEvents.profileView,
+    );
+    final events = await ShopService.instance.eventsFor(
+      userId: GuestAuthUser.guestUid,
+      businessId: ShowcaseCatalog.bizPatil,
+    );
+    expect(
+      events.where((row) => row.eventType == ShopEvents.profileView),
+      hasLength(18),
+    );
+  });
+
   test('eventsFor rejects a shop the user does not own', () async {
     await expectLater(
       ShopService.instance.eventsFor(

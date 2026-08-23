@@ -1,8 +1,20 @@
+import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/business_service.dart';
 import 'package:degloor_one/backend/notification_service.dart';
 import 'package:degloor_one/backend/repositories/shop_repository.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/core/error_handler.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
+
+class ShopEvents {
+  static const profileView = 'PROFILE_VIEW';
+  static const callClick = 'CALL_CLICK';
+  static const whatsappClick = 'WHATSAPP_CLICK';
+  static const directionsClick = 'DIRECTIONS_CLICK';
+  static const shareClick = 'SHARE_CLICK';
+  static const reviewSubmitted = 'REVIEW_SUBMITTED';
+  static const productView = 'PRODUCT_VIEW';
+}
 
 class ShopCatalog {
   const ShopCatalog({
@@ -76,6 +88,31 @@ class ShopService {
     );
   }
 
+  Future<ProductsRow?> productById(String productId) {
+    if (productId.isEmpty) return Future<ProductsRow?>.value();
+    return _repository.productById(productId);
+  }
+
+  Future<void> trackEvent({
+    required String businessId,
+    required String eventType,
+    String? userId,
+    Map<String, dynamic>? metadata,
+  }) async {
+    if (businessId.isEmpty || eventType.isEmpty) return;
+    final actor = userId ?? currentUserUid;
+    try {
+      await _repository.insertAnalytics({
+        'business_id': businessId,
+        'event_type': eventType,
+        if (actor.isNotEmpty) 'user_id': actor,
+        if (metadata != null) 'metadata': metadata,
+      });
+    } catch (error) {
+      AppLogger.error('Analytics Error ($eventType)', error);
+    }
+  }
+
   Future<ShopReviews> reviews(String businessId) async {
     if (businessId.isEmpty) return ShopReviews.empty;
     final items = kUseShowcaseData
@@ -140,6 +177,11 @@ class ShopService {
         rating: rating,
       );
     }
+    await trackEvent(
+      businessId: businessId,
+      eventType: ShopEvents.reviewSubmitted,
+      userId: userId,
+    );
   }
 
   Future<ComplaintsRow> reportListing({

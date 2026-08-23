@@ -2,7 +2,6 @@ import 'package:degloor_one/core/degloor_theme.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/backend/discovery_service.dart';
 import 'package:degloor_one/backend/location_service.dart';
-import 'package:degloor_one/backend/repositories/discovery_repository.dart';
 import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/l10n/app_localizations.dart';
 import 'package:degloor_one/components/business_card/business_card_widget.dart';

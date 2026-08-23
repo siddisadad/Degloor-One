@@ -9,8 +9,8 @@ import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/l10n/app_localizations.dart';
 
 import 'package:degloor_one/backend/discovery_service.dart';
-import 'package:degloor_one/backend/repositories/discovery_repository.dart';
 import 'package:degloor_one/backend/service_marketplace_service.dart';
+import 'package:degloor_one/features/catalogue/product_detail_widget.dart';
 import 'package:degloor_one/features/services/service_provider_display.dart';
 import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
@@ -538,7 +538,10 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                             name: prod.name,
                             price: prod.price ?? 0.0,
                             imageUrl: prod.imageUrl ?? 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=400&q=80',
-                            onTap: () => context.pushNamed('BusinessCatalogue', queryParameters: {'businessId': prod.businessId}),
+                            onTap: () => context.pushNamed(
+                              ProductDetailWidget.routeName,
+                              pathParameters: {'productId': prod.id},
+                            ),
                           );
                         },
                         childCount: products.length,
