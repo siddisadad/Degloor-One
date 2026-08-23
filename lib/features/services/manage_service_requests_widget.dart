@@ -1,8 +1,9 @@
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/discovery_service.dart';
 import 'package:degloor_one/backend/service_marketplace_service.dart';
-import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/backend/whatsapp_service.dart';
+import 'package:degloor_one/shared/service_provider_profile.dart';
+import 'package:degloor_one/shared/service_request.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
@@ -30,9 +31,9 @@ class _ManageServiceRequestsWidgetState
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
-  ServiceProvidersRow? _currentProvider;
-  StreamSubscription<List<ServiceRequestsRow>>? _requestsSubscription;
-  List<ServiceRequestsRow> _requests = [];
+  ServiceProviderProfile? _currentProvider;
+  StreamSubscription<List<ServiceRequest>>? _requestsSubscription;
+  List<ServiceRequest> _requests = [];
   final Map<String, String> _customerNames = {};
   final Map<String, String> _customerPhones = {};
   bool _loading = true;

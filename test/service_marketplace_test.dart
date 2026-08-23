@@ -5,6 +5,8 @@ import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/shared/service_category.dart';
+import 'package:degloor_one/shared/service_provider_profile.dart';
+import 'package:degloor_one/shared/service_request.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
 void main() {
@@ -44,6 +46,8 @@ void main() {
       description: 'Fix the kitchen tube light.',
       scheduledAt: DateTime.now().add(const Duration(days: 1)),
     );
+    expect(request, isA<ServiceRequest>());
+    expect(request, isNot(isA<ServiceRequestsRow>()));
     expect(request.status, 'pending');
     expect(request.providerId, 'sp-ravi');
 
@@ -92,6 +96,8 @@ void main() {
       hourlyRate: '200',
       bio: 'Fan and wiring repair in Degloor.',
     );
+    expect(profile, isA<ServiceProviderProfile>());
+    expect(profile, isNot(isA<ServiceProvidersRow>()));
     expect(profile.userId, GuestAuthUser.guestUid);
     expect(profile.categoryId, 'scat-electric');
     expect(profile.experienceYears, 5);
