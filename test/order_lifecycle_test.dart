@@ -9,7 +9,9 @@ void main() {
     expect(OrderLifecycle.stepperIndex('placed'), 0);
     expect(OrderLifecycle.stepperIndex('out_for_delivery'), 3);
     expect(OrderLifecycle.stepperIndex('cancelled'), -1);
-    expect(OrderLifecycle.label('out_for_delivery'), 'out for delivery');
+    expect(OrderLifecycle.label('out_for_delivery'), 'Out for delivery');
+    expect(OrderLifecycle.label('shipping'), 'On the way');
+    expect(OrderLifecycle.label('pending'), 'Pending');
   });
 
   test('owner transitions and cancel rules', () {

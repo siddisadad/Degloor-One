@@ -4,6 +4,7 @@ import 'package:degloor_one/backend/notification_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
+import 'package:degloor_one/components/load_more_control.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_icon_button.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
@@ -243,20 +244,9 @@ class _NotificationsWidgetState extends State<NotificationsWidget> {
                     itemCount: _notifications.length + (_hasMore ? 1 : 0),
                     itemBuilder: (context, index) {
                       if (index >= _notifications.length) {
-                        return Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                          child: TextButton(
-                            onPressed: _loadingMore
-                                ? null
-                                : () => _loadPage(),
-                            child: _loadingMore
-                                ? const SizedBox(
-                                    height: 18,
-                                    width: 18,
-                                    child: CircularProgressIndicator(strokeWidth: 2),
-                                  )
-                                : const Text('Load more'),
-                          ),
+                        return LoadMoreControl(
+                          loading: _loadingMore,
+                          onPressed: () => _loadPage(),
                         );
                       }
                       final notification = _notifications[index];
@@ -287,19 +277,23 @@ class _NotificationsWidgetState extends State<NotificationsWidget> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
                                       Expanded(
                                         child: Text(
                                           notification.title,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
                                           style: FlutterFlowTheme.of(context).titleSmall.override(
                                                 font: GoogleFonts.inter(),
                                                 fontWeight: notification.isRead ? FontWeight.normal : FontWeight.bold,
                                               ),
                                         ),
                                       ),
+                                      const SizedBox(width: 8),
                                       Text(
                                         dateTimeFormat('MMM d, h:mm a', notification.createdAt),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
                                         style: FlutterFlowTheme.of(context).bodySmall,
                                       ),
                                     ],

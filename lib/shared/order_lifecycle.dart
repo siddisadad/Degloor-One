@@ -98,6 +98,25 @@ class OrderLifecycle {
   }
 
   static String label(String status) {
-    return normalizeStatus(status).replaceAll('_', ' ');
+    switch (normalizeStatus(status)) {
+      case pending:
+        return 'Pending';
+      case accepted:
+        return 'Accepted';
+      case ready:
+        return 'Ready';
+      case shipping:
+        return 'On the way';
+      case outForDelivery:
+        return 'Out for delivery';
+      case delivered:
+        return 'Delivered';
+      case cancelled:
+        return 'Cancelled';
+      default:
+        final raw = normalizeStatus(status).replaceAll('_', ' ');
+        if (raw.isEmpty) return raw;
+        return raw[0].toUpperCase() + raw.substring(1);
+    }
   }
 }
