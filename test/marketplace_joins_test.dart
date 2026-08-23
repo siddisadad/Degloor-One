@@ -22,12 +22,34 @@ void main() {
       'id': 'sp-ravi',
       'category_id': 'scat-electric',
       'hourly_rate': 400,
+      'is_verified': true,
       'users': {'full_name': 'Ravi', 'avatar_url': 'https://example.com/a.png'},
       'service_categories': {'name': 'Electrician'},
     });
     expect(provider.displayName, 'Ravi');
     expect(provider.categoryName, 'Electrician');
+    expect(provider.isVerified, isTrue);
     expect(provider.hourlyRate, 400);
+    expect(provider.hourlyRateLabel, '₹400/hr');
+    expect(provider.avatarImageUrl(), 'https://example.com/a.png');
+  });
+
+  test('ServiceProviderCard falls back when join photo or rate is missing', () {
+    final provider = ServiceProviderCard.fromJoin({
+      'id': 'sp-anon',
+      'hourly_rate': 99.5,
+    });
+    expect(provider.displayName, 'Unknown Provider');
+    expect(provider.categoryName, 'General');
+    expect(provider.hourlyRateLabel, '₹99.50/hr');
+    expect(
+      provider.avatarImageUrl(width: 400, height: 300),
+      contains('w=400&h=300'),
+    );
+    expect(
+      const ServiceProviderCard(id: 'sp-none').hourlyRateLabel,
+      'Rate on request',
+    );
   });
 
   test('ShopReview uses the reviewer join and stored rating', () {

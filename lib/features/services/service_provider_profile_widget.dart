@@ -2,7 +2,6 @@ import 'package:degloor_one/backend/service_marketplace_service.dart';
 import 'package:degloor_one/core/app_flags.dart';
 import 'package:degloor_one/components/request_service_sheet/request_service_sheet_widget.dart';
 import 'package:degloor_one/components/supabase_unreachable_banner.dart';
-import 'package:degloor_one/features/services/service_provider_display.dart';
 import 'package:degloor_one/shared/marketplace_joins.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_icon_button.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
@@ -94,8 +93,7 @@ class _ServiceProviderProfileWidgetState
                   pinned: true,
                   flexibleSpace: FlexibleSpaceBar(
                     background: CachedNetworkImage(
-                      imageUrl: ServiceProviderDisplay.avatarUrl(
-                        provider.user?.avatarUrl,
+                      imageUrl: provider.avatarImageUrl(
                         width: 400,
                         height: 300,
                       ),
@@ -141,8 +139,12 @@ class _ServiceProviderProfileWidgetState
                                 ),
                               ],
                             ),
-                            // if (provider['is_verified'] == true)
-                            //   Icon(Icons.verified_rounded, color: FlutterFlowTheme.of(context).primary, size: 32),
+                            if (provider.isVerified)
+                              Icon(
+                                Icons.verified_rounded,
+                                color: FlutterFlowTheme.of(context).primary,
+                                size: 32,
+                              ),
                           ],
                         ),
                         const SizedBox(height: 24),
@@ -152,7 +154,7 @@ class _ServiceProviderProfileWidgetState
                             _buildStatItem('Experience', '${provider.experienceYears ?? 0} Years'),
                             _buildStatItem(
                               'Hourly Rate',
-                              ServiceProviderDisplay.hourlyRateLabel(provider.hourlyRate),
+                              provider.hourlyRateLabel,
                             ),
                           ],
                         ),

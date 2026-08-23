@@ -177,6 +177,22 @@ class ServiceProviderCard {
       'Unknown Provider';
 
   String get categoryName => category?.displayName ?? 'General';
+
+  /// Photo URL, or a size-aware fallback when the join has no avatar.
+  String avatarImageUrl({int width = 100, int height = 100}) {
+    final url = user?.avatarUrl?.trim();
+    if (url != null && url.isNotEmpty) return url;
+    return 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde'
+        '?auto=format&fit=crop&w=$width&h=$height&q=80';
+  }
+
+  String get hourlyRateLabel {
+    final rate = hourlyRate;
+    if (rate == null) return 'Rate on request';
+    final rounded =
+        rate % 1 == 0 ? rate.toStringAsFixed(0) : rate.toStringAsFixed(2);
+    return '₹$rounded/hr';
+  }
 }
 
 /// Shop review with an optional reviewer join.

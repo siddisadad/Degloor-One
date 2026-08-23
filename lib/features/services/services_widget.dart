@@ -9,7 +9,6 @@ import 'package:degloor_one/components/supabase_unreachable_banner.dart';
 import 'package:degloor_one/components/request_service_sheet/request_service_sheet_widget.dart';
 import 'package:degloor_one/components/load_more_control.dart';
 import 'package:degloor_one/core/degloor_theme.dart';
-import 'package:degloor_one/features/services/service_provider_display.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -276,9 +275,7 @@ class _ServicesWidgetState extends State<ServicesWidget> {
                                   ClipRRect(
                                     borderRadius: BorderRadius.circular(8.0),
                                     child: CachedNetworkImage(
-                                      imageUrl: ServiceProviderDisplay.avatarUrl(
-                                        provider.user?.avatarUrl,
-                                      ),
+                                      imageUrl: provider.avatarImageUrl(),
                                       width: 60.0,
                                       height: 60.0,
                                       fit: BoxFit.cover,
@@ -300,9 +297,7 @@ class _ServicesWidgetState extends State<ServicesWidget> {
                                           style: DegloorTheme.labelSmall,
                                         ),
                                         Text(
-                                          ServiceProviderDisplay.hourlyRateLabel(
-                                            provider.hourlyRate,
-                                          ),
+                                          provider.hourlyRateLabel,
                                           style: DegloorTheme.bodySmall,
                                         ),
                                       ],
