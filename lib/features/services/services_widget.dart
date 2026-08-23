@@ -119,7 +119,6 @@ class _ServicesWidgetState extends State<ServicesWidget> {
         appBar: degloorAppBar(
           context,
           title: 'Find local services',
-          showBack: false,
           actions: [
             IconButton(
               tooltip: 'Offer a service',

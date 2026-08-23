@@ -21,6 +21,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 50));
 
     expect(find.text('Find local services'), findsOneWidget);
+    expect(find.byIcon(Icons.arrow_back_rounded), findsOneWidget);
     expect(find.text('Electrician'), findsWidgets);
     expect(find.text('Ravi Electrician'), findsOneWidget);
   });

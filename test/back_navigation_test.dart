@@ -56,6 +56,21 @@ void main() {
     expect(find.text('Order placed'), findsOneWidget);
   });
 
+  testWidgets('local services app bar keeps a back arrow', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (context) => Scaffold(
+            appBar: degloorAppBar(context, title: 'Find local services'),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Find local services'), findsOneWidget);
+    expect(find.byIcon(Icons.arrow_back_rounded), findsOneWidget);
+  });
+
   testWidgets('tab-style pages hide back when they cannot pop', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
