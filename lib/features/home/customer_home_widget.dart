@@ -5,7 +5,6 @@ import 'package:degloor_one/components/modern/modern_category_item.dart';
 import 'package:degloor_one/components/modern/modern_business_card.dart';
 import 'package:degloor_one/components/modern/modern_product_card.dart';
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
-import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/l10n/app_localizations.dart';
 
 import 'package:degloor_one/backend/discovery_service.dart';
@@ -16,6 +15,7 @@ import 'package:degloor_one/shared/marketplace_joins.dart';
 import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/shared/catalog_product.dart';
 import 'package:degloor_one/shared/shop.dart';
+import 'package:degloor_one/shared/shop_category.dart';
 import 'package:degloor_one/shared/user_profile.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -42,7 +42,7 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
-  Future<List<BusinessCategoriesRow>>? _categoriesFuture;
+  Future<List<ShopCategory>>? _categoriesFuture;
   Future<List<ServiceProviderCard>>? _servicesFuture;
   final Map<String, String> _categoryIdToName = {};
 
@@ -329,7 +329,7 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                       child: Text(AppLocalizations.of(context)!.categories, style: DegloorTheme.headingMedium),
                     ),
                     const SizedBox(height: DegloorTheme.spacingMD),
-                    FutureBuilder<List<BusinessCategoriesRow>>(
+                    FutureBuilder<List<ShopCategory>>(
                       future: _categoriesFuture,
                       builder: (context, snapshot) {
                         if (!snapshot.hasData) return const SizedBox(height: 100);

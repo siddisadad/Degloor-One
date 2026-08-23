@@ -1,6 +1,6 @@
 import 'package:degloor_one/backend/discovery_service.dart';
-import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/components/degloor_app_bar.dart';
+import 'package:degloor_one/shared/shop_category.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/components/modern/modern_category_item.dart';
 import 'package:degloor_one/core/degloor_theme.dart';
@@ -25,7 +25,7 @@ class _CategoriesWidgetState extends State<CategoriesWidget> {
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
-  Future<List<BusinessCategoriesRow>>? _categoriesFuture;
+  Future<List<ShopCategory>>? _categoriesFuture;
 
   @override
   void initState() {
@@ -80,7 +80,7 @@ class _CategoriesWidgetState extends State<CategoriesWidget> {
             alignment: Alignment.topCenter,
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 520),
-              child: FutureBuilder<List<BusinessCategoriesRow>>(
+              child: FutureBuilder<List<ShopCategory>>(
                 future: _categoriesFuture,
                 builder: (context, snapshot) {
                   if (snapshot.hasError) {
