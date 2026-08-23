@@ -5,6 +5,7 @@ import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/core/error_handler.dart';
 import 'package:degloor_one/shared/catalog_product.dart';
+import 'package:degloor_one/shared/product_category.dart';
 import 'package:degloor_one/shared/shop.dart';
 import 'package:degloor_one/shared/shop_hours.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
@@ -187,9 +188,10 @@ class BusinessService {
     return rows.map(CatalogProduct.fromRow).toList();
   }
 
-  Future<List<ProductCategoriesRow>> productCategories(String userId) async {
+  Future<List<ProductCategory>> productCategories(String userId) async {
     final shop = await requireOwned(userId);
-    return _repository.productCategoriesFor(shop.id);
+    final rows = await _repository.productCategoriesFor(shop.id);
+    return rows.map(ProductCategory.fromRow).toList();
   }
 
   Future<CatalogProduct> addProduct({

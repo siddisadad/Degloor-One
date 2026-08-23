@@ -2,8 +2,8 @@ import 'package:degloor_one/core/degloor_theme.dart';
 import 'package:degloor_one/components/modern/modern_product_list_item.dart';
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/business_service.dart';
-import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/components/degloor_app_bar.dart';
+import 'package:degloor_one/shared/product_category.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
@@ -29,7 +29,7 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
   late ManageCatalogueModel _model;
   final scaffoldKey = GlobalKey<ScaffoldState>();
   List<CatalogProduct> _products = [];
-  List<ProductCategoriesRow> _businessCategories = [];
+  List<ProductCategory> _businessCategories = [];
   bool _loading = true;
   Shop? _business;
 

@@ -1,6 +1,6 @@
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
-import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/catalog_product.dart';
+import 'package:degloor_one/shared/product_category.dart';
 import 'business_catalogue_widget.dart' show BusinessCatalogueWidget;
 import 'package:flutter/material.dart';
 
@@ -9,7 +9,7 @@ class BusinessCatalogueModel extends FlutterFlowModel<BusinessCatalogueWidget> {
 
   List<CatalogProduct> allProducts = [];
   Map<String, List<CatalogProduct>> groupedProducts = {};
-  List<ProductCategoriesRow> categories = [];
+  List<ProductCategory> categories = [];
   bool isLoading = true;
 
   @override
