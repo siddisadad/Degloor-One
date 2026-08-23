@@ -1,9 +1,10 @@
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
+import 'package:degloor_one/backend/business_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
-import 'package:degloor_one/flutter_flow/flutter_flow_icon_button.dart';
+import 'package:degloor_one/components/degloor_app_bar.dart';
+import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
-import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:degloor_one/core/error_handler.dart';
@@ -54,46 +55,22 @@ class _ManageHoursWidgetState extends State<ManageHoursWidget> {
     }
 
     try {
-      final businesses = await BusinessesTable().queryRows(
-        queryFn: (q) => q.eq('owner_id', currentUser),
-      );
-
-      if (businesses.isNotEmpty) {
-        _business = businesses.first;
-        final hours = await BusinessHoursTable().queryRows(
-          queryFn: (q) => q.eq('business_id', _business!.id).order('day_of_week'),
-        );
-
-        // Initialize missing days
-        final existingDays = hours.map((h) => h.dayOfWeek).toSet();
-        for (int i = 0; i < 7; i++) {
-          if (!existingDays.contains(i)) {
-            hours.add(BusinessHoursRow({
-              'business_id': _business!.id,
-              'day_of_week': i,
-              'open_time': '09:00:00',
-              'close_time': '18:00:00',
-              'is_closed': false,
-            }));
-          }
-        }
-        hours.sort((a, b) => a.dayOfWeek.compareTo(b.dayOfWeek));
-
-        if (mounted) {
-          setState(() {
-            _hours = hours;
-            _loading = false;
-          });
-        }
-      } else {
-        if (mounted) {
-          setState(() => _loading = false);
-        }
+      final shop = await BusinessService.instance.requireOwned(currentUser);
+      final hours = await BusinessService.instance.hours(currentUser);
+      if (mounted) {
+        setState(() {
+          _business = shop;
+          _hours = hours;
+          _loading = false;
+        });
       }
     } catch (e) {
       AppLogger.error('Error fetching business hours', e);
       if (mounted) {
-        setState(() => _loading = false);
+        setState(() {
+          _business = null;
+          _loading = false;
+        });
       }
     }
   }
@@ -103,31 +80,29 @@ class _ManageHoursWidgetState extends State<ManageHoursWidget> {
     setState(() => _loading = true);
 
     try {
-      final List<Map<String, dynamic>> data = _hours.map((row) {
-        final rowId = row.data['id'];
-        return {
-          if (rowId != null) 'id': rowId,
-          'business_id': row.businessId,
-          'day_of_week': row.dayOfWeek,
-          'open_time': row.openTime?.toIso8601String(),
-          'close_time': row.closeTime?.toIso8601String(),
-          'is_closed': row.isClosed,
-        };
-      }).toList();
-
-      await BusinessHoursTable().upsert(data);
+      await BusinessService.instance.saveHours(
+        userId: currentUserUid,
+        hours: _hours,
+      );
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Business hours updated successfully')),
         );
       }
-      _fetchData(); // Refresh to get IDs for new rows
+      _fetchData();
     } catch (e) {
       AppLogger.error('Error saving hours', e);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to update business hours')),
+          SnackBar(
+            content: Text(
+              AppLogger.userFacingMessage(
+                e,
+                fallback: 'Unable to update business hours. Please try again.',
+              ),
+            ),
+          ),
         );
         setState(() => _loading = false);
       }
@@ -177,65 +152,32 @@ class _ManageHoursWidgetState extends State<ManageHoursWidget> {
       child: Scaffold(
         key: scaffoldKey,
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-        appBar: AppBar(
-          backgroundColor: FlutterFlowTheme.of(context).secondaryBackground,
-          automaticallyImplyLeading: false,
-          leading: FlutterFlowIconButton(
-            borderColor: Colors.transparent,
-            borderRadius: 30.0,
-            borderWidth: 1.0,
-            buttonSize: 60.0,
-            icon: Icon(
-              Icons.arrow_back_rounded,
-              color: FlutterFlowTheme.of(context).primaryText,
-              size: 30.0,
-            ),
-            onPressed: () async {
-              context.pop();
-            },
-          ),
-          title: Text(
-            'Business Hours',
-            style: FlutterFlowTheme.of(context).headlineSmall.override(
-                  font: GoogleFonts.inter(),
-                  letterSpacing: 0.0,
-                ),
-          ),
+        appBar: degloorAppBar(
+          context,
+          title: 'Business Hours',
           actions: [
-            Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(0.0, 8.0, 16.0, 8.0),
-              child: FFButtonWidget(
-                onPressed: _loading ? null : _saveHours,
-                text: 'Save',
-                options: FFButtonOptions(
-                  width: 80.0,
-                  height: 40.0,
-                  padding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-                  iconPadding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-                  color: FlutterFlowTheme.of(context).primary,
-                  textStyle: FlutterFlowTheme.of(context).titleSmall.override(
-                        font: GoogleFonts.inter(),
-                        color: Colors.white,
-                        fontSize: 14.0,
-                        letterSpacing: 0.0,
-                      ),
-                  elevation: 2.0,
-                  borderSide: const BorderSide(
-                    color: Colors.transparent,
-                  ),
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-              ),
+            TextButton(
+              onPressed: _loading ? null : _saveHours,
+              child: const Text('Save'),
             ),
           ],
-          centerTitle: false,
-          elevation: 0.0,
         ),
         body: _loading
             ? const Center(child: CircularProgressIndicator())
             : _business == null
-                ? const Center(child: Text('No business found for this account.'))
-                : SingleChildScrollView(
+                ? EmptyStateView(
+                    icon: Icons.storefront_outlined,
+                    title: 'No shop yet',
+                    description:
+                        'Register your business to set Degloor opening hours.',
+                    buttonText: 'Register business',
+                    onTap: () => context.pushNamed('BusinessRegistration'),
+                  )
+                : Align(
+                    alignment: Alignment.topCenter,
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 520),
+                      child: SingleChildScrollView(
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Column(
@@ -334,8 +276,8 @@ class _ManageHoursWidgetState extends State<ManageHoursWidget> {
                                                                     .of(context)
                                                                 .labelSmall),
                                                         Text(
-                                                          row.openTime?.toString() ??
-                                                              'Select',
+                                                          BusinessService.timeLabel(
+                                                              row.openTime),
                                                           style: FlutterFlowTheme
                                                                   .of(context)
                                                               .bodyMedium,
@@ -372,8 +314,8 @@ class _ManageHoursWidgetState extends State<ManageHoursWidget> {
                                                                     .of(context)
                                                                 .labelSmall),
                                                         Text(
-                                                          row.closeTime?.toString() ??
-                                                              'Select',
+                                                          BusinessService.timeLabel(
+                                                              row.closeTime),
                                                           style: FlutterFlowTheme
                                                                   .of(context)
                                                               .bodyMedium,
@@ -394,6 +336,8 @@ class _ManageHoursWidgetState extends State<ManageHoursWidget> {
                           ),
                         ],
                       ),
+                    ),
+                  ),
                     ),
                   ),
       ),

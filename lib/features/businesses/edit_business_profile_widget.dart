@@ -1,5 +1,9 @@
+import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
+import 'package:degloor_one/backend/business_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/components/cached_remote_image.dart';
+import 'package:degloor_one/components/degloor_app_bar.dart';
+import 'package:degloor_one/core/error_handler.dart';
 import 'package:degloor_one/components/slider/slider_widget.dart';
 import 'package:degloor_one/components/switch_component/switch_component_widget.dart';
 import 'package:degloor_one/components/text_field/text_field_widget.dart';
@@ -9,7 +13,6 @@ import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
 import 'package:degloor_one/shared/discovery_radius.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'edit_business_profile_model.dart';
 export 'edit_business_profile_model.dart';
@@ -57,12 +60,12 @@ class _EditBusinessProfileWidgetState extends State<EditBusinessProfileWidget> {
 
     setState(() => _isUploading = true);
     try {
-      final fileName = 'business_${widget.business.id}_${DateTime.now().millisecondsSinceEpoch}.jpg';
-      final path = 'businesses/${widget.business.id}/$fileName';
       final bytes = await image.readAsBytes();
-
-      await SupaFlow.client.storage.from('product-images').uploadBinary(path, bytes);
-      final url = SupaFlow.client.storage.from('product-images').getPublicUrl(path);
+      final url = await BusinessService.instance.uploadPublicImage(
+        folder: 'businesses',
+        businessId: widget.business.id,
+        bytes: bytes,
+      );
 
       setState(() {
         _uploadedImageUrl = url;
@@ -70,7 +73,16 @@ class _EditBusinessProfileWidgetState extends State<EditBusinessProfileWidget> {
       });
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Upload failed: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              AppLogger.userFacingMessage(
+                e,
+                fallback: 'Unable to upload the image. Please try again.',
+              ),
+            ),
+          ),
+        );
       }
       setState(() => _isUploading = false);
     }
@@ -91,20 +103,19 @@ class _EditBusinessProfileWidgetState extends State<EditBusinessProfileWidget> {
           sliderPercentFromRadius(kDefaultDiscoveryRadiusKm);
       final radiusKm = radiusFromSliderPercent(sliderVal);
 
-      await BusinessesTable().update(
-        data: {
-          'name': name,
-          'owner_name': _model.textFieldModel2.inputTextController?.text,
-          'description': _model.textFieldModel3.inputTextController?.text,
-          'phone_number': _model.textFieldModel4.inputTextController?.text,
-          'whatsapp_number': _model.switchModel.switchValue == true
-              ? _model.textFieldModel4.inputTextController?.text
-              : _model.textFieldModel5.inputTextController?.text,
-          'address_text': _model.textFieldModel6.inputTextController?.text,
-          'discovery_radius': radiusKm,
-          'image_url': _uploadedImageUrl,
-        },
-        matchingRows: (q) => q.eq('id', widget.business.id),
+      await BusinessService.instance.updateProfile(
+        userId: currentUserUid,
+        businessId: widget.business.id,
+        name: name,
+        ownerName: _model.textFieldModel2.inputTextController?.text,
+        description: _model.textFieldModel3.inputTextController?.text,
+        phoneNumber: _model.textFieldModel4.inputTextController?.text,
+        whatsappNumber: _model.switchModel.switchValue == true
+            ? _model.textFieldModel4.inputTextController?.text
+            : _model.textFieldModel5.inputTextController?.text,
+        addressText: _model.textFieldModel6.inputTextController?.text,
+        discoveryRadius: radiusKm,
+        imageUrl: _uploadedImageUrl,
       );
 
       if (mounted) {
@@ -116,7 +127,15 @@ class _EditBusinessProfileWidgetState extends State<EditBusinessProfileWidget> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error updating profile: $e'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text(
+              AppLogger.userFacingMessage(
+                e,
+                fallback: 'Unable to update the shop. Please try again.',
+              ),
+            ),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     } finally {
@@ -140,35 +159,13 @@ class _EditBusinessProfileWidgetState extends State<EditBusinessProfileWidget> {
       child: Scaffold(
         key: scaffoldKey,
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-        appBar: AppBar(
-          backgroundColor: FlutterFlowTheme.of(context).secondaryBackground,
-          automaticallyImplyLeading: false,
-          leading: FlutterFlowIconButton(
-            borderColor: Colors.transparent,
-            borderRadius: 30.0,
-            borderWidth: 1.0,
-            buttonSize: 60.0,
-            icon: Icon(
-              Icons.arrow_back_rounded,
-              color: FlutterFlowTheme.of(context).primaryText,
-              size: 30.0,
-            ),
-            onPressed: () => context.safePop(),
-          ),
-          title: Text(
-            'Edit Business Profile',
-            style: FlutterFlowTheme.of(context).headlineMedium.override(
-                  font: GoogleFonts.inter(),
-                  color: FlutterFlowTheme.of(context).primaryText,
-                  fontSize: 22.0,
-                ),
-          ),
-          actions: const [],
-          centerTitle: false,
-          elevation: 0.0,
-        ),
+        appBar: degloorAppBar(context, title: 'Edit Business Profile'),
         body: SafeArea(
-          child: SingleChildScrollView(
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 520),
+              child: SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.all(24.0),
               child: Column(
@@ -333,6 +330,8 @@ class _EditBusinessProfileWidgetState extends State<EditBusinessProfileWidget> {
                   ),
                 ],
               ),
+            ),
+          ),
             ),
           ),
         ),

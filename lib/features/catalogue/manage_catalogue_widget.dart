@@ -1,6 +1,9 @@
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
-import 'package:degloor_one/components/cached_remote_image.dart';
+import 'package:degloor_one/backend/business_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/components/cached_remote_image.dart';
+import 'package:degloor_one/components/degloor_app_bar.dart';
+import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_icon_button.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
@@ -57,9 +60,8 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
   Future<void> _fetchBusinessCategories() async {
     if (_business == null) return;
     try {
-      final categories = await ProductCategoriesTable().queryRows(
-        queryFn: (q) => q.eq('business_id', _business!.id).order('name'),
-      );
+      final categories =
+          await BusinessService.instance.productCategories(currentUserUid);
       setState(() {
         _businessCategories = categories;
       });
@@ -76,20 +78,16 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
     }
 
     try {
-      final businesses = await BusinessesTable().queryRows(
-        queryFn: (q) => q.eq('owner_id', currentUser),
-      );
-
-      if (businesses.isNotEmpty) {
-        _business = businesses.first;
-        await _fetchProducts();
-        await _fetchBusinessCategories();
-      } else {
-        setState(() => _loading = false);
-      }
+      final shop = await BusinessService.instance.requireOwned(currentUser);
+      _business = shop;
+      await _fetchProducts();
+      await _fetchBusinessCategories();
     } catch (e) {
       AppLogger.error('Error fetching business', e);
-      setState(() => _loading = false);
+      setState(() {
+        _business = null;
+        _loading = false;
+      });
     }
   }
 
@@ -97,9 +95,7 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
     if (_business == null) return;
     setState(() => _loading = true);
     try {
-      final products = await ProductsTable().queryRows(
-        queryFn: (q) => q.eq('business_id', _business!.id).order('created_at', ascending: false),
-      );
+      final products = await BusinessService.instance.products(currentUserUid);
       setState(() {
         _products = products;
         _loading = false;
@@ -117,12 +113,12 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
 
     setState(() => _model.isUploading = true);
     try {
-      final fileName = '${DateTime.now().millisecondsSinceEpoch}.jpg';
-      final path = 'products/${_business!.id}/$fileName';
       final bytes = await image.readAsBytes();
-
-      await SupaFlow.client.storage.from('product-images').uploadBinary(path, bytes);
-      final url = SupaFlow.client.storage.from('product-images').getPublicUrl(path);
+      final url = await BusinessService.instance.uploadPublicImage(
+        folder: 'products',
+        businessId: _business!.id,
+        bytes: bytes,
+      );
 
       setState(() {
         _model.uploadedImageUrl = url;
@@ -130,7 +126,16 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
       });
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Upload failed: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              AppLogger.userFacingMessage(
+                e,
+                fallback: 'Unable to upload the image. Please try again.',
+              ),
+            ),
+          ),
+        );
       }
       setState(() => _model.isUploading = false);
     }
@@ -163,37 +168,15 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
 
     setState(() => _loading = true);
     try {
-      String? categoryId;
-      if (categoryName.isNotEmpty) {
-        final normalizedName = categoryName.trim().toLowerCase();
-        final existingCategories = await ProductCategoriesTable().queryRows(
-          queryFn: (q) => q
-              .eq('business_id', _business!.id)
-              .ilike('name', normalizedName),
-        );
-        if (existingCategories.isNotEmpty) {
-          categoryId = existingCategories.first.id;
-        } else {
-          final newCategory = await ProductCategoriesTable().insert({
-            'business_id': _business!.id,
-            'name': normalizedName,
-            'created_at': DateTime.now().toIso8601String(),
-          });
-          categoryId = newCategory.id;
-        }
-      }
-
-      await ProductsTable().insert({
-        'business_id': _business!.id,
-        'category_id': categoryId,
-        'name': name,
-        'price': price,
-        'image_url': _model.uploadedImageUrl,
-        'is_available': true,
-        'stock_quantity': stock,
-        'track_inventory': _model.trackInventory,
-        'created_at': DateTime.now().toIso8601String(),
-      });
+      await BusinessService.instance.addProduct(
+        userId: currentUserUid,
+        name: name,
+        price: price,
+        categoryName: categoryName,
+        imageUrl: _model.uploadedImageUrl,
+        stockQuantity: stock,
+        trackInventory: _model.trackInventory,
+      );
 
       _model.productNameTextController?.clear();
       _model.productPriceTextController?.clear();
@@ -216,7 +199,12 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error adding product: $e'),
+            content: Text(
+              AppLogger.userFacingMessage(
+                e,
+                fallback: 'Unable to add the product. Please try again.',
+              ),
+            ),
             backgroundColor: FlutterFlowTheme.of(context).error,
           ),
         );
@@ -228,8 +216,9 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
   Future<void> _deleteProduct(String productId) async {
     setState(() => _loading = true);
     try {
-      await ProductsTable().delete(
-        matchingRows: (q) => q.eq('id', productId),
+      await BusinessService.instance.deleteProduct(
+        userId: currentUserUid,
+        productId: productId,
       );
       await _fetchProducts();
       if (mounted) {
@@ -241,7 +230,12 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error deleting product: $e'),
+            content: Text(
+              AppLogger.userFacingMessage(
+                e,
+                fallback: 'Unable to delete the product. Please try again.',
+              ),
+            ),
             backgroundColor: FlutterFlowTheme.of(context).error,
           ),
         );
@@ -252,15 +246,23 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
 
   Future<void> _updateStock(ProductsRow product, int newStock) async {
     try {
-      await ProductsTable().update(
-        data: {'stock_quantity': newStock},
-        matchingRows: (q) => q.eq('id', product.id),
+      await BusinessService.instance.updateStock(
+        userId: currentUserUid,
+        productId: product.id,
+        stockQuantity: newStock,
       );
       await _fetchProducts();
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error updating stock: $e')),
+          SnackBar(
+            content: Text(
+              AppLogger.userFacingMessage(
+                e,
+                fallback: 'Unable to update stock. Please try again.',
+              ),
+            ),
+          ),
         );
       }
     }
@@ -324,9 +326,12 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
                               try {
                                 final b = await img.readAsBytes();
                                 final ext = img.path.split('.').last;
-                                final path = 'products/${_business!.id}/edit_${DateTime.now().millisecondsSinceEpoch}.$ext';
-                                await SupaFlow.client.storage.from('product-images').uploadBinary(path, b);
-                                final url = SupaFlow.client.storage.from('product-images').getPublicUrl(path);
+                                final url = await BusinessService.instance.uploadPublicImage(
+                                  folder: 'products',
+                                  businessId: _business!.id,
+                                  bytes: b,
+                                  extension: ext,
+                                );
                                 setModalState(() {
                                   currentImageUrl = url;
                                   isEditingUploading = false;
@@ -379,15 +384,14 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
                     final stock = int.tryParse(stockController.text) ?? 0;
                     if (price == null) return;
 
-                    await ProductsTable().update(
-                      data: {
-                        'name': nameController.text,
-                        'price': price,
-                        'stock_quantity': stock,
-                        'track_inventory': trackInv,
-                        'image_url': currentImageUrl,
-                      },
-                      matchingRows: (q) => q.eq('id', product.id),
+                    await BusinessService.instance.updateProduct(
+                      userId: currentUserUid,
+                      productId: product.id,
+                      name: nameController.text,
+                      price: price,
+                      stockQuantity: stock,
+                      trackInventory: trackInv,
+                      imageUrl: currentImageUrl,
                     );
                     if (mounted) {
                       Navigator.pop(context);
@@ -428,35 +432,24 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
       child: Scaffold(
         key: scaffoldKey,
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-        appBar: AppBar(
-          backgroundColor: FlutterFlowTheme.of(context).primary,
-          title: Text(
-            'Manage Catalogue',
-            style: FlutterFlowTheme.of(context).headlineMedium.override(
-                  font: GoogleFonts.inter(),
-                  color: Colors.white,
-                  fontSize: 22.0,
-                ),
-          ),
-          actions: const [],
-          centerTitle: false,
-          elevation: 2.0,
-        ),
+        appBar: degloorAppBar(context, title: 'Manage Catalogue'),
         body: SafeArea(
-          child: Padding(
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 520),
+              child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
                 if (_business == null && !_loading)
-                  Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(24.0),
-                      child: Text(
-                        'No business found for this account. Please register your business first.',
-                        textAlign: TextAlign.center,
-                        style: FlutterFlowTheme.of(context).bodyMedium,
-                      ),
-                    ),
+                  EmptyStateView(
+                    icon: Icons.storefront_outlined,
+                    title: 'No shop yet',
+                    description:
+                        'Register your business to add milk, rice, and other Degloor products.',
+                    buttonText: 'Register business',
+                    onTap: () => context.pushNamed('BusinessRegistration'),
                   )
                 else
                   Expanded(
@@ -693,12 +686,12 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
                         if (_loading)
                           const Center(child: CircularProgressIndicator())
                         else if (_products.isEmpty)
-                          Expanded(
-                            child: Center(
-                              child: Text(
-                                'No products in catalogue yet.',
-                                style: FlutterFlowTheme.of(context).labelMedium,
-                              ),
+                          const Expanded(
+                            child: EmptyStateView(
+                              icon: Icons.inventory_2_outlined,
+                              title: 'No products yet',
+                              description:
+                                  'Add an item above to start your Degloor catalogue.',
                             ),
                           )
                         else
@@ -847,6 +840,8 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
                     ),
                   ),
               ],
+            ),
+          ),
             ),
           ),
         ),
