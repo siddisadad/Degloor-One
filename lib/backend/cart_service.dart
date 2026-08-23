@@ -7,6 +7,7 @@ import 'package:degloor_one/core/api/cart_api.dart';
 import 'package:degloor_one/core/error_handler.dart';
 import 'package:degloor_one/shared/join_rows.dart';
 import 'package:degloor_one/shared/rpc_row.dart';
+import 'package:degloor_one/shared/shopping_cart.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
 class CartAddResult {
@@ -344,11 +345,12 @@ class CartService {
     await SupaFlow.client.rpc('clear_cart');
   }
 
-  static Future<List<CartsRow>> cartsForUser(String userId) {
-    return CartsTable().queryRows(
+  static Future<List<ShoppingCart>> cartsForUser(String userId) async {
+    final rows = await CartsTable().queryRows(
       queryFn: (q) =>
           q.eq('user_id', userId).order('created_at', ascending: false),
     );
+    return rows.map(ShoppingCart.fromRow).toList();
   }
 
   static Future<List<CartLine>> itemsForCart(String cartId) async {
