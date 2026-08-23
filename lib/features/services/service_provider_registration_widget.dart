@@ -1,10 +1,12 @@
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
+import 'package:degloor_one/backend/service_marketplace_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/components/degloor_app_bar.dart';
+import 'package:degloor_one/core/error_handler.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:degloor_one/features/services/service_provider_registration_model.dart';
 export 'package:degloor_one/features/services/service_provider_registration_model.dart';
 
@@ -30,9 +32,7 @@ class _ServiceProviderRegistrationWidgetState
   void initState() {
     super.initState();
     _model = createModel(context, () => ServiceProviderRegistrationModel());
-    _categoriesFuture = ServiceCategoriesTable().queryRows(
-      queryFn: (q) => q.order('name', ascending: true),
-    );
+    _categoriesFuture = ServiceMarketplaceService.instance.categories();
   }
 
   Future<void> _submitRegistration() async {
@@ -45,14 +45,13 @@ class _ServiceProviderRegistrationWidgetState
       }
 
       try {
-        await ServiceProvidersTable().insert({
-          'user_id': currentUserUid,
-          'category_id': _model.categoryValue,
-          'experience_years': int.tryParse(_model.experienceTextController!.text),
-          'hourly_rate': double.tryParse(_model.rateTextController!.text),
-          'bio': _model.bioTextController!.text,
-          'is_verified': false,
-        });
+        await ServiceMarketplaceService.instance.register(
+          userId: currentUserUid,
+          categoryId: _model.categoryValue!,
+          experienceYears: _model.experienceTextController!.text,
+          hourlyRate: _model.rateTextController!.text,
+          bio: _model.bioTextController!.text,
+        );
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -66,7 +65,14 @@ class _ServiceProviderRegistrationWidgetState
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error submitting registration: $e'), backgroundColor: Colors.red),
+            SnackBar(
+              content: Text(
+                AppLogger.userFacingMessage(
+                  e,
+                  fallback: 'Unable to submit registration. Please try again.',
+                ),
+              ),
+            ),
           );
         }
       }
@@ -89,22 +95,13 @@ class _ServiceProviderRegistrationWidgetState
       child: Scaffold(
         key: scaffoldKey,
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-        appBar: AppBar(
-          backgroundColor: FlutterFlowTheme.of(context).primary,
-          title: Text(
-            'Join as a Provider',
-            style: FlutterFlowTheme.of(context).headlineMedium.override(
-                  font: GoogleFonts.inter(),
-                  color: Colors.white,
-                  fontSize: 22.0,
-                ),
-          ),
-          actions: const [],
-          centerTitle: false,
-          elevation: 2.0,
-        ),
+        appBar: degloorAppBar(context, title: 'Join as a Provider'),
         body: SafeArea(
-          child: SingleChildScrollView(
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 520),
+              child: SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.all(24.0),
               child: Form(
@@ -215,6 +212,8 @@ class _ServiceProviderRegistrationWidgetState
                   ],
                 ),
               ),
+            ),
+          ),
             ),
           ),
         ),

@@ -1,10 +1,12 @@
 import 'package:degloor_one/backend/service_marketplace_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/page_query.dart';
-import 'package:degloor_one/components/category_item/category_item_widget.dart';
+import 'package:degloor_one/components/degloor_app_bar.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
+import 'package:degloor_one/components/modern/modern_category_item.dart';
 import 'package:degloor_one/components/supabase_unreachable_banner.dart';
 import 'package:degloor_one/components/request_service_sheet/request_service_sheet_widget.dart';
+import 'package:degloor_one/core/degloor_theme.dart';
 import 'package:degloor_one/features/services/service_provider_display.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
@@ -117,35 +119,29 @@ class _ServicesWidgetState extends State<ServicesWidget> {
       },
       child: Scaffold(
         key: scaffoldKey,
-        backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-        appBar: AppBar(
-          backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-          title: Text(
-            'Find local services',
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: FlutterFlowTheme.of(context).headlineMedium.override(
-                  font: GoogleFonts.inter(),
-                  color: FlutterFlowTheme.of(context).primaryText,
-                  fontSize: 22.0,
-                  letterSpacing: 0.0,
-                ),
-          ),
+        backgroundColor: DegloorTheme.background,
+        appBar: degloorAppBar(
+          context,
+          title: 'Find local services',
+          showBack: false,
           actions: [
             IconButton(
               tooltip: 'Offer a service',
-              onPressed: () => context.pushNamed('ServiceProviderRegistration'),
-              icon: Icon(
+              onPressed: () =>
+                  context.pushNamed('ServiceProviderRegistration'),
+              icon: const Icon(
                 Icons.add_business_outlined,
-                color: FlutterFlowTheme.of(context).primary,
+                color: DegloorTheme.primary,
               ),
             ),
           ],
-          centerTitle: false,
-          elevation: 0.0,
         ),
         body: SafeArea(
-          child: Column(
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 520),
+              child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               if (!kUseShowcaseData)
@@ -154,17 +150,11 @@ class _ServicesWidgetState extends State<ServicesWidget> {
                   child: SupabaseUnreachableBanner(),
                 ),
               Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(16.0, 12.0, 16.0, 12.0),
-                child: Text(
-                  'Categories',
-                  style: FlutterFlowTheme.of(context).titleLarge.override(
-                        font: GoogleFonts.inter(fontWeight: FontWeight.w700),
-                        letterSpacing: 0.0,
-                      ),
-                ),
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+                child: Text('Categories', style: DegloorTheme.headingMedium),
               ),
               SizedBox(
-                height: 100.0,
+                height: 118,
                 child: FutureBuilder<List<ServiceCategoriesRow>>(
                   future: _model.categoriesFuture,
                   builder: (context, snapshot) {
@@ -172,7 +162,7 @@ class _ServicesWidgetState extends State<ServicesWidget> {
                       return Center(
                         child: Text(
                           'Could not load categories.',
-                          style: FlutterFlowTheme.of(context).bodySmall,
+                          style: DegloorTheme.bodySmall,
                         ),
                       );
                     }
@@ -180,24 +170,35 @@ class _ServicesWidgetState extends State<ServicesWidget> {
                       return const Center(child: CircularProgressIndicator());
                     }
                     final categories = snapshot.data!;
+                    if (categories.isEmpty) {
+                      return const Center(
+                        child: Text('No service categories yet'),
+                      );
+                    }
                     return ListView.separated(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
                       scrollDirection: Axis.horizontal,
                       itemCount: categories.length,
-                      separatorBuilder: (context, index) => const SizedBox(width: 12.0),
+                      separatorBuilder: (_, __) => const SizedBox(width: 12),
                       itemBuilder: (context, index) {
                         final category = categories[index];
-                        final isSelected = _model.selectedCategoryId == category.id;
-                        return InkWell(
-                          onTap: () => _onCategorySelected(category.id),
-                          child: Container(
-                            decoration: isSelected ? BoxDecoration(
-                              borderRadius: BorderRadius.circular(12.0),
-                              border: Border.all(color: FlutterFlowTheme.of(context).primary, width: 2.0),
-                            ) : null,
-                            child: CategoryItemWidget(
+                        final isSelected =
+                            _model.selectedCategoryId == category.id;
+                        return SizedBox(
+                          width: 84,
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(
+                                  DegloorTheme.radiusMD),
+                              border: isSelected
+                                  ? Border.all(
+                                      color: DegloorTheme.primary, width: 2)
+                                  : null,
+                            ),
+                            child: ModernCategoryItem(
                               label: category.name,
                               icon: getIconFromData(category.iconName),
+                              onTap: () => _onCategorySelected(category.id),
                             ),
                           ),
                         );
@@ -207,14 +208,9 @@ class _ServicesWidgetState extends State<ServicesWidget> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(16.0, 16.0, 16.0, 12.0),
-                child: Text(
-                  'Service providers',
-                  style: FlutterFlowTheme.of(context).titleLarge.override(
-                        font: GoogleFonts.inter(fontWeight: FontWeight.w700),
-                        letterSpacing: 0.0,
-                      ),
-                ),
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+                child: Text('Service providers',
+                    style: DegloorTheme.headingMedium),
               ),
               Expanded(
                 child: Builder(
@@ -277,16 +273,12 @@ class _ServicesWidgetState extends State<ServicesWidget> {
                           ),
                           child: Container(
                             decoration: BoxDecoration(
-                              color: FlutterFlowTheme.of(context).secondaryBackground,
+                              color: DegloorTheme.cardBackground,
                               borderRadius: BorderRadius.circular(
-                                FlutterFlowTheme.of(context).designToken.radius.lg,
+                                DegloorTheme.radiusMD,
                               ),
-                              border: Border.all(
-                                color: FlutterFlowTheme.of(context).alternate,
-                              ),
-                              boxShadow: [
-                                FlutterFlowTheme.of(context).designToken.shadow.sm,
-                              ],
+                              border: Border.all(color: DegloorTheme.border),
+                              boxShadow: DegloorTheme.softShadow,
                             ),
                             child: Padding(
                               padding: const EdgeInsets.all(12.0),
@@ -367,6 +359,8 @@ class _ServicesWidgetState extends State<ServicesWidget> {
                 ),
               ),
             ],
+              ),
+            ),
           ),
         ),
       ),

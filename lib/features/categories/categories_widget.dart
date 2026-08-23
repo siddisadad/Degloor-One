@@ -1,10 +1,12 @@
+import 'package:degloor_one/backend/discovery_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
-
-import 'package:degloor_one/flutter_flow/flutter_flow_icon_button.dart';
+import 'package:degloor_one/components/degloor_app_bar.dart';
+import 'package:degloor_one/components/empty_state_view.dart';
+import 'package:degloor_one/components/modern/modern_category_item.dart';
+import 'package:degloor_one/core/degloor_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'categories_model.dart';
 export 'categories_model.dart';
 
@@ -29,9 +31,7 @@ class _CategoriesWidgetState extends State<CategoriesWidget> {
   void initState() {
     super.initState();
     _model = createModel(context, () => CategoriesModel());
-    _categoriesFuture = BusinessCategoriesTable().queryRows(
-      queryFn: (q) => q.order('display_order', ascending: true),
-    );
+    _categoriesFuture = DiscoveryService.instance.categories();
   }
 
   Widget getIconFromData(String? iconName) {
@@ -55,11 +55,7 @@ class _CategoriesWidgetState extends State<CategoriesWidget> {
       'coffee_rounded': Icons.coffee_rounded,
     };
 
-    return Icon(
-      iconMap[iconName] ?? Icons.category_rounded,
-      color: FlutterFlowTheme.of(context).primary,
-      size: 32.0,
-    );
+    return Icon(iconMap[iconName] ?? Icons.category_rounded);
   }
 
   @override
@@ -77,109 +73,63 @@ class _CategoriesWidgetState extends State<CategoriesWidget> {
       },
       child: Scaffold(
         key: scaffoldKey,
-        backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-        appBar: AppBar(
-          backgroundColor: FlutterFlowTheme.of(context).secondaryBackground,
-          automaticallyImplyLeading: false,
-          leading: FlutterFlowIconButton(
-            borderColor: Colors.transparent,
-            borderRadius: 30.0,
-            borderWidth: 1.0,
-            buttonSize: 60.0,
-            icon: Icon(
-              Icons.arrow_back_rounded,
-              color: FlutterFlowTheme.of(context).primaryText,
-              size: 30.0,
-            ),
-            onPressed: () async {
-              context.pop();
-            },
-          ),
-          title: Text(
-            'All Categories',
-            style: FlutterFlowTheme.of(context).headlineMedium.override(
-                  font: GoogleFonts.inter(),
-                  color: FlutterFlowTheme.of(context).primaryText,
-                  fontSize: 22.0,
-                ),
-          ),
-          actions: const [],
-          centerTitle: false,
-          elevation: 0.0,
-        ),
+        backgroundColor: DegloorTheme.background,
+        appBar: degloorAppBar(context, title: 'All Categories'),
         body: SafeArea(
-          child: FutureBuilder<List<BusinessCategoriesRow>>(
-            future: _categoriesFuture,
-            builder: (context, snapshot) {
-              if (snapshot.hasError) {
-                return const Center(child: Text('Error loading categories'));
-              }
-              if (!snapshot.hasData) {
-                return Center(
-                  child: CircularProgressIndicator(
-                    color: FlutterFlowTheme.of(context).primary,
-                  ),
-                );
-              }
-              final categories = snapshot.data!;
-              return GridView.builder(
-                padding: const EdgeInsets.all(24.0),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  crossAxisSpacing: 16.0,
-                  mainAxisSpacing: 24.0,
-                  childAspectRatio: 0.8,
-                ),
-                itemCount: categories.length,
-                itemBuilder: (context, index) {
-                  final category = categories[index];
-                  return InkWell(
-                    onTap: () async {
-                      context.pushNamed(
-                        'SearchResults',
-                        queryParameters: {
-                          'categoryId': serializeParam(
-                            category.id,
-                            ParamType.string,
-                          ),
-                        }.withoutNulls,
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 520),
+              child: FutureBuilder<List<BusinessCategoriesRow>>(
+                future: _categoriesFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.hasError) {
+                    return const EmptyStateView(
+                      icon: Icons.category_outlined,
+                      title: 'Unable to load categories',
+                      description: 'Please try again in a moment.',
+                    );
+                  }
+                  if (!snapshot.hasData) {
+                    return Center(
+                      child: CircularProgressIndicator(
+                        color: FlutterFlowTheme.of(context).primary,
+                      ),
+                    );
+                  }
+                  final categories = snapshot.data!;
+                  if (categories.isEmpty) {
+                    return const EmptyStateView(
+                      icon: Icons.category_outlined,
+                      title: 'No categories yet',
+                      description: 'Degloor shop categories will show up here.',
+                    );
+                  }
+                  return GridView.builder(
+                    padding: const EdgeInsets.all(DegloorTheme.spacingLG),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3,
+                      crossAxisSpacing: 16.0,
+                      mainAxisSpacing: 24.0,
+                      childAspectRatio: 0.8,
+                    ),
+                    itemCount: categories.length,
+                    itemBuilder: (context, index) {
+                      final category = categories[index];
+                      return ModernCategoryItem(
+                        label: category.name,
+                        icon: getIconFromData(category.iconName),
+                        onTap: () => context.pushNamed(
+                          'SearchResults',
+                          queryParameters: {'categoryId': category.id},
+                        ),
                       );
                     },
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          width: 64,
-                          height: 64,
-                          decoration: BoxDecoration(
-                            color: FlutterFlowTheme.of(context).secondaryBackground,
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color: FlutterFlowTheme.of(context).alternate,
-                            ),
-                          ),
-                          child: Center(
-                            child: getIconFromData(category.iconName),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          category.name,
-                          textAlign: TextAlign.center,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: FlutterFlowTheme.of(context).labelMedium.override(
-                            font: GoogleFonts.inter(),
-                            color: FlutterFlowTheme.of(context).primaryText,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
                   );
                 },
-              );
-            },
+              ),
+            ),
           ),
         ),
       ),
