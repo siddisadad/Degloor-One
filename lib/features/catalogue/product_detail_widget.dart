@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:degloor_one/backend/cart_service.dart';
 import 'package:degloor_one/backend/shop_service.dart';
-import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/components/cached_remote_image.dart';
+import 'package:degloor_one/shared/catalog_product.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/core/degloor_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
@@ -21,7 +21,7 @@ class ProductDetailWidget extends StatefulWidget {
 }
 
 class _ProductDetailWidgetState extends State<ProductDetailWidget> {
-  Future<ProductsRow?>? _productFuture;
+  Future<CatalogProduct?>? _productFuture;
   int _quantity = 1;
   bool _isAdding = false;
 
@@ -53,7 +53,7 @@ class _ProductDetailWidgetState extends State<ProductDetailWidget> {
       alignment: Alignment.topCenter,
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 520),
-        child: FutureBuilder<ProductsRow?>(
+        child: FutureBuilder<CatalogProduct?>(
           future: _productFuture,
           builder: (context, snapshot) {
             if (!snapshot.hasData &&

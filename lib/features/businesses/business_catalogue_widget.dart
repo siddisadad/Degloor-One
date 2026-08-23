@@ -4,6 +4,7 @@ import 'package:degloor_one/backend/cart_service.dart';
 import 'package:degloor_one/backend/shop_service.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/catalog_product.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_icon_button.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
@@ -176,7 +177,7 @@ class _BusinessCatalogueWidgetState extends State<BusinessCatalogueWidget> with 
     );
   }
 
-  Widget _buildProductList(List<ProductsRow> products) {
+  Widget _buildProductList(List<CatalogProduct> products) {
     return ListView.separated(
       padding: const EdgeInsets.all(DegloorTheme.spacingMD),
       itemCount: products.length,

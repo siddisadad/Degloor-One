@@ -3,6 +3,7 @@ import 'package:degloor_one/backend/repositories/discovery_repository.dart';
 import 'package:degloor_one/backend/shop_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/backend/user_service.dart';
+import 'package:degloor_one/shared/catalog_product.dart';
 import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/shared/shop.dart';
 import 'package:degloor_one/shared/user_profile.dart';
@@ -26,9 +27,14 @@ class DiscoveryService {
     );
   }
 
-  Future<PageResult<ProductsRow>> searchProducts(DiscoverySearch query) async {
+  Future<PageResult<CatalogProduct>> searchProducts(
+    DiscoverySearch query,
+  ) async {
     final rows = await _repository.searchProducts(query);
-    return PageResult(items: rows, hasMore: rows.length >= query.page.limit);
+    return PageResult(
+      items: rows.map(CatalogProduct.fromRow).toList(),
+      hasMore: rows.length >= query.page.limit,
+    );
   }
 
   Future<List<BusinessCategoriesRow>> categories() async {

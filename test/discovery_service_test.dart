@@ -3,6 +3,7 @@ import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/backend/discovery_service.dart';
 import 'package:degloor_one/backend/repositories/discovery_repository.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/catalog_product.dart';
 import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/shared/shop.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
@@ -39,6 +40,21 @@ void main() {
       second.items.map((row) => row.id),
       isNot(contains(first.items.first.id)),
     );
+  });
+
+  test('product search returns catalog products', () async {
+    final page = await DiscoveryService.instance.searchProducts(
+      DiscoverySearch(
+        latitude: ShowcaseCatalog.degloorLat,
+        longitude: ShowcaseCatalog.degloorLng,
+        radiusKm: 15,
+        page: const PageQuery(limit: 5),
+      ),
+    );
+    expect(page.items, isNotEmpty);
+    expect(page.items, everyElement(isA<CatalogProduct>()));
+    expect(page.items, isNot(anyElement(isA<ProductsRow>())));
+    expect(page.items.map((row) => row.id), contains(ShowcaseCatalog.prodMilk));
   });
 
   test('discovery categories and profile use the showcase catalog', () async {

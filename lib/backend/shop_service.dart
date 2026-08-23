@@ -4,6 +4,7 @@ import 'package:degloor_one/backend/notification_service.dart';
 import 'package:degloor_one/backend/repositories/shop_repository.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/core/error_handler.dart';
+import 'package:degloor_one/shared/catalog_product.dart';
 import 'package:degloor_one/shared/marketplace_joins.dart';
 import 'package:degloor_one/shared/shop.dart';
 
@@ -62,9 +63,9 @@ class ShopCatalog {
     grouped: {},
   );
 
-  final List<ProductsRow> products;
+  final List<CatalogProduct> products;
   final List<ProductCategoriesRow> categories;
-  final Map<String, List<ProductsRow>> grouped;
+  final Map<String, List<CatalogProduct>> grouped;
 }
 
 class ShopReviews {
@@ -161,9 +162,11 @@ class ShopService {
 
   Future<ShopCatalog> catalog(String businessId) async {
     if (businessId.isEmpty) return ShopCatalog.empty;
-    final products = await _repository.availableProducts(businessId);
+    final products = (await _repository.availableProducts(businessId))
+        .map(CatalogProduct.fromRow)
+        .toList();
     final categories = await _repository.productCategories(businessId);
-    final grouped = <String, List<ProductsRow>>{};
+    final grouped = <String, List<CatalogProduct>>{};
     for (final product in products) {
       final key = product.categoryId ?? 'Uncategorized';
       grouped.putIfAbsent(key, () => []).add(product);
@@ -175,9 +178,10 @@ class ShopService {
     );
   }
 
-  Future<ProductsRow?> productById(String productId) {
-    if (productId.isEmpty) return Future<ProductsRow?>.value();
-    return _repository.productById(productId);
+  Future<CatalogProduct?> productById(String productId) async {
+    if (productId.isEmpty) return null;
+    final row = await _repository.productById(productId);
+    return row == null ? null : CatalogProduct.fromRow(row);
   }
 
   Future<void> trackEvent({

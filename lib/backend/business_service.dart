@@ -4,6 +4,7 @@ import 'package:degloor_one/backend/repositories/business_repository.dart';
 import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/core/error_handler.dart';
+import 'package:degloor_one/shared/catalog_product.dart';
 import 'package:degloor_one/shared/shop.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
@@ -179,9 +180,10 @@ class BusinessService {
     );
   }
 
-  Future<List<ProductsRow>> products(String userId) async {
+  Future<List<CatalogProduct>> products(String userId) async {
     final shop = await requireOwned(userId);
-    return _repository.productsFor(shop.id);
+    final rows = await _repository.productsFor(shop.id);
+    return rows.map(CatalogProduct.fromRow).toList();
   }
 
   Future<List<ProductCategoriesRow>> productCategories(String userId) async {
@@ -189,7 +191,7 @@ class BusinessService {
     return _repository.productCategoriesFor(shop.id);
   }
 
-  Future<ProductsRow> addProduct({
+  Future<CatalogProduct> addProduct({
     required String userId,
     required String name,
     required double price,
@@ -229,7 +231,7 @@ class BusinessService {
       }
     }
 
-    return _repository.insertProduct({
+    final row = await _repository.insertProduct({
       'business_id': shop.id,
       'category_id': categoryId,
       'name': trimmedName,
@@ -239,6 +241,7 @@ class BusinessService {
       'stock_quantity': stockQuantity,
       'track_inventory': trackInventory,
     });
+    return CatalogProduct.fromRow(row);
   }
 
   Future<void> updateProduct({

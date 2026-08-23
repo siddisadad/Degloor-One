@@ -3,6 +3,7 @@ import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/backend/business_service.dart';
 import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/catalog_product.dart';
 import 'package:degloor_one/shared/shop.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
@@ -45,6 +46,8 @@ void main() {
 
     final products =
         await BusinessService.instance.products(GuestAuthUser.guestUid);
+    expect(products, everyElement(isA<CatalogProduct>()));
+    expect(products, isNot(anyElement(isA<ProductsRow>())));
     expect(products.map((row) => row.id), contains(ShowcaseCatalog.prodMilk));
   });
 
@@ -57,6 +60,8 @@ void main() {
       stockQuantity: 6,
       trackInventory: true,
     );
+    expect(added, isA<CatalogProduct>());
+    expect(added, isNot(isA<ProductsRow>()));
     expect(added.businessId, ShowcaseCatalog.bizPatil);
     expect(added.categoryId, 'pcat-dairy');
     expect(added.price, 40);
