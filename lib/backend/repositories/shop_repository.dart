@@ -1,4 +1,6 @@
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/listing_complaint.dart';
+import 'package:degloor_one/shared/listing_complaint_draft.dart';
 import 'package:degloor_one/shared/marketplace_joins.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
@@ -117,16 +119,18 @@ class ShopRepository {
     return ReviewsTable().insert(data);
   }
 
-  Future<ComplaintsRow> insertComplaint(Map<String, dynamic> data) {
-    return ComplaintsTable().insert(data);
+  Future<ListingComplaint> insertComplaint(ListingComplaintDraft draft) async {
+    final row = await ComplaintsTable().insert(draft.toInsertJson());
+    return ListingComplaint.fromRow(row);
   }
 
-  Future<List<ComplaintsRow>> complaintsForUser(String userId) {
-    if (userId.isEmpty) return Future.value(const []);
-    return ComplaintsTable().queryRows(
+  Future<List<ListingComplaint>> complaintsForUser(String userId) async {
+    if (userId.isEmpty) return const [];
+    final rows = await ComplaintsTable().queryRows(
       queryFn: (q) =>
           q.eq('user_id', userId).order('created_at', ascending: false),
     );
+    return rows.map(ListingComplaint.fromRow).toList();
   }
 
   Future<List<BusinessAnalyticsRow>> analyticsFor(String businessId) {

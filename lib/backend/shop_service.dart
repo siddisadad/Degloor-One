@@ -6,6 +6,7 @@ import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/core/error_handler.dart';
 import 'package:degloor_one/shared/catalog_product.dart';
 import 'package:degloor_one/shared/listing_complaint.dart';
+import 'package:degloor_one/shared/listing_complaint_draft.dart';
 import 'package:degloor_one/shared/marketplace_joins.dart';
 import 'package:degloor_one/shared/product_category.dart';
 import 'package:degloor_one/shared/shop.dart';
@@ -290,20 +291,19 @@ class ShopService {
     if (shop == null) {
       throw Exception('Shop not found');
     }
-    final row = await _repository.insertComplaint({
-      'user_id': userId,
-      'business_id': businessId,
-      'subject': trimmedSubject,
-      'description': trimmedDescription,
-      'status': 'pending',
-    });
-    return ListingComplaint.fromRow(row);
+    return _repository.insertComplaint(
+      ListingComplaintDraft(
+        userId: userId,
+        businessId: businessId,
+        subject: trimmedSubject,
+        description: trimmedDescription,
+      ),
+    );
   }
 
-  Future<List<ListingComplaint>> complaintsForUser(String userId) async {
-    if (userId.isEmpty) return const [];
-    final rows = await _repository.complaintsForUser(userId);
-    return rows.map(ListingComplaint.fromRow).toList();
+  Future<List<ListingComplaint>> complaintsForUser(String userId) {
+    if (userId.isEmpty) return Future.value(const []);
+    return _repository.complaintsForUser(userId);
   }
 
   Future<List<BusinessAnalyticsRow>> eventsFor({
