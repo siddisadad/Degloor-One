@@ -32,4 +32,25 @@ class ShopHours {
       createdAt: row.createdAt,
     );
   }
+
+  /// Postgres TIME text. Default matches the previous hours form.
+  static String sqlTime(DateTime? time) {
+    if (time == null) return '09:00:00';
+    final hour = time.hour.toString().padLeft(2, '0');
+    final minute = time.minute.toString().padLeft(2, '0');
+    return '$hour:$minute:00';
+  }
+
+  /// Table upsert only. [businessId] wins so an owner cannot write
+  /// another shop's hours.
+  Map<String, dynamic> toUpsertJson({required String businessId}) {
+    return {
+      if (id != null && id!.isNotEmpty) 'id': id,
+      'business_id': businessId,
+      'day_of_week': dayOfWeek,
+      'open_time': sqlTime(openTime),
+      'close_time': sqlTime(closeTime),
+      'is_closed': isClosed,
+    };
+  }
 }

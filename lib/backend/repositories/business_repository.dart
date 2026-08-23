@@ -1,5 +1,6 @@
 import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/shop_hours.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
 /// Data access for owner shop, catalogue, and hours. Widgets should go
@@ -100,7 +101,13 @@ class BusinessRepository {
     );
   }
 
-  Future<void> upsertHours(List<Map<String, dynamic>> rows) async {
+  Future<void> upsertHours(
+    List<ShopHours> hours, {
+    required String businessId,
+  }) async {
+    final rows = [
+      for (final hour in hours) hour.toUpsertJson(businessId: businessId),
+    ];
     if (kUseShowcaseData) {
       for (final row in rows) {
         final id = row['id'];
