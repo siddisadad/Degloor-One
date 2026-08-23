@@ -24,65 +24,91 @@ class EmptyStateView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = FlutterFlowTheme.of(context);
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 72,
-              height: 72,
-              decoration: BoxDecoration(
-                color: theme.primary.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(20),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final bounded = constraints.hasBoundedHeight &&
+            constraints.maxHeight.isFinite;
+        final height = bounded ? constraints.maxHeight : double.infinity;
+        final compact = bounded && height < 280;
+        final tight = bounded && height < 360;
+        final pad = compact ? 12.0 : tight ? 16.0 : 32.0;
+        final box = compact ? 48.0 : tight ? 56.0 : 72.0;
+        final iconSize = compact ? 24.0 : tight ? 28.0 : 36.0;
+
+        final content = Padding(
+          padding: EdgeInsets.all(pad),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: box,
+                height: box,
+                decoration: BoxDecoration(
+                  color: theme.primary.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Icon(icon, size: iconSize, color: theme.primary),
               ),
-              child: Icon(icon, size: 36, color: theme.primary),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: theme.headlineSmall.override(
-                fontFamily: GoogleFonts.inter().fontFamily,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            if (description != null) ...[
-              const SizedBox(height: 8),
+              SizedBox(height: compact ? 8 : 16),
               Text(
-                description!,
+                title,
                 textAlign: TextAlign.center,
-                style: theme.bodyMedium.override(
+                style: theme.headlineSmall.override(
                   fontFamily: GoogleFonts.inter().fontFamily,
-                  color: theme.secondaryText,
+                  fontWeight: FontWeight.w700,
+                  fontSize: compact ? 18 : null,
                 ),
               ),
-            ],
-            if (buttonText != null && onTap != null) ...[
-              const SizedBox(height: 24),
-              FFButtonWidget(
-                onPressed: onTap,
-                text: buttonText!,
-                options: FFButtonOptions(
-                  height: 44,
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  color: theme.primary,
-                  textStyle: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w700,
+              if (description != null) ...[
+                const SizedBox(height: 8),
+                Text(
+                  description!,
+                  textAlign: TextAlign.center,
+                  maxLines: compact ? 3 : 8,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.bodyMedium.override(
+                    fontFamily: GoogleFonts.inter().fontFamily,
+                    color: theme.secondaryText,
                   ),
-                  borderRadius: BorderRadius.circular(12),
                 ),
-              ),
+              ],
+              if (buttonText != null && onTap != null) ...[
+                SizedBox(height: compact ? 12 : 24),
+                FFButtonWidget(
+                  onPressed: onTap,
+                  text: buttonText!,
+                  options: FFButtonOptions(
+                    height: compact ? 40 : 44,
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    color: theme.primary,
+                    textStyle: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ],
+              if (footer != null) ...[
+                SizedBox(height: compact ? 12 : 20),
+                footer!,
+              ],
             ],
-            if (footer != null) ...[
-              const SizedBox(height: 20),
-              footer!,
-            ],
-          ],
-        ),
-      ),
+          ),
+        );
+
+        if (!bounded) {
+          return Center(child: content);
+        }
+
+        return SingleChildScrollView(
+          physics: const ClampingScrollPhysics(),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: height),
+            child: Center(child: content),
+          ),
+        );
+      },
     );
   }
 }
