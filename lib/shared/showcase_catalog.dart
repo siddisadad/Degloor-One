@@ -387,7 +387,6 @@ class ShowcaseCatalog {
   static double _rad(double deg) => deg * pi / 180;
 
   static Map<String, List<Map<String, dynamic>>> _seed() {
-    final created = _ago(const Duration(days: 40));
     return {
       'users': [
         _user(guestId, 'guest@local', 'Guest Customer', 'customer',
@@ -418,7 +417,7 @@ class ShowcaseCatalog {
           'name': 'Degloor',
           'state': 'Maharashtra',
           'district': 'Nanded',
-          'created_at': created,
+          'created_at': _ago(const Duration(days: 40)),
         },
       ],
       'business_categories': [
@@ -455,7 +454,7 @@ class ShowcaseCatalog {
           18.5510,
           77.5860,
           4.2,
-          'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80',
+          'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=800&q=80',
         ),
         _biz(
           bizHardware,
@@ -556,7 +555,7 @@ class ShowcaseCatalog {
               'open_time': '09:00:00',
               'close_time': biz == bizMedical ? '23:00:00' : '21:00:00',
               'is_closed': false,
-              'created_at': created,
+              'created_at': _ago(const Duration(days: 40)),
             },
       ],
       'product_categories': [
@@ -600,7 +599,7 @@ class ShowcaseCatalog {
           'Paneer Butter Masala',
           'Creamy restaurant-style curry.',
           180,
-          'https://images.unsplash.com/photo-1545231027-63b6f917b284?auto=format&fit=crop&w=400&q=80',
+          'https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&w=400&q=80',
         ),
         _product(
           'prod-hammer',
@@ -621,7 +620,7 @@ class ShowcaseCatalog {
           'latitude': 18.5518,
           'longitude': 77.5850,
           'is_default': true,
-          'created_at': created,
+          'created_at': _ago(const Duration(days: 40)),
         },
         {
           'id': 'addr-work',
@@ -631,7 +630,7 @@ class ShowcaseCatalog {
           'latitude': 18.5542,
           'longitude': 77.5824,
           'is_default': false,
-          'created_at': created,
+          'created_at': _ago(const Duration(days: 40)),
         },
       ],
       'carts': [
@@ -937,7 +936,7 @@ class ShowcaseCatalog {
           'is_verified': true,
           'current_latitude': 18.5520,
           'current_longitude': 77.5840,
-          'created_at': created,
+          'created_at': _ago(const Duration(days: 40)),
         },
       ],
       'delivery_assignments': [
@@ -1133,3 +1132,4 @@ class ShowcaseCatalog {
     };
   }
 }
+

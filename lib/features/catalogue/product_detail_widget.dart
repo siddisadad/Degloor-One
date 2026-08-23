@@ -32,7 +32,8 @@ class _ProductDetailWidgetState extends State<ProductDetailWidget> {
   }
 
   void _fetchProduct() {
-    _productFuture = ShopService.instance.productById(widget.productId).then((product) {
+    _productFuture =
+        ShopService.instance.productById(widget.productId).then((product) {
       if (product != null) {
         unawaited(
           ShopService.instance.trackEvent(
