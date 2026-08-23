@@ -1,9 +1,10 @@
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
-import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
+import 'package:degloor_one/backend/discovery_service.dart';
+import 'package:degloor_one/backend/order_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
-import 'package:degloor_one/shared/showcase_catalog.dart';
 import 'package:degloor_one/l10n/app_localizations.dart';
 import 'package:degloor_one/components/brand_mark.dart';
+import 'package:degloor_one/components/empty_state_view.dart';
 import '/components/action_tile/action_tile_widget.dart';
 import '/components/completeness_card/completeness_card_widget.dart';
 import '/components/stat_card/stat_card_widget.dart';
@@ -11,7 +12,6 @@ import 'package:degloor_one/flutter_flow/flutter_flow_charts.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_icon_button.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
-import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
 import 'package:degloor_one/core/error_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -58,94 +58,25 @@ class _BusinessDashboardWidgetState extends State<BusinessDashboardWidget> {
     }
 
     try {
-      // 1. Fetch Business
-      final businesses = await BusinessesTable().queryRows(
-        queryFn: (q) => q.eq('owner_id', currentUser),
-      );
-
+      final businesses = await DiscoveryService.instance.ownedBy(currentUser);
       if (businesses.isEmpty) {
         safeSetState(() => _isLoading = false);
         return;
       }
 
-      _business = businesses.first;
-
-      // 2. Fetch Reviews
-      final reviews = await ReviewsTable().queryRows(
-        queryFn: (q) => q.eq('business_id', _business!.id),
-      );
-
-      // 3. Fetch Business Analytics
-      if (kUseShowcaseData) {
-        final events = ShowcaseCatalog.query(
-          'business_analytics',
-          ShowcaseQuery()..eq('business_id', _business!.id),
-        );
-        int views = 0;
-        int calls = 0;
-        int whatsapp = 0;
-        int directions = 0;
-        for (final e in events) {
-          final type = e['event_type'] as String?;
-          if (type == 'PROFILE_VIEW') views++;
-          if (type == 'CALL_CLICK') calls++;
-          if (type == 'WHATSAPP_CLICK') whatsapp++;
-          if (type == 'DIRECTIONS_CLICK') directions++;
-        }
-        final pendingOrders = await OrdersTable().queryRows(
-          queryFn: (q) =>
-              q.eq('business_id', _business!.id).eq('status', 'pending'),
-        );
-        if (!mounted) return;
-        setState(() {
-          _totalReviews = reviews.length;
-          _profileViews = views;
-          _callClicks = calls;
-          _whatsappClicks = whatsapp;
-          _directionsClicks = directions;
-          _pendingOrders = pendingOrders.length;
-          _isLoading = false;
-        });
-        return;
-      }
-      final analytics = await SupaFlow.client
-          .from('business_analytics')
-          .select('event_type')
-          .eq('business_id', _business!.id);
-
-      final List<dynamic> events = analytics as List<dynamic>;
-      int views = 0;
-      int calls = 0;
-      int whatsapp = 0;
-      int directions = 0;
-
-      for (var e in events) {
-        final type = e['event_type'] as String;
-        if (type == 'PROFILE_VIEW') {
-          views++;
-        } else if (type == 'CALL_CLICK') {
-          calls++;
-        } else if (type == 'WHATSAPP_CLICK') {
-          whatsapp++;
-        } else if (type == 'DIRECTIONS_CLICK') {
-          directions++;
-        }
-      }
-
-      // 4. Fetch Pending Orders
-      final pendingOrders = await OrdersTable().queryRows(
-        queryFn: (q) => q.eq('business_id', _business!.id).eq('status', 'pending'),
-      );
-
+      final business = businesses.first;
+      final insights = await DiscoveryService.instance.insightsFor(business.id);
+      final pending = await OrderService.instance.pendingCount(business.id);
       if (!mounted) return;
 
       setState(() {
-        _totalReviews = reviews.length;
-        _profileViews = views;
-        _callClicks = calls;
-        _whatsappClicks = whatsapp;
-        _directionsClicks = directions;
-        _pendingOrders = pendingOrders.length;
+        _business = business;
+        _totalReviews = insights.reviewCount;
+        _profileViews = insights.profileViews;
+        _callClicks = insights.callClicks;
+        _whatsappClicks = insights.whatsappClicks;
+        _directionsClicks = insights.directionsClicks;
+        _pendingOrders = pending;
         _isLoading = false;
       });
     } catch (e) {
@@ -207,22 +138,13 @@ class _BusinessDashboardWidgetState extends State<BusinessDashboardWidget> {
     if (_business == null) {
       return Scaffold(
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text('No business registered with this account.'),
-              const SizedBox(height: 16),
-              FFButtonWidget(
-                onPressed: () => context.pushNamed('BusinessRegistration'),
-                text: 'Register Business',
-                options: FFButtonOptions(
-                  color: FlutterFlowTheme.of(context).primary,
-                  textStyle: const TextStyle(color: Colors.white),
-                ),
-              ),
-            ],
-          ),
+        body: EmptyStateView(
+          icon: Icons.storefront_outlined,
+          title: 'No shop yet',
+          description:
+              'Register your business to see pending orders and Degloor insights.',
+          buttonText: 'Register business',
+          onTap: () => context.pushNamed('BusinessRegistration'),
         ),
       );
     }

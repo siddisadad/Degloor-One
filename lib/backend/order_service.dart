@@ -36,6 +36,14 @@ class OrderService {
     return PageResult(items: rows, hasMore: rows.length >= page.limit);
   }
 
+  Future<int> pendingCount(String businessId) {
+    if (businessId.isEmpty) return Future.value(0);
+    return _repository.countForBusiness(
+      businessId,
+      status: OrderLifecycle.pending,
+    );
+  }
+
   Future<OrdersRow?> findById(String orderId) => _repository.byId(orderId);
 
   Future<OrdersRow?> forCustomer({

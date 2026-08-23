@@ -26,6 +26,17 @@ class OrderRepository {
     );
   }
 
+  Future<int> countForBusiness(
+    String businessId, {
+    required String status,
+  }) async {
+    if (businessId.isEmpty || status.isEmpty) return 0;
+    final rows = await OrdersTable().queryRows(
+      queryFn: (q) => q.eq('business_id', businessId).eq('status', status),
+    );
+    return rows.length;
+  }
+
   Future<OrdersRow?> byId(String orderId) async {
     final rows = await OrdersTable().queryRows(
       queryFn: (q) => q.eq('id', orderId),

@@ -248,4 +248,16 @@ void main() {
     expect(items, isNotEmpty);
     expect(items.first['products'], isA<Map<String, dynamic>>());
   });
+
+  test('pending count is scoped to the shop and pending status', () async {
+    expect(
+      await OrderService.instance.pendingCount(ShowcaseCatalog.bizPatil),
+      1,
+    );
+    expect(
+      await OrderService.instance.pendingCount(ShowcaseCatalog.bizHotel),
+      0,
+    );
+    expect(await OrderService.instance.pendingCount(''), 0);
+  });
 }
