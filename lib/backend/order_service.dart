@@ -7,6 +7,7 @@ import 'package:degloor_one/core/api/api_client.dart';
 import 'package:degloor_one/core/api/order_api.dart';
 import 'package:degloor_one/shared/join_rows.dart';
 import 'package:degloor_one/shared/order_lifecycle.dart';
+import 'package:degloor_one/shared/order_status_change.dart';
 import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/shared/placed_order.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
@@ -136,8 +137,10 @@ class OrderService {
     return row == null ? null : PlacedOrder.fromRow(row);
   }
 
-  Future<List<OrderStatusHistoryRow>> historyFor(String orderId) {
-    return _repository.historyFor(orderId);
+  Future<List<OrderStatusChange>> historyFor(String orderId) async {
+    if (orderId.isEmpty) return const [];
+    final rows = await _repository.historyFor(orderId);
+    return rows.map(OrderStatusChange.fromRow).toList();
   }
 
   Future<List<OrderLine>> itemsWithProducts(String orderId) {

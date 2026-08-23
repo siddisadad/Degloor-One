@@ -8,6 +8,7 @@ import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/join_rows.dart';
 import 'package:degloor_one/shared/order_lifecycle.dart';
+import 'package:degloor_one/shared/order_status_change.dart';
 import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/shared/placed_order.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
@@ -364,5 +365,27 @@ void main() {
       0,
     );
     expect(await OrderService.instance.pendingCount(''), 0);
+  });
+
+  test('historyFor returns domain events for a ready order', () async {
+    final history =
+        await OrderService.instance.historyFor(ShowcaseCatalog.orderReady);
+    expect(history, isNotEmpty);
+    expect(history, everyElement(isA<OrderStatusChange>()));
+    expect(history, isNot(anyElement(isA<OrderStatusHistoryRow>())));
+    expect(
+      history.every((event) => event.orderId == ShowcaseCatalog.orderReady),
+      isTrue,
+    );
+    expect(
+      history.map((event) => event.status),
+      containsAll(['placed', 'accepted', 'ready']),
+    );
+    expect(history.first.notes, isNotEmpty);
+  });
+
+  test('historyFor is empty for unknown orders', () async {
+    expect(await OrderService.instance.historyFor(''), isEmpty);
+    expect(await OrderService.instance.historyFor('order-missing'), isEmpty);
   });
 }
