@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/backend/cart_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/join_rows.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
 void main() {
@@ -14,9 +15,9 @@ void main() {
     expect(kUseShowcaseData, isTrue);
     final items = await CartService.itemsForCart(ShowcaseCatalog.cartGuest);
     expect(items, isNotEmpty);
-    expect(items.first['products'], isA<Map<String, dynamic>>());
+    expect(items.first.product, isA<JoinedProduct>());
     expect(
-      items.any((item) => item['product_id'] == ShowcaseCatalog.prodRice),
+      items.any((item) => item.productId == ShowcaseCatalog.prodRice),
       isTrue,
     );
   });
@@ -24,7 +25,7 @@ void main() {
   test('addProduct increments quantity on the guest cart', () async {
     final before = await CartService.itemsForCart(ShowcaseCatalog.cartGuest);
     final riceBefore = before.firstWhere(
-      (item) => item['product_id'] == ShowcaseCatalog.prodRice,
+      (item) => item.productId == ShowcaseCatalog.prodRice,
     );
 
     final result = await CartService.addProduct(
@@ -36,9 +37,9 @@ void main() {
 
     final after = await CartService.itemsForCart(ShowcaseCatalog.cartGuest);
     final riceAfter = after.firstWhere(
-      (item) => item['product_id'] == ShowcaseCatalog.prodRice,
+      (item) => item.productId == ShowcaseCatalog.prodRice,
     );
-    expect(riceAfter['quantity'], (riceBefore['quantity'] as int) + 1);
+    expect(riceAfter.quantity, riceBefore.quantity + 1);
   });
 
   test('addProduct from another shop asks for replacement', () async {
@@ -52,7 +53,7 @@ void main() {
 
     final items = await CartService.itemsForCart(ShowcaseCatalog.cartGuest);
     expect(
-      items.any((item) => item['product_id'] == ShowcaseCatalog.prodThali),
+      items.any((item) => item.productId == ShowcaseCatalog.prodThali),
       isFalse,
     );
   });
@@ -71,7 +72,7 @@ void main() {
     expect(carts.first.businessId, ShowcaseCatalog.bizHotel);
     final items = await CartService.itemsForCart(carts.first.id);
     expect(
-      items.any((item) => item['product_id'] == ShowcaseCatalog.prodThali),
+      items.any((item) => item.productId == ShowcaseCatalog.prodThali),
       isTrue,
     );
   });
@@ -84,9 +85,9 @@ void main() {
     );
     final items = await CartService.itemsForCart(ShowcaseCatalog.cartGuest);
     final rice = items.firstWhere(
-      (item) => item['product_id'] == ShowcaseCatalog.prodRice,
+      (item) => item.productId == ShowcaseCatalog.prodRice,
     );
-    expect(rice['quantity'], 3);
+    expect(rice.quantity, 3);
 
     await expectLater(
       CartService.updateQuantity(
@@ -109,7 +110,7 @@ void main() {
     );
     final items = await CartService.itemsForCart(ShowcaseCatalog.cartGuest);
     expect(
-      items.any((item) => item['id'] == 'ci-milk'),
+      items.any((item) => item.id == 'ci-milk'),
       isFalse,
     );
 
@@ -129,10 +130,10 @@ void main() {
     );
     expect(
       CartService.checkoutItems([
-        {
+        CartLine.fromJoin({
           'products': {'id': 'prod-x', 'price': 1},
           'quantity': 2,
-        },
+        }),
       ]),
       [
         {'product_id': 'prod-x', 'quantity': 2},

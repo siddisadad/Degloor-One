@@ -5,6 +5,7 @@ import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/core/api/api_client.dart';
 import 'package:degloor_one/core/api/order_api.dart';
+import 'package:degloor_one/shared/join_rows.dart';
 import 'package:degloor_one/shared/order_lifecycle.dart';
 import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
@@ -128,16 +129,8 @@ class OrderService {
     return _repository.historyFor(orderId);
   }
 
-  Future<List<Map<String, dynamic>>> itemsWithProducts(String orderId) async {
-    if (orderId.isEmpty) return const [];
-    if (kUseShowcaseData) {
-      return ShowcaseCatalog.orderItemsWithProducts(orderId);
-    }
-    final items = await SupaFlow.client
-        .from('order_items')
-        .select('*, products(*)')
-        .eq('order_id', orderId);
-    return List<Map<String, dynamic>>.from(items);
+  Future<List<OrderLine>> itemsWithProducts(String orderId) {
+    return _repository.itemsWithProducts(orderId);
   }
 
   Stream<List<OrdersRow>> watchBusiness(String businessId) =>
@@ -210,7 +203,7 @@ class OrderService {
     required String userId,
     required String businessId,
     required String addressId,
-    required List<Map<String, dynamic>> items,
+    required List<CartLine> items,
     String paymentMethod = 'COD',
     String? cartId,
   }) {

@@ -7,6 +7,7 @@ import 'package:degloor_one/backend/order_service.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
+import 'package:degloor_one/shared/join_rows.dart';
 import 'package:flutter/material.dart';
 import 'package:degloor_one/core/error_handler.dart';
 import 'cart_model.dart';
@@ -150,7 +151,7 @@ class _CartWidgetState extends State<CartWidget> {
     }
   }
 
-  Future<void> _placeOrder(List<Map<String, dynamic>> items) async {
+  Future<void> _placeOrder(List<CartLine> items) async {
     if (_model.selectedAddress == null) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please select a delivery address')));
       return;
@@ -232,7 +233,7 @@ class _CartWidgetState extends State<CartWidget> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: FutureBuilder<List<Map<String, dynamic>>>(
+      body: FutureBuilder<List<CartLine>>(
         future: _model.cartItemsFuture,
         builder: (context, snapshot) {
           if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
@@ -276,7 +277,7 @@ class _CartWidgetState extends State<CartWidget> {
                   separatorBuilder: (context, index) => const SizedBox(height: 12),
                   itemBuilder: (context, index) {
                     final item = items[index];
-                    final product = item['products'] as Map<String, dynamic>;
+                    final product = item.product;
                     return Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
@@ -293,8 +294,8 @@ class _CartWidgetState extends State<CartWidget> {
                               width: 70,
                               height: 70,
                               color: DegloorTheme.accent,
-                              child: product['image_url'] != null
-                                  ? Image.network(product['image_url'] as String, fit: BoxFit.cover)
+                              child: product?.imageUrl != null
+                                  ? Image.network(product!.imageUrl!, fit: BoxFit.cover)
                                   : const Icon(Icons.image_not_supported_rounded, color: DegloorTheme.textSecondary),
                             ),
                           ),
@@ -304,14 +305,14 @@ class _CartWidgetState extends State<CartWidget> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  '${product['name']}',
+                                  product?.name ?? 'Item',
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                   style: DegloorTheme.titleMedium,
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  '₹${product['price']}',
+                                  '₹${product?.price ?? 0}',
                                   style: DegloorTheme.bodyLarge.copyWith(
                                     color: DegloorTheme.primary,
                                     fontWeight: FontWeight.bold,
@@ -327,12 +328,12 @@ class _CartWidgetState extends State<CartWidget> {
                             ),
                             child: Row(
                               children: [
-                                _qtyBtn(Icons.remove, () => _updateQuantity(item['id'], (item['quantity'] as int) - 1)),
+                                _qtyBtn(Icons.remove, () => _updateQuantity(item.id, item.quantity - 1)),
                                 Padding(
                                   padding: const EdgeInsets.symmetric(horizontal: 8),
-                                  child: Text('${item['quantity']}', style: DegloorTheme.titleMedium),
+                                  child: Text('${item.quantity}', style: DegloorTheme.titleMedium),
                                 ),
-                                _qtyBtn(Icons.add, () => _updateQuantity(item['id'], (item['quantity'] as int) + 1)),
+                                _qtyBtn(Icons.add, () => _updateQuantity(item.id, item.quantity + 1)),
                               ],
                             ),
                           ),
