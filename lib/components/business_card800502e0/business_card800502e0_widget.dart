@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -5,9 +7,9 @@ import '/app_state.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:degloor_one/backend/shop_service.dart';
 import 'package:degloor_one/backend/whatsapp_service.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:degloor_one/backend/supabase/analytics.dart';
 import 'business_card800502e0_model.dart';
 export 'business_card800502e0_model.dart';
 
@@ -391,9 +393,11 @@ class _BusinessCard800502e0WidgetState
                                     await launchUrl(url);
                                     // Log Call Click
                                     if (widget.id != null) {
-                                      logBusinessEvent(
-                                        businessId: widget.id!,
-                                        eventType: BusinessAnalyticsEvents.callClick,
+                                      unawaited(
+                                        ShopService.instance.trackEvent(
+                                          businessId: widget.id!,
+                                          eventType: ShopEvents.callClick,
+                                        ),
                                       );
                                     }
                                   }
@@ -419,9 +423,11 @@ class _BusinessCard800502e0WidgetState
                                   );
                                   // Log WhatsApp Click
                                   if (widget.id != null) {
-                                    logBusinessEvent(
-                                      businessId: widget.id!,
-                                      eventType: BusinessAnalyticsEvents.whatsappClick,
+                                    unawaited(
+                                      ShopService.instance.trackEvent(
+                                        businessId: widget.id!,
+                                        eventType: ShopEvents.whatsappClick,
+                                      ),
                                     );
                                   }
                                 }
@@ -445,9 +451,11 @@ class _BusinessCard800502e0WidgetState
                                     await launchUrl(url, mode: LaunchMode.externalApplication);
                                     // Log Directions Click
                                     if (widget.id != null) {
-                                      logBusinessEvent(
-                                        businessId: widget.id!,
-                                        eventType: BusinessAnalyticsEvents.directionsClick,
+                                      unawaited(
+                                        ShopService.instance.trackEvent(
+                                          businessId: widget.id!,
+                                          eventType: ShopEvents.directionsClick,
+                                        ),
                                       );
                                     }
                                   }

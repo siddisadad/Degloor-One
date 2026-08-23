@@ -2,6 +2,9 @@ import 'package:degloor_one/backend/repositories/discovery_repository.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/page_query.dart';
 
+export 'package:degloor_one/backend/repositories/discovery_repository.dart'
+    show DiscoverySearch;
+
 class DiscoveryService {
   DiscoveryService({DiscoveryRepository? repository})
       : _repository = repository ?? DiscoveryRepository();

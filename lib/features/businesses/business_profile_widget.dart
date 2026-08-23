@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/shop_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
@@ -19,7 +21,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:collection/collection.dart';
 import 'package:degloor_one/core/error_handler.dart';
-import 'package:degloor_one/backend/supabase/analytics.dart';
 import 'business_profile_model.dart';
 export 'business_profile_model.dart';
 
@@ -70,9 +71,11 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
       _model.statusMessage = isOpen ? 'Open Now' : 'Closed';
     });
 
-    logBusinessEvent(
-      businessId: bId,
-      eventType: BusinessAnalyticsEvents.profileView,
+    unawaited(
+      ShopService.instance.trackEvent(
+        businessId: bId,
+        eventType: ShopEvents.profileView,
+      ),
     );
     return business;
   }
@@ -213,11 +216,6 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                     }
                     return;
                   }
-
-                  logBusinessEvent(
-                    businessId: business.id,
-                    eventType: BusinessAnalyticsEvents.reviewSubmitted,
-                  );
 
                   if (context.mounted) {
                     Navigator.pop(context);
@@ -570,9 +568,11 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                                           subject: business.name,
                                         );
                                         // Log Share Click
-                                        logBusinessEvent(
-                                          businessId: business.id,
-                                          eventType: BusinessAnalyticsEvents.shareClick,
+                                        unawaited(
+                                          ShopService.instance.trackEvent(
+                                            businessId: business.id,
+                                            eventType: ShopEvents.shareClick,
+                                          ),
                                         );
                                       },
                                           ),
@@ -718,9 +718,11 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                                           if (await canLaunchUrl(url)) {
                                             await launchUrl(url);
                                             // Log Call Click
-                                            logBusinessEvent(
-                                              businessId: business.id,
-                                              eventType: BusinessAnalyticsEvents.callClick,
+                                            unawaited(
+                                              ShopService.instance.trackEvent(
+                                                businessId: business.id,
+                                                eventType: ShopEvents.callClick,
+                                              ),
                                             );
                                           }
                                         } else {
@@ -753,9 +755,11 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                                               'Hello ${business.name}, I found your shop on DEGLOOR ONE app.',
                                         );
                                         // Log WhatsApp Click
-                                        logBusinessEvent(
-                                          businessId: business.id,
-                                          eventType: BusinessAnalyticsEvents.whatsappClick,
+                                        unawaited(
+                                          ShopService.instance.trackEvent(
+                                            businessId: business.id,
+                                            eventType: ShopEvents.whatsappClick,
+                                          ),
                                         );
                                       } else {
                                         ScaffoldMessenger.of(context).showSnackBar(
@@ -789,9 +793,11 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                                           if (await canLaunchUrl(url)) {
                                             await launchUrl(url, mode: LaunchMode.externalApplication);
                                             // Log Directions Click
-                                            logBusinessEvent(
-                                              businessId: business.id,
-                                              eventType: BusinessAnalyticsEvents.directionsClick,
+                                            unawaited(
+                                              ShopService.instance.trackEvent(
+                                                businessId: business.id,
+                                                eventType: ShopEvents.directionsClick,
+                                              ),
                                             );
                                           }
                                         }
