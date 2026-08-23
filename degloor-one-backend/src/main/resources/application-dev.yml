@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/degloor_one}
+    username: ${DB_USERNAME:degloor}
+    password: ${DB_PASSWORD:degloor}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+  flyway:
+    enabled: true
+
+logging:
+  level:
+    com.degloor.one: INFO
+    org.springframework.security: INFO

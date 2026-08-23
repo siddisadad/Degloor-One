@@ -1,6 +1,9 @@
 import 'package:degloor_one/backend/repositories/delivery_repository.dart';
 import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/core/api/api_client.dart';
+import 'package:degloor_one/core/api/delivery_api.dart';
+import 'package:degloor_one/core/api/order_api.dart';
 import 'package:degloor_one/core/error_handler.dart';
 import 'package:degloor_one/shared/order_lifecycle.dart';
 import 'package:degloor_one/shared/page_query.dart';
@@ -97,6 +100,10 @@ class DeliveryService {
     if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
       throw Exception('Invalid coordinates');
     }
+    if (JavaApiConfig.enabled) {
+      await DeliveryApi.updateLocation(latitude: latitude, longitude: longitude);
+      return;
+    }
     if (kUseShowcaseData) {
       final query = ShowcaseQuery();
       if (partnerId != null && partnerId.isNotEmpty) {
@@ -131,6 +138,9 @@ class DeliveryService {
   }
 
   static Future<String?> fetchMyDeliveryOtp(String orderId) async {
+    if (JavaApiConfig.enabled) {
+      return OrderApi.deliveryOtp(orderId);
+    }
     if (kUseShowcaseData) {
       final orders = ShowcaseCatalog.query(
         'orders',
@@ -157,11 +167,32 @@ class DeliveryService {
   }
 
   static Future<void> _rpc(String name, Map<String, dynamic> params) async {
+    if (JavaApiConfig.enabled) {
+      await _applyJavaRpc(name, params);
+      return;
+    }
     if (kUseShowcaseData) {
       _applyShowcaseRpc(name, params);
       return;
     }
     await SupaFlow.client.rpc(name, params: params);
+  }
+
+  static Future<void> _applyJavaRpc(String name, Map<String, dynamic> params) async {
+    if (name == 'confirm_delivery_with_otp') {
+      await DeliveryApi.verifyOtp(
+        orderId: params['p_order_id'] as String,
+        otp: '${params['p_otp']}'.trim(),
+      );
+      return;
+    }
+    if (name == 'accept_delivery_order') {
+      await DeliveryApi.accept(params['p_order_id'] as String);
+      return;
+    }
+    if (name == 'confirm_delivery_pickup') {
+      await DeliveryApi.pickupAssignment('${params['p_assignment_id']}');
+    }
   }
 
   static void _applyShowcaseRpc(String name, Map<String, dynamic> params) {

@@ -2,6 +2,8 @@ import 'package:degloor_one/backend/notification_service.dart';
 import 'package:degloor_one/backend/repositories/order_repository.dart';
 import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/core/api/api_client.dart';
+import 'package:degloor_one/core/api/order_api.dart';
 import 'package:degloor_one/shared/order_lifecycle.dart';
 import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
@@ -94,6 +96,13 @@ class OrderService {
       throw Exception('Cart is empty');
     }
 
+    if (JavaApiConfig.enabled) {
+      final order = await OrderApi.checkout(
+        addressId: addressId,
+        paymentMethod: paymentMethod,
+      );
+      return '${order['id']}';
+    }
     if (kUseShowcaseData) {
       final order = placeShowcaseOrder(
         userId: userId,
@@ -132,6 +141,10 @@ class OrderService {
     required String actorUserId,
     String? reason,
   }) async {
+    if (JavaApiConfig.enabled) {
+      await OrderApi.cancel(orderId, reason: reason);
+      return;
+    }
     if (kUseShowcaseData) {
       _cancelShowcase(
         orderId: orderId,
@@ -155,6 +168,10 @@ class OrderService {
     required String ownerId,
   }) async {
     final status = OrderLifecycle.normalizeStatus(nextStatus);
+    if (JavaApiConfig.enabled) {
+      await OrderApi.ownerStatus(orderId, status);
+      return;
+    }
     if (kUseShowcaseData) {
       _updateShowcaseStatus(
         orderId: orderId,

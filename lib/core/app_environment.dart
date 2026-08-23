@@ -34,10 +34,16 @@ class AppEnvironment {
   static const envFlag = String.fromEnvironment('APP_ENV');
   static const bypassAuthFlag = String.fromEnvironment('BYPASS_AUTH');
   static const showcaseDataFlag = String.fromEnvironment('SHOWCASE_DATA');
+  static const javaApiBaseUrlFlag = String.fromEnvironment('JAVA_API_BASE_URL');
 
   static AppFlavor? _flavorOverride;
   static bool? _bypassOverride;
   static bool? _showcaseOverride;
+
+  /// Spring Boot API. Empty means Flutter keeps showcase/Supabase fallbacks.
+  static String get javaApiBaseUrl => javaApiBaseUrlFlag.trim();
+
+  static bool get usesJavaBackend => javaApiBaseUrl.isNotEmpty;
 
   static String get supabaseUrl =>
       supabaseUrlOverride.isNotEmpty ? supabaseUrlOverride : defaultSupabaseUrl;
