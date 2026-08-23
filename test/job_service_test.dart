@@ -3,6 +3,8 @@ import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/backend/job_service.dart';
 import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/job_application.dart';
+import 'package:degloor_one/shared/job_posting.dart';
 import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
@@ -47,14 +49,23 @@ void main() {
       jobType: 'Part-time',
       salaryRange: '₹400/night',
     );
+    expect(posted, isA<JobPosting>());
+    expect(posted, isNot(isA<JobsRow>()));
     expect(posted.title, 'Night stocker');
     expect(posted.isActive, isTrue);
+
+    final owned = await JobService.instance.forBusiness(ShowcaseCatalog.bizPatil);
+    expect(owned.items, everyElement(isA<JobPosting>()));
+    expect(owned.items, isNot(anyElement(isA<JobsRow>())));
+    expect(owned.items.map((job) => job.id), contains(posted.id));
 
     final application = await JobService.instance.apply(
       jobId: posted.id,
       applicantId: ShowcaseCatalog.customer2,
       experienceSummary: 'Stocked a kirana for 6 months.',
     );
+    expect(application, isA<JobApplication>());
+    expect(application, isNot(isA<JobApplicationsRow>()));
     expect(application.status, 'applied');
 
     await expectLater(

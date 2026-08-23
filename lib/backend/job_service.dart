@@ -2,6 +2,8 @@ import 'package:degloor_one/backend/business_service.dart';
 import 'package:degloor_one/backend/repositories/job_repository.dart';
 import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/job_application.dart';
+import 'package:degloor_one/shared/job_posting.dart';
 import 'package:degloor_one/shared/marketplace_joins.dart';
 import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/shared/rpc_row.dart';
@@ -28,15 +30,18 @@ class JobService {
     return PageResult(items: rows, hasMore: rows.length >= page.limit);
   }
 
-  Future<PageResult<JobsRow>> forBusiness(
+  Future<PageResult<JobPosting>> forBusiness(
     String businessId, {
     PageQuery page = const PageQuery(),
   }) async {
     final rows = await _repository.forBusiness(businessId, page: page);
-    return PageResult(items: rows, hasMore: rows.length >= page.limit);
+    return PageResult(
+      items: rows.map(JobPosting.fromRow).toList(),
+      hasMore: rows.length >= page.limit,
+    );
   }
 
-  Future<JobsRow> post({
+  Future<JobPosting> post({
     required String businessId,
     required String posterId,
     required String title,
@@ -53,7 +58,7 @@ class JobService {
       userId: posterId,
       businessId: businessId,
     );
-    return _repository.insert({
+    final row = await _repository.insert({
       'business_id': businessId,
       'poster_id': posterId,
       'title': trimmed,
@@ -63,9 +68,10 @@ class JobService {
       'location_text': locationText,
       'is_active': true,
     });
+    return JobPosting.fromRow(row);
   }
 
-  Future<JobApplicationsRow> apply({
+  Future<JobApplication> apply({
     required String jobId,
     required String applicantId,
     required String experienceSummary,
@@ -88,12 +94,13 @@ class JobService {
       if (existing.isNotEmpty) {
         throw Exception('You have already applied for this job');
       }
-      return _repository.insertApplication({
+      final row = await _repository.insertApplication({
         'job_id': jobId,
         'applicant_id': applicantId,
         'experience_summary': summary,
         'status': 'applied',
       });
+      return JobApplication.fromRow(row);
     }
 
     final response = await SupaFlow.client.rpc(
@@ -107,7 +114,7 @@ class JobService {
     if (row == null) {
       throw Exception('Failed to apply for this job');
     }
-    return JobApplicationsRow(row);
+    return JobApplication.fromRow(JobApplicationsRow(row));
   }
 
   Future<List<JobApplicant>> applicants(String jobId) =>

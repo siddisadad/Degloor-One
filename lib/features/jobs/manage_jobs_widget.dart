@@ -1,7 +1,7 @@
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/business_service.dart';
 import 'package:degloor_one/backend/job_service.dart';
-import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/job_posting.dart';
 import 'package:degloor_one/shared/marketplace_joins.dart';
 import 'package:degloor_one/components/degloor_app_bar.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
@@ -53,7 +53,7 @@ class _ManageJobsWidgetState extends State<ManageJobsWidget> {
     }
   }
 
-  Future<List<JobsRow>> _fetchMyJobs() async {
+  Future<List<JobPosting>> _fetchMyJobs() async {
     if (_model.businessId == null) return [];
     final page = await JobService.instance.forBusiness(_model.businessId!);
     return page.items;
@@ -186,7 +186,7 @@ class _ManageJobsWidgetState extends State<ManageJobsWidget> {
     );
   }
 
-  void _viewApplications(JobsRow job) async {
+  void _viewApplications(JobPosting job) async {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -343,7 +343,7 @@ class _ManageJobsWidgetState extends State<ManageJobsWidget> {
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 520),
-          child: FutureBuilder<List<JobsRow>>(
+          child: FutureBuilder<List<JobPosting>>(
             future: _fetchMyJobs(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
