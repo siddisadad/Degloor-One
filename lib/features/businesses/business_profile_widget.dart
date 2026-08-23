@@ -271,12 +271,12 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                       ),
                     ),
                     Text(
-                      row == null || row.isClosed || row.openTime?.time == null || row.closeTime?.time == null
+                      row == null || row.isClosed || row.openTime == null || row.closeTime == null
                           ? 'Closed'
-                          : '${dateTimeFormat('h:mm a', row.openTime!.time)} - ${dateTimeFormat('h:mm a', row.closeTime!.time)}',
+                          : '${dateTimeFormat('h:mm a', row.openTime)} - ${dateTimeFormat('h:mm a', row.closeTime)}',
                       style: TextStyle(
                         fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
-                        color: row == null || row.isClosed || row.openTime?.time == null || row.closeTime?.time == null ? Colors.red : Colors.green,
+                        color: row == null || row.isClosed || row.openTime == null || row.closeTime == null ? Colors.red : Colors.green,
                       ),
                     ),
                   ],

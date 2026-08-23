@@ -1,6 +1,5 @@
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/business_service.dart';
-import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/components/degloor_app_bar.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
@@ -9,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:degloor_one/core/error_handler.dart';
 import 'package:degloor_one/shared/shop.dart';
+import 'package:degloor_one/shared/shop_hours.dart';
 import 'manage_hours_model.dart';
 export 'manage_hours_model.dart';
 
@@ -29,7 +29,7 @@ class _ManageHoursWidgetState extends State<ManageHoursWidget> {
 
   bool _loading = true;
   Shop? _business;
-  List<BusinessHoursRow> _hours = [];
+  List<ShopHours> _hours = [];
   final List<String> _weekDays = [
     'Sunday',
     'Monday',
@@ -112,11 +112,11 @@ class _ManageHoursWidgetState extends State<ManageHoursWidget> {
 
   Future<void> _selectTime(int dayIndex, bool isOpenTime) async {
     final row = _hours[dayIndex];
-    final initialPostgresTime = isOpenTime ? row.openTime : row.closeTime;
+    final initial = isOpenTime ? row.openTime : row.closeTime;
 
     TimeOfDay initialTime = const TimeOfDay(hour: 9, minute: 0);
-    if (initialPostgresTime?.time != null) {
-      initialTime = TimeOfDay.fromDateTime(initialPostgresTime!.time!);
+    if (initial != null) {
+      initialTime = TimeOfDay.fromDateTime(initial);
     }
 
     final TimeOfDay? picked = await showTimePicker(
@@ -129,9 +129,9 @@ class _ManageHoursWidgetState extends State<ManageHoursWidget> {
       final dt = DateTime(now.year, now.month, now.day, picked.hour, picked.minute);
       setState(() {
         if (isOpenTime) {
-          row.openTime = PostgresTime(dt);
+          row.openTime = dt;
         } else {
-          row.closeTime = PostgresTime(dt);
+          row.closeTime = dt;
         }
       });
     }

@@ -6,6 +6,7 @@ import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/core/error_handler.dart';
 import 'package:degloor_one/shared/catalog_product.dart';
 import 'package:degloor_one/shared/shop.dart';
+import 'package:degloor_one/shared/shop_hours.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
 class ProfileCompleteness {
@@ -322,36 +323,37 @@ class BusinessService {
     );
   }
 
-  Future<List<BusinessHoursRow>> hours(String userId) async {
+  Future<List<ShopHours>> hours(String userId) async {
     final shop = await requireOwned(userId);
-    final rows = await _repository.hoursFor(shop.id);
-    final existingDays = rows.map((row) => row.dayOfWeek).toSet();
+    final hours = (await _repository.hoursFor(shop.id))
+        .map(ShopHours.fromRow)
+        .toList();
+    final existingDays = hours.map((row) => row.dayOfWeek).toSet();
     for (var day = 0; day < 7; day++) {
       if (existingDays.contains(day)) continue;
-      rows.add(
-        BusinessHoursRow({
-          'business_id': shop.id,
-          'day_of_week': day,
-          'open_time': '09:00:00',
-          'close_time': '18:00:00',
-          'is_closed': false,
-          'created_at': DateTime.now().toIso8601String(),
-        }),
+      hours.add(
+        ShopHours(
+          businessId: shop.id,
+          dayOfWeek: day,
+          openTime: DateTime(1970, 1, 1, 9),
+          closeTime: DateTime(1970, 1, 1, 18),
+          createdAt: DateTime.now(),
+        ),
       );
     }
-    rows.sort((a, b) => a.dayOfWeek.compareTo(b.dayOfWeek));
-    return rows;
+    hours.sort((a, b) => a.dayOfWeek.compareTo(b.dayOfWeek));
+    return hours;
   }
 
   Future<void> saveHours({
     required String userId,
-    required List<BusinessHoursRow> hours,
+    required List<ShopHours> hours,
   }) async {
     final shop = await requireOwned(userId);
     final data = hours.map((row) {
-      final id = row.data['id'];
+      final id = row.id;
       return {
-        if (id != null) 'id': id,
+        if (id != null && id.isNotEmpty) 'id': id,
         'business_id': shop.id,
         'day_of_week': row.dayOfWeek,
         'open_time': timeSql(row.openTime),
@@ -387,28 +389,20 @@ class BusinessService {
     }
   }
 
-  static String timeLabel(PostgresTime? time) {
-    final dt = time?.time;
-    if (dt != null) {
-      final hour = dt.hour.toString().padLeft(2, '0');
-      final minute = dt.minute.toString().padLeft(2, '0');
+  static String timeLabel(DateTime? time) {
+    if (time != null) {
+      final hour = time.hour.toString().padLeft(2, '0');
+      final minute = time.minute.toString().padLeft(2, '0');
       return '$hour:$minute';
     }
-    final raw = time?.toString() ?? '';
-    if (raw.length >= 5) return raw.substring(0, 5);
     return 'Select';
   }
 
-  static String timeSql(PostgresTime? time) {
-    final dt = time?.time;
-    if (dt != null) {
-      final hour = dt.hour.toString().padLeft(2, '0');
-      final minute = dt.minute.toString().padLeft(2, '0');
+  static String timeSql(DateTime? time) {
+    if (time != null) {
+      final hour = time.hour.toString().padLeft(2, '0');
+      final minute = time.minute.toString().padLeft(2, '0');
       return '$hour:$minute:00';
-    }
-    final raw = time?.toString() ?? '';
-    if (raw.contains(':')) {
-      return raw.length >= 8 ? raw.substring(0, 8) : raw;
     }
     return '09:00:00';
   }
