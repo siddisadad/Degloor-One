@@ -121,6 +121,29 @@ class _UserProfileReportsWidgetState extends State<UserProfileReportsWidget> {
                     ],
                   ),
                 ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    DegloorTheme.spacingMD,
+                    0,
+                    DegloorTheme.spacingMD,
+                    DegloorTheme.spacingMD,
+                  ),
+                  child: Row(
+                    children: [
+                      _activityCard(
+                        Icons.handyman_rounded,
+                        'Services',
+                        () => context.pushNamed('Services'),
+                      ),
+                      const SizedBox(width: 12),
+                      _activityCard(
+                        Icons.work_rounded,
+                        'Jobs',
+                        () => context.pushNamed('JobsMarketplace'),
+                      ),
+                    ],
+                  ),
+                ),
 
                 // 3. Settings Sections
                 _sectionHeader('Account Settings'),

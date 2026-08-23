@@ -1,4 +1,5 @@
 import 'package:degloor_one/core/degloor_theme.dart';
+import 'package:degloor_one/components/home_feature_shortcuts.dart';
 import 'package:degloor_one/components/modern/hero_banner.dart';
 import 'package:degloor_one/components/modern/modern_category_item.dart';
 import 'package:degloor_one/components/modern/modern_business_card.dart';
@@ -274,6 +275,22 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                         ],
                       ),
                     ),
+                  ),
+                ),
+              ),
+
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    DegloorTheme.spacingMD,
+                    0,
+                    DegloorTheme.spacingMD,
+                    DegloorTheme.spacingLG,
+                  ),
+                  child: HomeFeatureShortcuts(
+                    onServices: () => context.pushNamed('Services'),
+                    onJobs: () => context.pushNamed('JobsMarketplace'),
+                    onOrders: () => context.pushNamed('CustomerOrders'),
                   ),
                 ),
               ),

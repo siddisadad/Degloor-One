@@ -1,4 +1,4 @@
-import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
+import 'package:degloor_one/core/degloor_theme.dart';
 import 'package:flutter/material.dart';
 
 class HomeFeatureShortcuts extends StatelessWidget {
@@ -15,14 +15,13 @@ class HomeFeatureShortcuts extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = FlutterFlowTheme.of(context);
     return Row(
       children: [
         Expanded(
           child: _ShortcutTile(
             icon: Icons.handyman_rounded,
             label: 'Services',
-            accent: theme.primary,
+            accent: DegloorTheme.primary,
             onTap: onServices,
           ),
         ),
@@ -31,7 +30,7 @@ class HomeFeatureShortcuts extends StatelessWidget {
           child: _ShortcutTile(
             icon: Icons.work_rounded,
             label: 'Jobs',
-            accent: theme.secondary,
+            accent: DegloorTheme.secondary,
             onTap: onJobs,
           ),
         ),
@@ -64,19 +63,19 @@ class _ShortcutTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = FlutterFlowTheme.of(context);
     return Material(
-      color: theme.secondaryBackground,
+      color: DegloorTheme.cardBackground,
       elevation: 0,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(DegloorTheme.radiusMD),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(DegloorTheme.radiusMD),
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: theme.alternate.withValues(alpha: 0.9)),
+            borderRadius: BorderRadius.circular(DegloorTheme.radiusMD),
+            border: Border.all(color: DegloorTheme.border),
+            boxShadow: DegloorTheme.softShadow,
           ),
           child: Column(
             children: [
@@ -85,17 +84,16 @@ class _ShortcutTile extends StatelessWidget {
                 height: 40,
                 decoration: BoxDecoration(
                   color: accent.withValues(alpha: 0.14),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(DegloorTheme.radiusSM),
                 ),
                 child: Icon(icon, color: accent, size: 22),
               ),
               const SizedBox(height: 8),
               Text(
                 label,
-                style: theme.labelMedium.override(
-                  fontFamily: 'Inter',
+                style: DegloorTheme.labelSmall.copyWith(
+                  color: DegloorTheme.textPrimary,
                   fontWeight: FontWeight.w700,
-                  color: theme.primaryText,
                 ),
               ),
             ],
