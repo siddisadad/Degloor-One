@@ -170,6 +170,33 @@ void main() {
     );
   });
 
+  test('placeOrderFromCart ignores joined product prices', () async {
+    final orderId = await OrderService.instance.placeOrderFromCart(
+      userId: GuestAuthUser.guestUid,
+      businessId: ShowcaseCatalog.bizPatil,
+      addressId: 'addr-home',
+      cartId: ShowcaseCatalog.cartGuest,
+      items: [
+        {
+          'product_id': ShowcaseCatalog.prodRice,
+          'quantity': 1,
+          'products': {
+            'id': ShowcaseCatalog.prodRice,
+            'price': 1.0,
+          },
+        },
+      ],
+    );
+
+    expect(
+      ShowcaseCatalog.query(
+        'order_items',
+        ShowcaseQuery()..eq('order_id', orderId),
+      ).single['price_at_purchase'],
+      120.0,
+    );
+  });
+
   test('customer can cancel a pending order and stock is restored', () async {
     final order = OrderService.placeShowcaseOrder(
       userId: GuestAuthUser.guestUid,

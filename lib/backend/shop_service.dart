@@ -72,6 +72,59 @@ class ShopService {
     return _repository.hoursFor(businessId);
   }
 
+  /// Weekday is Sunday=0 (`DateTime.weekday % 7`). Overnight windows
+  /// (`close <= open`) wrap midnight. Empty / closed / missing times are closed.
+  static bool isOpenFromHours(
+    List<BusinessHoursRow> hours, {
+    DateTime? now,
+  }) {
+    final at = now ?? DateTime.now();
+    final dayOfWeek = at.weekday % 7;
+    final currentMinutes = at.hour * 60 + at.minute;
+    for (final row in hours) {
+      if (row.dayOfWeek != dayOfWeek) continue;
+      if (row.isClosed) return false;
+      final open = row.openTime?.time;
+      final close = row.closeTime?.time;
+      if (open == null || close == null) return false;
+      final openMinutes = open.hour * 60 + open.minute;
+      final closeMinutes = close.hour * 60 + close.minute;
+      if (closeMinutes > openMinutes) {
+        return currentMinutes >= openMinutes && currentMinutes <= closeMinutes;
+      }
+      return currentMinutes >= openMinutes || currentMinutes <= closeMinutes;
+    }
+    return false;
+  }
+
+  Future<bool> isOpenNow(String businessId, {DateTime? now}) async {
+    if (businessId.isEmpty) return false;
+    try {
+      return isOpenFromHours(await hours(businessId), now: now);
+    } catch (error) {
+      AppLogger.error('Error checking business open status', error);
+      return false;
+    }
+  }
+
+  Future<Map<String, bool>> isOpenNowBatch(
+    List<String> businessIds, {
+    DateTime? now,
+  }) async {
+    if (businessIds.isEmpty) return {};
+    try {
+      final at = now ?? DateTime.now();
+      final hoursById = await _repository.hoursForMany(businessIds);
+      return {
+        for (final id in businessIds)
+          id: isOpenFromHours(hoursById[id] ?? const [], now: at),
+      };
+    } catch (error) {
+      AppLogger.error('Error checking multiple business open statuses', error);
+      return {for (final id in businessIds) id: false};
+    }
+  }
+
   Future<ShopCatalog> catalog(String businessId) async {
     if (businessId.isEmpty) return ShopCatalog.empty;
     final products = await _repository.availableProducts(businessId);

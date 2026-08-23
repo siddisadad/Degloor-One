@@ -162,22 +162,12 @@ class _CartWidgetState extends State<CartWidget> {
         userId: currentUserUid,
         id: _model.selectedAddress!.id,
       );
-      // Use secure RPC for order placement and inventory management
-      final List<Map<String, dynamic>> rpcItems = items.map((item) {
-        final product = item['products'] as Map<String, dynamic>;
-        return {
-          'product_id': product['id'],
-          'quantity': item['quantity'],
-          'price': (product['price'] as num).toDouble(),
-        };
-      }).toList();
-
-      final orderId = await OrderService.instance.placeOrder(
+      final orderId = await OrderService.instance.placeOrderFromCart(
         userId: currentUserUid,
         businessId: _model.currentCart!.businessId,
         addressId: _model.selectedAddress!.id,
         cartId: _model.currentCart!.id,
-        items: rpcItems,
+        items: items,
       );
 
       if (!mounted) return;
@@ -257,11 +247,7 @@ class _CartWidgetState extends State<CartWidget> {
             );
           }
 
-          double subtotal = 0;
-          for (var item in items) {
-            final price = (item['products']['price'] as num).toDouble();
-            subtotal += price * (item['quantity'] as int);
-          }
+          final subtotal = CartService.subtotal(items);
 
           return Column(
             children: [

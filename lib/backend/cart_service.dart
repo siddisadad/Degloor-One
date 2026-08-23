@@ -361,6 +361,36 @@ class CartService {
     return List<Map<String, dynamic>>.from(items);
   }
 
+  /// Display-only basket total. Checkout ignores these prices.
+  static double subtotal(List<Map<String, dynamic>> items) {
+    var total = 0.0;
+    for (final item in items) {
+      final product = item['products'];
+      final price = product is Map
+          ? (product['price'] as num?)?.toDouble() ?? 0
+          : 0.0;
+      final quantity = (item['quantity'] as num?)?.toInt() ?? 0;
+      total += price * quantity;
+    }
+    return total;
+  }
+
+  /// Checkout payload. Prices stay off the wire; the server / catalog wins.
+  static List<Map<String, dynamic>> checkoutItems(
+    List<Map<String, dynamic>> items,
+  ) {
+    return [
+      for (final item in items)
+        {
+          'product_id': item['product_id'] ??
+              (item['products'] is Map
+                  ? (item['products'] as Map)['id']
+                  : null),
+          'quantity': item['quantity'],
+        },
+    ];
+  }
+
   static Future<int> getCartItemCount() async {
     final userId = currentUserUid;
     if (userId == '') return 0;

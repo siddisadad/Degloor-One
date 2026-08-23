@@ -28,6 +28,24 @@ class ShopRepository {
     );
   }
 
+  Future<Map<String, List<BusinessHoursRow>>> hoursForMany(
+    List<String> businessIds,
+  ) async {
+    final ids = businessIds.where((id) => id.isNotEmpty).toSet().toList();
+    if (ids.isEmpty) return {};
+    final rows = await BusinessHoursTable().queryRows(
+      queryFn: (q) =>
+          q.inFilter('business_id', ids).order('day_of_week'),
+    );
+    final map = {for (final id in ids) id: <BusinessHoursRow>[]};
+    for (final row in rows) {
+      final id = row.businessId;
+      if (id == null || id.isEmpty) continue;
+      map.putIfAbsent(id, () => []).add(row);
+    }
+    return map;
+  }
+
   Future<List<ProductsRow>> availableProducts(String businessId) {
     if (businessId.isEmpty) return Future.value(const []);
     return ProductsTable().queryRows(

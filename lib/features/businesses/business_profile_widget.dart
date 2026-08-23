@@ -63,7 +63,7 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
     if (business == null) return null;
 
     final category = await ShopService.instance.categoryName(business.categoryId);
-    final isOpenCalculated = await getBusinessOpenStatus(bId);
+    final isOpenCalculated = await ShopService.instance.isOpenNow(bId);
     final isOpen = (business.isOpen ?? false) && isOpenCalculated;
     safeSetState(() {
       _model.categoryName = category;

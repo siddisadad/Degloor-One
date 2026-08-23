@@ -128,6 +128,8 @@ Owner-scoped post. Apply once per job. Experience required.
 
 Critical Supabase RPCs are **not removed**. They remain the live fallback until the Java host is configured.
 
+Shop open-now math lives on `ShopService.isOpenNow` / `isOpenFromHours` (Sunday=0, overnight wrap). Cart display totals use `CartService.subtotal`; checkout goes through `OrderService.placeOrderFromCart`, which strips client prices. Payable amounts still come from showcase catalog or Java/RPC.
+
 ---
 
 ## Remaining blockers (live cutover)

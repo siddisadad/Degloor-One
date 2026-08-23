@@ -1,7 +1,25 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/backend/shop_service.dart';
+import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
+
+BusinessHoursRow _hours({
+  required int day,
+  required String open,
+  required String close,
+  bool closed = false,
+}) {
+  return BusinessHoursRow({
+    'id': 'h-$day-$open',
+    'business_id': 'biz',
+    'day_of_week': day,
+    'open_time': open,
+    'close_time': close,
+    'is_closed': closed,
+    'created_at': '2026-01-01T00:00:00.000Z',
+  });
+}
 
 void main() {
   setUp(ShowcaseCatalog.reset);
@@ -154,6 +172,59 @@ void main() {
       events.where((row) => row.eventType == ShopEvents.profileView),
       hasLength(18),
     );
+  });
+
+  test('isOpenFromHours handles same-day, overnight, and closed rows', () {
+    final sundayMorning = DateTime(2026, 8, 23, 10, 0);
+    final sundayLate = DateTime(2026, 8, 23, 22, 0);
+    final sundayOvernight = DateTime(2026, 8, 23, 1, 0);
+    final weekday = [
+      _hours(day: 0, open: '09:00:00', close: '21:00:00'),
+    ];
+    final overnight = [
+      _hours(day: 0, open: '22:00:00', close: '02:00:00'),
+    ];
+
+    expect(ShopService.isOpenFromHours(weekday, now: sundayMorning), isTrue);
+    expect(ShopService.isOpenFromHours(weekday, now: sundayLate), isFalse);
+    expect(ShopService.isOpenFromHours(const [], now: sundayMorning), isFalse);
+    expect(
+      ShopService.isOpenFromHours(
+        [_hours(day: 0, open: '09:00:00', close: '21:00:00', closed: true)],
+        now: sundayMorning,
+      ),
+      isFalse,
+    );
+    expect(ShopService.isOpenFromHours(overnight, now: sundayLate), isTrue);
+    expect(ShopService.isOpenFromHours(overnight, now: sundayOvernight), isTrue);
+    expect(ShopService.isOpenFromHours(overnight, now: sundayMorning), isFalse);
+  });
+
+  test('isOpenNow and isOpenNowBatch use showcase hours', () async {
+    final morning = DateTime(2026, 8, 23, 10, 0);
+    final late = DateTime(2026, 8, 23, 22, 0);
+
+    expect(
+      await ShopService.instance.isOpenNow(ShowcaseCatalog.bizPatil, now: morning),
+      isTrue,
+    );
+    expect(
+      await ShopService.instance.isOpenNow(ShowcaseCatalog.bizPatil, now: late),
+      isFalse,
+    );
+    expect(
+      await ShopService.instance
+          .isOpenNow(ShowcaseCatalog.bizMedical, now: late),
+      isTrue,
+    );
+    expect(await ShopService.instance.isOpenNow(''), isFalse);
+
+    final batch = await ShopService.instance.isOpenNowBatch(
+      [ShowcaseCatalog.bizPatil, ShowcaseCatalog.bizMedical],
+      now: late,
+    );
+    expect(batch[ShowcaseCatalog.bizPatil], isFalse);
+    expect(batch[ShowcaseCatalog.bizMedical], isTrue);
   });
 
   test('eventsFor rejects a shop the user does not own', () async {

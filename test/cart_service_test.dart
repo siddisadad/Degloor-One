@@ -118,6 +118,28 @@ void main() {
     expect(carts, isEmpty);
   });
 
+  test('subtotal is display-only and checkoutItems omit price', () async {
+    final items = await CartService.itemsForCart(ShowcaseCatalog.cartGuest);
+    expect(CartService.subtotal(items), 240);
+    final checkout = CartService.checkoutItems(items);
+    expect(checkout.every((item) => !item.containsKey('price')), isTrue);
+    expect(
+      checkout.map((item) => item['product_id']),
+      containsAll([ShowcaseCatalog.prodMilk, ShowcaseCatalog.prodRice]),
+    );
+    expect(
+      CartService.checkoutItems([
+        {
+          'products': {'id': 'prod-x', 'price': 1},
+          'quantity': 2,
+        },
+      ]),
+      [
+        {'product_id': 'prod-x', 'quantity': 2},
+      ],
+    );
+  });
+
   test('invalid quantity is rejected without writing', () async {
     final result = await CartService.addProduct(
       userId: GuestAuthUser.guestUid,
