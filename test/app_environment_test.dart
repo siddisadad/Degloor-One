@@ -10,6 +10,7 @@ void main() {
     expect(kBypassAuth, AppEnvironment.bypassAuth);
     expect(kUseShowcaseData, AppEnvironment.useShowcaseData);
     expect(kAppFlavor, AppFlavor.development);
+    expect(AppEnvironment.usesJavaBackend, isFalse);
   });
 
   test('compiled defaults stay production-safe without overrides', () {

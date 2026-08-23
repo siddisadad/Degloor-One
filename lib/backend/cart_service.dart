@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/core/api/api_client.dart';
+import 'package:degloor_one/core/api/cart_api.dart';
 import 'package:degloor_one/core/error_handler.dart';
 import 'package:degloor_one/shared/rpc_row.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
@@ -148,6 +150,21 @@ class CartService {
     }
 
     try {
+      if (JavaApiConfig.enabled) {
+        try {
+          await CartApi.addItem(
+            productId: productId,
+            quantity: quantity,
+            replaceOtherBusiness: replaceOtherBusiness,
+          );
+          return CartAddResult.success;
+        } on JavaApiException catch (e) {
+          if (e.code == 'CART_NEEDS_REPLACEMENT') {
+            return CartAddResult.needsConfirm;
+          }
+          return CartAddResult.failure(e.message);
+        }
+      }
       if (!kUseShowcaseData) {
         return await _addProductLive(
           productId: productId,
@@ -267,6 +284,10 @@ class CartService {
     if (uid.isEmpty) {
       throw Exception('CART_UNAUTHORIZED');
     }
+    if (JavaApiConfig.enabled) {
+      await CartApi.updateItem(productId: itemId, quantity: quantity);
+      return;
+    }
     if (kUseShowcaseData) {
       _assertShowcaseCartItemOwner(itemId, uid);
       if (quantity <= 0) {
@@ -310,6 +331,10 @@ class CartService {
     final uid = userId ?? currentUserUid;
     if (uid.isEmpty) {
       throw Exception('CART_UNAUTHORIZED');
+    }
+    if (JavaApiConfig.enabled) {
+      await CartApi.clear();
+      return;
     }
     if (kUseShowcaseData) {
       await CartsTable().delete(matchingRows: (q) => q.eq('user_id', uid));
