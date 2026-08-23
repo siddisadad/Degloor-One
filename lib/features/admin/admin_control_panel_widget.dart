@@ -1,8 +1,8 @@
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
-import 'package:degloor_one/backend/notification_service.dart';
-import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
+import 'package:degloor_one/backend/admin_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
-import 'package:degloor_one/shared/showcase_catalog.dart';
+import 'package:degloor_one/components/empty_state_view.dart';
+import 'package:degloor_one/core/error_handler.dart';
 import 'package:degloor_one/components/action_item/action_item_widget.dart';
 import 'package:degloor_one/components/button/button_widget.dart';
 import 'package:degloor_one/components/category_chip/category_chip_widget.dart';
@@ -31,55 +31,43 @@ class _AdminControlPanelWidgetState extends State<AdminControlPanelWidget> {
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
-  Future<List<BusinessesRow>> fetchVerificationQueue() async {
-    return await BusinessesTable().queryRows(
-      queryFn: (q) => q.eq('is_verified', false).order('created_at', ascending: false),
-    );
+  Future<List<BusinessesRow>> fetchVerificationQueue() {
+    return AdminService.instance.verificationQueue(currentUserUid);
   }
 
-  /* Removed Service Provider admin per requirements */
-
-  Future<List<ComplaintsRow>> fetchPendingComplaints() async {
-    return await ComplaintsTable().queryRows(
-      queryFn: (q) => q.eq('status', 'pending').order('created_at', ascending: false),
-    );
+  Future<List<ComplaintsRow>> fetchPendingComplaints() {
+    return AdminService.instance.pendingComplaints(currentUserUid);
   }
 
   Future<void> _resolveComplaint(ComplaintsRow complaint) async {
-    await ComplaintsTable().update(
-      data: {'status': 'resolved'},
-      matchingRows: (q) => q.eq('id', complaint.id),
-    );
-
-    await NotificationService.adminNotify(
-      userId: complaint.userId,
-      title: 'Complaint Resolved',
-      message:
-          'Your complaint regarding "${complaint.subject}" has been resolved.',
-      type: 'complaint_resolved',
-    );
-
-    safeSetState(() {});
-  }
-
-  Future<List<BusinessCategoriesRow>> fetchCategories() async {
-    return await BusinessCategoriesTable().queryRows(
-      queryFn: (q) => q.order('display_order', ascending: true),
-    );
-  }
-
-  Future<int> fetchCount(bool verified) async {
-    if (kUseShowcaseData) {
-      return ShowcaseCatalog.query(
-        'businesses',
-        ShowcaseQuery()..eq('is_verified', verified),
-      ).length;
+    try {
+      await AdminService.instance.resolveComplaint(
+        adminUserId: currentUserUid,
+        complaintId: complaint.id,
+      );
+      safeSetState(() {});
+    } catch (e) {
+      AppLogger.error('Error resolving complaint', e);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            AppLogger.userFacingMessage(
+              e,
+              fallback: 'Unable to resolve the complaint. Please try again.',
+            ),
+          ),
+        ),
+      );
     }
-    final response = await SupaFlow.client
-        .from('businesses')
-        .select('id')
-        .eq('is_verified', verified);
-    return response.length;
+  }
+
+  Future<List<BusinessCategoriesRow>> fetchCategories() {
+    return AdminService.instance.businessCategories(currentUserUid);
+  }
+
+  Future<AdminCounts> fetchCounts() {
+    return AdminService.instance.counts(currentUserUid);
   }
 
   @override
@@ -101,7 +89,16 @@ class _AdminControlPanelWidgetState extends State<AdminControlPanelWidget> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
     if (currentUser?.role != 'admin') {
-      return const Scaffold(body: Center(child: Text('Unauthorized')));
+      return Scaffold(
+        backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+        body: EmptyStateView(
+          icon: Icons.lock_outline_rounded,
+          title: 'Admin only',
+          description: 'This desk is for Degloor One administrators.',
+          buttonText: 'Go home',
+          onTap: () => context.goNamed('CustomerHome'),
+        ),
+      );
     }
     return GestureDetector(
       onTap: () {
@@ -158,18 +155,22 @@ class _AdminControlPanelWidgetState extends State<AdminControlPanelWidget> {
             ),
             elevation: 0.0,
           ),
-          body: TabBarView(
+          body: Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 520),
+              child: TabBarView(
             children: [
               // Verification Tab
               SingleChildScrollView(
                 padding: const EdgeInsets.all(24.0),
                 child: Column(
                   children: [
-                    FutureBuilder<List<int>>(
-                      future: Future.wait([fetchCount(false), fetchCount(true)]),
+                    FutureBuilder<AdminCounts>(
+                      future: fetchCounts(),
                       builder: (context, snapshot) {
-                        final pendingCount = snapshot.data?[0] ?? 0;
-                        final verifiedCount = snapshot.data?[1] ?? 0;
+                        final pendingCount = snapshot.data?.pending ?? 0;
+                        final verifiedCount = snapshot.data?.verified ?? 0;
                         return Row(
                           children: [
                             Expanded(
@@ -206,7 +207,14 @@ class _AdminControlPanelWidgetState extends State<AdminControlPanelWidget> {
                       future: fetchVerificationQueue(),
                       builder: (context, snapshot) {
                         final businesses = snapshot.data ?? [];
-                        if (businesses.isEmpty) return const SizedBox.shrink();
+                        if (businesses.isEmpty) {
+                          return const EmptyStateView(
+                            icon: Icons.verified_user_outlined,
+                            title: 'Queue is clear',
+                            description:
+                                'New Degloor shops will show up here for verification.',
+                          );
+                        }
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -220,23 +228,27 @@ class _AdminControlPanelWidgetState extends State<AdminControlPanelWidget> {
                                   subtitle: 'Owner: ${business.ownerName ?? 'Unknown'}',
                                   title: business.name,
                                   onApprove: () async {
-                                    await BusinessesTable().update(
-                                      data: {'is_verified': true},
-                                      matchingRows: (q) => q.eq('id', business.id),
-                                    );
-
-                                    // Notify owner
-                                    if (business.ownerId != null) {
-                                      await NotificationService.adminNotify(
-                                        userId: business.ownerId!,
-                                        title: 'Business Verified!',
-                                        message:
-                                            'Your business "${business.name}" has been verified and is now live.',
-                                        type: 'business_verified',
+                                    try {
+                                      await AdminService.instance.verifyBusiness(
+                                        adminUserId: currentUserUid,
+                                        businessId: business.id,
+                                      );
+                                      safeSetState(() {});
+                                    } catch (e) {
+                                      AppLogger.error('Error verifying business', e);
+                                      if (!mounted) return;
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            AppLogger.userFacingMessage(
+                                              e,
+                                              fallback:
+                                                  'Unable to verify the shop. Please try again.',
+                                            ),
+                                          ),
+                                        ),
                                       );
                                     }
-
-                                    safeSetState(() {});
                                   },
                                 )),
                           ].divide(const SizedBox(height: 12)),
@@ -256,7 +268,12 @@ class _AdminControlPanelWidgetState extends State<AdminControlPanelWidget> {
                   builder: (context, snapshot) {
                     final complaints = snapshot.data ?? [];
                     if (complaints.isEmpty) {
-                      return Center(child: Text('No pending complaints', style: FlutterFlowTheme.of(context).bodyMedium));
+                      return const EmptyStateView(
+                        icon: Icons.report_problem_outlined,
+                        title: 'No pending complaints',
+                        description:
+                            'Customer reports from Degloor shops will land here.',
+                      );
                     }
                     return Column(
                       children: complaints
@@ -305,10 +322,28 @@ class _AdminControlPanelWidgetState extends State<AdminControlPanelWidget> {
                                     TextButton(
                                       onPressed: () async {
                                         if (newCategoryName?.isNotEmpty == true) {
-                                          await BusinessCategoriesTable().insert({'name': newCategoryName});
-                                          if (context.mounted) {
-                                            Navigator.pop(context);
-                                            safeSetState(() {});
+                                          try {
+                                            await AdminService.instance.addCategory(
+                                              adminUserId: currentUserUid,
+                                              name: newCategoryName!,
+                                            );
+                                            if (context.mounted) {
+                                              Navigator.pop(context);
+                                              safeSetState(() {});
+                                            }
+                                          } catch (e) {
+                                            if (!context.mounted) return;
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(
+                                                content: Text(
+                                                  AppLogger.userFacingMessage(
+                                                    e,
+                                                    fallback:
+                                                        'Unable to add the category. Please try again.',
+                                                  ),
+                                                ),
+                                              ),
+                                            );
                                           }
                                         }
                                       },
@@ -378,6 +413,8 @@ class _AdminControlPanelWidgetState extends State<AdminControlPanelWidget> {
                 ),
               ),
             ],
+          ),
+            ),
           ),
         ),
       ),

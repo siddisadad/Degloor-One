@@ -3,7 +3,7 @@ import 'package:degloor_one/auth/password_recovery.dart';
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
-import 'package:degloor_one/backend/supabase/database/database.dart';
+import 'package:degloor_one/backend/discovery_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 
 import 'package:degloor_one/core/error_handler.dart';
@@ -59,9 +59,9 @@ class _InitialRedirectWidgetState extends State<InitialRedirectWidget> {
       if (!mounted) return;
 
       if (role == 'business_owner') {
-        final businesses = await BusinessesTable().querySingleRow(
-          queryFn: (q) => q.eq('owner_id', currentUserUid),
-        ).timeout(const Duration(seconds: 10));
+        final businesses = await DiscoveryService.instance
+            .ownedBy(currentUserUid)
+            .timeout(const Duration(seconds: 10));
         if (!mounted) return;
 
         if (businesses.isEmpty) {

@@ -1,0 +1,124 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:degloor_one/auth/guest_auth_user.dart';
+import 'package:degloor_one/backend/business_service.dart';
+import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
+import 'package:degloor_one/shared/showcase_catalog.dart';
+
+void main() {
+  setUp(ShowcaseCatalog.reset);
+
+  test('guest shop catalogue lists Patil products', () async {
+    final shop =
+        await BusinessService.instance.requireOwned(GuestAuthUser.guestUid);
+    expect(shop.id, ShowcaseCatalog.bizPatil);
+
+    final products =
+        await BusinessService.instance.products(GuestAuthUser.guestUid);
+    expect(products.map((row) => row.id), contains(ShowcaseCatalog.prodMilk));
+  });
+
+  test('add product reuses a category without lowercasing the name', () async {
+    final added = await BusinessService.instance.addProduct(
+      userId: GuestAuthUser.guestUid,
+      name: 'Curd',
+      price: 40,
+      categoryName: 'dairy',
+      stockQuantity: 6,
+      trackInventory: true,
+    );
+    expect(added.businessId, ShowcaseCatalog.bizPatil);
+    expect(added.categoryId, 'pcat-dairy');
+    expect(added.price, 40);
+
+    final categories = await BusinessService.instance
+        .productCategories(GuestAuthUser.guestUid);
+    expect(categories.map((row) => row.name), contains('Dairy'));
+    expect(categories.map((row) => row.name), isNot(contains('dairy')));
+  });
+
+  test('product mutations stay scoped to the owner', () async {
+    await expectLater(
+      BusinessService.instance.deleteProduct(
+        userId: ShowcaseCatalog.customer2,
+        productId: ShowcaseCatalog.prodMilk,
+      ),
+      throwsA(
+        isA<Exception>().having(
+          (error) => error.toString(),
+          'message',
+          contains('No shop found'),
+        ),
+      ),
+    );
+
+    await BusinessService.instance.deleteProduct(
+      userId: GuestAuthUser.guestUid,
+      productId: ShowcaseCatalog.prodMilk,
+    );
+    final products =
+        await BusinessService.instance.products(GuestAuthUser.guestUid);
+    expect(products.map((row) => row.id), isNot(contains(ShowcaseCatalog.prodMilk)));
+  });
+
+  test('hours save writes TIME strings and does not duplicate days', () async {
+    final hours =
+        await BusinessService.instance.hours(GuestAuthUser.guestUid);
+    expect(hours, hasLength(7));
+    hours.first.isClosed = true;
+
+    await BusinessService.instance.saveHours(
+      userId: GuestAuthUser.guestUid,
+      hours: hours,
+    );
+
+    final sunday = ShowcaseCatalog.query(
+      'business_hours',
+      ShowcaseQuery()
+        ..eq('business_id', ShowcaseCatalog.bizPatil)
+        ..eq('day_of_week', 0),
+    );
+    expect(sunday, hasLength(1));
+    expect(sunday.single['is_closed'], isTrue);
+    expect('${sunday.single['open_time']}', contains(':'));
+    expect('${sunday.single['open_time']}', isNot(contains('T')));
+  });
+
+  test('customer can register an unverified shop', () async {
+    final shop = await BusinessService.instance.register(
+      userId: ShowcaseCatalog.customer2,
+      name: 'Kale Kirana',
+      ownerName: 'Priya Kale',
+      phone: '9890000008',
+      categoryId: ShowcaseCatalog.catGrocery,
+      latitude: 18.55,
+      longitude: 77.58,
+      addressText: 'Lane 2, Degloor',
+    );
+    expect(shop.ownerId, ShowcaseCatalog.customer2);
+    expect(shop.isVerified, isFalse);
+
+    final owned =
+        await BusinessService.instance.ownedBy(ShowcaseCatalog.customer2);
+    expect(owned.map((row) => row.id), contains(shop.id));
+  });
+
+  test('profile update is owner scoped', () async {
+    await expectLater(
+      BusinessService.instance.updateProfile(
+        userId: ShowcaseCatalog.customer2,
+        businessId: ShowcaseCatalog.bizPatil,
+        name: 'Hacked',
+      ),
+      throwsA(isA<Exception>()),
+    );
+
+    await BusinessService.instance.updateProfile(
+      userId: GuestAuthUser.guestUid,
+      businessId: ShowcaseCatalog.bizPatil,
+      name: 'Patil Kirana Plus',
+    );
+    final shop =
+        await BusinessService.instance.requireOwned(GuestAuthUser.guestUid);
+    expect(shop.name, 'Patil Kirana Plus');
+  });
+}
