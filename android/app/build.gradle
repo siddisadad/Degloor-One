@@ -30,7 +30,7 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace "com.deshmukh.degloorone"
-    compileSdkVersion 35
+    compileSdkVersion 36
 
     compileOptions {
         coreLibraryDesugaringEnabled true
