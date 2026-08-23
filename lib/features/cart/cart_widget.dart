@@ -4,6 +4,8 @@ import 'package:degloor_one/backend/address_service.dart';
 import 'package:degloor_one/backend/discovery_service.dart';
 import 'package:degloor_one/backend/cart_service.dart';
 import 'package:degloor_one/backend/order_service.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:degloor_one/components/cached_remote_image.dart';
 import 'package:degloor_one/components/degloor_app_bar.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
@@ -305,7 +307,20 @@ class _CartWidgetState extends State<CartWidget> {
                               height: 70,
                               color: DegloorTheme.accent,
                               child: product?.imageUrl != null
-                                  ? Image.network(product!.imageUrl!, fit: BoxFit.cover)
+                                  ? CachedNetworkImage(
+                                      imageUrl: product!.imageUrl!,
+                                      width: 70,
+                                      height: 70,
+                                      fit: BoxFit.cover,
+                                      memCacheWidth: memCachePx(context, 70),
+                                      memCacheHeight: memCachePx(context, 70),
+                                      placeholder: (_, __) =>
+                                          Container(color: DegloorTheme.accent),
+                                      errorWidget: (_, __, ___) => const Icon(
+                                        Icons.image_not_supported_rounded,
+                                        color: DegloorTheme.textSecondary,
+                                      ),
+                                    )
                                   : const Icon(Icons.image_not_supported_rounded, color: DegloorTheme.textSecondary),
                             ),
                           ),

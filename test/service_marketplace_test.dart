@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/backend/service_marketplace_service.dart';
@@ -10,7 +11,34 @@ import 'package:degloor_one/shared/service_request.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  const nativeChannel = MethodChannel('com.deshmukh.degloorone/services');
+
   setUp(ShowcaseCatalog.reset);
+
+  tearDown(() {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(nativeChannel, null);
+  });
+
+  test('showcase categories and providers skip the native channel', () async {
+    var invoked = 0;
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(nativeChannel, (call) async {
+      invoked += 1;
+      return const [];
+    });
+
+    expect(kUseShowcaseData, isTrue);
+    final categories = await ServiceMarketplaceService.instance.categories();
+    final providers = await ServiceMarketplaceService.instance.providers(
+      page: const PageQuery(limit: 2),
+    );
+
+    expect(invoked, 0);
+    expect(categories, isNotEmpty);
+    expect(providers.items, isNotEmpty);
+  });
 
   test('service categories use the domain type', () async {
     final categories = await ServiceMarketplaceService.instance.categories();

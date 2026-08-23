@@ -1,6 +1,7 @@
-import 'package:flutter/material.dart';
-import 'package:degloor_one/core/degloor_theme.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:degloor_one/components/cached_remote_image.dart';
+import 'package:degloor_one/core/degloor_theme.dart';
+import 'package:flutter/material.dart';
 
 class ModernBusinessCard extends StatelessWidget {
   const ModernBusinessCard({
@@ -42,6 +43,8 @@ class ModernBusinessCard extends StatelessWidget {
                   height: 120,
                   width: double.infinity,
                   fit: BoxFit.cover,
+                  memCacheWidth: memCachePx(context, 220),
+                  memCacheHeight: memCachePx(context, 120),
                   placeholder: (context, url) => Container(
                     color: DegloorTheme.background,
                     child: const Center(

@@ -524,6 +524,8 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
                           )
                         : CachedRemoteImage(
                             url: business.imageUrl!,
+                            width: 60,
+                            height: 60,
                             placeholderIcon: Icons.storefront_rounded,
                           ),
                   ),

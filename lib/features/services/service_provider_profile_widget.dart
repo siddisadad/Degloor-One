@@ -8,6 +8,7 @@ import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:degloor_one/components/cached_remote_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:degloor_one/features/services/service_provider_profile_model.dart';
@@ -98,6 +99,8 @@ class _ServiceProviderProfileWidgetState
                         height: 300,
                       ),
                       fit: BoxFit.cover,
+                      memCacheWidth: memCachePx(context, 400),
+                      memCacheHeight: memCachePx(context, 250),
                     ),
                   ),
                   leading: FlutterFlowIconButton(

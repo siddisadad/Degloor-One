@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:degloor_one/core/degloor_theme.dart';
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class HeroBanner extends StatelessWidget {
@@ -50,7 +50,10 @@ class HeroBanner extends StatelessWidget {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(DegloorTheme.radiusSM),
                     ),
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 8,
+                    ),
                   ),
                   child: const Text(
                     'Explore Now',

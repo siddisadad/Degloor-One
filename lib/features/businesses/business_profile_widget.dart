@@ -17,6 +17,7 @@ import 'package:degloor_one/backend/whatsapp_service.dart';
 import 'package:degloor_one/app_state.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:degloor_one/components/cached_remote_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -503,6 +504,11 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                                   'https://images.unsplash.com/photo-1534723452862-4c874018d66d?auto=format&fit=crop&w=400&h=300&q=80',
                               height: 260.0,
                               fit: BoxFit.cover,
+                              memCacheWidth: memCachePx(
+                                context,
+                                MediaQuery.sizeOf(context).width,
+                              ),
+                              memCacheHeight: memCachePx(context, 260),
                               errorWidget: (context, url, error) => Container(
                                 color: FlutterFlowTheme.of(context).primaryBackground,
                                 child: Icon(

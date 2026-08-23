@@ -1,6 +1,7 @@
-import 'package:flutter/material.dart';
-import 'package:degloor_one/core/degloor_theme.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:degloor_one/components/cached_remote_image.dart';
+import 'package:degloor_one/core/degloor_theme.dart';
+import 'package:flutter/material.dart';
 
 class ModernProductListItem extends StatelessWidget {
   const ModernProductListItem({
@@ -57,6 +58,8 @@ class ModernProductListItem extends StatelessWidget {
                           width: 90,
                           height: 90,
                           fit: BoxFit.cover,
+                          memCacheWidth: memCachePx(context, 90),
+                          memCacheHeight: memCachePx(context, 90),
                           placeholder: (_, __) => Container(color: DegloorTheme.accent),
                           errorWidget: (_, __, ___) => _fallbackImg(),
                         )
