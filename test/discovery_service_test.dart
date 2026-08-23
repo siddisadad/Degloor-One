@@ -6,6 +6,7 @@ import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/catalog_product.dart';
 import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/shared/shop.dart';
+import 'package:degloor_one/shared/shop_category.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
 void main() {
@@ -60,6 +61,8 @@ void main() {
   test('discovery categories and profile use the showcase catalog', () async {
     final categories = await DiscoveryService.instance.categories();
     expect(categories.length, greaterThanOrEqualTo(7));
+    expect(categories, everyElement(isA<ShopCategory>()));
+    expect(categories, isNot(anyElement(isA<BusinessCategoriesRow>())));
     expect(categories.first.displayOrder, isNotNull);
 
     final profile =

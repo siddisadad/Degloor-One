@@ -6,6 +6,7 @@ import 'package:degloor_one/backend/user_service.dart';
 import 'package:degloor_one/shared/catalog_product.dart';
 import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/shared/shop.dart';
+import 'package:degloor_one/shared/shop_category.dart';
 import 'package:degloor_one/shared/user_profile.dart';
 
 export 'package:degloor_one/backend/repositories/discovery_repository.dart'
@@ -37,10 +38,11 @@ class DiscoveryService {
     );
   }
 
-  Future<List<BusinessCategoriesRow>> categories() async {
+  Future<List<ShopCategory>> categories() async {
     final native = await NativeServiceBridge.getDiscoveryCategories();
     if (native.isNotEmpty) return native;
-    return _repository.categories();
+    final rows = await _repository.categories();
+    return rows.map(ShopCategory.fromRow).toList();
   }
 
   Future<List<UserProfile>> profile(String userId) =>

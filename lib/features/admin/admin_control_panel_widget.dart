@@ -4,6 +4,7 @@ import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/core/error_handler.dart';
 import 'package:degloor_one/shared/shop.dart';
+import 'package:degloor_one/shared/shop_category.dart';
 import 'package:degloor_one/components/action_item/action_item_widget.dart';
 import 'package:degloor_one/components/button/button_widget.dart';
 import 'package:degloor_one/components/category_chip/category_chip_widget.dart';
@@ -63,7 +64,7 @@ class _AdminControlPanelWidgetState extends State<AdminControlPanelWidget> {
     }
   }
 
-  Future<List<BusinessCategoriesRow>> fetchCategories() {
+  Future<List<ShopCategory>> fetchCategories() {
     return AdminService.instance.businessCategories(currentUserUid);
   }
 
@@ -359,7 +360,7 @@ class _AdminControlPanelWidgetState extends State<AdminControlPanelWidget> {
                       ],
                     ),
                     const SizedBox(height: 12),
-                    FutureBuilder<List<BusinessCategoriesRow>>(
+                    FutureBuilder<List<ShopCategory>>(
                       future: fetchCategories(),
                       builder: (context, snapshot) {
                         final categories = snapshot.data ?? [];

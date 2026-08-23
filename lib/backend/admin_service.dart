@@ -2,6 +2,7 @@ import 'package:degloor_one/backend/notification_service.dart';
 import 'package:degloor_one/backend/repositories/admin_repository.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/shop.dart';
+import 'package:degloor_one/shared/shop_category.dart';
 import 'package:degloor_one/shared/user_profile.dart';
 
 class AdminCounts {
@@ -91,11 +92,13 @@ class AdminService {
     );
   }
 
-  Future<List<BusinessCategoriesRow>> businessCategories(String adminUserId) {
-    return requireAdmin(adminUserId).then((_) => _repository.businessCategories());
+  Future<List<ShopCategory>> businessCategories(String adminUserId) async {
+    await requireAdmin(adminUserId);
+    final rows = await _repository.businessCategories();
+    return rows.map(ShopCategory.fromRow).toList();
   }
 
-  Future<BusinessCategoriesRow> addCategory({
+  Future<ShopCategory> addCategory({
     required String adminUserId,
     required String name,
   }) async {
@@ -115,10 +118,11 @@ class AdminService {
       final order = category.displayOrder ?? 0;
       if (order >= nextOrder) nextOrder = order + 1;
     }
-    return _repository.insertBusinessCategory({
+    final row = await _repository.insertBusinessCategory({
       'name': trimmed,
       'icon_name': 'category_rounded',
       'display_order': nextOrder,
     });
+    return ShopCategory.fromRow(row);
   }
 }

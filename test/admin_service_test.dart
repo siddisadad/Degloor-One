@@ -4,6 +4,7 @@ import 'package:degloor_one/backend/admin_service.dart';
 import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/shop.dart';
+import 'package:degloor_one/shared/shop_category.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
 void main() {
@@ -72,6 +73,8 @@ void main() {
       adminUserId: ShowcaseCatalog.adminId,
       name: 'Stationery',
     );
+    expect(created, isA<ShopCategory>());
+    expect(created, isNot(isA<BusinessCategoriesRow>()));
     expect(created.name, 'Stationery');
     expect(created.displayOrder, greaterThan(7));
 

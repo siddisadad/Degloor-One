@@ -1,5 +1,6 @@
 import 'package:flutter/services.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/shop_category.dart';
 
 class NativeServiceBridge {
   static const _serviceChannel = MethodChannel('com.deshmukh.degloorone/services');
@@ -32,14 +33,14 @@ class NativeServiceBridge {
     }
   }
 
-  static Future<List<BusinessCategoriesRow>> getDiscoveryCategories() async {
+  static Future<List<ShopCategory>> getDiscoveryCategories() async {
     try {
       final List<dynamic>? result = await _discoveryChannel.invokeMethod('getNativeDiscoveryCategories');
       if (result == null) return [];
       
       return result.map((e) {
         final map = Map<String, dynamic>.from(e);
-        return BusinessCategoriesRow(map);
+        return ShopCategory.fromRow(BusinessCategoriesRow(map));
       }).toList();
     } catch (e) {
       return [];

@@ -14,7 +14,6 @@ import 'package:degloor_one/flutter_flow/form_field_controller.dart';
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/business_service.dart';
 import 'package:degloor_one/backend/discovery_service.dart';
-import 'package:degloor_one/backend/supabase/database/database.dart';
 import 'package:degloor_one/features/home/customer_home_widget.dart';
 import 'package:degloor_one/index.dart';
 import 'package:flutter/material.dart';
@@ -22,6 +21,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:degloor_one/core/error_handler.dart';
 import 'package:degloor_one/core/google_maps_js.dart';
 import 'package:degloor_one/shared/discovery_radius.dart';
+import 'package:degloor_one/shared/shop_category.dart';
 import 'business_registration_model.dart';
 export 'business_registration_model.dart';
 
@@ -42,7 +42,7 @@ class _BusinessRegistrationWidgetState
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
-  List<BusinessCategoriesRow> _categories = [];
+  List<ShopCategory> _categories = [];
   bool _isSubmitting = false;
 
   @override
