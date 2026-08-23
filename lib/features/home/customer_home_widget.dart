@@ -14,6 +14,7 @@ import 'package:degloor_one/backend/service_marketplace_service.dart';
 import 'package:degloor_one/features/catalogue/product_detail_widget.dart';
 import 'package:degloor_one/shared/marketplace_joins.dart';
 import 'package:degloor_one/shared/page_query.dart';
+import 'package:degloor_one/shared/user_profile.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
@@ -245,7 +246,7 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                           borderRadius: BorderRadius.circular(DegloorTheme.radiusSM),
                         ),
                         child: Center(
-                          child: FutureBuilder<List<UsersRow>>(
+                          child: FutureBuilder<List<UserProfile>>(
                             future: _model.userProfileFuture,
                             builder: (context, snapshot) {
                               final name = snapshot.data?.firstOrNull?.fullName ?? 'U';

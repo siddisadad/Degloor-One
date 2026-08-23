@@ -1,6 +1,8 @@
 import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/backend/user_service.dart';
+import 'package:degloor_one/backend/supabase/database/tables/users_table.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
+import 'package:degloor_one/shared/user_profile.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -10,6 +12,8 @@ void main() {
     final profile =
         await UserService.instance.profile(GuestAuthUser.guestUid);
     expect(profile, hasLength(1));
+    expect(profile.single, isA<UserProfile>());
+    expect(profile.single, isNot(isA<UsersRow>()));
     expect(profile.single.fullName, 'Guest Customer');
     expect(profile.single.email, 'guest@local');
     expect(profile.single.phoneNumber, '+919890000001');

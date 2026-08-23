@@ -14,6 +14,7 @@ import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
 import 'package:degloor_one/shared/page_query.dart';
+import 'package:degloor_one/shared/user_profile.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:async';
@@ -39,7 +40,7 @@ class _DeliveryDashboardWidgetState extends State<DeliveryDashboardWidget> {
   DeliveryPartnersRow? _partner;
   DeliveryAssignmentsRow? _assignment;
   OrdersRow? _activeOrder;
-  UsersRow? _customer;
+  UserProfile? _customer;
   final Map<String, BusinessesRow> _shops = {};
   List<OrdersRow> _ready = [];
   bool _loading = true;
@@ -122,7 +123,7 @@ class _DeliveryDashboardWidgetState extends State<DeliveryDashboardWidget> {
 
       DeliveryAssignmentsRow? assignment = _assignment;
       OrdersRow? activeOrder = _activeOrder;
-      UsersRow? customer = _customer;
+      UserProfile? customer = _customer;
       if (reset) {
         assignment =
             await DeliveryService.instance.activeForPartner(partner.id);
@@ -130,7 +131,7 @@ class _DeliveryDashboardWidgetState extends State<DeliveryDashboardWidget> {
             ? null
             : await OrderService.instance.findById(assignment.orderId);
         final users = activeOrder == null
-            ? const <UsersRow>[]
+            ? const <UserProfile>[]
             : await DiscoveryService.instance.profile(activeOrder.userId);
         customer = users.isEmpty ? null : users.first;
       }

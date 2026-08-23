@@ -13,6 +13,7 @@ import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
 import 'package:degloor_one/shared/join_rows.dart';
+import 'package:degloor_one/shared/user_profile.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:degloor_one/core/error_handler.dart';
@@ -386,7 +387,7 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
             final partner = partnerSnapshot.data?.firstOrNull;
             if (partner == null) return Container();
 
-            return FutureBuilder<List<UsersRow>>(
+            return FutureBuilder<List<UserProfile>>(
               future: DiscoveryService.instance.profile(partner.userId),
               builder: (context, userSnapshot) {
                 final user = userSnapshot.data?.firstOrNull;
