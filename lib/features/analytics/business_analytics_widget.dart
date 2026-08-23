@@ -1,8 +1,8 @@
 import '/backend/supabase/supabase.dart';
-import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
-import 'package:degloor_one/shared/showcase_catalog.dart';
+import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
+import 'package:degloor_one/backend/shop_service.dart';
+import 'package:degloor_one/components/degloor_app_bar.dart';
 import '/components/stat_card/stat_card_widget.dart';
-import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -62,48 +62,24 @@ class _BusinessAnalyticsWidgetState extends State<BusinessAnalyticsWidget>
   }
 
   Future<void> _fetchData() async {
-    if (kUseShowcaseData) {
-      final rows = ShowcaseCatalog.query(
-        'business_analytics',
-        ShowcaseQuery()..eq('business_id', widget.businessId),
+    try {
+      final rows = await ShopService.instance.eventsFor(
+        userId: currentUserUid,
+        businessId: widget.businessId,
+        days: _selectedPeriod,
       );
       if (!mounted) return;
       safeSetState(() {
-        _analyticsData = rows.map(BusinessAnalyticsRow.new).toList();
-        _isLoading = false;
-      });
-      return;
-    }
-    try {
-      final now = DateTime.now();
-      DateTime? startDate;
-      if (_selectedPeriod == 7) {
-        startDate = now.subtract(const Duration(days: 7));
-      } else if (_selectedPeriod == 30) {
-        startDate = now.subtract(const Duration(days: 30));
-      }
-
-      var query = SupaFlow.client
-          .from('business_analytics')
-          .select()
-          .eq('business_id', widget.businessId);
-
-      if (startDate != null) {
-        query = query.gte('created_at', startDate.toIso8601String());
-      }
-
-      final List<dynamic> response = await query.order('created_at', ascending: true);
-
-      if (!mounted) return;
-
-      safeSetState(() {
-        _analyticsData = response.map((e) => BusinessAnalyticsRow(e)).toList();
+        _analyticsData = rows;
         _isLoading = false;
       });
     } catch (e) {
       AppLogger.error('Error fetching analytics', e);
       if (mounted) {
-        safeSetState(() => _isLoading = false);
+        safeSetState(() {
+          _analyticsData = [];
+          _isLoading = false;
+        });
       }
     }
   }
@@ -129,39 +105,14 @@ class _BusinessAnalyticsWidgetState extends State<BusinessAnalyticsWidget>
       child: Scaffold(
         key: scaffoldKey,
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-        appBar: AppBar(
-          backgroundColor: FlutterFlowTheme.of(context).secondaryBackground,
-          automaticallyImplyLeading: false,
-          leading: FlutterFlowIconButton(
-            borderColor: Colors.transparent,
-            borderRadius: 30.0,
-            borderWidth: 1.0,
-            buttonSize: 60.0,
-            icon: Icon(
-              Icons.arrow_back_rounded,
-              color: FlutterFlowTheme.of(context).primaryText,
-              size: 30.0,
-            ),
-            onPressed: () async {
-              context.pop();
-            },
-          ),
-          title: Text(
-            'Business Insights',
-            style: FlutterFlowTheme.of(context).headlineSmall.override(
-                  font: GoogleFonts.inter(
-                    fontWeight: FontWeight.bold,
-                  ),
-                  color: FlutterFlowTheme.of(context).primaryText,
-                ),
-          ),
-          actions: const [],
-          centerTitle: false,
-          elevation: 0.0,
-        ),
+        appBar: degloorAppBar(context, title: 'Business Insights'),
         body: SafeArea(
-          child: Column(
-            children: [
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 520),
+              child: Column(
+                children: [
               Container(
                 decoration: BoxDecoration(
                   color: FlutterFlowTheme.of(context).secondaryBackground,
@@ -208,6 +159,8 @@ class _BusinessAnalyticsWidgetState extends State<BusinessAnalyticsWidget>
                       ),
               ),
             ],
+              ),
+            ),
           ),
         ),
       ),

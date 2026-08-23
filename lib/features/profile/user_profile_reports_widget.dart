@@ -1,5 +1,8 @@
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
+import 'package:degloor_one/backend/discovery_service.dart';
+import 'package:degloor_one/backend/shop_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/l10n/app_localizations.dart';
 import 'package:degloor_one/app_state.dart';
 import 'package:degloor_one/components/brand_mark.dart';
@@ -33,14 +36,10 @@ class _UserProfileReportsWidgetState extends State<UserProfileReportsWidget> {
     super.initState();
     _model = createModel(context, () => UserProfileReportsModel());
     if (loggedIn && currentUserUid.length > 10) {
-      _model.userProfileFuture = UsersTable().queryRows(
-        queryFn: (q) => q.eq('id', currentUserUid),
-      );
-      _model.complaintsFuture = ComplaintsTable().queryRows(
-        queryFn: (q) => q
-            .eq('user_id', currentUserUid)
-            .order('created_at', ascending: false),
-      );
+      _model.userProfileFuture =
+          DiscoveryService.instance.profile(currentUserUid);
+      _model.complaintsFuture =
+          ShopService.instance.complaintsForUser(currentUserUid);
     }
   }
 
@@ -61,8 +60,12 @@ class _UserProfileReportsWidgetState extends State<UserProfileReportsWidget> {
         key: scaffoldKey,
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         body: SafeArea(
-          child: SingleChildScrollView(
-            child: Padding(
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 520),
+              child: SingleChildScrollView(
+                child: Padding(
               padding: const EdgeInsets.all(24.0),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -299,9 +302,11 @@ class _UserProfileReportsWidgetState extends State<UserProfileReportsWidget> {
                           }
                           final complaints = snapshot.data!;
                           if (complaints.isEmpty) {
-                            return Text(
-                              'No reports filed yet.',
-                              style: FlutterFlowTheme.of(context).labelSmall,
+                            return const EmptyStateView(
+                              icon: Icons.flag_outlined,
+                              title: 'No reports yet',
+                              description:
+                                  'If something is wrong with a Degloor listing, report it from the shop page.',
                             );
                           }
                           return Column(
@@ -379,6 +384,8 @@ class _UserProfileReportsWidgetState extends State<UserProfileReportsWidget> {
                 ].divide(const SizedBox(height: 32.0)),
               ),
             ),
+          ),
+        ),
           ),
         ),
       ),

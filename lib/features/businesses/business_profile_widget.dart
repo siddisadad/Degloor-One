@@ -1,7 +1,6 @@
-import 'package:degloor_one/backend/notification_service.dart';
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
+import 'package:degloor_one/backend/shop_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
-import 'package:degloor_one/shared/showcase_catalog.dart';
 import 'package:degloor_one/l10n/app_localizations.dart';
 import 'package:degloor_one/components/brand_mark.dart';
 import 'package:degloor_one/components/action_button/action_button_widget.dart';
@@ -52,52 +51,35 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
     _model = createModel(context, () => BusinessProfileModel());
     if (widget.businessId != null) {
       final bId = widget.businessId!;
-      _businessFuture = BusinessesTable()
-          .querySingleRow(
-            queryFn: (q) => q.eq('id', bId),
-          )
-          .then((rows) async {
-            if (rows.isEmpty) return null;
-            final business = rows.first;
-
-            // Fetch category name
-            if (business.categoryId != null) {
-              final cats = await BusinessCategoriesTable().queryRows(
-                queryFn: (q) => q.eq('id', business.categoryId!),
-              );
-              if (cats.isNotEmpty) {
-                safeSetState(() {
-                  _model.categoryName = cats.first.name;
-                });
-              }
-            }
-
-            // Fetch open status
-            final isOpenCalculated = await getBusinessOpenStatus(bId);
-            final isOpen = (business.isOpen ?? false) && isOpenCalculated;
-            safeSetState(() {
-              _model.isOpen = isOpen;
-              _model.statusMessage = isOpen ? 'Open Now' : 'Closed';
-            });
-
-            // Log Profile View
-            logBusinessEvent(
-              businessId: bId,
-              eventType: BusinessAnalyticsEvents.profileView,
-            );
-
-            return business;
-          });
+      _businessFuture = _loadShop(bId);
       _model.reviewsFuture = _fetchReviews();
       _fetchWeeklyHours(bId);
     }
   }
 
+  Future<BusinessesRow?> _loadShop(String bId) async {
+    final business = await ShopService.instance.byId(bId);
+    if (business == null) return null;
+
+    final category = await ShopService.instance.categoryName(business.categoryId);
+    final isOpenCalculated = await getBusinessOpenStatus(bId);
+    final isOpen = (business.isOpen ?? false) && isOpenCalculated;
+    safeSetState(() {
+      _model.categoryName = category;
+      _model.isOpen = isOpen;
+      _model.statusMessage = isOpen ? 'Open Now' : 'Closed';
+    });
+
+    logBusinessEvent(
+      businessId: bId,
+      eventType: BusinessAnalyticsEvents.profileView,
+    );
+    return business;
+  }
+
   Future<void> _fetchWeeklyHours(String bId) async {
     try {
-      final hours = await BusinessHoursTable().queryRows(
-        queryFn: (q) => q.eq('business_id', bId).order('day_of_week'),
-      );
+      final hours = await ShopService.instance.hours(bId);
       safeSetState(() {
         _model.weeklyHours = hours;
       });
@@ -107,30 +89,11 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
   }
 
   Future<List<Map<String, dynamic>>> _fetchReviews() async {
-    if (kUseShowcaseData) {
-      return ShowcaseCatalog.reviewsForBusiness(widget.businessId!);
-    }
-    final response = await SupaFlow.client
-        .from('reviews')
-        .select('*, users(full_name)')
-        .eq('business_id', widget.businessId!)
-        .order('created_at', ascending: false);
-
-    final List<Map<String, dynamic>> reviews = List<Map<String, dynamic>>.from(response);
-
-    // Calculate distribution
-    final dist = {5: 0, 4: 0, 3: 0, 2: 0, 1: 0};
-    for (var r in reviews) {
-      final rating = (r['rating'] as num).toInt();
-      if (dist.containsKey(rating)) {
-        dist[rating] = dist[rating]! + 1;
-      }
-    }
+    final page = await ShopService.instance.reviews(widget.businessId ?? '');
     safeSetState(() {
-      _model.ratingDistribution = dist;
+      _model.ratingDistribution = page.distribution;
     });
-
-    return reviews;
+    return page.items;
   }
 
   Future<void> _showWriteReviewDialog() async {
@@ -227,28 +190,34 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                 onPressed: () async {
                   if (rating < 1) return;
 
-                  await ReviewsTable().insert({
-                    'user_id': currentUser,
-                    'business_id': business.id,
-                    'rating': rating,
-                    'comment': commentController.text.trim(),
-                    'created_at': DateTime.now().toIso8601String(),
-                  });
+                  try {
+                    await ShopService.instance.addReview(
+                      userId: currentUser,
+                      businessId: business.id,
+                      rating: rating,
+                      comment: commentController.text,
+                    );
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            AppLogger.userFacingMessage(
+                              e,
+                              fallback:
+                                  'Unable to submit the review. Please try again.',
+                            ),
+                          ),
+                        ),
+                      );
+                    }
+                    return;
+                  }
 
-                  // Log Review Submitted
                   logBusinessEvent(
                     businessId: business.id,
                     eventType: BusinessAnalyticsEvents.reviewSubmitted,
                   );
-
-                  // Notify Owner
-                  if (business.ownerId != null) {
-                    await NotificationService.notifyNewReview(
-                      ownerId: business.ownerId!,
-                      businessName: business.name,
-                      rating: rating,
-                    );
-                  }
 
                   if (context.mounted) {
                     Navigator.pop(context);
@@ -369,13 +338,29 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                 );
                 return;
               }
-              await ComplaintsTable().insert({
-                'user_id': currentUser,
-                'business_id': widget.businessId,
-                'subject': subjectController.text,
-                'description': descriptionController.text,
-                'status': 'pending',
-              });
+              try {
+                await ShopService.instance.reportListing(
+                  userId: currentUser,
+                  businessId: widget.businessId ?? '',
+                  subject: subjectController.text,
+                  description: descriptionController.text,
+                );
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        AppLogger.userFacingMessage(
+                          e,
+                          fallback:
+                              'Unable to submit the report. Please try again.',
+                        ),
+                      ),
+                    ),
+                  );
+                }
+                return;
+              }
               if (context.mounted) {
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -461,9 +446,7 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                     FFButtonWidget(
                       onPressed: () => setState(() {
                         if (widget.businessId != null) {
-                          _businessFuture = BusinessesTable().querySingleRow(
-                            queryFn: (q) => q.eq('id', widget.businessId!),
-                          ).then((rows) => rows.isNotEmpty ? rows.first : null);
+                          _businessFuture = _loadShop(widget.businessId!);
                         }
                       }),
                       text: 'Retry',
