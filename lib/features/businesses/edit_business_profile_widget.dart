@@ -1,6 +1,5 @@
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/business_service.dart';
-import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/components/cached_remote_image.dart';
 import 'package:degloor_one/components/degloor_app_bar.dart';
 import 'package:degloor_one/core/error_handler.dart';
@@ -12,6 +11,7 @@ import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
 import 'package:degloor_one/shared/discovery_radius.dart';
+import 'package:degloor_one/shared/shop.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'edit_business_profile_model.dart';
@@ -23,7 +23,7 @@ class EditBusinessProfileWidget extends StatefulWidget {
     required this.business,
   });
 
-  final BusinessesRow business;
+  final Shop business;
 
   static String routeName = 'EditBusinessProfile';
   static String routePath = '/editBusinessProfile';

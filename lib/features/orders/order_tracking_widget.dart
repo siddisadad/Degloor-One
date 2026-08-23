@@ -14,6 +14,7 @@ import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
 import 'package:degloor_one/shared/join_rows.dart';
 import 'package:degloor_one/shared/placed_order.dart';
+import 'package:degloor_one/shared/shop.dart';
 import 'package:degloor_one/shared/user_profile.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -488,7 +489,7 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
   }
 
   Widget _buildBusinessInfo(String businessId, PlacedOrder order) {
-    return FutureBuilder<List<BusinessesRow>>(
+    return FutureBuilder<List<Shop>>(
       future: DiscoveryService.instance.businessesByIds([businessId]),
       builder: (context, snapshot) {
         final business = snapshot.data?.firstOrNull;

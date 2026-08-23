@@ -11,6 +11,7 @@ import 'package:degloor_one/components/discovery_radius_bar.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/core/error_handler.dart';
 import 'package:degloor_one/shared/discovery_radius.dart';
+import 'package:degloor_one/shared/shop.dart';
 import 'package:flutter/material.dart';
 import 'search_results_model.dart';
 export 'search_results_model.dart';
@@ -38,7 +39,7 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
   late SearchResultsModel _model;
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
-  List<BusinessesRow> _businesses = [];
+  List<Shop> _businesses = [];
   int _offset = 0;
   final int _limit = 20;
   bool _hasMore = true;

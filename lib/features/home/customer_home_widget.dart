@@ -14,6 +14,7 @@ import 'package:degloor_one/backend/service_marketplace_service.dart';
 import 'package:degloor_one/features/catalogue/product_detail_widget.dart';
 import 'package:degloor_one/shared/marketplace_joins.dart';
 import 'package:degloor_one/shared/page_query.dart';
+import 'package:degloor_one/shared/shop.dart';
 import 'package:degloor_one/shared/user_profile.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -473,7 +474,7 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                     const SizedBox(height: DegloorTheme.spacingSM),
                     SizedBox(
                       height: 210,
-                      child: FutureBuilder<List<BusinessesRow>>(
+                      child: FutureBuilder<List<Shop>>(
                         future: _model.openNowBusinessesFuture,
                         builder: (context, snapshot) {
                           if (!snapshot.hasData) return const SizedBox();

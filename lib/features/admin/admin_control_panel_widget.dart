@@ -3,6 +3,7 @@ import 'package:degloor_one/backend/admin_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/core/error_handler.dart';
+import 'package:degloor_one/shared/shop.dart';
 import 'package:degloor_one/components/action_item/action_item_widget.dart';
 import 'package:degloor_one/components/button/button_widget.dart';
 import 'package:degloor_one/components/category_chip/category_chip_widget.dart';
@@ -31,7 +32,7 @@ class _AdminControlPanelWidgetState extends State<AdminControlPanelWidget> {
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
-  Future<List<BusinessesRow>> fetchVerificationQueue() {
+  Future<List<Shop>> fetchVerificationQueue() {
     return AdminService.instance.verificationQueue(currentUserUid);
   }
 
@@ -203,7 +204,7 @@ class _AdminControlPanelWidgetState extends State<AdminControlPanelWidget> {
                       },
                     ),
                     const SizedBox(height: 24),
-                    FutureBuilder<List<BusinessesRow>>(
+                    FutureBuilder<List<Shop>>(
                       future: fetchVerificationQueue(),
                       builder: (context, snapshot) {
                         final businesses = snapshot.data ?? [];

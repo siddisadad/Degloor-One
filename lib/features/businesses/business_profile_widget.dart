@@ -4,6 +4,7 @@ import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/shop_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/marketplace_joins.dart';
+import 'package:degloor_one/shared/shop.dart';
 import 'package:degloor_one/l10n/app_localizations.dart';
 import 'package:degloor_one/components/brand_mark.dart';
 import 'package:degloor_one/components/action_button/action_button_widget.dart';
@@ -45,7 +46,7 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
-  Future<BusinessesRow?>? _businessFuture;
+  Future<Shop?>? _businessFuture;
 
   @override
   void initState() {
@@ -59,7 +60,7 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
     }
   }
 
-  Future<BusinessesRow?> _loadShop(String bId) async {
+  Future<Shop?> _loadShop(String bId) async {
     final business = await ShopService.instance.byId(bId);
     if (business == null) return null;
 
@@ -430,7 +431,7 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
       child: Scaffold(
         key: scaffoldKey,
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-        body: FutureBuilder<BusinessesRow?>(
+        body: FutureBuilder<Shop?>(
           future: _businessFuture,
           builder: (context, snapshot) {
             if (snapshot.hasError) {

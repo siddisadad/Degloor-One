@@ -1,6 +1,7 @@
 import 'package:degloor_one/backend/notification_service.dart';
 import 'package:degloor_one/backend/repositories/admin_repository.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/shop.dart';
 import 'package:degloor_one/shared/user_profile.dart';
 
 class AdminCounts {
@@ -39,9 +40,10 @@ class AdminService {
     return AdminCounts(pending: pending, verified: verified);
   }
 
-  Future<List<BusinessesRow>> verificationQueue(String adminUserId) async {
+  Future<List<Shop>> verificationQueue(String adminUserId) async {
     await requireAdmin(adminUserId);
-    return _repository.unverifiedBusinesses();
+    final rows = await _repository.unverifiedBusinesses();
+    return rows.map(Shop.fromRow).toList();
   }
 
   Future<void> verifyBusiness({

@@ -3,9 +3,10 @@ import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/backend/business_service.dart';
 import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/shop.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
-BusinessesRow _shop({
+Shop _shop({
   String name = 'Shop',
   String? description,
   String? categoryId,
@@ -15,21 +16,21 @@ BusinessesRow _shop({
   double? lng,
   String? image,
 }) {
-  return BusinessesRow({
-    'id': 'biz-test',
-    'name': name,
-    'description': description,
-    'category_id': categoryId,
-    'whatsapp_number': whatsapp,
-    'address_text': address,
-    'latitude': lat,
-    'longitude': lng,
-    'image_url': image,
-    'is_open': true,
-    'is_verified': true,
-    'rating': 0,
-    'created_at': '2026-01-01T00:00:00.000Z',
-  });
+  return Shop(
+    id: 'biz-test',
+    name: name,
+    description: description,
+    categoryId: categoryId,
+    whatsappNumber: whatsapp,
+    addressText: address,
+    latitude: lat,
+    longitude: lng,
+    imageUrl: image,
+    isOpen: true,
+    isVerified: true,
+    rating: 0,
+    createdAt: DateTime.utc(2026, 1, 1),
+  );
 }
 
 void main() {
@@ -38,6 +39,8 @@ void main() {
   test('guest shop catalogue lists Patil products', () async {
     final shop =
         await BusinessService.instance.requireOwned(GuestAuthUser.guestUid);
+    expect(shop, isA<Shop>());
+    expect(shop, isNot(isA<BusinessesRow>()));
     expect(shop.id, ShowcaseCatalog.bizPatil);
 
     final products =

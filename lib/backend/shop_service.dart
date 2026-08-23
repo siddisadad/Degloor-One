@@ -5,6 +5,7 @@ import 'package:degloor_one/backend/repositories/shop_repository.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/core/error_handler.dart';
 import 'package:degloor_one/shared/marketplace_joins.dart';
+import 'package:degloor_one/shared/shop.dart';
 
 class ShopEvents {
   static const profileView = 'PROFILE_VIEW';
@@ -89,9 +90,10 @@ class ShopService {
 
   static final instance = ShopService();
 
-  Future<BusinessesRow?> byId(String businessId) {
-    if (businessId.isEmpty) return Future<BusinessesRow?>.value();
-    return _repository.byId(businessId);
+  Future<Shop?> byId(String businessId) async {
+    if (businessId.isEmpty) return null;
+    final row = await _repository.byId(businessId);
+    return row == null ? null : Shop.fromRow(row);
   }
 
   Future<String?> categoryName(String? categoryId) async {
