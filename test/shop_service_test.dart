@@ -6,6 +6,7 @@ import 'package:degloor_one/shared/catalog_product.dart';
 import 'package:degloor_one/shared/listing_complaint.dart';
 import 'package:degloor_one/shared/product_category.dart';
 import 'package:degloor_one/shared/shop.dart';
+import 'package:degloor_one/shared/shop_event.dart';
 import 'package:degloor_one/shared/shop_hours.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
@@ -136,6 +137,8 @@ void main() {
       userId: GuestAuthUser.guestUid,
       businessId: ShowcaseCatalog.bizPatil,
     );
+    expect(events, everyElement(isA<ShopEvent>()));
+    expect(events, isNot(anyElement(isA<BusinessAnalyticsRow>())));
     final summary = ShopService.summarizeEvents(events);
     expect(summary.profileViews, 18);
     expect(summary.callClicks, 5);
@@ -154,6 +157,8 @@ void main() {
       businessId: ShowcaseCatalog.bizPatil,
     );
     expect(events, isNotEmpty);
+    expect(events, everyElement(isA<ShopEvent>()));
+    expect(events, isNot(anyElement(isA<BusinessAnalyticsRow>())));
     expect(
       events.every((row) => row.businessId == ShowcaseCatalog.bizPatil),
       isTrue,

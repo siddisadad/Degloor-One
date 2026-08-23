@@ -2,13 +2,13 @@ import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/business_service.dart';
 import 'package:degloor_one/backend/notification_service.dart';
 import 'package:degloor_one/backend/repositories/shop_repository.dart';
-import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/core/error_handler.dart';
 import 'package:degloor_one/shared/catalog_product.dart';
 import 'package:degloor_one/shared/listing_complaint.dart';
 import 'package:degloor_one/shared/marketplace_joins.dart';
 import 'package:degloor_one/shared/product_category.dart';
 import 'package:degloor_one/shared/shop.dart';
+import 'package:degloor_one/shared/shop_event.dart';
 import 'package:degloor_one/shared/shop_hours.dart';
 
 class ShopEvents {
@@ -306,7 +306,7 @@ class ShopService {
     return rows.map(ListingComplaint.fromRow).toList();
   }
 
-  Future<List<BusinessAnalyticsRow>> eventsFor({
+  Future<List<ShopEvent>> eventsFor({
     required String userId,
     required String businessId,
     int days = 0,
@@ -315,19 +315,16 @@ class ShopService {
       userId: userId,
       businessId: businessId,
     );
-    final rows = await _repository.analyticsFor(businessId);
-    if (days <= 0) return rows;
+    final events =
+        (await _repository.analyticsFor(businessId)).map(ShopEvent.fromRow);
+    if (days <= 0) return events.toList();
     final start = DateTime.now().subtract(Duration(days: days));
-    return rows.where((row) {
-      try {
-        return !row.createdAt.isBefore(start);
-      } catch (_) {
-        return true;
-      }
-    }).toList();
+    return events
+        .where((event) => !event.createdAt.isBefore(start))
+        .toList();
   }
 
-  static ShopEventSummary summarizeEvents(List<BusinessAnalyticsRow> events) {
+  static ShopEventSummary summarizeEvents(List<ShopEvent> events) {
     var profileViews = 0;
     var callClicks = 0;
     var whatsappClicks = 0;

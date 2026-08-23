@@ -11,6 +11,7 @@ import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/shared/search_query.dart';
 import 'package:degloor_one/shared/shop.dart';
 import 'package:degloor_one/shared/shop_category.dart';
+import 'package:degloor_one/shared/shop_event.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 import 'package:degloor_one/shared/user_profile.dart';
 
@@ -168,7 +169,9 @@ class DiscoveryService {
     if (businessId.isEmpty) return ShopInsights.empty;
     final reviews = await _repository.reviewCount(businessId);
     final events = await _repository.analyticsFor(businessId);
-    final summary = ShopService.summarizeEvents(events);
+    final summary = ShopService.summarizeEvents(
+      events.map(ShopEvent.fromRow).toList(),
+    );
     return ShopInsights(
       reviewCount: reviews,
       profileViews: summary.profileViews,
