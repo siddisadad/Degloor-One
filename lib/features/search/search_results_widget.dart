@@ -1,3 +1,4 @@
+import 'package:degloor_one/core/degloor_theme.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/backend/discovery_service.dart';
 import 'package:degloor_one/backend/location_service.dart';
@@ -241,25 +242,42 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
                                         children: [
                                           Text('Sort By', style: FlutterFlowTheme.of(context).titleMedium),
                                           const SizedBox(height: 16),
-                                          ListTile(
-                                            leading: const Icon(Icons.social_distance_rounded),
-                                            title: const Text('Distance (Nearest First)'),
-                                            onTap: () {
-                                              setState(() {
-                                                _businesses.sort((a, b) => (a.distanceKm ?? 0).compareTo(b.distanceKm ?? 0));
-                                              });
-                                              Navigator.pop(context);
-                                            },
-                                          ),
-                                          ListTile(
-                                            leading: const Icon(Icons.star_rounded, color: Colors.amber),
-                                            title: const Text('Rating (Highest First)'),
-                                            onTap: () {
-                                              setState(() {
-                                                _businesses.sort((a, b) => (b.rating ?? 0).compareTo(a.rating ?? 0));
-                                              });
-                                              Navigator.pop(context);
-                                            },
+                                          ListTileTheme(
+                                            data: const ListTileThemeData(
+                                              iconColor: DegloorTheme.primary,
+                                              textColor: DegloorTheme.textPrimary,
+                                            ),
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Material(
+                                                  color: Colors.transparent,
+                                                  child: ListTile(
+                                                    leading: const Icon(Icons.social_distance_rounded),
+                                                    title: const Text('Distance (Nearest First)'),
+                                                    onTap: () {
+                                                      setState(() {
+                                                        _businesses.sort((a, b) => (a.distanceKm ?? 0).compareTo(b.distanceKm ?? 0));
+                                                      });
+                                                      Navigator.pop(context);
+                                                    },
+                                                  ),
+                                                ),
+                                                Material(
+                                                  color: Colors.transparent,
+                                                  child: ListTile(
+                                                    leading: const Icon(Icons.star_rounded, color: Colors.amber),
+                                                    title: const Text('Rating (Highest First)'),
+                                                    onTap: () {
+                                                      setState(() {
+                                                        _businesses.sort((a, b) => (b.rating ?? 0).compareTo(a.rating ?? 0));
+                                                      });
+                                                      Navigator.pop(context);
+                                                    },
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
                                           ),
                                         ],
                                       ),

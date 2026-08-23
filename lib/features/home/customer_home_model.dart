@@ -10,6 +10,7 @@ class CustomerHomeModel extends FlutterFlowModel<CustomerHomeWidget> {
 
   Future<List<UsersRow>>? userProfileFuture;
   Future<List<BusinessesRow>>? openNowBusinessesFuture;
+  Future<List<ProductsRow>>? recommendedProductsFuture;
   String locationName = 'Degloor, Maharashtra';
   bool openNow = false;
 

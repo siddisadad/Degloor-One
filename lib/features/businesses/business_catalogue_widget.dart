@@ -1,14 +1,13 @@
+import 'package:degloor_one/features/catalogue/product_detail_widget.dart';
+import 'package:degloor_one/core/degloor_theme.dart';
 import 'package:degloor_one/backend/cart_service.dart';
 import 'package:degloor_one/backend/shop_service.dart';
-import 'package:degloor_one/components/cached_remote_image.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_icon_button.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
-import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:degloor_one/core/error_handler.dart';
 import 'business_catalogue_model.dart';
 export 'business_catalogue_model.dart';
@@ -179,84 +178,130 @@ class _BusinessCatalogueWidgetState extends State<BusinessCatalogueWidget> with 
 
   Widget _buildProductList(List<ProductsRow> products) {
     return ListView.separated(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(DegloorTheme.spacingMD),
       itemCount: products.length,
       separatorBuilder: (context, index) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
         final product = products[index];
-        return Card(
-          clipBehavior: Clip.antiAliasWithSaveLayer,
-          color: FlutterFlowTheme.of(context).secondaryBackground,
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: BorderSide(color: FlutterFlowTheme.of(context).alternate),
-          ),
-          child: Padding(
+        final inStock = (product.trackInventory != true) || ((product.stockQuantity ?? 0) > 0);
+
+        return InkWell(
+          onTap: () {
+            context.pushNamed(
+              ProductDetailWidget.routeName,
+              pathParameters: {'productId': product.id},
+            );
+          },
+          borderRadius: BorderRadius.circular(DegloorTheme.radiusMD),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(DegloorTheme.radiusMD),
+              border: Border.all(color: DegloorTheme.border),
+              boxShadow: DegloorTheme.softShadow,
+            ),
             padding: const EdgeInsets.all(12),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Container(
-                    width: 80,
-                    height: 80,
-                    color: FlutterFlowTheme.of(context).primaryBackground,
-                    child: product.imageUrl != null
-                        ? CachedRemoteImage(url: product.imageUrl!)
-                        : Icon(Icons.image_not_supported_rounded, color: FlutterFlowTheme.of(context).alternate),
-                  ),
+                Stack(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(DegloorTheme.radiusSM),
+                      child: product.imageUrl != null
+                          ? Image.network(
+                              product.imageUrl!,
+                              width: 100,
+                              height: 100,
+                              fit: BoxFit.cover,
+                            )
+                          : Container(
+                              width: 100,
+                              height: 100,
+                              color: DegloorTheme.accent,
+                              child: const Icon(Icons.image_not_supported_rounded, color: DegloorTheme.textSecondary),
+                            ),
+                    ),
+                    if (!inStock)
+                      Container(
+                        width: 100,
+                        height: 100,
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.5),
+                          borderRadius: BorderRadius.circular(DegloorTheme.radiusSM),
+                        ),
+                        child: const Center(
+                          child: Text(
+                            'OUT OF STOCK',
+                            style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 16),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         product.name,
-                        style: FlutterFlowTheme.of(context).bodyLarge.override(
-                          fontFamily: GoogleFonts.inter().fontFamily,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: DegloorTheme.titleMedium.copyWith(fontSize: 15),
                       ),
                       const SizedBox(height: 4),
-                      Text(
-                        '₹${product.price}',
-                        style: FlutterFlowTheme.of(context).titleMedium.override(
-                          fontFamily: GoogleFonts.inter().fontFamily,
-                          color: FlutterFlowTheme.of(context).primary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      if (product.trackInventory == true)
+                      if (product.description != null && product.description!.isNotEmpty)
                         Text(
-                          (product.stockQuantity ?? 0) > 0 ? 'In Stock' : 'Out of Stock',
-                          style: FlutterFlowTheme.of(context).labelSmall.override(
-                            fontFamily: GoogleFonts.inter().fontFamily,
-                            color: (product.stockQuantity ?? 0) > 0 ? FlutterFlowTheme.of(context).success : FlutterFlowTheme.of(context).error,
-                          ),
+                          product.description!,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: DegloorTheme.bodySmall,
                         ),
+                      const SizedBox(height: 8),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '₹${product.price?.toStringAsFixed(0)}',
+                                style: DegloorTheme.headingMedium.copyWith(color: DegloorTheme.primary, fontSize: 18),
+                              ),
+                              if (inStock)
+                                Text(
+                                  'In Stock',
+                                  style: DegloorTheme.labelSmall.copyWith(color: DegloorTheme.success),
+                                ),
+                            ],
+                          ),
+                          if (inStock)
+                            ElevatedButton(
+                              onPressed: () async {
+                                await CartService.addToCart(
+                                  context: context,
+                                  businessId: widget.businessId,
+                                  productId: product.id,
+                                );
+                                _fetchCartCount();
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: DegloorTheme.primary,
+                                foregroundColor: Colors.white,
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(DegloorTheme.radiusMD),
+                                ),
+                                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+                                minimumSize: const Size(0, 36),
+                              ),
+                              child: const Text('Add'),
+                            ),
+                        ],
+                      ),
                     ],
-                  ),
-                ),
-                FFButtonWidget(
-                  onPressed: (product.trackInventory == true && (product.stockQuantity ?? 0) <= 0)
-                      ? null
-                      : () async {
-                          await CartService.addToCart(
-                            context: context,
-                            businessId: widget.businessId,
-                            productId: product.id,
-                          );
-                          _fetchCartCount();
-                        },
-                  text: 'Add',
-                  options: FFButtonOptions(
-                    width: 70,
-                    height: 36,
-                    color: FlutterFlowTheme.of(context).primary,
-                    textStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                    borderRadius: BorderRadius.circular(18),
                   ),
                 ),
               ],

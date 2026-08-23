@@ -1,78 +1,67 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
-
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
-
-    Alternatively, build your application passing the --base-href parameter
-    specifying the new root path of your web app.
-
-    Fore more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-  -->
   <base href="$FLUTTER_BASE_HREF">
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-
-  <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="DEGLOOR ONE">
 
-  
-
   <meta name="robots" content="noindex" />
-
-  <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png" />
-
-  <!-- Open Graph & SEO tags -->
-  <meta property="og:title" content="DEGLOOR ONE" />
-  <meta property="og:description" content="Everything Local. One App." />
-  <meta property="og:image" content="icons/Icon-512.png" /> 
-  <meta name="twitter:title" content="DEGLOOR ONE" />
-  <meta name="twitter:description" content="Everything Local. One App." />
-  <meta name="twitter:image" content="icons/Icon-512.png" />
-  <meta name="twitter:card" content="summary_large_image" />
 
   <title> DEGLOOR ONE </title>
   <meta name="description" content="Everything Local. One App." />
 
-  <!-- Set a real Web client ID before enabling Google Sign-In on web. -->
-
-
-  <!-- Status Bar color in Safari browser (iOS) and PWA -->
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
   <meta name="theme-color" media="(prefers-color-scheme: light)" content="#0D2B5C">
   <meta name="theme-color" media="(prefers-color-scheme: dark)"  content="#0A1B3D">
 
   <link rel="manifest" href="manifest.json">
   
-  <!-- Google Maps API - Replace YOUR_GOOGLE_MAPS_WEB_API_KEY with a real key to enable maps -->
-  <!-- <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_WEB_API_KEY"></script> -->
   <script>
     window.__degloorGoogleMapsReady = function () {
       try {
-        return typeof google !== 'undefined' &&
-          !!google.maps &&
-          !!google.maps.MapTypeId;
+        return typeof google !== 'undefined' && !!google.maps && !!google.maps.MapTypeId;
       } catch (e) {
         return false;
       }
     };
   </script>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #F8F9FB;
+    }
+    .loading {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      -ms-transform: translate(-50%, -50%);
+      transform: translate(-50%, -50%);
+      flex-direction: column;
+      font-family: 'Inter', sans-serif;
+    }
+    .loading img {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 20px;
+    }
+  </style>
 </head>
 <body>
-  
-  
-  
-  
-  
+  <div id="loading_indicator" class="loading">
+    <img src="icons/Icon-192.png" alt="DEGLOOR ONE" />
+    <div style="color: #0D2B5C; font-weight: bold;">Loading...</div>
+  </div>
   <script>
     {{flutter_bootstrap_js}}
   </script>

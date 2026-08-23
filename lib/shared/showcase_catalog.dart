@@ -455,7 +455,7 @@ class ShowcaseCatalog {
           18.5510,
           77.5860,
           4.2,
-          'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80',
+          'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80',
         ),
         _biz(
           bizHardware,
@@ -468,7 +468,7 @@ class ShowcaseCatalog {
           18.5550,
           77.5800,
           4.8,
-          'https://images.unsplash.com/photo-1581244277943-fe4a9c777189?auto=format&fit=crop&w=800&q=80',
+          'https://images.unsplash.com/photo-1504148455328-c376907d081c?auto=format&fit=crop&w=800&q=80',
         ),
         _biz(
           bizMedical,
@@ -507,7 +507,7 @@ class ShowcaseCatalog {
           18.5515,
           77.5855,
           4.4,
-          'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=800&q=80',
+          'https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?auto=format&fit=crop&w=800&q=80',
         ),
         _biz(
           bizAuto,
@@ -600,7 +600,7 @@ class ShowcaseCatalog {
           'Paneer Butter Masala',
           'Creamy restaurant-style curry.',
           180,
-          'https://images.unsplash.com/photo-1631452180519-c014fe94643c?auto=format&fit=crop&w=400&q=80',
+          'https://images.unsplash.com/photo-1545231027-63b6f917b284?auto=format&fit=crop&w=400&q=80',
         ),
         _product(
           'prod-hammer',

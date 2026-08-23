@@ -372,10 +372,13 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
                   ],
                 ),
                 const SizedBox(height: 12),
-                SwitchListTile(
-                  title: const Text('Track Inventory'),
-                  value: trackInv,
-                  onChanged: (v) => setModalState(() => trackInv = v),
+                Material(
+                  color: Colors.transparent,
+                  child: SwitchListTile(
+                    title: const Text('Track Inventory'),
+                    value: trackInv,
+                    onChanged: (v) => setModalState(() => trackInv = v),
+                  ),
                 ),
                 const SizedBox(height: 20),
                 FFButtonWidget(
@@ -704,8 +707,10 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
                               ),
                               itemBuilder: (context, index) {
                                 final product = _products[index];
-                                return ListTile(
-                                  leading: ClipRRect(
+                                return Material(
+                                  color: Colors.transparent,
+                                  child: ListTile(
+                                    leading: ClipRRect(
                                     borderRadius: BorderRadius.circular(4),
                                     child: Container(
                                       width: 48,
@@ -832,9 +837,10 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
                                       ),
                                     ],
                                   ),
-                                );
-                              },
-                            ),
+                                ),
+                              );
+                            },
+                          ),
                           ),
                       ],
                     ),

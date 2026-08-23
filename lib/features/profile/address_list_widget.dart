@@ -163,9 +163,11 @@ class _AddressListWidgetState extends State<AddressListWidget> {
                         borderRadius: BorderRadius.circular(16),
                         side: BorderSide(color: theme.alternate),
                       ),
-                      child: ListTile(
-                        contentPadding: const EdgeInsets.all(16),
-                        title: Row(
+                      child: Material(
+                        color: Colors.transparent,
+                        child: ListTile(
+                          contentPadding: const EdgeInsets.all(16),
+                          title: Row(
                           children: [
                             Expanded(
                               child: Text(
@@ -226,9 +228,10 @@ class _AddressListWidgetState extends State<AddressListWidget> {
                           ],
                         ),
                       ),
-                    );
-                  },
-                );
+                    ),
+                  );
+                },
+              );
               },
             ),
           ),

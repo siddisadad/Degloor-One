@@ -1,12 +1,10 @@
+import 'package:degloor_one/core/degloor_theme.dart';
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/address_service.dart';
 import 'package:degloor_one/backend/discovery_service.dart';
-import 'package:degloor_one/components/cached_remote_image.dart';
-import 'package:degloor_one/shared/otp_copy.dart';
 import 'package:degloor_one/backend/cart_service.dart';
 import 'package:degloor_one/backend/order_service.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
-import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
 import 'package:flutter/material.dart';
@@ -234,19 +232,15 @@ class _CartWidgetState extends State<CartWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: scaffoldKey,
-      backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+      backgroundColor: DegloorTheme.background,
       appBar: AppBar(
-        backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-        title: Text(
-          'Your cart',
-          style: FlutterFlowTheme.of(context).headlineMedium.override(
-                fontFamily: 'Inter',
-                fontWeight: FontWeight.w700,
-                color: FlutterFlowTheme.of(context).primaryText,
-                fontSize: 22,
-              ),
-        ),
+        backgroundColor: Colors.white,
+        title: Text('Your Cart', style: DegloorTheme.headingMedium),
         elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_rounded),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: _model.cartItemsFuture,
@@ -257,7 +251,7 @@ class _CartWidgetState extends State<CartWidget> {
             return EmptyStateView(
               icon: Icons.shopping_cart_outlined,
               title: 'Your cart is empty',
-              description: 'Add milk, rice, or anything nearby and check out in a tap.',
+              description: 'Add items from nearby shops and they will appear here.',
               buttonText: 'Browse shops',
               onTap: () => context.goNamed('CustomerHome'),
             );
@@ -272,62 +266,53 @@ class _CartWidgetState extends State<CartWidget> {
           return Column(
             children: [
               if (_model.currentBusiness != null)
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                    decoration: BoxDecoration(
-                      color: FlutterFlowTheme.of(context).primary.withValues(alpha: 0.06),
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.store_rounded, color: FlutterFlowTheme.of(context).primary, size: 20),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            'Ordering from ${_model.currentBusiness!.name}',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                  fontFamily: 'Inter',
-                                  fontWeight: FontWeight.w700,
-                                ),
-                          ),
+                Container(
+                  width: double.infinity,
+                  color: DegloorTheme.primary.withValues(alpha: 0.05),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.storefront_rounded, color: DegloorTheme.primary, size: 20),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'Ordering from ${_model.currentBusiness!.name}',
+                          style: DegloorTheme.titleMedium.copyWith(color: DegloorTheme.primary),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               Expanded(
                 child: ListView.separated(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                  padding: const EdgeInsets.all(DegloorTheme.spacingMD),
                   itemCount: items.length,
-                  separatorBuilder: (context, index) => const SizedBox(height: 10),
+                  separatorBuilder: (context, index) => const SizedBox(height: 12),
                   itemBuilder: (context, index) {
                     final item = items[index];
                     final product = item['products'] as Map<String, dynamic>;
                     return Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: FlutterFlowTheme.of(context).secondaryBackground,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: FlutterFlowTheme.of(context).alternate),
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(DegloorTheme.radiusMD),
+                        boxShadow: DegloorTheme.softShadow,
+                        border: Border.all(color: DegloorTheme.border),
                       ),
                       child: Row(
                         children: [
                           ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: BorderRadius.circular(DegloorTheme.radiusSM),
                             child: Container(
-                              width: 64,
-                              height: 64,
-                              color: FlutterFlowTheme.of(context).primaryBackground,
+                              width: 70,
+                              height: 70,
+                              color: DegloorTheme.accent,
                               child: product['image_url'] != null
-                                  ? CachedRemoteImage(url: product['image_url'] as String)
-                                  : Icon(Icons.image_not_supported_rounded, color: FlutterFlowTheme.of(context).alternate),
+                                  ? Image.network(product['image_url'] as String, fit: BoxFit.cover)
+                                  : const Icon(Icons.image_not_supported_rounded, color: DegloorTheme.textSecondary),
                             ),
                           ),
-                          const SizedBox(width: 12),
+                          const SizedBox(width: 16),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -336,35 +321,34 @@ class _CartWidgetState extends State<CartWidget> {
                                   '${product['name']}',
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
-                                  style: FlutterFlowTheme.of(context).bodyLarge.override(
-                                        fontFamily: 'Inter',
-                                        fontWeight: FontWeight.w600,
-                                      ),
+                                  style: DegloorTheme.titleMedium,
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
                                   '₹${product['price']}',
-                                  style: FlutterFlowTheme.of(context).labelMedium.override(
-                                        fontFamily: 'Inter',
-                                        color: FlutterFlowTheme.of(context).primary,
-                                        fontWeight: FontWeight.w700,
-                                      ),
+                                  style: DegloorTheme.bodyLarge.copyWith(
+                                    color: DegloorTheme.primary,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ],
                             ),
                           ),
-                          Row(
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.remove_circle_outline_rounded),
-                                onPressed: () => _updateQuantity(item['id'], (item['quantity'] as int) - 1),
-                              ),
-                              Text('${item['quantity']}', style: FlutterFlowTheme.of(context).bodyMedium),
-                              IconButton(
-                                icon: const Icon(Icons.add_circle_outline_rounded),
-                                onPressed: () => _updateQuantity(item['id'], (item['quantity'] as int) + 1),
-                              ),
-                            ],
+                          Container(
+                            decoration: BoxDecoration(
+                              color: DegloorTheme.background,
+                              borderRadius: BorderRadius.circular(DegloorTheme.radiusMD),
+                            ),
+                            child: Row(
+                              children: [
+                                _qtyBtn(Icons.remove, () => _updateQuantity(item['id'], (item['quantity'] as int) - 1)),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                                  child: Text('${item['quantity']}', style: DegloorTheme.titleMedium),
+                                ),
+                                _qtyBtn(Icons.add, () => _updateQuantity(item['id'], (item['quantity'] as int) + 1)),
+                              ],
+                            ),
                           ),
                         ],
                       ),
@@ -372,109 +356,126 @@ class _CartWidgetState extends State<CartWidget> {
                   },
                 ),
               ),
+              // Checkout Summary
               Container(
                 decoration: BoxDecoration(
-                  color: FlutterFlowTheme.of(context).secondaryBackground,
-                  boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, -5))],
-                  borderRadius: const BorderRadius.only(topLeft: Radius.circular(24), topRight: Radius.circular(24)),
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, -5),
+                    ),
+                  ],
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(DegloorTheme.radiusXL)),
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.all(24.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Address Selection
-                      InkWell(
-                        onTap: () async {
-                           await context.pushNamed('AddressList');
-                           _fetchAddresses();
-                        },
+                padding: const EdgeInsets.all(DegloorTheme.spacingLG),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Address
+                    InkWell(
+                      onTap: () async {
+                         await context.pushNamed('AddressList');
+                         _fetchAddresses();
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: DegloorTheme.background,
+                          borderRadius: BorderRadius.circular(DegloorTheme.radiusMD),
+                        ),
                         child: Row(
                           children: [
-                            Icon(Icons.location_on_rounded, color: FlutterFlowTheme.of(context).secondaryText),
+                            const Icon(Icons.location_on_rounded, color: DegloorTheme.secondary),
                             const SizedBox(width: 12),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('Deliver to', style: FlutterFlowTheme.of(context).labelSmall),
-                                  Text(_model.selectedAddress?.addressText ?? 'Select Address',
-                                       style: FlutterFlowTheme.of(context).bodyMedium, maxLines: 1, overflow: TextOverflow.ellipsis),
+                                  Text('Deliver to', style: DegloorTheme.labelSmall),
+                                  Text(
+                                    _model.selectedAddress?.addressText ?? 'Select delivery address',
+                                    style: DegloorTheme.bodyMedium.copyWith(fontWeight: FontWeight.w600),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ],
                               ),
                             ),
-                            const Icon(Icons.keyboard_arrow_right_rounded),
+                            const Icon(Icons.chevron_right_rounded, color: DegloorTheme.textSecondary),
                           ],
                         ),
                       ),
-                      const SizedBox(height: 16),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text('Subtotal', style: FlutterFlowTheme.of(context).bodyLarge),
-                          Text(
-                            '₹$subtotal',
-                            style: FlutterFlowTheme.of(context).titleMedium.override(
-                                  fontFamily: 'Inter',
-                                  fontWeight: FontWeight.bold,
-                                ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text('Delivery Fee', style: FlutterFlowTheme.of(context).bodyMedium),
-                          Text('₹${_model.deliveryFee.toStringAsFixed(2)}',
-                              style: TextStyle(
-                                  color: _model.deliveryFee == 0 ? Colors.green : FlutterFlowTheme.of(context).primaryText,
-                                  fontWeight: FontWeight.bold)),
-                        ],
-                      ),
-                      const Divider(height: 32),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text('Total', style: FlutterFlowTheme.of(context).headlineSmall),
-                          Text(
-                            '₹${(subtotal + _model.deliveryFee).toStringAsFixed(2)}',
-                            style: FlutterFlowTheme.of(context).headlineSmall.override(
-                                  fontFamily: 'Inter',
-                                  fontWeight: FontWeight.w800,
-                                  color: FlutterFlowTheme.of(context).primary,
-                                ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        OtpCopy.checkoutHint,
-                        style: FlutterFlowTheme.of(context).labelSmall.override(
-                              fontFamily: 'Inter',
-                              color: FlutterFlowTheme.of(context).secondaryText,
-                            ),
-                      ),
-                      const SizedBox(height: 16),
-                      FFButtonWidget(
-                        onPressed: _model.isPlacingOrder ? null : () => _placeOrder(items),
-                        text: _model.isPlacingOrder ? 'Placing order...' : 'Place Order (COD)',
-                        options: FFButtonOptions(
-                          width: double.infinity,
-                          height: 54,
-                          color: FlutterFlowTheme.of(context).primary,
-                          textStyle: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-                          borderRadius: BorderRadius.circular(12),
+                    ),
+                    const SizedBox(height: 20),
+                    _summaryRow('Subtotal', '₹${subtotal.toStringAsFixed(0)}'),
+                    const SizedBox(height: 8),
+                    _summaryRow(
+                      'Delivery Fee',
+                      _model.deliveryFee == 0 ? 'FREE' : '₹${_model.deliveryFee.toStringAsFixed(0)}',
+                      valueColor: _model.deliveryFee == 0 ? DegloorTheme.success : null,
+                    ),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 12),
+                      child: Divider(),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Total', style: DegloorTheme.headingMedium),
+                        Text(
+                          '₹${(subtotal + _model.deliveryFee).toStringAsFixed(0)}',
+                          style: DegloorTheme.headingMedium.copyWith(color: DegloorTheme.primary, fontSize: 22),
                         ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    FFButtonWidget(
+                      onPressed: _model.isPlacingOrder ? null : () => _placeOrder(items),
+                      text: _model.isPlacingOrder ? 'Processing...' : 'Place Order (COD)',
+                      options: FFButtonOptions(
+                        width: double.infinity,
+                        height: 54,
+                        color: DegloorTheme.primary,
+                        textStyle: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                        borderRadius: BorderRadius.circular(DegloorTheme.radiusMD),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ],
           );
         },
       ),
+    );
+  }
+
+  Widget _qtyBtn(IconData icon, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(DegloorTheme.radiusMD),
+      child: Padding(
+        padding: const EdgeInsets.all(8),
+        child: Icon(icon, size: 18, color: DegloorTheme.primary),
+      ),
+    );
+  }
+
+  Widget _summaryRow(String label, String value, {Color? valueColor}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(label, style: DegloorTheme.bodyMedium.copyWith(color: DegloorTheme.textSecondary)),
+        Text(
+          value,
+          style: DegloorTheme.bodyLarge.copyWith(
+            fontWeight: FontWeight.w700,
+            color: valueColor ?? DegloorTheme.textPrimary,
+          ),
+        ),
+      ],
     );
   }
 }

@@ -15,6 +15,11 @@ class DiscoveryService {
     return PageResult(items: rows, hasMore: rows.length >= query.page.limit);
   }
 
+  Future<PageResult<ProductsRow>> searchProducts(DiscoverySearch query) async {
+    final rows = await _repository.searchProducts(query);
+    return PageResult(items: rows, hasMore: rows.length >= query.page.limit);
+  }
+
   Future<List<BusinessCategoriesRow>> categories() => _repository.categories();
 
   Future<List<UsersRow>> profile(String userId) {

@@ -202,11 +202,14 @@ class _AddAddressWidgetState extends State<AddAddressWidget> {
                         validator: (val) => (val == null || val.isEmpty) ? 'Please enter address details' : null,
                       ),
                       const SizedBox(height: 16),
-                      SwitchListTile(
-                        value: _model.isDefault,
-                        onChanged: (val) => setState(() => _model.isDefault = val),
-                        title: const Text('Set as Default Address'),
-                        activeThumbColor: FlutterFlowTheme.of(context).primary,
+                      Material(
+                        color: Colors.transparent,
+                        child: SwitchListTile(
+                          value: _model.isDefault,
+                          onChanged: (val) => setState(() => _model.isDefault = val),
+                          title: const Text('Set as Default Address'),
+                          activeThumbColor: FlutterFlowTheme.of(context).primary,
+                        ),
                       ),
                       const SizedBox(height: 24),
                       FFButtonWidget(
