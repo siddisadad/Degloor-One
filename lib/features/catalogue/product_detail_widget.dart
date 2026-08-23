@@ -107,7 +107,10 @@ class _ProductDetailWidgetState extends State<ProductDetailWidget> {
                     pinned: true,
                     flexibleSpace: FlexibleSpaceBar(
                       background: product.imageUrl != null
-                          ? CachedRemoteImage(url: product.imageUrl!)
+                          ? CachedRemoteImage(
+                              url: product.imageUrl!,
+                              height: 350,
+                            )
                           : Container(color: DegloorTheme.accent),
                     ),
                     backgroundColor: Colors.white,

@@ -187,7 +187,11 @@ class _EditBusinessProfileWidgetState extends State<EditBusinessProfileWidget> {
                             child: _isUploading
                                 ? const Center(child: CircularProgressIndicator())
                                 : (_uploadedImageUrl != null && _uploadedImageUrl!.isNotEmpty)
-                                    ? CachedRemoteImage(url: _uploadedImageUrl!)
+                                    ? CachedRemoteImage(
+                                        url: _uploadedImageUrl!,
+                                        width: 120,
+                                        height: 120,
+                                      )
                                     : Icon(Icons.business_rounded, size: 60, color: FlutterFlowTheme.of(context).secondaryText),
                           ),
                         ),

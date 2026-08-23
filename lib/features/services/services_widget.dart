@@ -11,6 +11,7 @@ import 'package:degloor_one/components/load_more_control.dart';
 import 'package:degloor_one/core/degloor_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:degloor_one/components/cached_remote_image.dart';
 import 'package:flutter/material.dart';
 import 'services_model.dart';
 export 'services_model.dart';
@@ -278,6 +279,8 @@ class _ServicesWidgetState extends State<ServicesWidget> {
                                       width: 60.0,
                                       height: 60.0,
                                       fit: BoxFit.cover,
+                                      memCacheWidth: memCachePx(context, 60),
+                                      memCacheHeight: memCachePx(context, 60),
                                     ),
                                   ),
                                   const SizedBox(width: 12.0),

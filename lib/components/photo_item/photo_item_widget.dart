@@ -1,6 +1,7 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:degloor_one/components/cached_remote_image.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'photo_item_model.dart';
 export 'photo_item_model.dart';
@@ -59,7 +60,11 @@ class _PhotoItemWidgetState extends State<PhotoItemWidget> {
               widget.desc,
               'https://dimg.dreamflow.cloud/v1/image/interior%20of%20hardware%20store%20shelves',
             ),
+            width: 140,
+            height: 100,
             fit: BoxFit.cover,
+            memCacheWidth: memCachePx(context, 140),
+            memCacheHeight: memCachePx(context, 100),
             errorWidget: (context, url, error) => Container(
               color: FlutterFlowTheme.of(context).primaryBackground,
               child: Icon(

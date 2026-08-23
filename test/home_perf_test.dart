@@ -1,13 +1,19 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:degloor_one/components/cached_remote_image.dart';
+import 'package:degloor_one/components/modern/hero_banner.dart';
 import 'package:degloor_one/components/modern/modern_product_card.dart';
 import 'package:degloor_one/features/home/customer_home_widget.dart';
 import 'package:degloor_one/flutter_flow/lat_lng.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 void main() {
+  setUpAll(() {
+    GoogleFonts.config.allowRuntimeFetching = false;
+  });
+
   test('home only refetches when location or radius changes', () {
     const degloor = ShowcaseCatalog.degloor;
     expect(
@@ -73,5 +79,37 @@ void main() {
       ),
     );
     expect(cachePx, 140);
+  });
+
+  testWidgets('home banner caches the remote image', (tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(body: HeroBanner()),
+      ),
+    );
+
+    expect(find.byType(CachedNetworkImage), findsOneWidget);
+    expect(find.text('Shop Local,\nDiscover More'), findsOneWidget);
+  });
+
+  testWidgets('cached remote image uses the parent box for mem cache',
+      (tester) async {
+    tester.view.devicePixelRatio = 2;
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: SizedBox(
+          width: 48,
+          height: 48,
+          child: CachedRemoteImage(url: 'https://example.com/x.jpg'),
+        ),
+      ),
+    );
+
+    final image =
+        tester.widget<CachedNetworkImage>(find.byType(CachedNetworkImage));
+    expect(image.memCacheWidth, 96);
+    expect(image.memCacheHeight, 96);
   });
 }

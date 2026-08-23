@@ -119,6 +119,8 @@ class _CustomerOrdersWidgetState extends State<CustomerOrdersWidget> {
               )
             : CachedRemoteImage(
                 url: imageUrl,
+                width: 48,
+                height: 48,
                 placeholderIcon: Icons.storefront_rounded,
               ),
       ),

@@ -28,14 +28,31 @@ class CachedRemoteImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (width != null || height != null) {
+      return _image(context, width, height);
+    }
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final inferredWidth =
+            constraints.maxWidth.isFinite ? constraints.maxWidth : null;
+        final inferredHeight =
+            constraints.maxHeight.isFinite ? constraints.maxHeight : null;
+        return _image(context, inferredWidth, inferredHeight);
+      },
+    );
+  }
+
+  Widget _image(BuildContext context, double? imageWidth, double? imageHeight) {
     final fallbackColor = FlutterFlowTheme.of(context).alternate;
     return CachedNetworkImage(
       imageUrl: url,
       fit: fit,
-      width: width,
-      height: height,
-      memCacheWidth: width == null ? null : memCachePx(context, width!),
-      memCacheHeight: height == null ? null : memCachePx(context, height!),
+      width: width ?? imageWidth,
+      height: height ?? imageHeight,
+      memCacheWidth:
+          imageWidth == null ? null : memCachePx(context, imageWidth),
+      memCacheHeight:
+          imageHeight == null ? null : memCachePx(context, imageHeight),
       errorWidget: (_, __, ___) => Icon(placeholderIcon, color: fallbackColor),
       placeholder: (_, __) => Center(
         child: SizedBox(

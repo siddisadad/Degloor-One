@@ -1,9 +1,14 @@
-import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:degloor_one/components/cached_remote_image.dart';
 import 'package:degloor_one/core/degloor_theme.dart';
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class HeroBanner extends StatelessWidget {
   const HeroBanner({super.key});
+
+  static const imageUrl =
+      'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&w=800&q=80';
 
   @override
   Widget build(BuildContext context) {
@@ -18,19 +23,21 @@ class HeroBanner extends StatelessWidget {
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(DegloorTheme.radiusLG),
-        image: DecorationImage(
-          image: const NetworkImage(
-            'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&w=800&q=80',
-          ),
-          fit: BoxFit.cover,
-          colorFilter: ColorFilter.mode(
-            DegloorTheme.primary.withValues(alpha: 0.4),
-            BlendMode.darken,
-          ),
-        ),
       ),
+      clipBehavior: Clip.antiAlias,
       child: Stack(
+        fit: StackFit.expand,
         children: [
+          CachedNetworkImage(
+            imageUrl: imageUrl,
+            fit: BoxFit.cover,
+            memCacheWidth: memCachePx(context, MediaQuery.sizeOf(context).width),
+            memCacheHeight: memCachePx(context, 180),
+            color: DegloorTheme.primary.withValues(alpha: 0.4),
+            colorBlendMode: BlendMode.darken,
+            placeholder: (_, __) => const SizedBox.shrink(),
+            errorWidget: (_, __, ___) => const SizedBox.shrink(),
+          ),
           Padding(
             padding: const EdgeInsets.all(DegloorTheme.spacingLG),
             child: Column(
@@ -56,7 +63,10 @@ class HeroBanner extends StatelessWidget {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(DegloorTheme.radiusSM),
                     ),
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 0,
+                    ),
                   ),
                   child: const Text(
                     'Explore Now',

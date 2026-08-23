@@ -1,3 +1,5 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:degloor_one/components/cached_remote_image.dart';
 import 'package:degloor_one/core/degloor_theme.dart';
 import 'package:degloor_one/components/modern/modern_product_list_item.dart';
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
@@ -218,7 +220,27 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
       child: Container(
         width: 80, height: 80,
         decoration: BoxDecoration(color: DegloorTheme.background, borderRadius: BorderRadius.circular(8), border: Border.all(color: DegloorTheme.border)),
-        child: _model.isUploading ? const Center(child: CircularProgressIndicator()) : (_model.uploadedImageUrl != null ? ClipRRect(borderRadius: BorderRadius.circular(8), child: Image.network(_model.uploadedImageUrl!, fit: BoxFit.cover)) : const Icon(Icons.add_a_photo_rounded, color: DegloorTheme.textSecondary)),
+        child: _model.isUploading
+            ? const Center(child: CircularProgressIndicator())
+            : (_model.uploadedImageUrl != null
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: CachedNetworkImage(
+                      imageUrl: _model.uploadedImageUrl!,
+                      width: 80,
+                      height: 80,
+                      fit: BoxFit.cover,
+                      memCacheWidth: memCachePx(context, 80),
+                      memCacheHeight: memCachePx(context, 80),
+                      placeholder: (_, __) =>
+                          Container(color: DegloorTheme.accent),
+                      errorWidget: (_, __, ___) => const Icon(
+                        Icons.image_not_supported_rounded,
+                        color: DegloorTheme.textSecondary,
+                      ),
+                    ),
+                  )
+                : const Icon(Icons.add_a_photo_rounded, color: DegloorTheme.textSecondary)),
       ),
     );
   }

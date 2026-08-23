@@ -5,6 +5,7 @@ import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/app_state.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:degloor_one/components/cached_remote_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:degloor_one/backend/shop_service.dart';
@@ -101,6 +102,11 @@ class _BusinessCard800502e0WidgetState
                       imageUrl: widget.imgDesc,
                       height: 140.0,
                       fit: BoxFit.cover,
+                      memCacheWidth: memCachePx(
+                        context,
+                        MediaQuery.sizeOf(context).width,
+                      ),
+                      memCacheHeight: memCachePx(context, 140),
                       errorWidget: (context, url, error) => Container(
                         color: FlutterFlowTheme.of(context).primaryBackground,
                         child: Icon(
