@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:degloor_one/shared/address_default_flag.dart';
 import 'package:degloor_one/shared/address_draft.dart';
 
 void main() {
@@ -9,7 +10,7 @@ void main() {
       addressText: 'Lane 3, Degloor',
       latitude: 18.55,
       longitude: 77.58,
-      isDefault: true,
+      defaultFlag: AddressDefaultFlag(true),
     );
     expect(draft.toInsertJson(), {
       'user_id': 'user-1',
@@ -35,7 +36,10 @@ void main() {
       latitude: 18.55,
       longitude: 77.58,
     );
-    expect(draft.toInsertJson(isDefault: true)['is_default'], isTrue);
+    expect(
+      draft.toInsertJson(defaultFlag: const AddressDefaultFlag(true))['is_default'],
+      isTrue,
+    );
     expect(draft.toInsertJson()['is_default'], isFalse);
   });
 
@@ -49,6 +53,7 @@ void main() {
     );
     expect(draft.title, 'Home');
     expect(draft.addressText, 'Degloor');
+    expect(draft.defaultFlag.isDefault, isFalse);
     expect(
       () => AddressDraft.fromForm(
         userId: 'user-1',

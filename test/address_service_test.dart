@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/backend/address_service.dart';
 import 'package:degloor_one/backend/supabase/database/tables/addresses_table.dart';
+import 'package:degloor_one/shared/address_default_flag.dart';
 import 'package:degloor_one/shared/address_draft.dart';
 import 'package:degloor_one/shared/saved_address.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
@@ -69,7 +70,7 @@ void main() {
         addressText: 'Near temple, Degloor',
         latitude: 18.55,
         longitude: 77.58,
-        isDefault: true,
+        defaultFlag: AddressDefaultFlag(true),
       ),
     );
     final rows =

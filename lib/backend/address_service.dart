@@ -1,6 +1,7 @@
 import 'package:degloor_one/backend/repositories/address_repository.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/core/error_handler.dart';
+import 'package:degloor_one/shared/address_default_flag.dart';
 import 'package:degloor_one/shared/address_draft.dart';
 import 'package:degloor_one/shared/saved_address.dart';
 
@@ -66,7 +67,7 @@ class AddressService {
 
     final row = await _repository.insert(
       normalized,
-      isDefault: makeDefault,
+      defaultFlag: AddressDefaultFlag(makeDefault),
     );
 
     if (makeDefault) {

@@ -1,4 +1,5 @@
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/address_default_flag.dart';
 import 'package:degloor_one/shared/address_draft.dart';
 
 /// Data access for saved customer addresses. Widgets should go through
@@ -23,14 +24,19 @@ class AddressRepository {
     return rows.isEmpty ? null : rows.first;
   }
 
-  Future<AddressesRow> insert(AddressDraft draft, {bool? isDefault}) {
-    return AddressesTable().insert(draft.toInsertJson(isDefault: isDefault));
+  Future<AddressesRow> insert(
+    AddressDraft draft, {
+    AddressDefaultFlag? defaultFlag,
+  }) {
+    return AddressesTable().insert(
+      draft.toInsertJson(defaultFlag: defaultFlag),
+    );
   }
 
   Future<void> clearDefaults(String userId) async {
     if (userId.isEmpty) return;
     await AddressesTable().update(
-      data: {'is_default': false},
+      data: const AddressDefaultFlag(false).toUpdateJson(),
       matchingRows: (q) => q.eq('user_id', userId),
     );
   }
@@ -41,7 +47,7 @@ class AddressRepository {
   }) async {
     if (userId.isEmpty || exceptId.isEmpty) return;
     await AddressesTable().update(
-      data: {'is_default': false},
+      data: const AddressDefaultFlag(false).toUpdateJson(),
       matchingRows: (q) => q.eq('user_id', userId).neq('id', exceptId),
     );
   }
@@ -52,7 +58,7 @@ class AddressRepository {
   }) async {
     if (id.isEmpty || userId.isEmpty) return;
     await AddressesTable().update(
-      data: {'is_default': true},
+      data: const AddressDefaultFlag(true).toUpdateJson(),
       matchingRows: (q) => q.eq('id', id).eq('user_id', userId),
     );
   }
