@@ -59,30 +59,23 @@ class DeliveryService {
     return PageResult(items: rows, hasMore: rows.length >= page.limit);
   }
 
-  static Future<DeliveryAssignmentsRow?> activeAssignment(String orderId) async {
-    if (orderId.isEmpty) return null;
-    final rows = await DeliveryAssignmentsTable().querySingleRow(
-      queryFn: (q) => q.eq('order_id', orderId).neq('status', 'delivered'),
-    );
-    return rows.isEmpty ? null : rows.first;
+  Future<DeliveryAssignmentsRow?> activeAssignment(String orderId) {
+    return _repository.activeAssignment(orderId);
   }
 
-  static Stream<List<DeliveryPartnersRow>> watchPartner(String partnerId) {
-    return DeliveryPartnersTable().stream(
-      primaryKey: 'id',
-      queryFn: (q) => q.eq('id', partnerId),
-    );
+  Stream<List<DeliveryPartnersRow>> watchPartner(String partnerId) {
+    return _repository.watchPartner(partnerId);
   }
 
-  static Future<void> acceptOrder(String orderId) {
+  Future<void> acceptOrder(String orderId) {
     return _rpc('accept_delivery_order', {'p_order_id': orderId});
   }
 
-  static Future<void> confirmPickup(String assignmentId) {
+  Future<void> confirmPickup(String assignmentId) {
     return _rpc('confirm_delivery_pickup', {'p_assignment_id': assignmentId});
   }
 
-  static Future<void> confirmDeliveryWithOtp({
+  Future<void> confirmDeliveryWithOtp({
     required String orderId,
     required String otp,
   }) {
@@ -92,7 +85,7 @@ class DeliveryService {
     });
   }
 
-  static Future<void> updatePartnerLocation({
+  Future<void> updatePartnerLocation({
     required double latitude,
     required double longitude,
     String? partnerId,
@@ -105,19 +98,11 @@ class DeliveryService {
       return;
     }
     if (kUseShowcaseData) {
-      final query = ShowcaseQuery();
-      if (partnerId != null && partnerId.isNotEmpty) {
-        query.eq('id', partnerId);
-      } else {
-        query.eq('user_id', ShowcaseCatalog.riderId);
-      }
-      ShowcaseCatalog.update(
-        'delivery_partners',
-        {
-          'current_latitude': latitude,
-          'current_longitude': longitude,
-        },
-        query,
+      await _repository.updateLocation(
+        latitude: latitude,
+        longitude: longitude,
+        partnerId: partnerId,
+        userId: ShowcaseCatalog.riderId,
       );
       return;
     }
@@ -137,7 +122,7 @@ class DeliveryService {
         current == OrderLifecycle.outForDelivery;
   }
 
-  static Future<String?> fetchMyDeliveryOtp(String orderId) async {
+  Future<String?> fetchMyDeliveryOtp(String orderId) async {
     if (JavaApiConfig.enabled) {
       return OrderApi.deliveryOtp(orderId);
     }

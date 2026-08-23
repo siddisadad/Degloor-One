@@ -479,7 +479,7 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
               ),
               onPressed: () async {
                 try {
-                  await DeliveryService.confirmDeliveryWithOtp(
+                  await DeliveryService.instance.confirmDeliveryWithOtp(
                     orderId: order.id,
                     otp: otpController.text.trim(),
                   );

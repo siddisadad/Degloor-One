@@ -83,7 +83,7 @@ void main() {
   });
 
   test('showcase delivery OTP marks the order delivered', () async {
-    await DeliveryService.confirmDeliveryWithOtp(
+    await DeliveryService.instance.confirmDeliveryWithOtp(
       orderId: ShowcaseCatalog.orderOut,
       otp: '4821',
     );
@@ -96,7 +96,7 @@ void main() {
 
   test('showcase delivery OTP rejects a wrong code', () async {
     await expectLater(
-      DeliveryService.confirmDeliveryWithOtp(
+      DeliveryService.instance.confirmDeliveryWithOtp(
         orderId: ShowcaseCatalog.orderOut,
         otp: '0000',
       ),
@@ -125,7 +125,7 @@ void main() {
     expect(statuses, isNotEmpty);
     expect(statuses.first, isNot(OrderLifecycle.delivered));
 
-    await DeliveryService.confirmDeliveryWithOtp(
+    await DeliveryService.instance.confirmDeliveryWithOtp(
       orderId: ShowcaseCatalog.orderOut,
       otp: '4821',
     );

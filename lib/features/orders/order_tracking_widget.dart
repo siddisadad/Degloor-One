@@ -191,7 +191,7 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
                     // OTP is fetched via RPC so partners cannot read it from the orders row.
                     if (actions.showDeliveryOtp)
                       FutureBuilder<String?>(
-                        future: DeliveryService.fetchMyDeliveryOtp(order.id),
+                        future: DeliveryService.instance.fetchMyDeliveryOtp(order.id),
                         builder: (context, otpSnapshot) =>
                             _buildOtpCard(otpSnapshot.data),
                       ),
@@ -374,13 +374,13 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
 
   Widget _buildDeliveryPartnerInfo(String orderId) {
     return FutureBuilder<DeliveryAssignmentsRow?>(
-      future: DeliveryService.activeAssignment(orderId),
+      future: DeliveryService.instance.activeAssignment(orderId),
       builder: (context, assignmentSnapshot) {
         final assignment = assignmentSnapshot.data;
         if (assignment == null) return Container();
 
         return StreamBuilder<List<DeliveryPartnersRow>>(
-          stream: DeliveryService.watchPartner(assignment.deliveryPartnerId),
+          stream: DeliveryService.instance.watchPartner(assignment.deliveryPartnerId),
           builder: (context, partnerSnapshot) {
             final partner = partnerSnapshot.data?.firstOrNull;
             if (partner == null) return Container();

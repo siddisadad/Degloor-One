@@ -92,7 +92,7 @@ class LocationService {
         locationSettings: const LocationSettings(accuracy: LocationAccuracy.medium),
       );
 
-      await DeliveryService.updatePartnerLocation(
+      await DeliveryService.instance.updatePartnerLocation(
         latitude: position.latitude,
         longitude: position.longitude,
         partnerId: partnerId,

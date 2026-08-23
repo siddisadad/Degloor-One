@@ -53,4 +53,40 @@ class DeliveryRepository {
       offset: page.offset,
     );
   }
+
+  Future<DeliveryAssignmentsRow?> activeAssignment(String orderId) async {
+    if (orderId.isEmpty) return null;
+    final rows = await DeliveryAssignmentsTable().queryRows(
+      queryFn: (q) => q.eq('order_id', orderId).neq('status', 'delivered'),
+      limit: 1,
+    );
+    return rows.isEmpty ? null : rows.first;
+  }
+
+  Stream<List<DeliveryPartnersRow>> watchPartner(String partnerId) {
+    return DeliveryPartnersTable().stream(
+      primaryKey: 'id',
+      queryFn: (q) => q.eq('id', partnerId),
+    );
+  }
+
+  Future<void> updateLocation({
+    required double latitude,
+    required double longitude,
+    String? partnerId,
+    String? userId,
+  }) {
+    return DeliveryPartnersTable().update(
+      data: {
+        'current_latitude': latitude,
+        'current_longitude': longitude,
+      },
+      matchingRows: (q) {
+        if (partnerId != null && partnerId.isNotEmpty) {
+          return q.eq('id', partnerId);
+        }
+        return q.eq('user_id', userId);
+      },
+    );
+  }
 }
