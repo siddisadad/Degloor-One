@@ -9,6 +9,7 @@ import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/l10n/app_localizations.dart';
 
 import 'package:degloor_one/backend/discovery_service.dart';
+import 'package:degloor_one/backend/user_service.dart';
 import 'package:degloor_one/backend/service_marketplace_service.dart';
 import 'package:degloor_one/features/catalogue/product_detail_widget.dart';
 import 'package:degloor_one/features/services/service_provider_display.dart';
@@ -58,7 +59,7 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
     FFAppState.instance.addListener(_onAppStateChanged);
 
     if (loggedIn && currentUserUid.length > 10) {
-      _model.userProfileFuture = DiscoveryService.instance.profile(currentUserUid);
+      _model.userProfileFuture = UserService.instance.profile(currentUserUid);
     }
     _categoriesFuture = DiscoveryService.instance.categories();
     _categoriesFuture?.then((rows) {

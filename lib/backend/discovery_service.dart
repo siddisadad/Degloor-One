@@ -1,5 +1,6 @@
 import 'package:degloor_one/backend/repositories/discovery_repository.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/backend/user_service.dart';
 import 'package:degloor_one/shared/page_query.dart';
 
 export 'package:degloor_one/backend/repositories/discovery_repository.dart'
@@ -25,13 +26,11 @@ class DiscoveryService {
 
   Future<List<BusinessCategoriesRow>> categories() => _repository.categories();
 
-  Future<List<UsersRow>> profile(String userId) {
-    if (userId.isEmpty) return Future.value(const []);
-    return _repository.usersByIds([userId]);
-  }
+  Future<List<UsersRow>> profile(String userId) =>
+      UserService.instance.profile(userId);
 
   Future<List<UsersRow>> usersByIds(List<String> ids) =>
-      _repository.usersByIds(ids);
+      UserService.instance.byIds(ids);
 
   Future<List<BusinessesRow>> businessesByIds(List<String> ids) =>
       _repository.businessesByIds(ids);

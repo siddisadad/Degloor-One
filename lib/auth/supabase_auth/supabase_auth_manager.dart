@@ -6,6 +6,7 @@ import 'package:degloor_one/auth/auth_manager.dart';
 import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/backend/supabase/supabase_connection.dart';
+import 'package:degloor_one/backend/user_service.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:degloor_one/core/error_handler.dart';
@@ -242,26 +243,16 @@ class SupabaseAuthManager extends AuthManager
       final user = await signInFunc();
       if (user == null) return null;
 
-      // Ensure user record exists in the public.users table and get their role
-      // Added timeout to prevent infinite hang on slow networks
-      final rows = await UsersTable().queryRows(
-        queryFn: (q) => q.eq('id', user.id),
-      ).timeout(const Duration(seconds: 10));
-
-      String? actualRole;
-      if (rows.isEmpty) {
-        actualRole = 'customer';
-        await UsersTable().insert({
-          'id': user.id,
-          'email': user.email,
-          'phone_number': user.phone,
-          'full_name': user.userMetadata?['full_name'],
-          'avatar_url': user.userMetadata?['avatar_url'],
-          'role': actualRole,
-        });
-      } else {
-        actualRole = rows.first.role;
-      }
+      final profile = await UserService.instance
+          .ensureOnSignIn(
+            userId: user.id,
+            email: user.email,
+            phone: user.phone,
+            fullName: user.userMetadata?['full_name'] as String?,
+            avatarUrl: user.userMetadata?['avatar_url'] as String?,
+          )
+          .timeout(const Duration(seconds: 10));
+      final actualRole = profile.role;
 
       final authUser = DegloorOneSupabaseUser(user, actualRole);
 

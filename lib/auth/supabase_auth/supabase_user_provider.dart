@@ -3,6 +3,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/auth/password_recovery.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/backend/user_service.dart';
 
 export '../base_auth_user_provider.dart';
 
@@ -68,12 +69,7 @@ class DegloorOneSupabaseUser extends BaseAuthUser {
     await SupaFlow.client.auth.refreshSession().then((_) async {
       user = SupaFlow.client.auth.currentUser;
       if (user != null) {
-        final rows = await UsersTable().queryRows(
-          queryFn: (q) => q.eq('id', user!.id),
-        );
-        if (rows.isNotEmpty) {
-          role = rows.first.role;
-        }
+        role = await UserService.instance.roleFor(user!.id);
       }
     });
   }
@@ -103,12 +99,7 @@ Stream<BaseAuthUser> degloorOneSupabaseUserStream() {
       final user = authState?.session?.user;
       String? role;
       if (user != null && !kUsesDeadFlutterFlowHost) {
-        final rows = await UsersTable().queryRows(
-          queryFn: (q) => q.eq('id', user.id),
-        );
-        if (rows.isNotEmpty) {
-          role = rows.first.role;
-        }
+        role = await UserService.instance.roleFor(user.id);
       }
       currentUser = DegloorOneSupabaseUser(user, role);
       return currentUser!;
