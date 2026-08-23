@@ -1,8 +1,7 @@
 import 'package:degloor_one/components/order_status_chip.dart';
-import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
+import 'package:degloor_one/core/degloor_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 /// Shared order card used by customer and shop lists.
 class OrderListCard extends StatelessWidget {
@@ -31,24 +30,22 @@ class OrderListCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = FlutterFlowTheme.of(context);
-    final tokens = theme.designToken;
     final shortId = orderId.length >= 8 ? orderId.substring(0, 8) : orderId;
 
     return Material(
-      color: theme.secondaryBackground,
-      borderRadius: BorderRadius.circular(tokens.radius.lg),
+      color: DegloorTheme.cardBackground,
+      borderRadius: BorderRadius.circular(DegloorTheme.radiusLG),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
         child: Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(tokens.radius.lg),
-            border: Border.all(color: theme.alternate),
-            boxShadow: [tokens.shadow.sm],
+            borderRadius: BorderRadius.circular(DegloorTheme.radiusLG),
+            border: Border.all(color: DegloorTheme.border),
+            boxShadow: DegloorTheme.softShadow,
           ),
           child: Padding(
-            padding: EdgeInsets.all(tokens.spacing.md),
+            padding: const EdgeInsets.all(DegloorTheme.spacingMD),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -56,7 +53,7 @@ class OrderListCard extends StatelessWidget {
                   children: [
                     if (leading != null) ...[
                       leading!,
-                      SizedBox(width: tokens.spacing.sm),
+                      const SizedBox(width: DegloorTheme.spacingSM),
                     ],
                     Expanded(
                       child: Column(
@@ -66,17 +63,14 @@ class OrderListCard extends StatelessWidget {
                             title,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: theme.titleSmall.override(
-                              font: GoogleFonts.inter(),
-                              fontWeight: FontWeight.w700,
-                            ),
+                            style: DegloorTheme.titleMedium,
                           ),
                           const SizedBox(height: 2),
                           Text(
                             'Order #$shortId',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: theme.labelSmall,
+                            style: DegloorTheme.labelSmall,
                           ),
                           if (subtitle != null) ...[
                             const SizedBox(height: 2),
@@ -84,16 +78,13 @@ class OrderListCard extends StatelessWidget {
                               subtitle!,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: theme.bodySmall.override(
-                                font: GoogleFonts.inter(),
-                                color: theme.secondaryText,
-                              ),
+                              style: DegloorTheme.bodySmall,
                             ),
                           ],
                         ],
                       ),
                     ),
-                    SizedBox(width: tokens.spacing.sm),
+                    const SizedBox(width: DegloorTheme.spacingSM),
                     Flexible(
                       child: Align(
                         alignment: Alignment.centerRight,
@@ -102,7 +93,7 @@ class OrderListCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                Divider(height: tokens.spacing.lg, color: theme.alternate),
+                const Divider(height: DegloorTheme.spacingLG, color: DegloorTheme.border),
                 Row(
                   children: [
                     Expanded(
@@ -112,21 +103,20 @@ class OrderListCard extends StatelessWidget {
                             : dateTimeFormat('MMM d, yyyy · HH:mm', createdAt),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: theme.bodySmall,
+                        style: DegloorTheme.bodySmall,
                       ),
                     ),
                     Text(
                       '₹${totalAmount.toStringAsFixed(2)}',
-                      style: theme.titleSmall.override(
-                        font: GoogleFonts.inter(),
-                        color: theme.primary,
+                      style: DegloorTheme.titleMedium.copyWith(
+                        color: DegloorTheme.primary,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
                   ],
                 ),
                 if (footer != null) ...[
-                  SizedBox(height: tokens.spacing.md),
+                  const SizedBox(height: DegloorTheme.spacingMD),
                   footer!,
                 ],
               ],

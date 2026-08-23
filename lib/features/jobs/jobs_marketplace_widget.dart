@@ -5,9 +5,11 @@ import 'package:degloor_one/shared/marketplace_joins.dart';
 import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/components/apply_job_sheet/apply_job_sheet_widget.dart';
 import 'package:degloor_one/components/degloor_app_bar.dart';
+import 'package:degloor_one/components/degloor_filter_chip.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/components/job_card/job_card_widget.dart';
-import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
+import 'package:degloor_one/components/load_more_control.dart';
+import 'package:degloor_one/core/degloor_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_model.dart';
 import 'package:flutter/material.dart';
 import 'package:degloor_one/features/jobs/jobs_marketplace_model.dart';
@@ -115,7 +117,7 @@ class _JobsMarketplaceWidgetState extends State<JobsMarketplaceWidget> {
       },
       child: Scaffold(
         key: scaffoldKey,
-        backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+        backgroundColor: DegloorTheme.background,
         appBar: degloorAppBar(context, title: 'Local jobs'),
         body: SafeArea(
           child: Align(
@@ -126,35 +128,35 @@ class _JobsMarketplaceWidgetState extends State<JobsMarketplaceWidget> {
             children: [
               Container(
                 width: double.infinity,
-                decoration: BoxDecoration(
-                  color: FlutterFlowTheme.of(context).secondaryBackground,
-                ),
+                color: DegloorTheme.cardBackground,
                 child: Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.all(DegloorTheme.spacingMD),
                   child: Column(
                     children: [
                       TextFormField(
                         controller: _model.searchBarController,
                         focusNode: _model.searchBarFocusNode,
                         decoration: InputDecoration(
-                          labelText: 'Search for jobs...',
-                          labelStyle: FlutterFlowTheme.of(context).labelMedium,
-                          hintStyle: FlutterFlowTheme.of(context).labelMedium,
+                          hintText: 'Search for jobs...',
+                          hintStyle: DegloorTheme.bodyMedium.copyWith(
+                            color: DegloorTheme.textSecondary,
+                          ),
                           enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: FlutterFlowTheme.of(context).alternate,
-                            ),
-                            borderRadius: BorderRadius.circular(12),
+                            borderSide:
+                                const BorderSide(color: DegloorTheme.border),
+                            borderRadius:
+                                BorderRadius.circular(DegloorTheme.radiusMD),
                           ),
                           focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: FlutterFlowTheme.of(context).primary,
+                            borderSide: const BorderSide(
+                              color: DegloorTheme.primary,
                             ),
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius:
+                                BorderRadius.circular(DegloorTheme.radiusMD),
                           ),
-                          prefixIcon: Icon(
+                          prefixIcon: const Icon(
                             Icons.search_rounded,
-                            color: FlutterFlowTheme.of(context).secondaryText,
+                            color: DegloorTheme.textSecondary,
                           ),
                           suffixIcon: _model.searchBarController!.text.isNotEmpty
                               ? InkWell(
@@ -162,49 +164,37 @@ class _JobsMarketplaceWidgetState extends State<JobsMarketplaceWidget> {
                                     _model.searchBarController?.clear();
                                     _loadJobs();
                                   },
-                                  child: Icon(
+                                  child: const Icon(
                                     Icons.clear,
-                                    color: FlutterFlowTheme.of(context).secondaryText,
+                                    color: DegloorTheme.textSecondary,
                                     size: 20,
                                   ),
                                 )
                               : null,
                           filled: true,
-                          fillColor: FlutterFlowTheme.of(context).primaryBackground,
+                          fillColor: DegloorTheme.background,
                         ),
-                        style: FlutterFlowTheme.of(context).bodyMedium,
+                        style: DegloorTheme.bodyMedium,
                         onFieldSubmitted: (_) => _loadJobs(),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: DegloorTheme.spacingMD),
                       SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
                         child: Row(
-                          children: ['All', 'Full-time', 'Part-time', 'Daily Wage'].map((type) {
-                            final isSelected = (_model.jobTypeFilter ?? 'All') == type;
-                            return Padding(
-                              padding: const EdgeInsets.only(right: 8.0),
-                              child: ChoiceChip(
-                                label: Text(type),
-                                selected: isSelected,
-                                onSelected: (selected) {
-                                  setState(() {
-                                    _model.jobTypeFilter = selected ? type : 'All';
-                                  });
-                                  _loadJobs();
-                                },
-                                selectedColor: FlutterFlowTheme.of(context).primary,
-                                backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-                                labelStyle: TextStyle(
-                                  color: isSelected ? Colors.white : FlutterFlowTheme.of(context).primaryText,
-                                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                  side: BorderSide(
-                                    color: isSelected ? Colors.transparent : FlutterFlowTheme.of(context).alternate,
-                                  ),
-                                ),
-                              ),
+                          children: ['All', 'Full-time', 'Part-time', 'Daily Wage']
+                              .map((type) {
+                            final isSelected =
+                                (_model.jobTypeFilter ?? 'All') == type;
+                            return DegloorFilterChip(
+                              label: type,
+                              selected: isSelected,
+                              onTap: () {
+                                setState(() {
+                                  _model.jobTypeFilter =
+                                      isSelected ? 'All' : type;
+                                });
+                                _loadJobs();
+                              },
                             );
                           }).toList(),
                         ),
@@ -215,7 +205,11 @@ class _JobsMarketplaceWidgetState extends State<JobsMarketplaceWidget> {
               ),
               Expanded(
                 child: _loading && _jobs.isEmpty
-                    ? const Center(child: CircularProgressIndicator())
+                    ? const Center(
+                        child: CircularProgressIndicator(
+                          color: DegloorTheme.primary,
+                        ),
+                      )
                     : _jobs.isEmpty
                         ? EmptyStateView(
                             icon: Icons.work_outline_rounded,
@@ -230,20 +224,13 @@ class _JobsMarketplaceWidgetState extends State<JobsMarketplaceWidget> {
                             },
                           )
                         : ListView.builder(
-                            padding: const EdgeInsets.all(16),
+                            padding: const EdgeInsets.all(DegloorTheme.spacingMD),
                             itemCount: _jobs.length + (_hasMore ? 1 : 0),
                             itemBuilder: (context, index) {
                               if (index >= _jobs.length) {
-                                return Padding(
-                                  padding: const EdgeInsets.only(top: 8),
-                                  child: TextButton(
-                                    onPressed: _loading
-                                        ? null
-                                        : () => _loadJobs(loadMore: true),
-                                    child: Text(
-                                      _loading ? 'Loading...' : 'Load more',
-                                    ),
-                                  ),
+                                return LoadMoreControl(
+                                  loading: _loading,
+                                  onPressed: () => _loadJobs(loadMore: true),
                                 );
                               }
                               final job = _jobs[index];

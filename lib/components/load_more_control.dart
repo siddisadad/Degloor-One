@@ -1,6 +1,5 @@
-import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
+import 'package:degloor_one/core/degloor_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 /// Footer control for paged lists (orders, inbox).
 class LoadMoreControl extends StatelessWidget {
@@ -15,25 +14,23 @@ class LoadMoreControl extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = FlutterFlowTheme.of(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(8, 4, 8, 16),
       child: TextButton(
         onPressed: loading ? null : onPressed,
         child: loading
-            ? SizedBox(
+            ? const SizedBox(
                 height: 18,
                 width: 18,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  color: theme.primary,
+                  color: DegloorTheme.primary,
                 ),
               )
             : Text(
                 'Load more',
-                style: theme.titleSmall.override(
-                  font: GoogleFonts.inter(),
-                  color: theme.primary,
+                style: DegloorTheme.titleMedium.copyWith(
+                  color: DegloorTheme.primary,
                   fontWeight: FontWeight.w700,
                 ),
               ),

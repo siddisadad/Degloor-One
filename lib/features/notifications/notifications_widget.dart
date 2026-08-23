@@ -1,15 +1,14 @@
 import 'dart:async';
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/notification_service.dart';
-import 'package:degloor_one/shared/app_notification.dart';
-import 'package:degloor_one/shared/page_query.dart';
+import 'package:degloor_one/components/degloor_app_bar.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/components/load_more_control.dart';
-import 'package:degloor_one/flutter_flow/flutter_flow_icon_button.dart';
-import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
+import 'package:degloor_one/core/degloor_theme.dart';
+import 'package:degloor_one/shared/app_notification.dart';
+import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:degloor_one/core/error_handler.dart';
 import 'notifications_model.dart';
 export 'notifications_model.dart';
@@ -129,8 +128,8 @@ class _NotificationsWidgetState extends State<NotificationsWidget> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Clear All'),
-        content: const Text('Are you sure you want to delete all notifications?'),
+        title: const Text('Clear all'),
+        content: const Text('Delete every notification in this inbox?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -138,7 +137,7 @@ class _NotificationsWidgetState extends State<NotificationsWidget> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Clear All'),
+            child: const Text('Clear all'),
           ),
         ],
       ),
@@ -173,32 +172,10 @@ class _NotificationsWidgetState extends State<NotificationsWidget> {
       },
       child: Scaffold(
         key: scaffoldKey,
-        backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-        appBar: AppBar(
-          backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-          automaticallyImplyLeading: false,
-          leading: FlutterFlowIconButton(
-            borderColor: Colors.transparent,
-            borderRadius: 8.0,
-            borderWidth: 1.0,
-            buttonSize: 40.0,
-            icon: Icon(
-              Icons.arrow_back_rounded,
-              color: FlutterFlowTheme.of(context).primaryText,
-              size: 22.0,
-            ),
-            onPressed: () async {
-              context.safePop();
-            },
-          ),
-          title: Text(
-            'Notifications',
-            style: FlutterFlowTheme.of(context).headlineMedium.override(
-                  font: GoogleFonts.inter(fontWeight: FontWeight.w700),
-                  color: FlutterFlowTheme.of(context).primaryText,
-                  fontSize: 22.0,
-                ),
-          ),
+        backgroundColor: DegloorTheme.background,
+        appBar: degloorAppBar(
+          context,
+          title: 'Notifications',
           actions: [
             if (_notifications.isNotEmpty)
               PopupMenuButton<String>(
@@ -220,16 +197,10 @@ class _NotificationsWidgetState extends State<NotificationsWidget> {
                 ],
               ),
           ],
-          centerTitle: false,
-          elevation: 0.0,
         ),
         body: _isLoading
-            ? Center(
-                child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    FlutterFlowTheme.of(context).primary,
-                  ),
-                ),
+            ? const Center(
+                child: CircularProgressIndicator(color: DegloorTheme.primary),
               )
             : _notifications.isEmpty
                 ? EmptyStateView(
@@ -239,9 +210,11 @@ class _NotificationsWidgetState extends State<NotificationsWidget> {
                     buttonText: 'Back to home',
                     onTap: () => context.goNamed('CustomerHome'),
                   )
-                : ListView.builder(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
+                : ListView.separated(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
                     itemCount: _notifications.length + (_hasMore ? 1 : 0),
+                    separatorBuilder: (_, __) =>
+                        const SizedBox(height: DegloorTheme.spacingSM),
                     itemBuilder: (context, index) {
                       if (index >= _notifications.length) {
                         return LoadMoreControl(
@@ -250,79 +223,98 @@ class _NotificationsWidgetState extends State<NotificationsWidget> {
                         );
                       }
                       final notification = _notifications[index];
-                      return Padding(
-                        padding: const EdgeInsetsDirectional.fromSTEB(16, 8, 16, 8),
-                        child: InkWell(
-                          onTap: () {
-                            if (!notification.isRead) {
-                              _markAsRead(notification.id);
-                            }
-                          },
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: notification.isRead
-                                  ? FlutterFlowTheme.of(context).secondaryBackground
-                                  : FlutterFlowTheme.of(context).primaryBackground.withValues(alpha: 0.5),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: notification.isRead
-                                    ? FlutterFlowTheme.of(context).alternate
-                                    : FlutterFlowTheme.of(context).primary,
-                                width: notification.isRead ? 1 : 2,
-                              ),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(16),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          notification.title,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: FlutterFlowTheme.of(context).titleSmall.override(
-                                                font: GoogleFonts.inter(),
-                                                fontWeight: notification.isRead ? FontWeight.normal : FontWeight.bold,
-                                              ),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        dateTimeFormat('MMM d, h:mm a', notification.createdAt),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: FlutterFlowTheme.of(context).bodySmall,
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    notification.message,
-                                    style: FlutterFlowTheme.of(context).bodyMedium,
-                                  ),
-                                  if (!notification.isRead)
-                                    Padding(
-                                      padding: const EdgeInsets.only(top: 8.0),
-                                      child: Text(
-                                        'Tap to mark as read',
-                                        style: FlutterFlowTheme.of(context).bodySmall.override(
-                                              font: GoogleFonts.inter(),
-                                              color: FlutterFlowTheme.of(context).primary,
-                                              fontStyle: FontStyle.italic,
-                                            ),
-                                      ),
-                                    ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
+                      return _NotificationTile(
+                        notification: notification,
+                        onTap: () {
+                          if (!notification.isRead) {
+                            _markAsRead(notification.id);
+                          }
+                        },
                       );
                     },
                   ),
+      ),
+    );
+  }
+}
+
+class _NotificationTile extends StatelessWidget {
+  const _NotificationTile({
+    required this.notification,
+    required this.onTap,
+  });
+
+  final AppNotification notification;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final unread = !notification.isRead;
+    return Material(
+      color: unread ? DegloorTheme.accent : DegloorTheme.cardBackground,
+      borderRadius: BorderRadius.circular(DegloorTheme.radiusMD),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(DegloorTheme.radiusMD),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(DegloorTheme.radiusMD),
+            border: Border.all(
+              color: unread ? DegloorTheme.primary.withValues(alpha: 0.25) : DegloorTheme.border,
+            ),
+            boxShadow: DegloorTheme.softShadow,
+          ),
+          padding: const EdgeInsets.all(DegloorTheme.spacingMD),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 8,
+                height: 8,
+                margin: const EdgeInsets.only(top: 6, right: 10),
+                decoration: BoxDecoration(
+                  color: unread ? DegloorTheme.secondary : Colors.transparent,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            notification.title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: DegloorTheme.titleMedium.copyWith(
+                              fontWeight: unread ? FontWeight.w700 : FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          dateTimeFormat('MMM d, h:mm a', notification.createdAt),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: DegloorTheme.bodySmall,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      notification.message,
+                      style: DegloorTheme.bodyMedium.copyWith(
+                        color: DegloorTheme.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

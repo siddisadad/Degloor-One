@@ -1,7 +1,5 @@
-import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
-import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
+import 'package:degloor_one/core/degloor_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class EmptyStateView extends StatelessWidget {
   const EmptyStateView({
@@ -23,7 +21,6 @@ class EmptyStateView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = FlutterFlowTheme.of(context);
     return LayoutBuilder(
       builder: (context, constraints) {
         final bounded = constraints.hasBoundedHeight &&
@@ -44,19 +41,17 @@ class EmptyStateView extends StatelessWidget {
                 width: box,
                 height: box,
                 decoration: BoxDecoration(
-                  color: theme.primary.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(20),
+                  color: DegloorTheme.accent,
+                  borderRadius: BorderRadius.circular(DegloorTheme.radiusLG),
                 ),
-                child: Icon(icon, size: iconSize, color: theme.primary),
+                child: Icon(icon, size: iconSize, color: DegloorTheme.primary),
               ),
               SizedBox(height: compact ? 8 : 16),
               Text(
                 title,
                 textAlign: TextAlign.center,
-                style: theme.headlineSmall.override(
-                  fontFamily: GoogleFonts.inter().fontFamily,
-                  fontWeight: FontWeight.w700,
-                  fontSize: compact ? 18 : null,
+                style: DegloorTheme.headingMedium.copyWith(
+                  fontSize: compact ? 18 : 20,
                 ),
               ),
               if (description != null) ...[
@@ -66,26 +61,28 @@ class EmptyStateView extends StatelessWidget {
                   textAlign: TextAlign.center,
                   maxLines: compact ? 3 : 8,
                   overflow: TextOverflow.ellipsis,
-                  style: theme.bodyMedium.override(
-                    fontFamily: GoogleFonts.inter().fontFamily,
-                    color: theme.secondaryText,
+                  style: DegloorTheme.bodyMedium.copyWith(
+                    color: DegloorTheme.textSecondary,
                   ),
                 ),
               ],
               if (buttonText != null && onTap != null) ...[
                 SizedBox(height: compact ? 12 : 24),
-                FFButtonWidget(
+                FilledButton(
                   onPressed: onTap,
-                  text: buttonText!,
-                  options: FFButtonOptions(
-                    height: compact ? 40 : 44,
+                  style: FilledButton.styleFrom(
+                    backgroundColor: DegloorTheme.primary,
+                    foregroundColor: Colors.white,
+                    minimumSize: Size(0, compact ? 40 : 44),
                     padding: const EdgeInsets.symmetric(horizontal: 24),
-                    color: theme.primary,
-                    textStyle: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(DegloorTheme.radiusMD),
                     ),
-                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    buttonText!,
+                    style: const TextStyle(fontWeight: FontWeight.w700),
                   ),
                 ),
               ],

@@ -6,10 +6,10 @@ import 'package:degloor_one/components/degloor_app_bar.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/components/load_more_control.dart';
 import 'package:degloor_one/components/order_list_card.dart';
+import 'package:degloor_one/core/degloor_theme.dart';
 import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/shared/placed_order.dart';
 import 'package:degloor_one/shared/shop.dart';
-import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:flutter/material.dart';
 import 'package:degloor_one/core/error_handler.dart';
@@ -102,19 +102,18 @@ class _CustomerOrdersWidgetState extends State<CustomerOrdersWidget> {
   }
 
   Widget _shopThumb(Shop? shop) {
-    final theme = FlutterFlowTheme.of(context);
     final imageUrl = shop?.imageUrl;
     return ClipRRect(
-      borderRadius: BorderRadius.circular(theme.designToken.radius.md),
+      borderRadius: BorderRadius.circular(DegloorTheme.radiusMD),
       child: SizedBox(
         width: 48,
         height: 48,
         child: imageUrl == null || imageUrl.isEmpty
-            ? ColoredBox(
-                color: theme.primary.withValues(alpha: 0.08),
+            ? const ColoredBox(
+                color: DegloorTheme.accent,
                 child: Icon(
                   Icons.storefront_rounded,
-                  color: theme.primary,
+                  color: DegloorTheme.primary,
                   size: 22,
                 ),
               )
@@ -134,10 +133,9 @@ class _CustomerOrdersWidgetState extends State<CustomerOrdersWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = FlutterFlowTheme.of(context);
     return Scaffold(
       key: scaffoldKey,
-      backgroundColor: theme.primaryBackground,
+      backgroundColor: DegloorTheme.background,
       appBar: degloorAppBar(context, title: 'My Orders'),
       body: SafeArea(
         child: Align(
@@ -145,10 +143,8 @@ class _CustomerOrdersWidgetState extends State<CustomerOrdersWidget> {
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 520),
             child: _isLoading
-                ? Center(
-                    child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(theme.primary),
-                    ),
+                ? const Center(
+                    child: CircularProgressIndicator(color: DegloorTheme.primary),
                   )
                 : _orders.isEmpty
                     ? EmptyStateView(
@@ -160,14 +156,14 @@ class _CustomerOrdersWidgetState extends State<CustomerOrdersWidget> {
                         onTap: () => context.goNamed('CustomerHome'),
                       )
                     : RefreshIndicator(
-                        color: theme.primary,
+                        color: DegloorTheme.primary,
                         onRefresh: () => _loadPage(reset: true),
                         child: ListView.separated(
                           physics: const AlwaysScrollableScrollPhysics(),
-                          padding: EdgeInsets.all(theme.designToken.spacing.md),
+                          padding: const EdgeInsets.all(DegloorTheme.spacingMD),
                           itemCount: _orders.length + (_hasMore ? 1 : 0),
                           separatorBuilder: (context, index) =>
-                              SizedBox(height: theme.designToken.spacing.sm),
+                              const SizedBox(height: DegloorTheme.spacingSM),
                           itemBuilder: (context, index) {
                             if (index >= _orders.length) {
                               return LoadMoreControl(

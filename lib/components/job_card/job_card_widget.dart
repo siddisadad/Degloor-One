@@ -40,22 +40,19 @@ class JobCardWidget extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: DegloorTheme.primary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(DegloorTheme.radiusSM),
-                      ),
-                      child: Text(
-                        jobType,
-                        style: DegloorTheme.labelSmall.copyWith(color: DegloorTheme.primary, fontWeight: FontWeight.bold),
-                      ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: DegloorTheme.accent,
+                    borderRadius: BorderRadius.circular(DegloorTheme.radiusSM),
+                  ),
+                  child: Text(
+                    jobType,
+                    style: DegloorTheme.labelSmall.copyWith(
+                      color: DegloorTheme.primary,
+                      fontWeight: FontWeight.bold,
                     ),
-                    const Icon(Icons.bookmark_border_rounded, color: DegloorTheme.textSecondary, size: 20),
-                  ],
+                  ),
                 ),
                 const SizedBox(height: 16),
                 Text(title, style: DegloorTheme.headingMedium.copyWith(fontSize: 18)),

@@ -7,14 +7,12 @@ import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/components/modern/modern_category_item.dart';
 import 'package:degloor_one/components/supabase_unreachable_banner.dart';
 import 'package:degloor_one/components/request_service_sheet/request_service_sheet_widget.dart';
+import 'package:degloor_one/components/load_more_control.dart';
 import 'package:degloor_one/core/degloor_theme.dart';
 import 'package:degloor_one/features/services/service_provider_display.dart';
-import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
-import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'services_model.dart';
 export 'services_model.dart';
 
@@ -86,22 +84,20 @@ class _ServicesWidgetState extends State<ServicesWidget> {
   }
 
   Widget getIconFromData(String? iconName) {
+    const color = DegloorTheme.primary;
     switch (iconName) {
       case 'electrical_services':
-        return Icon(Icons.electrical_services_rounded,
-            color: FlutterFlowTheme.of(context).primary, size: 24.0);
+        return const Icon(Icons.electrical_services_rounded,
+            color: color, size: 24.0);
       case 'plumbing':
-        return Icon(Icons.plumbing_rounded,
-            color: FlutterFlowTheme.of(context).primary, size: 24.0);
+        return const Icon(Icons.plumbing_rounded, color: color, size: 24.0);
       case 'construction':
-        return Icon(Icons.construction_rounded,
-            color: FlutterFlowTheme.of(context).primary, size: 24.0);
+        return const Icon(Icons.construction_rounded, color: color, size: 24.0);
       case 'cleaning_services':
-        return Icon(Icons.cleaning_services_rounded,
-            color: FlutterFlowTheme.of(context).primary, size: 24.0);
+        return const Icon(Icons.cleaning_services_rounded,
+            color: color, size: 24.0);
       default:
-        return Icon(Icons.category_rounded,
-            color: FlutterFlowTheme.of(context).primary, size: 24.0);
+        return const Icon(Icons.category_rounded, color: color, size: 24.0);
     }
   }
 
@@ -246,15 +242,9 @@ class _ServicesWidgetState extends State<ServicesWidget> {
                       separatorBuilder: (context, index) => const SizedBox(height: 12.0),
                       itemBuilder: (context, index) {
                         if (index >= providers.length) {
-                          return TextButton(
-                            onPressed: _model.providersLoading
-                                ? null
-                                : () => _loadProviders(loadMore: true),
-                            child: Text(
-                              _model.providersLoading
-                                  ? 'Loading...'
-                                  : 'Load more',
-                            ),
+                          return LoadMoreControl(
+                            loading: _model.providersLoading,
+                            onPressed: () => _loadProviders(loadMore: true),
                           );
                         }
                         final provider = providers[index];
@@ -303,22 +293,22 @@ class _ServicesWidgetState extends State<ServicesWidget> {
                                           displayName,
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
-                                          style: FlutterFlowTheme.of(context).titleSmall,
+                                          style: DegloorTheme.titleMedium,
                                         ),
                                         Text(
                                           provider.categoryName,
-                                          style: FlutterFlowTheme.of(context).labelSmall,
+                                          style: DegloorTheme.labelSmall,
                                         ),
                                         Text(
                                           ServiceProviderDisplay.hourlyRateLabel(
                                             provider.hourlyRate,
                                           ),
-                                          style: FlutterFlowTheme.of(context).bodySmall,
+                                          style: DegloorTheme.bodySmall,
                                         ),
                                       ],
                                     ),
                                   ),
-                                  FFButtonWidget(
+                                  FilledButton(
                                     onPressed: () async {
                                       await showModalBottomSheet(
                                         isScrollControlled: true,
@@ -336,17 +326,23 @@ class _ServicesWidgetState extends State<ServicesWidget> {
                                         },
                                       );
                                     },
-                                    text: 'Request',
-                                    options: FFButtonOptions(
-                                      width: 80.0,
-                                      height: 36.0,
-                                      color: FlutterFlowTheme.of(context).primary,
-                                      textStyle: FlutterFlowTheme.of(context).titleSmall.override(
-                                            font: GoogleFonts.inter(),
-                                            color: Colors.white,
-                                            fontSize: 12.0,
-                                          ),
-                                      borderRadius: BorderRadius.circular(8.0),
+                                    style: FilledButton.styleFrom(
+                                      backgroundColor: DegloorTheme.primary,
+                                      foregroundColor: Colors.white,
+                                      minimumSize: const Size(80, 36),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 12),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(
+                                            DegloorTheme.radiusSM),
+                                      ),
+                                    ),
+                                    child: const Text(
+                                      'Request',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w700,
+                                      ),
                                     ),
                                   ),
                                 ],
