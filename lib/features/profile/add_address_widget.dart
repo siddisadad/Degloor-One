@@ -1,5 +1,5 @@
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
-import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/backend/address_service.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_google_map.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
@@ -7,7 +7,7 @@ import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
 import 'package:degloor_one/app_state.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:degloor_one/components/degloor_app_bar.dart';
 import 'package:degloor_one/core/error_handler.dart';
 import 'package:degloor_one/features/profile/add_address_model.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -72,21 +72,29 @@ class _AddAddressWidgetState extends State<AddAddressWidget> {
         return;
       }
 
-      await AddressesTable().insert({
-        'user_id': currentUserUid,
-        'title': _model.titleTextController?.text,
-        'address_text': _model.addressTextController?.text,
-        'latitude': _model.mapCenter!.latitude,
-        'longitude': _model.mapCenter!.longitude,
-        'is_default': _model.isDefault,
-      });
-
-      if (_model.isDefault) {
-        // Unset other defaults if this one is set
-        await AddressesTable().update(
-          data: {'is_default': false},
-          matchingRows: (q) => q.eq('user_id', currentUserUid).neq('is_default', true),
+      try {
+        await AddressService.instance.add(
+          userId: currentUserUid,
+          title: _model.titleTextController?.text ?? '',
+          addressText: _model.addressTextController?.text ?? '',
+          latitude: _model.mapCenter!.latitude,
+          longitude: _model.mapCenter!.longitude,
+          isDefault: _model.isDefault,
         );
+      } catch (e) {
+        AppLogger.error('Error saving address', e);
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              AppLogger.userFacingMessage(
+                e,
+                fallback: 'Unable to save the address. Please try again.',
+              ),
+            ),
+          ),
+        );
+        return;
       }
 
       if (mounted) {
@@ -114,20 +122,7 @@ class _AddAddressWidgetState extends State<AddAddressWidget> {
       child: Scaffold(
         key: scaffoldKey,
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-        appBar: AppBar(
-          backgroundColor: FlutterFlowTheme.of(context).primary,
-          title: Text(
-            'Add New Address',
-            style: FlutterFlowTheme.of(context).headlineMedium.override(
-                  font: GoogleFonts.inter(),
-                  color: Colors.white,
-                  fontSize: 22.0,
-                ),
-          ),
-          actions: const [],
-          centerTitle: false,
-          elevation: 2.0,
-        ),
+        appBar: degloorAppBar(context, title: 'Add New Address'),
         body: SafeArea(
           child: Form(
             key: _model.formKey,

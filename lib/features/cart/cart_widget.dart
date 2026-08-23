@@ -1,4 +1,6 @@
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
+import 'package:degloor_one/backend/address_service.dart';
+import 'package:degloor_one/backend/discovery_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/components/cached_remote_image.dart';
 import 'package:degloor_one/shared/otp_copy.dart';
@@ -59,10 +61,11 @@ class _CartWidgetState extends State<CartWidget> {
 
       _model.currentCart = carts.first;
 
-      // Fetch Business details
-      final business = await BusinessesTable().querySingleRow(queryFn: (q) => q.eq('id', _model.currentCart!.businessId));
-      if (business.isNotEmpty) {
-        _model.currentBusiness = business.first;
+      final shops = await DiscoveryService.instance.businessesByIds([
+        _model.currentCart!.businessId,
+      ]);
+      if (shops.isNotEmpty) {
+        _model.currentBusiness = shops.first;
       }
 
       final items = await CartService.itemsForCart(_model.currentCart!.id);
@@ -83,9 +86,7 @@ class _CartWidgetState extends State<CartWidget> {
     final userId = currentUserUid;
     if (userId == '') return;
     try {
-      final addresses = await AddressesTable().queryRows(
-        queryFn: (q) => q.eq('user_id', userId),
-      );
+      final addresses = await AddressService.instance.listForUser(userId);
       if (!mounted) return;
       setState(() {
         _model.addressesFuture = Future.value(addresses);
