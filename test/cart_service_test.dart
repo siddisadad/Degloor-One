@@ -3,6 +3,7 @@ import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/backend/cart_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/join_rows.dart';
+import 'package:degloor_one/shared/shopping_cart.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
 void main() {
@@ -69,6 +70,8 @@ void main() {
 
     final carts = await CartService.cartsForUser(GuestAuthUser.guestUid);
     expect(carts, isNotEmpty);
+    expect(carts, everyElement(isA<ShoppingCart>()));
+    expect(carts, isNot(anyElement(isA<CartsRow>())));
     expect(carts.first.businessId, ShowcaseCatalog.bizHotel);
     final items = await CartService.itemsForCart(carts.first.id);
     expect(
@@ -116,6 +119,7 @@ void main() {
 
     await CartService.clearCart(userId: GuestAuthUser.guestUid);
     final carts = await CartService.cartsForUser(GuestAuthUser.guestUid);
+    expect(carts, isA<List<ShoppingCart>>());
     expect(carts, isEmpty);
   });
 
