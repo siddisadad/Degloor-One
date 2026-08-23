@@ -3,6 +3,7 @@ import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/backend/admin_service.dart';
 import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/listing_complaint.dart';
 import 'package:degloor_one/shared/shop.dart';
 import 'package:degloor_one/shared/shop_category.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
@@ -56,6 +57,8 @@ void main() {
   test('admin can resolve a pending complaint', () async {
     final pending = await AdminService.instance
         .pendingComplaints(ShowcaseCatalog.adminId);
+    expect(pending, everyElement(isA<ListingComplaint>()));
+    expect(pending, isNot(anyElement(isA<ComplaintsRow>())));
     expect(pending.map((row) => row.id), contains('cmp-1'));
 
     await AdminService.instance.resolveComplaint(
