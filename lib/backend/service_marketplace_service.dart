@@ -5,6 +5,7 @@ import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/marketplace_joins.dart';
 import 'package:degloor_one/shared/page_query.dart';
+import 'package:degloor_one/shared/service_category.dart';
 import 'package:degloor_one/shared/rpc_row.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
@@ -53,10 +54,11 @@ class ServiceMarketplaceService {
   ServiceRequestActions requestActions(String? status) =>
       ServiceRequestActions.forStatus(status);
 
-  Future<List<ServiceCategoriesRow>> categories() async {
+  Future<List<ServiceCategory>> categories() async {
     final native = await NativeServiceBridge.getCategories();
     if (native.isNotEmpty) return native;
-    return _repository.categories();
+    final rows = await _repository.categories();
+    return rows.map(ServiceCategory.fromRow).toList();
   }
 
   Future<PageResult<ServiceProviderCard>> providers({
