@@ -221,7 +221,7 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
                     // Help / Report
                     FFButtonWidget(
                       onPressed: () {
-                        context.pushNamed('UserProfileReports');
+                        context.pushNamed('MyProfile');
                       },
                       text: 'Report an Issue',
                       options: FFButtonOptions(

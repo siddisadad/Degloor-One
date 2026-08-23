@@ -129,7 +129,7 @@ class _BusinessCatalogueWidgetState extends State<BusinessCatalogueWidget> with 
               FlutterFlowIconButton(
                 icon: Icon(Icons.shopping_cart_rounded, color: FlutterFlowTheme.of(context).primaryText),
                 onPressed: () async {
-                  await context.pushNamed('Cart');
+                  await context.pushNamed('ShoppingCart');
                   _fetchCartCount();
                 },
               ),

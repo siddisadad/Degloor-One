@@ -16,10 +16,18 @@ import 'services_model.dart';
 export 'services_model.dart';
 
 class ServicesWidget extends StatefulWidget {
-  const ServicesWidget({super.key});
+  const ServicesWidget({
+    super.key,
+    this.showBack = true,
+  });
+
+  /// Pushed local services (Home, profile) shows back. The Services tab does not.
+  final bool showBack;
 
   static String routeName = 'Services';
   static String routePath = '/services';
+  static String stackedRouteName = 'LocalServices';
+  static String stackedRoutePath = '/localServices';
 
   @override
   State<ServicesWidget> createState() => _ServicesWidgetState();
@@ -119,6 +127,7 @@ class _ServicesWidgetState extends State<ServicesWidget> {
         appBar: degloorAppBar(
           context,
           title: 'Find local services',
+          showBack: widget.showBack,
           actions: [
             IconButton(
               tooltip: 'Offer a service',

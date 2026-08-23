@@ -15,10 +15,18 @@ import 'user_profile_reports_model.dart';
 export 'user_profile_reports_model.dart';
 
 class UserProfileReportsWidget extends StatefulWidget {
-  const UserProfileReportsWidget({super.key});
+  const UserProfileReportsWidget({
+    super.key,
+    this.showBack = true,
+  });
+
+  /// Pushed profile (Home, order help) shows back. The Profile tab does not.
+  final bool showBack;
 
   static String routeName = 'UserProfileReports';
   static String routePath = '/userProfileReports';
+  static String stackedRouteName = 'MyProfile';
+  static String stackedRoutePath = '/myProfile';
 
   @override
   State<UserProfileReportsWidget> createState() =>
@@ -63,9 +71,10 @@ class _UserProfileReportsWidgetState extends State<UserProfileReportsWidget> {
         appBar: AppBar(
           backgroundColor: Colors.white,
           automaticallyImplyLeading: false,
-          leading: degloorBackButton(
+          leading: degloorBackLeading(
             context,
             color: DegloorTheme.textPrimary,
+            show: widget.showBack ? true : null,
           ),
           title: Text('My Profile', style: DegloorTheme.headingMedium),
           elevation: 0,
@@ -149,7 +158,7 @@ class _UserProfileReportsWidgetState extends State<UserProfileReportsWidget> {
                           _activityCard(
                             Icons.shopping_cart_rounded,
                             'Cart',
-                            () => context.pushNamed('Cart'),
+                            () => context.pushNamed('ShoppingCart'),
                           ),
                           const SizedBox(width: 12),
                           _activityCard(
@@ -172,7 +181,7 @@ class _UserProfileReportsWidgetState extends State<UserProfileReportsWidget> {
                           _activityCard(
                             Icons.handyman_rounded,
                             'Services',
-                            () => context.goNamed('Services'),
+                            () => context.pushNamed('LocalServices'),
                           ),
                           const SizedBox(width: 12),
                           _activityCard(
