@@ -3,6 +3,7 @@ import 'package:degloor_one/backend/notification_service.dart';
 import 'package:degloor_one/backend/repositories/service_marketplace_repository.dart';
 import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/marketplace_joins.dart';
 import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/shared/rpc_row.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
@@ -58,13 +59,16 @@ class ServiceMarketplaceService {
     return _repository.categories();
   }
 
-  Future<PageResult<Map<String, dynamic>>> providers({
+  Future<PageResult<ServiceProviderCard>> providers({
     String? categoryId,
     PageQuery page = const PageQuery(),
   }) async {
     final native = await NativeServiceBridge.getProviders(categoryId);
     if (native.isNotEmpty) {
-      return PageResult(items: native, hasMore: false);
+      return PageResult(
+        items: native.map(ServiceProviderCard.fromJoin).toList(),
+        hasMore: false,
+      );
     }
     
     final rows = await _repository.providers(
@@ -120,7 +124,7 @@ class ServiceMarketplaceService {
     });
   }
 
-  Future<Map<String, dynamic>?> providerById(String id) =>
+  Future<ServiceProviderCard?> providerById(String id) =>
       _repository.providerById(id);
 
   Stream<List<ServiceRequestsRow>> watchForProvider(String providerId) =>

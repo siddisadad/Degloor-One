@@ -12,7 +12,7 @@ import 'package:degloor_one/backend/discovery_service.dart';
 import 'package:degloor_one/backend/user_service.dart';
 import 'package:degloor_one/backend/service_marketplace_service.dart';
 import 'package:degloor_one/features/catalogue/product_detail_widget.dart';
-import 'package:degloor_one/features/services/service_provider_display.dart';
+import 'package:degloor_one/shared/marketplace_joins.dart';
 import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -40,7 +40,7 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   Future<List<BusinessCategoriesRow>>? _categoriesFuture;
-  Future<List<Map<String, dynamic>>>? _servicesFuture;
+  Future<List<ServiceProviderCard>>? _servicesFuture;
   final Map<String, String> _categoryIdToName = {};
 
   void _onAppStateChanged() {
@@ -374,7 +374,7 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                     const SizedBox(height: DegloorTheme.spacingSM),
                     SizedBox(
                       height: 118,
-                      child: FutureBuilder<List<Map<String, dynamic>>>(
+                      child: FutureBuilder<List<ServiceProviderCard>>(
                         future: _servicesFuture,
                         builder: (context, snapshot) {
                           if (!snapshot.hasData) {
@@ -393,16 +393,11 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                                 const SizedBox(width: 12),
                             itemBuilder: (context, index) {
                               final provider = providers[index];
-                              final name = ServiceProviderDisplay.name(
-                                  provider['users']);
-                              final category =
-                                  ServiceProviderDisplay.categoryName(
-                                      provider['service_categories']);
                               return InkWell(
                                 onTap: () => context.pushNamed(
                                   'ServiceProviderProfile',
                                   queryParameters: {
-                                    'providerId': '${provider['id']}',
+                                    'providerId': provider.id,
                                   },
                                 ),
                                 borderRadius: BorderRadius.circular(
@@ -429,7 +424,7 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                                       ),
                                       const SizedBox(height: 10),
                                       Text(
-                                        name,
+                                        provider.displayName,
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                         style: DegloorTheme.titleMedium
@@ -437,7 +432,7 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
-                                        category,
+                                        provider.categoryName,
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                         style: DegloorTheme.bodySmall,

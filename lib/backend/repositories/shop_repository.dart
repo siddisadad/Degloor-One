@@ -1,4 +1,6 @@
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/marketplace_joins.dart';
+import 'package:degloor_one/shared/showcase_catalog.dart';
 
 /// Public shop reads and customer review/report writes. Widgets should go
 /// through [ShopService].
@@ -80,6 +82,23 @@ class ShopRepository {
       queryFn: (q) =>
           q.eq('business_id', businessId).order('created_at', ascending: false),
     );
+  }
+
+  Future<List<ShopReview>> reviewsWithUsers(String businessId) async {
+    if (businessId.isEmpty) return const [];
+    if (kUseShowcaseData) {
+      return ShowcaseCatalog.reviewsForBusiness(businessId)
+          .map(ShopReview.fromJoin)
+          .toList();
+    }
+    final response = await SupaFlow.client
+        .from('reviews')
+        .select('*, users(full_name)')
+        .eq('business_id', businessId)
+        .order('created_at', ascending: false);
+    return List<Map<String, dynamic>>.from(response)
+        .map(ShopReview.fromJoin)
+        .toList();
   }
 
   Future<ReviewsRow?> reviewByUser({

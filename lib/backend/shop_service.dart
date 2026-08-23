@@ -4,7 +4,7 @@ import 'package:degloor_one/backend/notification_service.dart';
 import 'package:degloor_one/backend/repositories/shop_repository.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/core/error_handler.dart';
-import 'package:degloor_one/shared/showcase_catalog.dart';
+import 'package:degloor_one/shared/marketplace_joins.dart';
 
 class ShopEvents {
   static const profileView = 'PROFILE_VIEW';
@@ -45,7 +45,7 @@ class ShopReviews {
     distribution: {5: 0, 4: 0, 3: 0, 2: 0, 1: 0},
   );
 
-  final List<Map<String, dynamic>> items;
+  final List<ShopReview> items;
   final Map<int, int> distribution;
 }
 
@@ -168,26 +168,14 @@ class ShopService {
 
   Future<ShopReviews> reviews(String businessId) async {
     if (businessId.isEmpty) return ShopReviews.empty;
-    final items = kUseShowcaseData
-        ? ShowcaseCatalog.reviewsForBusiness(businessId)
-        : await _liveReviews(businessId);
+    final items = await _repository.reviewsWithUsers(businessId);
     final dist = {5: 0, 4: 0, 3: 0, 2: 0, 1: 0};
     for (final review in items) {
-      final rating = (review['rating'] as num?)?.toInt();
-      if (rating != null && dist.containsKey(rating)) {
-        dist[rating] = dist[rating]! + 1;
+      if (dist.containsKey(review.rating)) {
+        dist[review.rating] = dist[review.rating]! + 1;
       }
     }
     return ShopReviews(items: items, distribution: dist);
-  }
-
-  Future<List<Map<String, dynamic>>> _liveReviews(String businessId) async {
-    final response = await SupaFlow.client
-        .from('reviews')
-        .select('*, users(full_name)')
-        .eq('business_id', businessId)
-        .order('created_at', ascending: false);
-    return List<Map<String, dynamic>>.from(response);
   }
 
   Future<void> addReview({

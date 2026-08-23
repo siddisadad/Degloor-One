@@ -2,6 +2,7 @@ import 'package:degloor_one/backend/business_service.dart';
 import 'package:degloor_one/backend/repositories/job_repository.dart';
 import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/marketplace_joins.dart';
 import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/shared/rpc_row.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
@@ -14,7 +15,7 @@ class JobService {
 
   static final instance = JobService();
 
-  Future<PageResult<Map<String, dynamic>>> listActive({
+  Future<PageResult<JobListing>> listActive({
     String? search,
     String? jobType,
     PageQuery page = const PageQuery(),
@@ -109,6 +110,6 @@ class JobService {
     return JobApplicationsRow(row);
   }
 
-  Future<List<Map<String, dynamic>>> applicants(String jobId) =>
+  Future<List<JobApplicant>> applicants(String jobId) =>
       _repository.applicants(jobId);
 }

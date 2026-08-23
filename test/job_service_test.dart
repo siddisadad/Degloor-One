@@ -16,26 +16,26 @@ void main() {
     );
     expect(first.items, hasLength(1));
     expect(first.hasMore, isTrue);
-    expect(first.items.first['businesses']['name'], isNotEmpty);
+    expect(first.items.first.shop?.name, isNotEmpty);
 
     final second = await JobService.instance.listActive(
       page: const PageQuery(limit: 1, offset: 1),
     );
     expect(second.items, hasLength(1));
-    expect(second.items.first['id'], isNot(first.items.first['id']));
+    expect(second.items.first.id, isNot(first.items.first.id));
   });
 
   test('job type filter and search use the catalog', () async {
     final fullTime = await JobService.instance.listActive(jobType: 'Full-time');
     expect(fullTime.items, isNotEmpty);
     expect(
-      fullTime.items.every((job) => job['job_type'] == 'Full-time'),
+      fullTime.items.every((job) => job.jobType == 'Full-time'),
       isTrue,
     );
 
     final search = await JobService.instance.listActive(search: 'counter');
     expect(search.items, hasLength(1));
-    expect(search.items.single['id'], 'job-counter');
+    expect(search.items.single.id, 'job-counter');
   });
 
   test('owners can post a job and applicants can apply once', () async {
@@ -68,7 +68,7 @@ void main() {
 
     final applicants = await JobService.instance.applicants(posted.id);
     expect(applicants, hasLength(1));
-    expect(applicants.first['users']['full_name'], isNotEmpty);
+    expect(applicants.first.user?.fullName, isNotEmpty);
 
     expect(
       ShowcaseCatalog.query(
