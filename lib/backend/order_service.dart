@@ -5,6 +5,7 @@ import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/core/api/api_client.dart';
 import 'package:degloor_one/core/api/order_api.dart';
+import 'package:degloor_one/shared/checkout_line_item.dart';
 import 'package:degloor_one/shared/join_rows.dart';
 import 'package:degloor_one/shared/order_lifecycle.dart';
 import 'package:degloor_one/shared/page_query.dart';
@@ -162,7 +163,7 @@ class OrderService {
     required String userId,
     required String businessId,
     required String addressId,
-    required List<Map<String, dynamic>> items,
+    required List<CheckoutLineItem> items,
     String paymentMethod = 'COD',
     String? cartId,
   }) async {
@@ -199,12 +200,7 @@ class OrderService {
         'p_total_amount': 0,
         'p_delivery_address_id': addressId,
         'p_payment_method': paymentMethod,
-        'p_items': items
-            .map((item) => {
-                  'product_id': item['product_id'],
-                  'quantity': item['quantity'],
-                })
-            .toList(),
+        'p_items': items.map((item) => item.toRpcJson()).toList(),
       },
     );
     if (response == null) {
@@ -292,7 +288,7 @@ class OrderService {
     required String businessId,
     required String cartId,
     required String addressId,
-    required List<Map<String, dynamic>> items,
+    required List<CheckoutLineItem> items,
     String paymentMethod = 'COD',
     String deliveryOtp = '7392',
     double? totalAmount,
@@ -301,8 +297,8 @@ class OrderService {
     var subtotal = 0.0;
     final priced = <Map<String, dynamic>>[];
     for (final item in items) {
-      final productId = '${item['product_id']}';
-      final quantity = (item['quantity'] as num?)?.toInt() ?? 0;
+      final productId = item.productId;
+      final quantity = item.quantity;
       if (quantity <= 0) {
         throw Exception('Invalid quantity');
       }

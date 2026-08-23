@@ -6,6 +6,7 @@ import 'package:degloor_one/backend/delivery_service.dart';
 import 'package:degloor_one/backend/order_service.dart';
 import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/checkout_line_item.dart';
 import 'package:degloor_one/shared/join_rows.dart';
 import 'package:degloor_one/shared/order_lifecycle.dart';
 import 'package:degloor_one/shared/page_query.dart';
@@ -25,11 +26,10 @@ void main() {
       totalAmount: 1,
       deliveryFee: 25,
       items: [
-        {
-          'product_id': ShowcaseCatalog.prodRice,
-          'quantity': 1,
-          'price': 1.0,
-        },
+        CheckoutLineItem(
+          productId: ShowcaseCatalog.prodRice,
+          quantity: 1,
+        ),
       ],
     );
 
@@ -67,11 +67,10 @@ void main() {
         cartId: '',
         addressId: 'addr-home',
         items: [
-          {
-            'product_id': ShowcaseCatalog.prodRice,
-            'quantity': 1,
-            'price': 1.0,
-          },
+          CheckoutLineItem(
+            productId: ShowcaseCatalog.prodRice,
+            quantity: 1,
+          ),
         ],
       ),
       throwsA(
@@ -150,11 +149,10 @@ void main() {
       addressId: 'addr-home',
       cartId: ShowcaseCatalog.cartGuest,
       items: [
-        {
-          'product_id': ShowcaseCatalog.prodRice,
-          'quantity': 2,
-          'price': 1.0,
-        },
+        CheckoutLineItem(
+          productId: ShowcaseCatalog.prodRice,
+          quantity: 2,
+        ),
       ],
     );
 
@@ -206,10 +204,10 @@ void main() {
       cartId: ShowcaseCatalog.cartGuest,
       addressId: 'addr-home',
       items: [
-        {
-          'product_id': ShowcaseCatalog.prodRice,
-          'quantity': 1,
-        },
+        CheckoutLineItem(
+          productId: ShowcaseCatalog.prodRice,
+          quantity: 1,
+        ),
       ],
     );
     final stockAfterPlace = ShowcaseCatalog.query(

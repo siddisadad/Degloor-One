@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/backend/cart_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/checkout_line_item.dart';
 import 'package:degloor_one/shared/join_rows.dart';
 import 'package:degloor_one/shared/shopping_cart.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
@@ -127,9 +128,13 @@ void main() {
     final items = await CartService.itemsForCart(ShowcaseCatalog.cartGuest);
     expect(CartService.subtotal(items), 240);
     final checkout = CartService.checkoutItems(items);
-    expect(checkout.every((item) => !item.containsKey('price')), isTrue);
+    expect(checkout, everyElement(isA<CheckoutLineItem>()));
     expect(
-      checkout.map((item) => item['product_id']),
+      checkout.every((item) => !item.toRpcJson().containsKey('price')),
+      isTrue,
+    );
+    expect(
+      checkout.map((item) => item.productId),
       containsAll([ShowcaseCatalog.prodMilk, ShowcaseCatalog.prodRice]),
     );
     expect(
@@ -138,10 +143,8 @@ void main() {
           'products': {'id': 'prod-x', 'price': 1},
           'quantity': 2,
         }),
-      ]),
-      [
-        {'product_id': 'prod-x', 'quantity': 2},
-      ],
+      ]).single.toRpcJson(),
+      {'product_id': 'prod-x', 'quantity': 2},
     );
   });
 
