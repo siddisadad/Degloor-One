@@ -1,5 +1,5 @@
 import 'package:degloor_one/backend/service_marketplace_service.dart';
-import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/core/app_flags.dart';
 import 'package:degloor_one/components/request_service_sheet/request_service_sheet_widget.dart';
 import 'package:degloor_one/components/supabase_unreachable_banner.dart';
 import 'package:degloor_one/features/services/service_provider_display.dart';

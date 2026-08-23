@@ -7,7 +7,7 @@ import 'package:degloor_one/auth/base_auth_user_provider.dart';
 
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
-import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/core/app_flags.dart';
 import 'package:degloor_one/shared/shop.dart';
 import 'package:degloor_one/features/main_scaffold.dart';
 import 'package:degloor_one/features/catalogue/product_detail_widget.dart';

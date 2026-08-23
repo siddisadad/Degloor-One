@@ -126,7 +126,15 @@ class _ManageServiceRequestsWidgetState
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error updating request: $e'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text(
+              AppLogger.userFacingMessage(
+                e,
+                fallback: 'Unable to update the request. Please try again.',
+              ),
+            ),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     }

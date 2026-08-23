@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/shop_service.dart';
-import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/marketplace_joins.dart';
 import 'package:degloor_one/shared/shop.dart';
 import 'package:degloor_one/l10n/app_localizations.dart';

@@ -1,5 +1,6 @@
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/job_service.dart';
+import 'package:degloor_one/core/error_handler.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_model.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
@@ -218,7 +219,11 @@ class _ApplyJobSheetWidgetState extends State<ApplyJobSheetWidget> {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
-                              'Error: $e',
+                              AppLogger.userFacingMessage(
+                                e,
+                                fallback:
+                                    'Unable to submit the application. Please try again.',
+                              ),
                               style: const TextStyle(
                                 color: Colors.white,
                               ),

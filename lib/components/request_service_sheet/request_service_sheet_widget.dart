@@ -1,5 +1,6 @@
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/service_marketplace_service.dart';
+import 'package:degloor_one/core/error_handler.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
@@ -161,7 +162,15 @@ class _RequestServiceSheetWidgetState extends State<RequestServiceSheetWidget> {
                     } catch (e) {
                       if (!context.mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Error: $e')),
+                        SnackBar(
+                          content: Text(
+                            AppLogger.userFacingMessage(
+                              e,
+                              fallback:
+                                  'Unable to send the request. Please try again.',
+                            ),
+                          ),
+                        ),
                       );
                       return;
                     }
