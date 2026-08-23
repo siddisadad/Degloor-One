@@ -2,6 +2,8 @@ import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/listing_complaint.dart';
 import 'package:degloor_one/shared/listing_complaint_draft.dart';
 import 'package:degloor_one/shared/marketplace_joins.dart';
+import 'package:degloor_one/shared/shop_event.dart';
+import 'package:degloor_one/shared/shop_event_draft.dart';
 import 'package:degloor_one/shared/shop_review_draft.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
@@ -68,8 +70,9 @@ class ShopRepository {
     return rows.isEmpty ? null : rows.first;
   }
 
-  Future<BusinessAnalyticsRow> insertAnalytics(Map<String, dynamic> data) {
-    return BusinessAnalyticsTable().insert(data);
+  Future<ShopEvent> insertAnalytics(ShopEventDraft draft) async {
+    final row = await BusinessAnalyticsTable().insert(draft.toInsertJson());
+    return ShopEvent.fromRow(row);
   }
 
   Future<List<ProductCategoriesRow>> productCategories(String businessId) {

@@ -10,6 +10,7 @@ import 'package:degloor_one/shared/marketplace_joins.dart';
 import 'package:degloor_one/shared/product_category.dart';
 import 'package:degloor_one/shared/shop.dart';
 import 'package:degloor_one/shared/shop_event.dart';
+import 'package:degloor_one/shared/shop_event_draft.dart';
 import 'package:degloor_one/shared/shop_hours.dart';
 import 'package:degloor_one/shared/shop_review_draft.dart';
 
@@ -204,12 +205,14 @@ class ShopService {
     if (businessId.isEmpty || eventType.isEmpty) return;
     final actor = userId ?? currentUserUid;
     try {
-      await _repository.insertAnalytics({
-        'business_id': businessId,
-        'event_type': eventType,
-        if (actor.isNotEmpty) 'user_id': actor,
-        if (metadata != null) 'metadata': metadata,
-      });
+      await _repository.insertAnalytics(
+        ShopEventDraft(
+          businessId: businessId,
+          eventType: eventType,
+          userId: actor.isEmpty ? null : actor,
+          metadata: metadata,
+        ),
+      );
     } catch (error) {
       AppLogger.error('Analytics Error ($eventType)', error);
     }

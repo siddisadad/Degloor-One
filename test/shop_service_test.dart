@@ -230,7 +230,17 @@ void main() {
     );
     final views = events.where((row) => row.eventType == ShopEvents.productView);
     expect(views, hasLength(1));
+    expect(views.single, isA<ShopEvent>());
+    expect(views.single, isNot(isA<BusinessAnalyticsRow>()));
     expect(views.single.businessId, ShowcaseCatalog.bizPatil);
+    final stored = ShowcaseCatalog.query(
+      'business_analytics',
+      ShowcaseQuery()
+        ..eq('business_id', ShowcaseCatalog.bizPatil)
+        ..eq('event_type', ShopEvents.productView),
+    ).single;
+    expect(stored['metadata'], {'product_id': ShowcaseCatalog.prodMilk});
+    expect(stored.containsKey('source'), isFalse);
   });
 
   test('trackEvent ignores empty ids', () async {
