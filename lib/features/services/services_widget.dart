@@ -257,16 +257,14 @@ class _ServicesWidgetState extends State<ServicesWidget> {
                           );
                         }
                         final provider = providers[index];
-                        final user = provider['users'];
-                        final category = provider['service_categories'];
-                        final displayName = ServiceProviderDisplay.name(user);
+                        final displayName = provider.displayName;
 
                         return InkWell(
                           onTap: () => context.pushNamed(
                             'ServiceProviderProfile',
                             queryParameters: {
                               'providerId': serializeParam(
-                                provider['id'],
+                                provider.id,
                                 ParamType.string,
                               ),
                             }.withoutNulls,
@@ -287,7 +285,9 @@ class _ServicesWidgetState extends State<ServicesWidget> {
                                   ClipRRect(
                                     borderRadius: BorderRadius.circular(8.0),
                                     child: CachedNetworkImage(
-                                      imageUrl: ServiceProviderDisplay.avatarUrl(user),
+                                      imageUrl: ServiceProviderDisplay.avatarUrl(
+                                        provider.user?.avatarUrl,
+                                      ),
                                       width: 60.0,
                                       height: 60.0,
                                       fit: BoxFit.cover,
@@ -305,12 +305,12 @@ class _ServicesWidgetState extends State<ServicesWidget> {
                                           style: FlutterFlowTheme.of(context).titleSmall,
                                         ),
                                         Text(
-                                          ServiceProviderDisplay.categoryName(category),
+                                          provider.categoryName,
                                           style: FlutterFlowTheme.of(context).labelSmall,
                                         ),
                                         Text(
                                           ServiceProviderDisplay.hourlyRateLabel(
-                                            provider['hourly_rate'],
+                                            provider.hourlyRate,
                                           ),
                                           style: FlutterFlowTheme.of(context).bodySmall,
                                         ),
@@ -328,7 +328,7 @@ class _ServicesWidgetState extends State<ServicesWidget> {
                                           return Padding(
                                             padding: MediaQuery.viewInsetsOf(context),
                                             child: RequestServiceSheetWidget(
-                                              providerId: provider['id'],
+                                              providerId: provider.id,
                                               providerName: displayName,
                                             ),
                                           );

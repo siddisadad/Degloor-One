@@ -16,14 +16,14 @@ void main() {
     );
     expect(first.items, hasLength(1));
     expect(first.hasMore, isTrue);
-    expect(first.items.first['users']['full_name'], isNotEmpty);
+    expect(first.items.first.user?.fullName, isNotEmpty);
 
     final electricians = await ServiceMarketplaceService.instance.providers(
       categoryId: 'scat-electric',
     );
     expect(electricians.items, isNotEmpty);
     expect(
-      electricians.items.every((row) => row['category_id'] == 'scat-electric'),
+      electricians.items.every((row) => row.categoryId == 'scat-electric'),
       isTrue,
     );
   });
@@ -71,8 +71,8 @@ void main() {
     final provider =
         await ServiceMarketplaceService.instance.providerById('sp-ravi');
     expect(provider, isNotNull);
-    expect(provider!['users']['full_name'], isNotEmpty);
-    expect(provider['service_categories']['name'], 'Electrician');
+    expect(provider!.user?.fullName, isNotEmpty);
+    expect(provider.category?.name, 'Electrician');
   });
 
   test('guest can register as a provider once', () async {

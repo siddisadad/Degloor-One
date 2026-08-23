@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:degloor_one/backend/job_service.dart';
+import 'package:degloor_one/shared/marketplace_joins.dart';
 import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/components/apply_job_sheet/apply_job_sheet_widget.dart';
 import 'package:degloor_one/components/degloor_app_bar.dart';
@@ -26,7 +27,7 @@ class _JobsMarketplaceWidgetState extends State<JobsMarketplaceWidget> {
   late JobsMarketplaceModel _model;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
-  List<Map<String, dynamic>> _jobs = [];
+  List<JobListing> _jobs = [];
   bool _loading = false;
   bool _hasMore = true;
   int _offset = 0;
@@ -93,14 +94,14 @@ class _JobsMarketplaceWidgetState extends State<JobsMarketplaceWidget> {
     }
   }
 
-  void _applyForJob(Map<String, dynamic> job) async {
+  void _applyForJob(JobListing job) async {
     await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => ApplyJobSheetWidget(
-        jobId: job['id'].toString(),
-        jobTitle: job['title'] ?? 'Job Position',
+        jobId: job.id,
+        jobTitle: job.title,
       ),
     );
   }
@@ -246,20 +247,16 @@ class _JobsMarketplaceWidgetState extends State<JobsMarketplaceWidget> {
                                 );
                               }
                               final job = _jobs[index];
-                              final business =
-                                  job['businesses'] as Map<String, dynamic>?;
 
                               return Padding(
                                 padding: const EdgeInsets.only(bottom: 16.0),
                                 child: JobCardWidget(
-                                  title: job['title'] ?? 'Job Title',
-                                  companyName: business?['name'] ?? 'Employer',
-                                  location: business?['address_text'] ??
-                                      business?['location'] ??
-                                      'Degloor',
-                                  salary: job['salary_range'] ??
+                                  title: job.title,
+                                  companyName: job.shop?.displayName ?? 'Employer',
+                                  location: job.shop?.displayLocation ?? 'Degloor',
+                                  salary: job.salaryRange ??
                                       'Salary Not Specified',
-                                  jobType: job['job_type'] ?? 'Type',
+                                  jobType: job.jobType,
                                   onActionPressed: () async => _applyForJob(job),
                                 ),
                               );

@@ -28,6 +28,9 @@ class ServiceProviderDisplay {
     int width = 100,
     int height = 100,
   }) {
+    if (user is String && user.trim().isNotEmpty) {
+      return user.trim();
+    }
     final url = asJoinMap(user)?['avatar_url'];
     if (url is String && url.trim().isNotEmpty) {
       return url.trim();

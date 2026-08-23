@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/shop_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/marketplace_joins.dart';
 import 'package:degloor_one/l10n/app_localizations.dart';
 import 'package:degloor_one/components/brand_mark.dart';
 import 'package:degloor_one/components/action_button/action_button_widget.dart';
@@ -91,7 +92,7 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
     }
   }
 
-  Future<List<Map<String, dynamic>>> _fetchReviews() async {
+  Future<List<ShopReview>> _fetchReviews() async {
     final page = await ShopService.instance.reviews(widget.businessId ?? '');
     safeSetState(() {
       _model.ratingDistribution = page.distribution;
@@ -655,7 +656,7 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                                       color: FlutterFlowTheme.of(context).onBackground,
                                       size: 18.0,
                                     ),
-                                    FutureBuilder<List<Map<String, dynamic>>>(
+                                    FutureBuilder<List<ShopReview>>(
                                       future: _model.reviewsFuture,
                                       builder: (context, snapshot) {
                                         final reviews = snapshot.data ?? [];
@@ -1121,7 +1122,7 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                                   ],
                                 ),
                                 _buildRatingDistribution(),
-                                FutureBuilder<List<Map<String, dynamic>>>(
+                                FutureBuilder<List<ShopReview>>(
                                   future: _model.reviewsFuture,
                                   builder: (context, snapshot) {
                                     if (!snapshot.hasData) {
@@ -1152,23 +1153,15 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                                     return Column(
                                       mainAxisSize: MainAxisSize.min,
                                       children: reviews.map((review) {
-                                        final user = review['users'] as Map<String, dynamic>?;
-                                        final fullName = user?['full_name'] ?? 'Anonymous';
-                                        final initials = fullName
-                                            .split(' ')
-                                            .take(2)
-                                            .map((e) => e.isNotEmpty ? e[0] : '')
-                                            .join()
-                                            .toUpperCase();
                                         return ReviewCardWidget(
-                                          comment: review['comment'] ?? '',
+                                          comment: review.comment ?? '',
                                           date: dateTimeFormat(
                                             'MMM d, yyyy',
-                                            DateTime.parse(review['created_at']),
+                                            review.createdAt,
                                           ),
-                                          initials: initials,
-                                          name: fullName,
-                                          rating: review['rating'].toString(),
+                                          initials: review.initials,
+                                          name: review.authorName,
+                                          rating: review.rating.toString(),
                                         );
                                       }).toList(),
                                     );

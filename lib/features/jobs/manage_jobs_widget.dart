@@ -2,6 +2,7 @@ import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/business_service.dart';
 import 'package:degloor_one/backend/job_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/marketplace_joins.dart';
 import 'package:degloor_one/components/degloor_app_bar.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/components/job_card/job_card_widget.dart';
@@ -224,7 +225,7 @@ class _ManageJobsWidgetState extends State<ManageJobsWidget> {
             ),
             const Divider(height: 1),
             Expanded(
-              child: FutureBuilder<List<Map<String, dynamic>>>(
+              child: FutureBuilder<List<JobApplicant>>(
                 future: JobService.instance.applicants(job.id),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
@@ -250,7 +251,6 @@ class _ManageJobsWidgetState extends State<ManageJobsWidget> {
                     separatorBuilder: (context, index) => const SizedBox(height: 12),
                     itemBuilder: (context, index) {
                       final app = apps[index];
-                      final user = app['users'] as Map<String, dynamic>?;
                       return Container(
                         decoration: BoxDecoration(
                           color: FlutterFlowTheme.of(context).primaryBackground,
@@ -266,7 +266,8 @@ class _ManageJobsWidgetState extends State<ManageJobsWidget> {
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
-                                    user?['full_name'] ?? 'Unknown Applicant',
+                                    app.user?.displayName(fallback: 'Unknown Applicant') ??
+                                        'Unknown Applicant',
                                     style: FlutterFlowTheme.of(context).titleMedium.override(fontFamily: 'Inter', fontWeight: FontWeight.bold),
                                   ),
                                   Container(
@@ -276,7 +277,7 @@ class _ManageJobsWidgetState extends State<ManageJobsWidget> {
                                       borderRadius: BorderRadius.circular(8),
                                     ),
                                     child: Text(
-                                      app['status'].toString().toUpperCase(),
+                                      app.status.toUpperCase(),
                                       style: FlutterFlowTheme.of(context).bodySmall.override(
                                             fontFamily: 'Inter',
                                             color: FlutterFlowTheme.of(context).success,
@@ -291,12 +292,12 @@ class _ManageJobsWidgetState extends State<ManageJobsWidget> {
                                 children: [
                                   Icon(Icons.phone_rounded, size: 14, color: FlutterFlowTheme.of(context).secondaryText),
                                   const SizedBox(width: 4),
-                                  Text(user?['phone_number'] ?? 'N/A', style: FlutterFlowTheme.of(context).bodySmall),
+                                  Text(app.user?.phoneNumber ?? 'N/A', style: FlutterFlowTheme.of(context).bodySmall),
                                 ],
                               ),
                               const SizedBox(height: 12),
                               Text('Experience Summary:', style: FlutterFlowTheme.of(context).bodySmall.override(fontFamily: 'Inter', fontWeight: FontWeight.bold)),
-                              Text(app['experience_summary'] ?? 'No summary provided.', style: FlutterFlowTheme.of(context).bodyMedium),
+                              Text(app.experienceSummary ?? 'No summary provided.', style: FlutterFlowTheme.of(context).bodyMedium),
                             ],
                           ),
                         ),

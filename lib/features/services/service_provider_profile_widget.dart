@@ -3,6 +3,7 @@ import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/components/request_service_sheet/request_service_sheet_widget.dart';
 import 'package:degloor_one/components/supabase_unreachable_banner.dart';
 import 'package:degloor_one/features/services/service_provider_display.dart';
+import 'package:degloor_one/shared/marketplace_joins.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_icon_button.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
@@ -43,9 +44,8 @@ class _ServiceProviderProfileWidgetState
     if (widget.providerId.isEmpty) {
       return;
     }
-    _model.providerFuture = ServiceMarketplaceService.instance
-        .providerById(widget.providerId)
-        .then((provider) => provider ?? <String, dynamic>{});
+    _model.providerFuture =
+        ServiceMarketplaceService.instance.providerById(widget.providerId);
   }
 
   @override
@@ -71,23 +71,21 @@ class _ServiceProviderProfileWidgetState
               )
             : widget.providerId.isEmpty
             ? const Center(child: Text('Provider not found.'))
-            : FutureBuilder<Map<String, dynamic>>(
+            : FutureBuilder<ServiceProviderCard?>(
           future: _model.providerFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
             }
-            if (snapshot.hasError || !snapshot.hasData) {
+            if (snapshot.hasError) {
               return Center(child: Text('Error loading provider details: ${snapshot.error}'));
             }
 
-            final provider = snapshot.data!;
-            if (provider.isEmpty || provider['id'] == null) {
+            final provider = snapshot.data;
+            if (provider == null || provider.id.isEmpty) {
               return const Center(child: Text('Provider not found.'));
             }
-            final user = provider['users'];
-            final category = provider['service_categories'];
-            final displayName = ServiceProviderDisplay.name(user);
+            final displayName = provider.displayName;
 
             return CustomScrollView(
               slivers: [
@@ -97,7 +95,7 @@ class _ServiceProviderProfileWidgetState
                   flexibleSpace: FlexibleSpaceBar(
                     background: CachedNetworkImage(
                       imageUrl: ServiceProviderDisplay.avatarUrl(
-                        user,
+                        provider.user?.avatarUrl,
                         width: 400,
                         height: 300,
                       ),
@@ -135,7 +133,7 @@ class _ServiceProviderProfileWidgetState
                                   style: FlutterFlowTheme.of(context).headlineMedium,
                                 ),
                                 Text(
-                                  ServiceProviderDisplay.categoryName(category),
+                                  provider.categoryName,
                                   style: FlutterFlowTheme.of(context).titleMedium.override(
                                         font: GoogleFonts.inter(),
                                         color: FlutterFlowTheme.of(context).primary,
@@ -151,10 +149,10 @@ class _ServiceProviderProfileWidgetState
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
-                            _buildStatItem('Experience', '${provider['experience_years'] ?? 0} Years'),
+                            _buildStatItem('Experience', '${provider.experienceYears ?? 0} Years'),
                             _buildStatItem(
                               'Hourly Rate',
-                              ServiceProviderDisplay.hourlyRateLabel(provider['hourly_rate']),
+                              ServiceProviderDisplay.hourlyRateLabel(provider.hourlyRate),
                             ),
                           ],
                         ),
@@ -165,7 +163,7 @@ class _ServiceProviderProfileWidgetState
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          provider['bio'] ?? 'No bio provided.',
+                          provider.bio ?? 'No bio provided.',
                           style: FlutterFlowTheme.of(context).bodyMedium.override(
                                 font: GoogleFonts.inter(),
                                 lineHeight: 1.6,
@@ -183,7 +181,7 @@ class _ServiceProviderProfileWidgetState
                                 return Padding(
                                   padding: MediaQuery.viewInsetsOf(context),
                                   child: RequestServiceSheetWidget(
-                                    providerId: provider['id'],
+                                    providerId: provider.id,
                                     providerName: displayName,
                                   ),
                                 );

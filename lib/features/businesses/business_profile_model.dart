@@ -5,6 +5,7 @@ import 'package:degloor_one/components/review_card/review_card_widget.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/index.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/marketplace_joins.dart';
 import 'business_profile_widget.dart' show BusinessProfileWidget;
 import 'package:flutter/material.dart';
 
@@ -32,7 +33,7 @@ class BusinessProfileModel extends FlutterFlowModel<BusinessProfileWidget> {
   // Model for Button.
   late ButtonModel buttonModel2;
 
-  Future<List<Map<String, dynamic>>>? reviewsFuture;
+  Future<List<ShopReview>>? reviewsFuture;
   String? categoryName;
   bool? isOpen;
   String? statusMessage;

@@ -1,4 +1,5 @@
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/marketplace_joins.dart';
 import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/shared/rpc_row.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
@@ -6,7 +7,7 @@ import 'package:degloor_one/shared/showcase_catalog.dart';
 /// Data access for jobs and applications. Widgets should go through
 /// [JobService].
 class JobRepository {
-  Future<List<Map<String, dynamic>>> listActive({
+  Future<List<JobListing>> listActive({
     String? search,
     String? jobType,
     PageQuery page = const PageQuery(),
@@ -17,7 +18,7 @@ class JobRepository {
         jobType: jobType,
         limit: page.limit,
         offset: page.offset,
-      );
+      ).map(JobListing.fromJoin).toList();
     }
 
     var query = SupaFlow.client
@@ -35,7 +36,9 @@ class JobRepository {
 
     final response =
         await query.order('created_at', ascending: false).range(page.from, page.to);
-    return List<Map<String, dynamic>>.from(response);
+    return List<Map<String, dynamic>>.from(response)
+        .map(JobListing.fromJoin)
+        .toList();
   }
 
   Future<List<JobsRow>> forBusiness(
@@ -58,15 +61,19 @@ class JobRepository {
     return JobApplicationsTable().insert(data);
   }
 
-  Future<List<Map<String, dynamic>>> applicants(String jobId) async {
+  Future<List<JobApplicant>> applicants(String jobId) async {
     if (kUseShowcaseData) {
-      return ShowcaseCatalog.jobApplicants(jobId);
+      return ShowcaseCatalog.jobApplicants(jobId)
+          .map(JobApplicant.fromJoin)
+          .toList();
     }
     final response = await SupaFlow.client
         .from('job_applications')
         .select('*, users(full_name, phone_number)')
         .eq('job_id', jobId)
         .order('created_at', ascending: false);
-    return List<Map<String, dynamic>>.from(response);
+    return List<Map<String, dynamic>>.from(response)
+        .map(JobApplicant.fromJoin)
+        .toList();
   }
 }

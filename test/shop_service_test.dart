@@ -77,7 +77,7 @@ void main() {
         await ShopService.instance.reviews(ShowcaseCatalog.bizHotel);
     expect(reviews.items, hasLength(2));
     expect(
-      reviews.items.any((row) => row['user_id'] == GuestAuthUser.guestUid),
+      reviews.items.any((row) => row.userId == GuestAuthUser.guestUid),
       isTrue,
     );
   });

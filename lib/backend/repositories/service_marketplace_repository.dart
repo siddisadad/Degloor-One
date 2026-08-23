@@ -1,4 +1,5 @@
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/marketplace_joins.dart';
 import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
@@ -11,7 +12,7 @@ class ServiceMarketplaceRepository {
     );
   }
 
-  Future<List<Map<String, dynamic>>> providers({
+  Future<List<ServiceProviderCard>> providers({
     String? categoryId,
     PageQuery page = const PageQuery(),
   }) async {
@@ -20,7 +21,7 @@ class ServiceMarketplaceRepository {
         categoryId: categoryId,
         limit: page.limit,
         offset: page.offset,
-      );
+      ).map(ServiceProviderCard.fromJoin).toList();
     }
 
     var query = SupaFlow.client
@@ -31,20 +32,25 @@ class ServiceMarketplaceRepository {
     }
     final response =
         await query.order('created_at', ascending: false).range(page.from, page.to);
-    return List<Map<String, dynamic>>.from(response);
+    return List<Map<String, dynamic>>.from(response)
+        .map(ServiceProviderCard.fromJoin)
+        .toList();
   }
 
-  Future<Map<String, dynamic>?> providerById(String id) async {
+  Future<ServiceProviderCard?> providerById(String id) async {
     if (kUseShowcaseData) {
-      return ShowcaseCatalog.serviceProvider(id);
+      final row = ShowcaseCatalog.serviceProvider(id);
+      return row == null ? null : ServiceProviderCard.fromJoin(row);
     }
-    return SupaFlow.client
+    final row = await SupaFlow.client
         .from('service_providers')
         .select(
           '*, users(full_name, avatar_url, phone_number), service_categories(name)',
         )
         .eq('id', id)
         .maybeSingle();
+    if (row == null) return null;
+    return ServiceProviderCard.fromJoin(Map<String, dynamic>.from(row));
   }
 
   Future<ServiceProvidersRow?> forUser(String userId) async {
