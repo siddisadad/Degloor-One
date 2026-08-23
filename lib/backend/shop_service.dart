@@ -6,6 +6,7 @@ import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/core/error_handler.dart';
 import 'package:degloor_one/shared/catalog_product.dart';
 import 'package:degloor_one/shared/marketplace_joins.dart';
+import 'package:degloor_one/shared/product_category.dart';
 import 'package:degloor_one/shared/shop.dart';
 import 'package:degloor_one/shared/shop_hours.dart';
 
@@ -65,7 +66,7 @@ class ShopCatalog {
   );
 
   final List<CatalogProduct> products;
-  final List<ProductCategoriesRow> categories;
+  final List<ProductCategory> categories;
   final Map<String, List<CatalogProduct>> grouped;
 }
 
@@ -170,7 +171,9 @@ class ShopService {
     final products = (await _repository.availableProducts(businessId))
         .map(CatalogProduct.fromRow)
         .toList();
-    final categories = await _repository.productCategories(businessId);
+    final categories = (await _repository.productCategories(businessId))
+        .map(ProductCategory.fromRow)
+        .toList();
     final grouped = <String, List<CatalogProduct>>{};
     for (final product in products) {
       final key = product.categoryId ?? 'Uncategorized';

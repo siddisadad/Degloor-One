@@ -4,6 +4,7 @@ import 'package:degloor_one/backend/business_service.dart';
 import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/catalog_product.dart';
+import 'package:degloor_one/shared/product_category.dart';
 import 'package:degloor_one/shared/shop.dart';
 import 'package:degloor_one/shared/shop_hours.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
@@ -69,6 +70,8 @@ void main() {
 
     final categories = await BusinessService.instance
         .productCategories(GuestAuthUser.guestUid);
+    expect(categories, everyElement(isA<ProductCategory>()));
+    expect(categories, isNot(anyElement(isA<ProductCategoriesRow>())));
     expect(categories.map((row) => row.name), contains('Dairy'));
     expect(categories.map((row) => row.name), isNot(contains('dairy')));
   });
