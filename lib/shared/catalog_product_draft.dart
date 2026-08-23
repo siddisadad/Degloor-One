@@ -1,3 +1,5 @@
+import 'package:degloor_one/shared/catalog_product_stock.dart';
+
 /// Fields an owner submits when adding or editing a catalogue product.
 /// Id, createdAt, and checkout price authority stay off this type.
 class CatalogProductDraft {
@@ -6,7 +8,7 @@ class CatalogProductDraft {
     required this.price,
     this.categoryName = '',
     this.imageUrl,
-    this.stockQuantity = 0,
+    this.stock = const CatalogProductStock(0),
     this.trackInventory = false,
   });
 
@@ -14,8 +16,10 @@ class CatalogProductDraft {
   final double price;
   final String categoryName;
   final String? imageUrl;
-  final int stockQuantity;
+  final CatalogProductStock stock;
   final bool trackInventory;
+
+  int get stockQuantity => stock.quantity;
 
   /// Parse owner form text. Price and stock stay off the widget.
   factory CatalogProductDraft.fromForm({
@@ -30,17 +34,12 @@ class CatalogProductDraft {
     if (price == null) {
       throw Exception('Please enter a valid price');
     }
-    final trimmedStock = stockText.trim();
-    final stock = trimmedStock.isEmpty ? 0 : int.tryParse(trimmedStock);
-    if (stock == null) {
-      throw Exception('Please enter a valid stock quantity');
-    }
     return CatalogProductDraft(
       name: name,
       price: price,
       categoryName: categoryName,
       imageUrl: imageUrl,
-      stockQuantity: stock,
+      stock: CatalogProductStock.parse(stockText),
       trackInventory: trackInventory,
     );
   }
@@ -58,7 +57,7 @@ class CatalogProductDraft {
       'price': price,
       'image_url': imageUrl,
       'is_available': true,
-      'stock_quantity': stockQuantity < 0 ? 0 : stockQuantity,
+      ...stock.toUpdateJson(),
       'track_inventory': trackInventory,
     };
   }
@@ -68,7 +67,7 @@ class CatalogProductDraft {
     return {
       'name': name.trim(),
       'price': price,
-      'stock_quantity': stockQuantity < 0 ? 0 : stockQuantity,
+      ...stock.toUpdateJson(),
       'track_inventory': trackInventory,
       'image_url': imageUrl,
     };

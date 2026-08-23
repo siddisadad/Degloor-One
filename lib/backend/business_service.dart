@@ -6,6 +6,7 @@ import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/core/error_handler.dart';
 import 'package:degloor_one/shared/catalog_product.dart';
 import 'package:degloor_one/shared/catalog_product_draft.dart';
+import 'package:degloor_one/shared/catalog_product_stock.dart';
 import 'package:degloor_one/shared/product_category.dart';
 import 'package:degloor_one/shared/product_category_draft.dart';
 import 'package:degloor_one/shared/shop.dart';
@@ -208,7 +209,7 @@ class BusinessService {
     if (draft.price < 0) {
       throw Exception('Please enter a valid price');
     }
-    if (draft.stockQuantity < 0) {
+    if (draft.stock.quantity < 0) {
       throw Exception('Please enter a valid stock quantity');
     }
 
@@ -262,16 +263,16 @@ class BusinessService {
     await _repository.updateProduct(
       productId: productId,
       businessId: shop.id,
-      data: draft.toUpdateJson(),
+      draft: draft,
     );
   }
 
   Future<void> updateStock({
     required String userId,
     required String productId,
-    required int stockQuantity,
+    required CatalogProductStock stock,
   }) async {
-    if (stockQuantity < 0) {
+    if (stock.quantity < 0) {
       throw Exception('Please enter a valid stock quantity');
     }
     final shop = await requireOwned(userId);
@@ -282,10 +283,10 @@ class BusinessService {
     if (existing == null) {
       throw Exception(_missingProductMessage);
     }
-    await _repository.updateProduct(
+    await _repository.updateStock(
       productId: productId,
       businessId: shop.id,
-      data: {'stock_quantity': stockQuantity},
+      stock: stock,
     );
   }
 
