@@ -611,22 +611,27 @@ class _DeliveryDashboardWidgetState extends State<DeliveryDashboardWidget> {
         createdAt: order.createdAt,
         totalAmount: order.totalAmount,
         status: order.status,
-        footer: FFButtonWidget(
-          onPressed: () => _acceptOrder(order.id),
-          text: 'Accept',
-          options: FFButtonOptions(
-            width: double.infinity,
-            height: 40,
-            color: FlutterFlowTheme.of(context).primary,
-            textStyle: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w700,
-            ),
-            borderRadius: BorderRadius.circular(
-              FlutterFlowTheme.of(context).designToken.radius.md,
-            ),
-          ),
-        ),
+        footer: _assignment != null
+            ? Text(
+                'Finish your current delivery first.',
+                style: FlutterFlowTheme.of(context).labelSmall,
+              )
+            : FFButtonWidget(
+                onPressed: () => _acceptOrder(order.id),
+                text: 'Accept',
+                options: FFButtonOptions(
+                  width: double.infinity,
+                  height: 40,
+                  color: FlutterFlowTheme.of(context).primary,
+                  textStyle: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  borderRadius: BorderRadius.circular(
+                    FlutterFlowTheme.of(context).designToken.radius.md,
+                  ),
+                ),
+              ),
       ),
     );
   }

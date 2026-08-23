@@ -13,7 +13,9 @@ class DeliveryRepository {
     return rows.isEmpty ? null : rows.first;
   }
 
-  Future<DeliveryPartnersRow> registerPartner(String userId) {
+  Future<DeliveryPartnersRow> registerPartner(String userId) async {
+    final existing = await partnerForUser(userId);
+    if (existing != null) return existing;
     return DeliveryPartnersTable().insert({
       'user_id': userId,
       'is_available': false,
@@ -35,8 +37,10 @@ class DeliveryRepository {
   Future<DeliveryAssignmentsRow?> activeForPartner(String partnerId) async {
     if (partnerId.isEmpty) return null;
     final rows = await DeliveryAssignmentsTable().queryRows(
-      queryFn: (q) =>
-          q.eq('delivery_partner_id', partnerId).neq('status', 'delivered'),
+      queryFn: (q) => q
+          .eq('delivery_partner_id', partnerId)
+          .neq('status', 'delivered')
+          .order('created_at', ascending: false),
       limit: 1,
     );
     return rows.isEmpty ? null : rows.first;

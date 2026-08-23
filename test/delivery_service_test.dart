@@ -122,18 +122,35 @@ void main() {
     );
   });
 
-  test('accept writes an assignment after the current job is finished', () async {
+  test('otp closes the assignment so the rider can accept again', () async {
     ShowcaseCatalog.reset();
     await expectLater(
       DeliveryService.acceptOrder(ShowcaseCatalog.orderReady),
       throwsA(isA<Exception>()),
     );
-
-    ShowcaseCatalog.update(
-      'delivery_assignments',
-      {'status': 'delivered'},
-      ShowcaseQuery()..eq('id', 'da-1'),
+    expect(
+      DeliveryService.messageFor(Exception('You already have an active delivery')),
+      'Finish your current delivery first.',
     );
+
+    await expectLater(
+      DeliveryService.confirmPickup('da-1'),
+      throwsA(isA<Exception>()),
+    );
+
+    await DeliveryService.confirmDeliveryWithOtp(
+      orderId: ShowcaseCatalog.orderOut,
+      otp: '4821',
+    );
+    expect(
+      ShowcaseCatalog.query(
+        'delivery_assignments',
+        ShowcaseQuery()..eq('id', 'da-1'),
+      ).single['status'],
+      'delivered',
+    );
+    expect(await DeliveryService.instance.activeForPartner('dp-amit'), isNull);
+
     await DeliveryService.acceptOrder(ShowcaseCatalog.orderReady);
     final claimed = await DeliveryService.instance.activeForPartner('dp-amit');
     expect(claimed?.orderId, ShowcaseCatalog.orderReady);
@@ -145,5 +162,22 @@ void main() {
       ).single['status'],
       OrderLifecycle.shipping,
     );
+
+    await DeliveryService.confirmPickup(claimed!.id);
+    expect(
+      (await DeliveryService.instance.activeForPartner('dp-amit'))?.status,
+      'picked_up',
+    );
+  });
+
+  test('register partner is idempotent', () async {
+    ShowcaseCatalog.reset();
+    final first = await DeliveryService.instance.registerPartner(
+      GuestAuthUser.guestUid,
+    );
+    final second = await DeliveryService.instance.registerPartner(
+      GuestAuthUser.guestUid,
+    );
+    expect(second.id, first.id);
   });
 }

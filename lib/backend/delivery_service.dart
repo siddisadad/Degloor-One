@@ -153,6 +153,18 @@ class DeliveryService {
     if (raw.contains('delivery') && raw.contains('otp')) {
       return 'The delivery code is invalid or has expired.';
     }
+    if (raw.contains('already have an active')) {
+      return 'Finish your current delivery first.';
+    }
+    if (raw.contains('confirm pickup')) {
+      return 'Confirm pickup before verifying delivery.';
+    }
+    if (raw.contains('no longer available')) {
+      return 'That order was already claimed.';
+    }
+    if (raw.contains('pickup is not allowed')) {
+      return 'Pickup is not allowed for this assignment.';
+    }
     return AppLogger.userFacingMessage(error);
   }
 
@@ -183,11 +195,28 @@ class DeliveryService {
       if (expected.isEmpty || expected != otp) {
         throw Exception('Invalid delivery OTP');
       }
+      final assignments = ShowcaseCatalog.query(
+        'delivery_assignments',
+        ShowcaseQuery()
+          ..eq('order_id', orderId)
+          ..neq('status', 'delivered'),
+      );
+      if (assignments.isNotEmpty &&
+          '${assignments.first['status']}' != 'picked_up') {
+        throw Exception('Confirm pickup before verifying delivery');
+      }
       ShowcaseCatalog.update(
         'orders',
         {'status': OrderLifecycle.delivered},
         ShowcaseQuery()..eq('id', orderId),
       );
+      if (assignments.isNotEmpty) {
+        ShowcaseCatalog.update(
+          'delivery_assignments',
+          {'status': 'delivered'},
+          ShowcaseQuery()..eq('id', assignments.first['id']),
+        );
+      }
       ShowcaseCatalog.insert('order_status_history', {
         'order_id': orderId,
         'status': OrderLifecycle.delivered,
@@ -246,7 +275,8 @@ class DeliveryService {
         'delivery_assignments',
         ShowcaseQuery()..eq('id', assignmentId),
       );
-      if (assignments.isEmpty) {
+      if (assignments.isEmpty ||
+          '${assignments.first['status']}' != 'assigned') {
         throw Exception('Pickup is not allowed for this assignment');
       }
       final orderId = '${assignments.first['order_id']}';
