@@ -1,4 +1,5 @@
 import 'package:degloor_one/components/degloor_app_bar.dart';
+import 'package:degloor_one/features/cart/cart_widget.dart';
 import 'package:degloor_one/features/orders/order_success_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -68,6 +69,18 @@ void main() {
     );
 
     expect(find.text('Find local services'), findsOneWidget);
+    expect(find.byIcon(Icons.arrow_back_rounded), findsOneWidget);
+  });
+
+  testWidgets('cart tab shows a back arrow', (tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: CartWidget(),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('Your Cart'), findsOneWidget);
     expect(find.byIcon(Icons.arrow_back_rounded), findsOneWidget);
   });
 
