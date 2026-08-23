@@ -599,7 +599,7 @@ class ShowcaseCatalog {
           'Paneer Butter Masala',
           'Creamy restaurant-style curry.',
           180,
-          'https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&w=400&q=80',
+          'https://images.unsplash.com/photo-1601050634129-416a24699182?auto=format&fit=crop&w=400&q=80',
         ),
         _product(
           'prod-hammer',

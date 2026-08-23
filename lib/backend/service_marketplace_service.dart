@@ -1,3 +1,4 @@
+import 'package:degloor_one/backend/native_service_bridge.dart';
 import 'package:degloor_one/backend/notification_service.dart';
 import 'package:degloor_one/backend/repositories/service_marketplace_repository.dart';
 import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
@@ -21,12 +22,21 @@ class ServiceMarketplaceService {
 
   static final instance = ServiceMarketplaceService();
 
-  Future<List<ServiceCategoriesRow>> categories() => _repository.categories();
+  Future<List<ServiceCategoriesRow>> categories() async {
+    final native = await NativeServiceBridge.getCategories();
+    if (native.isNotEmpty) return native;
+    return _repository.categories();
+  }
 
   Future<PageResult<Map<String, dynamic>>> providers({
     String? categoryId,
     PageQuery page = const PageQuery(),
   }) async {
+    final native = await NativeServiceBridge.getProviders(categoryId);
+    if (native.isNotEmpty) {
+      return PageResult(items: native, hasMore: false);
+    }
+    
     final rows = await _repository.providers(
       categoryId: categoryId,
       page: page,

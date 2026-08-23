@@ -1,11 +1,11 @@
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/job_service.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
-import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
+import 'package:degloor_one/flutter_flow/flutter_flow_model.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
 import 'package:flutter/material.dart';
-import 'apply_job_sheet_model.dart';
-export 'apply_job_sheet_model.dart';
+import 'package:degloor_one/components/apply_job_sheet/apply_job_sheet_model.dart';
+export 'package:degloor_one/components/apply_job_sheet/apply_job_sheet_model.dart';
 
 class ApplyJobSheetWidget extends StatefulWidget {
   const ApplyJobSheetWidget({

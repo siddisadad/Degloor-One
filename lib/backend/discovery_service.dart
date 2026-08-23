@@ -1,6 +1,10 @@
+import 'package:degloor_one/backend/native_service_bridge.dart';
 import 'package:degloor_one/backend/repositories/discovery_repository.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/page_query.dart';
+
+export 'package:degloor_one/backend/repositories/discovery_repository.dart'
+    show DiscoverySearch;
 
 class DiscoveryService {
   DiscoveryService({DiscoveryRepository? repository})
@@ -20,7 +24,11 @@ class DiscoveryService {
     return PageResult(items: rows, hasMore: rows.length >= query.page.limit);
   }
 
-  Future<List<BusinessCategoriesRow>> categories() => _repository.categories();
+  Future<List<BusinessCategoriesRow>> categories() async {
+    final native = await NativeServiceBridge.getDiscoveryCategories();
+    if (native.isNotEmpty) return native;
+    return _repository.categories();
+  }
 
   Future<List<UsersRow>> profile(String userId) {
     if (userId.isEmpty) return Future.value(const []);

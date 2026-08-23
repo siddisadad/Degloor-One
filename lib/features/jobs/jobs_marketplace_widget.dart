@@ -7,10 +7,10 @@ import 'package:degloor_one/components/degloor_app_bar.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/components/job_card/job_card_widget.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
-import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
+import 'package:degloor_one/flutter_flow/flutter_flow_model.dart';
 import 'package:flutter/material.dart';
-import 'jobs_marketplace_model.dart';
-export 'jobs_marketplace_model.dart';
+import 'package:degloor_one/features/jobs/jobs_marketplace_model.dart';
+export 'package:degloor_one/features/jobs/jobs_marketplace_model.dart';
 
 class JobsMarketplaceWidget extends StatefulWidget {
   const JobsMarketplaceWidget({super.key});

@@ -7,11 +7,11 @@ import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/components/job_card/job_card_widget.dart';
 import 'package:degloor_one/core/error_handler.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
-import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
+import 'package:degloor_one/flutter_flow/flutter_flow_model.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
 import 'package:flutter/material.dart';
-import 'manage_jobs_model.dart';
-export 'manage_jobs_model.dart';
+import 'package:degloor_one/features/jobs/manage_jobs_model.dart';
+export 'package:degloor_one/features/jobs/manage_jobs_model.dart';
 
 class ManageJobsWidget extends StatefulWidget {
   const ManageJobsWidget({super.key});

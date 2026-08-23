@@ -36,6 +36,19 @@ class ShopRepository {
     );
   }
 
+  Future<ProductsRow?> productById(String productId) async {
+    if (productId.isEmpty) return null;
+    final rows = await ProductsTable().queryRows(
+      queryFn: (q) => q.eq('id', productId),
+      limit: 1,
+    );
+    return rows.isEmpty ? null : rows.first;
+  }
+
+  Future<BusinessAnalyticsRow> insertAnalytics(Map<String, dynamic> data) {
+    return BusinessAnalyticsTable().insert(data);
+  }
+
   Future<List<ProductCategoriesRow>> productCategories(String businessId) {
     if (businessId.isEmpty) return Future.value(const []);
     return ProductCategoriesTable().queryRows(
