@@ -17,8 +17,11 @@ void main() {
     expect(line.productId, 'prod-x');
     expect(line.product?.name, 'Rice');
     expect(line.product?.price, 1.0);
-    expect(line.toCheckoutItem(), {'product_id': 'prod-x', 'quantity': 2});
-    expect(line.toCheckoutItem().containsKey('price'), isFalse);
+    final checkout = line.toCheckoutItem();
+    expect(checkout.productId, 'prod-x');
+    expect(checkout.quantity, 2);
+    expect(checkout.toRpcJson(), {'product_id': 'prod-x', 'quantity': 2});
+    expect(checkout.toRpcJson().containsKey('price'), isFalse);
   });
 
   test('empty or missing product join is null', () {

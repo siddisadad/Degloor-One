@@ -1,3 +1,5 @@
+import 'package:degloor_one/shared/checkout_line_item.dart';
+
 /// Normalize a PostgREST embedded join (`products(*)`, `users(...)`).
 Map<String, dynamic>? asJoinMap(dynamic value) {
   if (value is Map<String, dynamic>) return value;
@@ -63,11 +65,11 @@ class CartLine {
   }
 
   /// Checkout payload. Price stays off the wire.
-  Map<String, dynamic> toCheckoutItem() {
-    return {
-      'product_id': productId,
-      'quantity': quantity,
-    };
+  CheckoutLineItem toCheckoutItem() {
+    return CheckoutLineItem(
+      productId: productId,
+      quantity: quantity,
+    );
   }
 }
 

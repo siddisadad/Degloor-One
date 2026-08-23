@@ -5,6 +5,7 @@ import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/core/api/api_client.dart';
 import 'package:degloor_one/core/api/cart_api.dart';
 import 'package:degloor_one/core/error_handler.dart';
+import 'package:degloor_one/shared/checkout_line_item.dart';
 import 'package:degloor_one/shared/join_rows.dart';
 import 'package:degloor_one/shared/rpc_row.dart';
 import 'package:degloor_one/shared/shopping_cart.dart';
@@ -376,7 +377,7 @@ class CartService {
   }
 
   /// Checkout payload. Prices stay off the wire; the server / catalog wins.
-  static List<Map<String, dynamic>> checkoutItems(List<CartLine> items) {
+  static List<CheckoutLineItem> checkoutItems(List<CartLine> items) {
     return [for (final item in items) item.toCheckoutItem()];
   }
 
