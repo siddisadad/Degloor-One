@@ -352,18 +352,7 @@ class BusinessService {
     required List<ShopHours> hours,
   }) async {
     final shop = await requireOwned(userId);
-    final data = hours.map((row) {
-      final id = row.id;
-      return {
-        if (id != null && id.isNotEmpty) 'id': id,
-        'business_id': shop.id,
-        'day_of_week': row.dayOfWeek,
-        'open_time': timeSql(row.openTime),
-        'close_time': timeSql(row.closeTime),
-        'is_closed': row.isClosed,
-      };
-    }).toList();
-    await _repository.upsertHours(data);
+    await _repository.upsertHours(hours, businessId: shop.id);
   }
 
   Future<String> uploadPublicImage({
@@ -400,12 +389,5 @@ class BusinessService {
     return 'Select';
   }
 
-  static String timeSql(DateTime? time) {
-    if (time != null) {
-      final hour = time.hour.toString().padLeft(2, '0');
-      final minute = time.minute.toString().padLeft(2, '0');
-      return '$hour:$minute:00';
-    }
-    return '09:00:00';
-  }
+  static String timeSql(DateTime? time) => ShopHours.sqlTime(time);
 }
