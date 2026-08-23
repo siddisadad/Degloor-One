@@ -69,10 +69,7 @@ class ServiceMarketplaceService {
   }) async {
     final native = await NativeServiceBridge.getProviders(categoryId);
     if (native.isNotEmpty) {
-      return PageResult(
-        items: native.map(ServiceProviderCard.fromJoin).toList(),
-        hasMore: false,
-      );
+      return PageResult(items: native, hasMore: false);
     }
     
     final rows = await _repository.providers(

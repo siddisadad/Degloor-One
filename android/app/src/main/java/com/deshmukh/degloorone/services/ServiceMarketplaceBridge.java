@@ -53,8 +53,12 @@ public class ServiceMarketplaceBridge implements MethodChannel.MethodCallHandler
         List<Map<String, Object>> allProviders = new ArrayList<>();
         
         // Mock data logic in Java
-        allProviders.add(createProvider("sp-native-1", "user-electrician", "scat-electric", "Native Java Electrician", 450.0, 10));
-        allProviders.add(createProvider("sp-native-2", "user-plumber", "scat-plumb", "Native Java Plumber", 350.0, 5));
+        allProviders.add(createProvider(
+            "sp-native-1", "user-electrician", "scat-electric",
+            "Ravi Electrician", "Electrician", "Native Java Electrician", 450.0, 10));
+        allProviders.add(createProvider(
+            "sp-native-2", "user-plumber", "scat-plumb",
+            "Amit Plumber", "Plumber", "Native Java Plumber", 350.0, 5));
 
         if (categoryId == null || categoryId.isEmpty()) {
             return allProviders;
@@ -69,7 +73,16 @@ public class ServiceMarketplaceBridge implements MethodChannel.MethodCallHandler
         return filtered;
     }
 
-    private Map<String, Object> createProvider(String id, String userId, String categoryId, String bio, double rate, int years) {
+    private Map<String, Object> createProvider(
+        String id,
+        String userId,
+        String categoryId,
+        String displayName,
+        String categoryName,
+        String bio,
+        double rate,
+        int years
+    ) {
         Map<String, Object> p = new HashMap<>();
         p.put("id", id);
         p.put("user_id", userId);
@@ -78,16 +91,15 @@ public class ServiceMarketplaceBridge implements MethodChannel.MethodCallHandler
         p.put("hourly_rate", rate);
         p.put("experience_years", years);
         p.put("is_verified", true);
-        
-        // Add nested user and category maps to match expected PageResult structure
+
         Map<String, Object> user = new HashMap<>();
-        user.put("full_name", bio.split(" ")[2] + " " + bio.split(" ")[0]); // Mock name
+        user.put("full_name", displayName);
         p.put("users", user);
-        
+
         Map<String, Object> cat = new HashMap<>();
-        cat.put("name", "Native Service");
+        cat.put("name", categoryName);
         p.put("service_categories", cat);
-        
+
         return p;
     }
 }

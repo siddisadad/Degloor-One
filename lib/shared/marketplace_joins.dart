@@ -12,6 +12,23 @@ String? _text(dynamic value) {
   return text.isEmpty ? null : text;
 }
 
+String _id(dynamic value) {
+  if (value is String || value is num) return '$value'.trim();
+  return '';
+}
+
+double? _double(dynamic value) {
+  if (value is num) return value.toDouble();
+  if (value is String) return double.tryParse(value);
+  return null;
+}
+
+int? _int(dynamic value) {
+  if (value is num) return value.toInt();
+  if (value is String) return int.tryParse(value);
+  return null;
+}
+
 DateTime? _date(dynamic value) {
   if (value is DateTime) return value;
   if (value is String) return DateTime.tryParse(value);
@@ -161,12 +178,12 @@ class ServiceProviderCard {
 
   factory ServiceProviderCard.fromJoin(Map<String, dynamic> data) {
     return ServiceProviderCard(
-      id: '${data['id'] ?? ''}',
+      id: _id(data['id']),
       userId: _text(data['user_id']),
       categoryId: _text(data['category_id']),
       bio: _text(data['bio']),
-      hourlyRate: (data['hourly_rate'] as num?)?.toDouble(),
-      experienceYears: (data['experience_years'] as num?)?.toInt(),
+      hourlyRate: _double(data['hourly_rate']),
+      experienceYears: _int(data['experience_years']),
       isVerified: data['is_verified'] == true,
       user: JoinedUser.fromJoin(data['users']),
       category: JoinedCategory.fromJoin(data['service_categories']),
