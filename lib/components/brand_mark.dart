@@ -5,7 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 /// Shared DEGLOOR ONE mark used on splash, auth, home, and profile.
 const kBrandImageAsset = 'assets/images/app_brand.png';
 const kBrandName = 'DEGLOOR ONE';
-const kBrandTagline = 'Everything Local. One App.';
+const kBrandTagline = 'Everything local, in one app.';
 
 class BrandMark extends StatelessWidget {
   const BrandMark({

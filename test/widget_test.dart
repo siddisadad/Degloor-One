@@ -27,7 +27,7 @@ void main() {
     );
 
     expect(find.byType(Image), findsWidgets);
-    expect(find.text('Everything Local. One App.'), findsOneWidget);
+    expect(find.text('Everything local, in one app.'), findsOneWidget);
     expect(find.text('Degloor, Maharashtra'), findsOneWidget);
   });
 }

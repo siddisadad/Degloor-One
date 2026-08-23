@@ -3,13 +3,15 @@ import 'package:degloor_one/core/degloor_theme.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class HeroBanner extends StatelessWidget {
-  const HeroBanner({super.key});
+  const HeroBanner({super.key, this.onExplore});
+
+  final VoidCallback? onExplore;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      height: 180,
+      height: 168,
       margin: const EdgeInsets.symmetric(horizontal: DegloorTheme.spacingMD),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
@@ -18,45 +20,37 @@ class HeroBanner extends StatelessWidget {
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(DegloorTheme.radiusLG),
-        image: DecorationImage(
-          image: const NetworkImage(
-            'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&w=800&q=80',
-          ),
-          fit: BoxFit.cover,
-          colorFilter: ColorFilter.mode(
-            DegloorTheme.primary.withValues(alpha: 0.4),
-            BlendMode.darken,
-          ),
-        ),
       ),
       child: Stack(
         children: [
           Padding(
-            padding: const EdgeInsets.all(DegloorTheme.spacingLG),
+            padding: const EdgeInsets.all(DegloorTheme.spacingMD),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'Shop Local,\nDiscover More',
+                  'Everything local,\nin one app.',
                   style: GoogleFonts.inter(
                     color: Colors.white,
-                    fontSize: 24,
+                    fontSize: 22,
                     fontWeight: FontWeight.w800,
-                    height: 1.1,
+                    height: 1.15,
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: onExplore,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: DegloorTheme.secondary,
                     foregroundColor: Colors.white,
                     elevation: 0,
+                    visualDensity: VisualDensity.compact,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(DegloorTheme.radiusSM),
                     ),
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                   ),
                   child: const Text(
                     'Explore Now',

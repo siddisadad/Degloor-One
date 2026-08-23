@@ -66,7 +66,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noResultsFound => 'No results found';
 
   @override
-  String get searchPlaceholder => 'Search hardware, food...';
+  String get searchPlaceholder => 'Search anything...';
 
   @override
   String get call => 'Call';
