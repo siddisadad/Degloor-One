@@ -20,6 +20,7 @@ class ShowcaseCatalog {
   static const owner6 = '00000000-0000-4000-8000-000000000006';
   static const riderId = '00000000-0000-4000-8000-000000000007';
   static const customer2 = '00000000-0000-4000-8000-000000000008';
+  static const adminId = '00000000-0000-4000-8000-000000000009';
 
   static const catGrocery = 'cat-grocery';
   static const catFood = 'cat-food';
@@ -401,6 +402,7 @@ class ShowcaseCatalog {
         _user(riderId, 'rider@degloor.local', 'Amit Jadhav', 'delivery_partner',
             phone: '+919890000007'),
         _user(customer2, 'priya@degloor.local', 'Priya Kale', 'customer'),
+        _user(adminId, 'admin@degloor.local', 'Sadad Siddi', 'admin'),
         _user('user-electrician', 'ravi.e@degloor.local', 'Ravi Electrician',
             'service_provider'),
         _user('user-plumber', 'sunil.p@degloor.local', 'Sunil Plumber',

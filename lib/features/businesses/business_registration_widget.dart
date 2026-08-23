@@ -12,6 +12,8 @@ import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/form_field_controller.dart';
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
+import 'package:degloor_one/backend/business_service.dart';
+import 'package:degloor_one/backend/discovery_service.dart';
 import 'package:degloor_one/backend/supabase/database/database.dart';
 import 'package:degloor_one/features/home/customer_home_widget.dart';
 import 'package:degloor_one/index.dart';
@@ -54,9 +56,7 @@ class _BusinessRegistrationWidgetState
 
   Future<void> _loadCategories() async {
     try {
-      final rows = await BusinessCategoriesTable().queryRows(
-        queryFn: (q) => q.order('display_order', ascending: true),
-      );
+      final rows = await DiscoveryService.instance.categories();
       if (mounted) {
         setState(() {
           _categories = rows;
@@ -961,35 +961,27 @@ class _BusinessRegistrationWidgetState
                                 final radiusKm =
                                     radiusFromSliderPercent(sliderVal);
 
-                                await BusinessesTable().insert({
-                                  'owner_id': currentUserUid,
-                                  'name': name,
-                                  'owner_name': owner,
-                                  'description': _model.textFieldModel3
+                                await BusinessService.instance.register(
+                                  userId: currentUserUid,
+                                  name: name,
+                                  ownerName: owner,
+                                  phone: phone,
+                                  categoryId: _model.dropdownValue!,
+                                  latitude:
+                                      _model.mapGoogleMapsCenter!.latitude,
+                                  longitude:
+                                      _model.mapGoogleMapsCenter!.longitude,
+                                  description: _model.textFieldModel3
                                           .inputTextController?.text ??
                                       '',
-                                  'phone_number': phone,
-                                  'whatsapp_number':
+                                  whatsappNumber:
                                       _model.switchModel.switchValue == true
                                           ? phone
                                           : _model.textFieldModel5
                                               .inputTextController?.text,
-                                  'address_text':
+                                  addressText:
                                       '${_model.textFieldModel6.inputTextController?.text ?? ''}, ${_model.textFieldModel8.inputTextController?.text ?? ''}, ${_model.textFieldModel7.inputTextController?.text ?? 'Degloor'}',
-                                  'category_id': _model.dropdownValue,
-                                  'latitude':
-                                      _model.mapGoogleMapsCenter?.latitude,
-                                  'longitude':
-                                      _model.mapGoogleMapsCenter?.longitude,
-                                  'discovery_radius': radiusKm,
-                                  'is_verified': false,
-                                });
-
-                                // Update user role to business_owner
-                                await UsersTable().update(
-                                  data: {'role': 'business_owner'},
-                                  matchingRows: (q) =>
-                                      q.eq('id', currentUserUid),
+                                  discoveryRadius: radiusKm,
                                 );
 
                                 // Refresh user to update local role
@@ -1011,8 +1003,13 @@ class _BusinessRegistrationWidgetState
                                 if (!context.mounted) return;
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    content:
-                                        Text('Error submitting business: $e'),
+                                    content: Text(
+                                      AppLogger.userFacingMessage(
+                                        e,
+                                        fallback:
+                                            'Unable to submit the shop. Please try again.',
+                                      ),
+                                    ),
                                     backgroundColor:
                                         FlutterFlowTheme.of(context).error,
                                   ),
