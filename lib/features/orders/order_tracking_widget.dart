@@ -13,6 +13,7 @@ import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
 import 'package:degloor_one/shared/join_rows.dart';
+import 'package:degloor_one/shared/placed_order.dart';
 import 'package:degloor_one/shared/user_profile.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -62,7 +63,7 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
         key: scaffoldKey,
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         appBar: degloorAppBar(context, title: 'Track order'),
-        body: StreamBuilder<List<OrdersRow>>(
+        body: StreamBuilder<List<PlacedOrder>>(
           stream: OrderService.instance.watchUserOrder(
             orderId: widget.orderId,
             userId: currentUserUid,
@@ -486,7 +487,7 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
     );
   }
 
-  Widget _buildBusinessInfo(String businessId, OrdersRow order) {
+  Widget _buildBusinessInfo(String businessId, PlacedOrder order) {
     return FutureBuilder<List<BusinessesRow>>(
       future: DiscoveryService.instance.businessesByIds([businessId]),
       builder: (context, snapshot) {
@@ -591,7 +592,7 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
     );
   }
 
-  Widget _buildOrderSummary(OrdersRow order) {
+  Widget _buildOrderSummary(PlacedOrder order) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

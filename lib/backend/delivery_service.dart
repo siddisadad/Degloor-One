@@ -7,6 +7,7 @@ import 'package:degloor_one/core/api/order_api.dart';
 import 'package:degloor_one/core/error_handler.dart';
 import 'package:degloor_one/shared/order_lifecycle.dart';
 import 'package:degloor_one/shared/page_query.dart';
+import 'package:degloor_one/shared/placed_order.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
 class DeliveryService {
@@ -52,11 +53,14 @@ class DeliveryService {
     return _repository.activeForPartner(partnerId);
   }
 
-  Future<PageResult<OrdersRow>> readyOrders({
+  Future<PageResult<PlacedOrder>> readyOrders({
     PageQuery page = const PageQuery(),
   }) async {
     final rows = await _repository.readyOrders(page: page);
-    return PageResult(items: rows, hasMore: rows.length >= page.limit);
+    return PageResult(
+      items: rows.map(PlacedOrder.fromRow).toList(),
+      hasMore: rows.length >= page.limit,
+    );
   }
 
   Future<DeliveryAssignmentsRow?> activeAssignment(String orderId) {
