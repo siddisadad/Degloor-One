@@ -25,4 +25,16 @@ void main() {
     expect(find.text('Electrician'), findsWidgets);
     expect(find.text('Ravi Electrician'), findsOneWidget);
   });
+
+  testWidgets('services tab hides the back arrow', (tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: ServicesWidget(showBack: false),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('Find local services'), findsOneWidget);
+    expect(find.byIcon(Icons.arrow_back_rounded), findsNothing);
+  });
 }

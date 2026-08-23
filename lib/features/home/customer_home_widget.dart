@@ -239,7 +239,7 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                   Padding(
                     padding: const EdgeInsets.only(right: DegloorTheme.spacingMD),
                     child: InkWell(
-                      onTap: () => context.pushNamed('UserProfileReports'),
+                      onTap: () => context.pushNamed('MyProfile'),
                       child: Container(
                         width: 36,
                         height: 36,
@@ -305,7 +305,7 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                     DegloorTheme.spacingLG,
                   ),
                   child: HomeFeatureShortcuts(
-                    onServices: () => context.goNamed('Services'),
+                    onServices: () => context.pushNamed('LocalServices'),
                     onJobs: () => context.pushNamed('JobsMarketplace'),
                     onOrders: () => context.pushNamed('CustomerOrders'),
                   ),
@@ -369,7 +369,7 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                           Text('Local Services',
                               style: DegloorTheme.headingMedium),
                           TextButton(
-                            onPressed: () => context.goNamed('Services'),
+                            onPressed: () => context.pushNamed('LocalServices'),
                             style: TextButton.styleFrom(
                               foregroundColor: DegloorTheme.primary,
                             ),

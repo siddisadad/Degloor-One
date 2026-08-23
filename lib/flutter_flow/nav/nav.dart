@@ -156,7 +156,8 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
                 GoRoute(
                   name: ServicesWidget.routeName,
                   path: ServicesWidget.routePath,
-                  builder: (context, state) => const ServicesWidget(),
+                  builder: (context, state) =>
+                      const ServicesWidget(showBack: false),
                 ),
               ],
             ),
@@ -165,7 +166,8 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
                 GoRoute(
                   name: CartWidget.routeName,
                   path: CartWidget.routePath,
-                  builder: (context, state) => const CartWidget(),
+                  builder: (context, state) =>
+                      const CartWidget(showBack: false),
                   redirect: (context, state) =>
                       !kBypassAuth && !appStateNotifier.loggedIn
                           ? '/authentication'
@@ -178,7 +180,8 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
                 GoRoute(
                   name: UserProfileReportsWidget.routeName,
                   path: UserProfileReportsWidget.routePath,
-                  builder: (context, state) => const UserProfileReportsWidget(),
+                  builder: (context, state) =>
+                      const UserProfileReportsWidget(showBack: false),
                   redirect: (context, state) =>
                       !kBypassAuth && !appStateNotifier.loggedIn
                           ? '/authentication'
@@ -192,6 +195,23 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           name: LocationRadiusSelectorWidget.routeName,
           path: LocationRadiusSelectorWidget.routePath,
           builder: (context, params) => const LocationRadiusSelectorWidget(),
+        ),
+        FFRoute(
+          name: ServicesWidget.stackedRouteName,
+          path: ServicesWidget.stackedRoutePath,
+          builder: (context, params) => const ServicesWidget(),
+        ),
+        FFRoute(
+          name: UserProfileReportsWidget.stackedRouteName,
+          path: UserProfileReportsWidget.stackedRoutePath,
+          builder: (context, params) => const UserProfileReportsWidget(),
+          requireAuth: true,
+        ),
+        FFRoute(
+          name: CartWidget.stackedRouteName,
+          path: CartWidget.stackedRoutePath,
+          builder: (context, params) => const CartWidget(),
+          requireAuth: true,
         ),
         FFRoute(
           name: SearchResultsWidget.routeName,

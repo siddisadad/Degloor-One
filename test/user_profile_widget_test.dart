@@ -41,4 +41,16 @@ void main() {
     expect(find.text('Guest Customer'), findsNothing);
     expect(find.text('Personal information'), findsNothing);
   });
+
+  testWidgets('profile tab hides the back arrow', (tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: UserProfileReportsWidget(showBack: false),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('My Profile'), findsOneWidget);
+    expect(find.byIcon(Icons.arrow_back_rounded), findsNothing);
+  });
 }

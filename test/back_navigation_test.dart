@@ -72,7 +72,7 @@ void main() {
     expect(find.byIcon(Icons.arrow_back_rounded), findsOneWidget);
   });
 
-  testWidgets('cart tab shows a back arrow', (tester) async {
+  testWidgets('pushed cart shows a back arrow', (tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: CartWidget(),
@@ -82,6 +82,18 @@ void main() {
 
     expect(find.text('Your Cart'), findsOneWidget);
     expect(find.byIcon(Icons.arrow_back_rounded), findsOneWidget);
+  });
+
+  testWidgets('cart tab hides the back arrow', (tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: CartWidget(showBack: false),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('Your Cart'), findsOneWidget);
+    expect(find.byIcon(Icons.arrow_back_rounded), findsNothing);
   });
 
   testWidgets('tab-style pages hide back when they cannot pop', (tester) async {

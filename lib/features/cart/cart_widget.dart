@@ -15,10 +15,18 @@ import 'cart_model.dart';
 export 'cart_model.dart';
 
 class CartWidget extends StatefulWidget {
-  const CartWidget({super.key});
+  const CartWidget({
+    super.key,
+    this.showBack = true,
+  });
+
+  /// Pushed cart (profile, catalogue) shows back. The Cart tab does not.
+  final bool showBack;
 
   static String routeName = 'Cart';
   static String routePath = '/cart';
+  static String stackedRouteName = 'ShoppingCart';
+  static String stackedRoutePath = '/shoppingCart';
 
   @override
   State<CartWidget> createState() => _CartWidgetState();
@@ -230,7 +238,10 @@ class _CartWidgetState extends State<CartWidget> {
         title: Text('Your Cart', style: DegloorTheme.headingMedium),
         elevation: 0,
         automaticallyImplyLeading: false,
-        leading: degloorBackButton(context),
+        leading: degloorBackLeading(
+          context,
+          show: widget.showBack ? true : null,
+        ),
       ),
       body: FutureBuilder<List<CartLine>>(
         future: _model.cartItemsFuture,
