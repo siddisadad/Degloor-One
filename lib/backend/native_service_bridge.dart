@@ -1,5 +1,6 @@
 import 'package:flutter/services.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/marketplace_joins.dart';
 import 'package:degloor_one/shared/service_category.dart';
 import 'package:degloor_one/shared/shop_category.dart';
 
@@ -21,14 +22,16 @@ class NativeServiceBridge {
     }
   }
 
-  static Future<List<Map<String, dynamic>>> getProviders(String? categoryId) async {
+  static Future<List<ServiceProviderCard>> getProviders(String? categoryId) async {
     try {
       final List<dynamic>? result = await _serviceChannel.invokeMethod('getNativeProviders', {
         'categoryId': categoryId,
       });
       if (result == null) return [];
-      
-      return result.map((e) => Map<String, dynamic>.from(e)).toList();
+
+      return result
+          .map((row) => ServiceProviderCard.fromJoin(Map<String, dynamic>.from(row as Map)))
+          .toList();
     } catch (e) {
       return [];
     }
