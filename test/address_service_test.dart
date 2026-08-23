@@ -1,6 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/backend/address_service.dart';
+import 'package:degloor_one/backend/supabase/database/tables/addresses_table.dart';
+import 'package:degloor_one/shared/saved_address.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
 void main() {
@@ -9,6 +11,8 @@ void main() {
   test('guest has home and work addresses', () async {
     final rows =
         await AddressService.instance.listForUser(GuestAuthUser.guestUid);
+    expect(rows, everyElement(isA<SavedAddress>()));
+    expect(rows, isNot(anyElement(isA<AddressesRow>())));
     expect(rows.map((row) => row.id), containsAll(['addr-home', 'addr-work']));
     expect(rows.where((row) => row.isDefault).single.id, 'addr-home');
   });

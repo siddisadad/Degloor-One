@@ -1,6 +1,6 @@
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/address_service.dart';
-import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/saved_address.dart';
 import 'package:degloor_one/components/degloor_app_bar.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/core/error_handler.dart';
@@ -24,7 +24,7 @@ class _AddressListWidgetState extends State<AddressListWidget> {
   late AddressListModel _model;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
-  Future<List<AddressesRow>>? _addressesFuture;
+  Future<List<SavedAddress>>? _addressesFuture;
 
   @override
   void initState() {
@@ -117,7 +117,7 @@ class _AddressListWidgetState extends State<AddressListWidget> {
           alignment: Alignment.topCenter,
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 520),
-            child: FutureBuilder<List<AddressesRow>>(
+            child: FutureBuilder<List<SavedAddress>>(
               future: _addressesFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
