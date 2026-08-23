@@ -10,6 +10,7 @@ import 'package:degloor_one/shared/catalog_product_stock.dart';
 import 'package:degloor_one/shared/product_category.dart';
 import 'package:degloor_one/shared/product_category_draft.dart';
 import 'package:degloor_one/shared/shop.dart';
+import 'package:degloor_one/shared/shop_draft.dart';
 import 'package:degloor_one/shared/shop_hours.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
@@ -95,50 +96,31 @@ class BusinessService {
 
   Future<Shop> register({
     required String userId,
-    required String name,
-    required String ownerName,
-    required String phone,
-    required String categoryId,
-    required double latitude,
-    required double longitude,
-    String description = '',
-    String? whatsappNumber,
-    String addressText = '',
-    double discoveryRadius = 5,
+    required ShopDraft draft,
   }) async {
     if (userId.isEmpty) {
       throw Exception(_signInMessage);
     }
-    final trimmedName = name.trim();
-    final trimmedOwner = ownerName.trim();
-    final trimmedPhone = phone.trim();
-    if (trimmedName.isEmpty ||
-        trimmedOwner.isEmpty ||
-        trimmedPhone.isEmpty ||
-        categoryId.isEmpty) {
-      throw Exception('Please fill all required fields');
-    }
-    if (latitude < -90 ||
-        latitude > 90 ||
-        longitude < -180 ||
-        longitude > 180) {
+    if (draft.latitude == null || draft.longitude == null) {
       throw Exception('Please pick a location on the map');
     }
+    final normalized = ShopDraft.fromRegister(
+      name: draft.name,
+      ownerName: draft.ownerName ?? '',
+      phone: draft.phoneNumber ?? '',
+      categoryId: draft.categoryId ?? '',
+      latitude: draft.latitude!,
+      longitude: draft.longitude!,
+      description: draft.description ?? '',
+      whatsappNumber: draft.whatsappNumber,
+      addressText: draft.addressText ?? '',
+      discoveryRadius: draft.discoveryRadius ?? 5,
+    );
 
-    final row = await _repository.insertBusiness({
-      'owner_id': userId,
-      'name': trimmedName,
-      'owner_name': trimmedOwner,
-      'description': description.trim(),
-      'phone_number': trimmedPhone,
-      'whatsapp_number': (whatsappNumber ?? trimmedPhone).trim(),
-      'address_text': addressText.trim(),
-      'category_id': categoryId,
-      'latitude': latitude,
-      'longitude': longitude,
-      'discovery_radius': discoveryRadius,
-      'is_verified': false,
-    });
+    final row = await _repository.insertBusiness(
+      normalized,
+      ownerId: userId,
+    );
 
     // Live RLS blocks client role changes. Showcase still needs the owner role
     // so the dashboard route works after local registration.
@@ -155,33 +137,23 @@ class BusinessService {
   Future<void> updateProfile({
     required String userId,
     required String businessId,
-    required String name,
-    String? ownerName,
-    String? description,
-    String? phoneNumber,
-    String? whatsappNumber,
-    String? addressText,
-    double? discoveryRadius,
-    String? imageUrl,
+    required ShopDraft draft,
   }) async {
     await requireOwnedBusiness(userId: userId, businessId: businessId);
-    final trimmedName = name.trim();
-    if (trimmedName.isEmpty) {
-      throw Exception('Business name is required');
-    }
+    final normalized = ShopDraft.fromProfile(
+      name: draft.name,
+      ownerName: draft.ownerName,
+      description: draft.description,
+      phoneNumber: draft.phoneNumber,
+      whatsappNumber: draft.whatsappNumber,
+      addressText: draft.addressText,
+      discoveryRadius: draft.discoveryRadius,
+      imageUrl: draft.imageUrl,
+    );
     await _repository.updateBusiness(
       businessId: businessId,
       ownerId: userId,
-      data: {
-        'name': trimmedName,
-        'owner_name': ownerName?.trim(),
-        'description': description?.trim(),
-        'phone_number': phoneNumber?.trim(),
-        'whatsapp_number': whatsappNumber?.trim(),
-        'address_text': addressText?.trim(),
-        if (discoveryRadius != null) 'discovery_radius': discoveryRadius,
-        'image_url': imageUrl,
-      },
+      draft: normalized,
     );
   }
 

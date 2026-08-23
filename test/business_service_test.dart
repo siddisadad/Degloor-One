@@ -8,6 +8,7 @@ import 'package:degloor_one/shared/catalog_product_draft.dart';
 import 'package:degloor_one/shared/catalog_product_stock.dart';
 import 'package:degloor_one/shared/product_category.dart';
 import 'package:degloor_one/shared/shop.dart';
+import 'package:degloor_one/shared/shop_draft.dart';
 import 'package:degloor_one/shared/shop_hours.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
@@ -188,13 +189,15 @@ void main() {
   test('customer can register an unverified shop', () async {
     final shop = await BusinessService.instance.register(
       userId: ShowcaseCatalog.customer2,
-      name: 'Kale Kirana',
-      ownerName: 'Priya Kale',
-      phone: '9890000008',
-      categoryId: ShowcaseCatalog.catGrocery,
-      latitude: 18.55,
-      longitude: 77.58,
-      addressText: 'Lane 2, Degloor',
+      draft: ShopDraft.fromRegister(
+        name: 'Kale Kirana',
+        ownerName: 'Priya Kale',
+        phone: '9890000008',
+        categoryId: ShowcaseCatalog.catGrocery,
+        latitude: 18.55,
+        longitude: 77.58,
+        addressText: 'Lane 2, Degloor',
+      ),
     );
     expect(shop.ownerId, ShowcaseCatalog.customer2);
     expect(shop.isVerified, isFalse);
@@ -209,7 +212,7 @@ void main() {
       BusinessService.instance.updateProfile(
         userId: ShowcaseCatalog.customer2,
         businessId: ShowcaseCatalog.bizPatil,
-        name: 'Hacked',
+        draft: ShopDraft.fromProfile(name: 'Hacked'),
       ),
       throwsA(isA<Exception>()),
     );
@@ -217,7 +220,7 @@ void main() {
     await BusinessService.instance.updateProfile(
       userId: GuestAuthUser.guestUid,
       businessId: ShowcaseCatalog.bizPatil,
-      name: 'Patil Kirana Plus',
+      draft: ShopDraft.fromProfile(name: 'Patil Kirana Plus'),
     );
     final shop =
         await BusinessService.instance.requireOwned(GuestAuthUser.guestUid);

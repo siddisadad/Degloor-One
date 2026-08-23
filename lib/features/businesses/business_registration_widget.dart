@@ -22,6 +22,7 @@ import 'package:degloor_one/core/error_handler.dart';
 import 'package:degloor_one/core/google_maps_js.dart';
 import 'package:degloor_one/shared/discovery_radius.dart';
 import 'package:degloor_one/shared/shop_category.dart';
+import 'package:degloor_one/shared/shop_draft.dart';
 import 'business_registration_model.dart';
 export 'business_registration_model.dart';
 
@@ -963,25 +964,27 @@ class _BusinessRegistrationWidgetState
 
                                 await BusinessService.instance.register(
                                   userId: currentUserUid,
-                                  name: name,
-                                  ownerName: owner,
-                                  phone: phone,
-                                  categoryId: _model.dropdownValue!,
-                                  latitude:
-                                      _model.mapGoogleMapsCenter!.latitude,
-                                  longitude:
-                                      _model.mapGoogleMapsCenter!.longitude,
-                                  description: _model.textFieldModel3
-                                          .inputTextController?.text ??
-                                      '',
-                                  whatsappNumber:
-                                      _model.switchModel.switchValue == true
-                                          ? phone
-                                          : _model.textFieldModel5
-                                              .inputTextController?.text,
-                                  addressText:
-                                      '${_model.textFieldModel6.inputTextController?.text ?? ''}, ${_model.textFieldModel8.inputTextController?.text ?? ''}, ${_model.textFieldModel7.inputTextController?.text ?? 'Degloor'}',
-                                  discoveryRadius: radiusKm,
+                                  draft: ShopDraft.fromRegister(
+                                    name: name,
+                                    ownerName: owner,
+                                    phone: phone,
+                                    categoryId: _model.dropdownValue!,
+                                    latitude:
+                                        _model.mapGoogleMapsCenter!.latitude,
+                                    longitude:
+                                        _model.mapGoogleMapsCenter!.longitude,
+                                    description: _model.textFieldModel3
+                                            .inputTextController?.text ??
+                                        '',
+                                    whatsappNumber:
+                                        _model.switchModel.switchValue == true
+                                            ? phone
+                                            : _model.textFieldModel5
+                                                .inputTextController?.text,
+                                    addressText:
+                                        '${_model.textFieldModel6.inputTextController?.text ?? ''}, ${_model.textFieldModel8.inputTextController?.text ?? ''}, ${_model.textFieldModel7.inputTextController?.text ?? 'Degloor'}',
+                                    discoveryRadius: radiusKm,
+                                  ),
                                 );
 
                                 // Refresh user to update local role
