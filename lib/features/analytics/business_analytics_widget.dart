@@ -62,14 +62,14 @@ class _BusinessAnalyticsWidgetState extends State<BusinessAnalyticsWidget>
 
   Future<void> _fetchData() async {
     try {
-      final rows = await ShopService.instance.eventsFor(
+      final events = await ShopService.instance.eventsFor(
         userId: currentUserUid,
         businessId: widget.businessId,
         days: _selectedPeriod,
       );
       if (!mounted) return;
       safeSetState(() {
-        _summary = ShopService.summarizeEvents(rows);
+        _summary = ShopService.summarizeEvents(events);
         _isLoading = false;
       });
     } catch (e) {
