@@ -2,6 +2,7 @@ import 'package:degloor_one/core/app_environment.dart';
 import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+export 'package:degloor_one/core/app_flags.dart';
 export 'database/database.dart';
 
 /// FlutterFlow default. Override at build time when that project is paused
@@ -12,17 +13,6 @@ const kDeadFlutterFlowHost = AppEnvironment.deadFlutterFlowHost;
 String get kSupabaseUrl => AppEnvironment.supabaseUrl;
 
 String get kSupabaseAnonKey => AppEnvironment.supabaseAnonKey;
-
-/// True when the compiled URL still points at the deleted FlutterFlow project.
-bool get kUsesDeadFlutterFlowHost => AppEnvironment.usesDeadFlutterFlowHost;
-
-/// Guest mode. Forced to true for now.
-bool get kBypassAuth => true;
-
-/// Local Degloor catalog. Forced to true for now to show sample data.
-bool get kUseShowcaseData => true;
-
-AppFlavor get kAppFlavor => AppEnvironment.flavor;
 
 /// Throws immediately so Chrome never POSTs to a host that NXDOMAINs.
 class BlockedSupabaseHttpClient extends http.BaseClient {

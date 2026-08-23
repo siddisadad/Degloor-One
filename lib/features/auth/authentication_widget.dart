@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
-import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/backend/supabase/supabase_connection.dart';
+import 'package:degloor_one/core/app_flags.dart';
 import 'package:degloor_one/backend/user_service.dart';
 import 'package:degloor_one/components/auth_page_header.dart';
 import 'package:degloor_one/components/brand_mark.dart';
