@@ -1,3 +1,4 @@
+import 'package:degloor_one/components/degloor_app_bar.dart';
 import 'package:degloor_one/core/degloor_theme.dart';
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/shop_service.dart';
@@ -61,6 +62,11 @@ class _UserProfileReportsWidgetState extends State<UserProfileReportsWidget> {
         backgroundColor: DegloorTheme.background,
         appBar: AppBar(
           backgroundColor: Colors.white,
+          automaticallyImplyLeading: false,
+          leading: degloorBackLeading(
+            context,
+            color: DegloorTheme.textPrimary,
+          ),
           title: Text('My Profile', style: DegloorTheme.headingMedium),
           elevation: 0,
         ),

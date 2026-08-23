@@ -5,6 +5,7 @@ import 'package:degloor_one/backend/order_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/l10n/app_localizations.dart';
 import 'package:degloor_one/components/brand_mark.dart';
+import 'package:degloor_one/components/degloor_app_bar.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
 import '/components/action_tile/action_tile_widget.dart';
 import '/components/completeness_card/completeness_card_widget.dart';
@@ -104,6 +105,7 @@ class _BusinessDashboardWidgetState extends State<BusinessDashboardWidget> {
     if (_isLoading) {
       return Scaffold(
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+        appBar: degloorAppBar(context, title: 'Dashboard'),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
@@ -111,6 +113,7 @@ class _BusinessDashboardWidgetState extends State<BusinessDashboardWidget> {
     if (_business == null) {
       return Scaffold(
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+        appBar: degloorAppBar(context, title: 'Dashboard'),
         body: EmptyStateView(
           icon: Icons.storefront_outlined,
           title: 'No shop yet',
@@ -180,7 +183,12 @@ class _BusinessDashboardWidgetState extends State<BusinessDashboardWidget> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                                Column(
+                                degloorBackButton(
+                                  context,
+                                  color: FlutterFlowTheme.of(context).primaryText,
+                                ),
+                                Expanded(
+                                child: Column(
                                   mainAxisSize: MainAxisSize.min,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
@@ -253,6 +261,7 @@ class _BusinessDashboardWidgetState extends State<BusinessDashboardWidget> {
                                       ].divide(const SizedBox(width: 4.0)),
                                     ),
                                   ].divide(const SizedBox(height: 4.0)),
+                                ),
                                 ),
                                 Row(
                                   children: [

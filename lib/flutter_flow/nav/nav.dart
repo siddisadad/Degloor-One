@@ -146,6 +146,7 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
                     searchTerm: state.uri.queryParameters['searchTerm'],
                     categoryId: state.uri.queryParameters['categoryId'],
                     openNow: state.uri.queryParameters['openNow'] == 'true',
+                    showBack: false,
                   ),
                 ),
               ],

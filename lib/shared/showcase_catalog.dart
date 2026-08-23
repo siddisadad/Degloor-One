@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/flutter_flow/lat_lng.dart';
+import 'package:degloor_one/shared/search_query.dart';
 
 class ShowcaseCatalog {
   ShowcaseCatalog._();
@@ -196,10 +197,25 @@ class ShowcaseCatalog {
       if (openNow && raw['is_open'] != true) continue;
       final rating = (raw['rating'] as num?)?.toDouble() ?? 0;
       if (rating < minRating) continue;
-      if (searchTerm != null && searchTerm.trim().isNotEmpty) {
-        final hay = '${raw['name']} ${raw['description']} ${raw['address_text']}'
-            .toLowerCase();
-        if (!hay.contains(searchTerm.trim().toLowerCase())) continue;
+      final query = SearchQuery.parse(searchTerm);
+      if (!query.isEmpty) {
+        final categoryName = table('business_categories')
+            .where((row) => row['id'] == raw['category_id'])
+            .map((row) => '${row['name']}')
+            .join(' ');
+        final productNames = table('products')
+            .where((row) => row['business_id'] == raw['id'])
+            .map((row) => '${row['name']} ${row['description']}')
+            .join(' ');
+        if (!query.matches([
+          raw['name']?.toString(),
+          raw['description']?.toString(),
+          raw['address_text']?.toString(),
+          categoryName,
+          productNames,
+        ])) {
+          continue;
+        }
       }
       matches.add({
         ...raw,
@@ -230,9 +246,13 @@ class ShowcaseCatalog {
       if (lat == null || lng == null) continue;
       final distance = _haversineKm(latitude, longitude, lat, lng);
       if (distance > radiusKm) continue;
-      if (searchTerm != null && searchTerm.trim().isNotEmpty) {
-        final hay = '${product['name']} ${product['description']}'.toLowerCase();
-        if (!hay.contains(searchTerm.trim().toLowerCase())) continue;
+      final query = SearchQuery.parse(searchTerm);
+      if (!query.matches([
+        product['name']?.toString(),
+        product['description']?.toString(),
+        biz['name']?.toString(),
+      ])) {
+        continue;
       }
       matches.add({
         ...product,
@@ -326,9 +346,18 @@ class ShowcaseCatalog {
   }) {
     final q = ShowcaseQuery()..eq('is_active', true);
     if (jobType != null && jobType != 'All') q.eq('job_type', jobType);
+    final parsed = SearchQuery.parse(search);
     var rows = query('jobs', q).where((job) {
-      if (search == null || search.trim().isEmpty) return true;
-      return '${job['title']}'.toLowerCase().contains(search.toLowerCase());
+      if (parsed.isEmpty) return true;
+      final businesses =
+          query('businesses', ShowcaseQuery()..eq('id', job['business_id']));
+      final biz = businesses.isEmpty ? <String, dynamic>{} : businesses.first;
+      return parsed.matches([
+        job['title']?.toString(),
+        job['description']?.toString(),
+        job['job_type']?.toString(),
+        biz['name']?.toString(),
+      ]);
     }).map((job) {
       final businesses =
           query('businesses', ShowcaseQuery()..eq('id', job['business_id']));

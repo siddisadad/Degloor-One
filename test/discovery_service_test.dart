@@ -43,6 +43,49 @@ void main() {
     );
   });
 
+  test('master search for milk returns the product and Patil shop', () async {
+    final result = await DiscoveryService.instance.masterSearch(
+      query: DiscoverySearch(
+        latitude: ShowcaseCatalog.degloorLat,
+        longitude: ShowcaseCatalog.degloorLng,
+        radiusKm: 15,
+        searchTerm: 'milk',
+      ),
+    );
+    expect(result.products.map((row) => row.id), contains(ShowcaseCatalog.prodMilk));
+    expect(result.shops.map((row) => row.id), contains(ShowcaseCatalog.bizPatil));
+    expect(result.totalCount, greaterThanOrEqualTo(2));
+  });
+
+  test('master search scopes services and jobs', () async {
+    final services = await DiscoveryService.instance.masterSearch(
+      query: DiscoverySearch(
+        latitude: ShowcaseCatalog.degloorLat,
+        longitude: ShowcaseCatalog.degloorLng,
+        radiusKm: 15,
+        searchTerm: 'electric',
+      ),
+      scope: MasterSearchScope.services,
+    );
+    expect(services.shops, isEmpty);
+    expect(services.services, isNotEmpty);
+    expect(
+      services.services.any((row) => row.categoryName.toLowerCase().contains('electric')),
+      isTrue,
+    );
+
+    final jobs = await DiscoveryService.instance.masterSearch(
+      query: DiscoverySearch(
+        latitude: ShowcaseCatalog.degloorLat,
+        longitude: ShowcaseCatalog.degloorLng,
+        radiusKm: 15,
+        searchTerm: 'counter',
+      ),
+      scope: MasterSearchScope.jobs,
+    );
+    expect(jobs.jobs.map((row) => row.id), contains('job-counter'));
+  });
+
   test('product search returns catalog products', () async {
     final page = await DiscoveryService.instance.searchProducts(
       DiscoverySearch(

@@ -4,6 +4,7 @@ import 'package:degloor_one/backend/service_marketplace_service.dart';
 import 'package:degloor_one/backend/whatsapp_service.dart';
 import 'package:degloor_one/shared/service_provider_profile.dart';
 import 'package:degloor_one/shared/service_request.dart';
+import 'package:degloor_one/components/degloor_app_bar.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
@@ -150,6 +151,8 @@ class _ManageServiceRequestsWidgetState
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         appBar: AppBar(
           backgroundColor: FlutterFlowTheme.of(context).primary,
+          automaticallyImplyLeading: false,
+          leading: degloorBackButton(context, color: Colors.white),
           title: Text(
             'Service Requests',
             style: FlutterFlowTheme.of(context).headlineMedium.override(

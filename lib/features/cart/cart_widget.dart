@@ -4,6 +4,7 @@ import 'package:degloor_one/backend/address_service.dart';
 import 'package:degloor_one/backend/discovery_service.dart';
 import 'package:degloor_one/backend/cart_service.dart';
 import 'package:degloor_one/backend/order_service.dart';
+import 'package:degloor_one/components/degloor_app_bar.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
@@ -228,10 +229,8 @@ class _CartWidgetState extends State<CartWidget> {
         backgroundColor: Colors.white,
         title: Text('Your Cart', style: DegloorTheme.headingMedium),
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded),
-          onPressed: () => Navigator.pop(context),
-        ),
+        automaticallyImplyLeading: false,
+        leading: degloorBackLeading(context),
       ),
       body: FutureBuilder<List<CartLine>>(
         future: _model.cartItemsFuture,

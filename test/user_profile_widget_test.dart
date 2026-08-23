@@ -25,6 +25,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
 
+    expect(find.byIcon(Icons.arrow_back_rounded), findsNothing);
     expect(find.text('Guest Customer'), findsOneWidget);
     expect(find.text('guest@local'), findsOneWidget);
 

@@ -4,6 +4,7 @@ import 'package:degloor_one/backend/cart_service.dart';
 import 'package:degloor_one/backend/shop_service.dart';
 import 'package:degloor_one/components/cached_remote_image.dart';
 import 'package:degloor_one/shared/catalog_product.dart';
+import 'package:degloor_one/components/degloor_app_bar.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/core/degloor_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
@@ -58,8 +59,17 @@ class _ProductDetailWidgetState extends State<ProductDetailWidget> {
           builder: (context, snapshot) {
             if (!snapshot.hasData &&
                 snapshot.connectionState != ConnectionState.done) {
-              return const Scaffold(
-                body: Center(child: CircularProgressIndicator()),
+              return Scaffold(
+                appBar: AppBar(
+                  backgroundColor: Colors.white,
+                  elevation: 0,
+                  automaticallyImplyLeading: false,
+                  leading: degloorBackButton(
+                    context,
+                    color: DegloorTheme.textPrimary,
+                  ),
+                ),
+                body: const Center(child: CircularProgressIndicator()),
               );
             }
             final product = snapshot.data;
@@ -69,6 +79,11 @@ class _ProductDetailWidgetState extends State<ProductDetailWidget> {
                 appBar: AppBar(
                   backgroundColor: Colors.white,
                   elevation: 0,
+                  automaticallyImplyLeading: false,
+                  leading: degloorBackButton(
+                    context,
+                    color: DegloorTheme.textPrimary,
+                  ),
                   title: Text('Product', style: DegloorTheme.headingMedium),
                 ),
                 body: const EmptyStateView(
@@ -96,13 +111,8 @@ class _ProductDetailWidgetState extends State<ProductDetailWidget> {
                           : Container(color: DegloorTheme.accent),
                     ),
                     backgroundColor: Colors.white,
-                    leading: IconButton(
-                      icon: const Icon(
-                        Icons.arrow_back_rounded,
-                        color: Colors.black,
-                      ),
-                      onPressed: () => Navigator.pop(context),
-                    ),
+                    automaticallyImplyLeading: false,
+                    leading: degloorBackButton(context, color: Colors.black),
                   ),
                   SliverToBoxAdapter(
                     child: Padding(

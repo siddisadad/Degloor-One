@@ -2,6 +2,7 @@ import 'package:degloor_one/features/catalogue/product_detail_widget.dart';
 import 'package:degloor_one/core/degloor_theme.dart';
 import 'package:degloor_one/backend/cart_service.dart';
 import 'package:degloor_one/backend/shop_service.dart';
+import 'package:degloor_one/components/degloor_app_bar.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/catalog_product.dart';
@@ -88,6 +89,11 @@ class _BusinessCatalogueWidgetState extends State<BusinessCatalogueWidget> with 
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         appBar: AppBar(
           backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+          automaticallyImplyLeading: false,
+          leading: degloorBackButton(
+            context,
+            color: FlutterFlowTheme.of(context).primaryText,
+          ),
           title: Text(
             'Products',
             style: FlutterFlowTheme.of(context).headlineSmall,
@@ -109,6 +115,11 @@ class _BusinessCatalogueWidgetState extends State<BusinessCatalogueWidget> with 
       backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
       appBar: AppBar(
         backgroundColor: FlutterFlowTheme.of(context).secondaryBackground,
+        automaticallyImplyLeading: false,
+        leading: degloorBackButton(
+          context,
+          color: FlutterFlowTheme.of(context).primaryText,
+        ),
         title: Text(
           'Products',
           style: FlutterFlowTheme.of(context).headlineSmall,
