@@ -12,6 +12,7 @@ import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
 import 'package:degloor_one/shared/discovery_radius.dart';
 import 'package:degloor_one/shared/shop.dart';
+import 'package:degloor_one/shared/shop_draft.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'edit_business_profile_model.dart';
@@ -106,16 +107,18 @@ class _EditBusinessProfileWidgetState extends State<EditBusinessProfileWidget> {
       await BusinessService.instance.updateProfile(
         userId: currentUserUid,
         businessId: widget.business.id,
-        name: name,
-        ownerName: _model.textFieldModel2.inputTextController?.text,
-        description: _model.textFieldModel3.inputTextController?.text,
-        phoneNumber: _model.textFieldModel4.inputTextController?.text,
-        whatsappNumber: _model.switchModel.switchValue == true
-            ? _model.textFieldModel4.inputTextController?.text
-            : _model.textFieldModel5.inputTextController?.text,
-        addressText: _model.textFieldModel6.inputTextController?.text,
-        discoveryRadius: radiusKm,
-        imageUrl: _uploadedImageUrl,
+        draft: ShopDraft.fromProfile(
+          name: name,
+          ownerName: _model.textFieldModel2.inputTextController?.text,
+          description: _model.textFieldModel3.inputTextController?.text,
+          phoneNumber: _model.textFieldModel4.inputTextController?.text,
+          whatsappNumber: _model.switchModel.switchValue == true
+              ? _model.textFieldModel4.inputTextController?.text
+              : _model.textFieldModel5.inputTextController?.text,
+          addressText: _model.textFieldModel6.inputTextController?.text,
+          discoveryRadius: radiusKm,
+          imageUrl: _uploadedImageUrl,
+        ),
       );
 
       if (mounted) {

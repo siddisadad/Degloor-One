@@ -4,6 +4,7 @@ import 'package:degloor_one/shared/catalog_product.dart';
 import 'package:degloor_one/shared/catalog_product_draft.dart';
 import 'package:degloor_one/shared/product_category.dart';
 import 'package:degloor_one/shared/product_category_draft.dart';
+import 'package:degloor_one/shared/shop_draft.dart';
 import 'package:degloor_one/shared/shop_hours.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
@@ -26,17 +27,20 @@ class BusinessRepository {
     return rows.isEmpty ? null : rows.first;
   }
 
-  Future<BusinessesRow> insertBusiness(Map<String, dynamic> data) {
-    return BusinessesTable().insert(data);
+  Future<BusinessesRow> insertBusiness(
+    ShopDraft draft, {
+    required String ownerId,
+  }) {
+    return BusinessesTable().insert(draft.toInsertJson(ownerId: ownerId));
   }
 
   Future<void> updateBusiness({
     required String businessId,
     required String ownerId,
-    required Map<String, dynamic> data,
+    required ShopDraft draft,
   }) async {
     await BusinessesTable().update(
-      data: data,
+      data: draft.toUpdateJson(),
       matchingRows: (q) => q.eq('id', businessId).eq('owner_id', ownerId),
     );
   }
