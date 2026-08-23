@@ -6,6 +6,8 @@ import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/marketplace_joins.dart';
 import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/shared/service_category.dart';
+import 'package:degloor_one/shared/service_provider_profile.dart';
+import 'package:degloor_one/shared/service_request.dart';
 import 'package:degloor_one/shared/rpc_row.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
@@ -80,10 +82,12 @@ class ServiceMarketplaceService {
     return PageResult(items: rows, hasMore: rows.length >= page.limit);
   }
 
-  Future<ServiceProvidersRow?> forUser(String userId) =>
-      _repository.forUser(userId);
+  Future<ServiceProviderProfile?> forUser(String userId) async {
+    final row = await _repository.forUser(userId);
+    return row == null ? null : ServiceProviderProfile.fromRow(row);
+  }
 
-  Future<ServiceProvidersRow> register({
+  Future<ServiceProviderProfile> register({
     required String userId,
     required String categoryId,
     required String experienceYears,
@@ -116,7 +120,7 @@ class ServiceMarketplaceService {
     if (existing != null) {
       throw Exception('You already have a service profile');
     }
-    return _repository.insertProvider({
+    final row = await _repository.insertProvider({
       'user_id': userId,
       'category_id': categoryId,
       'experience_years': years,
@@ -124,15 +128,19 @@ class ServiceMarketplaceService {
       'bio': trimmedBio,
       'is_verified': false,
     });
+    return ServiceProviderProfile.fromRow(row);
   }
 
   Future<ServiceProviderCard?> providerById(String id) =>
       _repository.providerById(id);
 
-  Stream<List<ServiceRequestsRow>> watchForProvider(String providerId) =>
-      _repository.watchForProvider(providerId);
+  Stream<List<ServiceRequest>> watchForProvider(String providerId) {
+    return _repository
+        .watchForProvider(providerId)
+        .map((rows) => rows.map(ServiceRequest.fromRow).toList());
+  }
 
-  Future<ServiceRequestsRow> createRequest({
+  Future<ServiceRequest> createRequest({
     required String userId,
     required String providerId,
     required String description,
@@ -168,7 +176,7 @@ class ServiceMarketplaceService {
           type: 'service_request',
         );
       }
-      return row;
+      return ServiceRequest.fromRow(row);
     }
 
     final response = await SupaFlow.client.rpc(
@@ -183,7 +191,7 @@ class ServiceMarketplaceService {
     if (row == null) {
       throw Exception('Failed to send the service request');
     }
-    return ServiceRequestsRow(row);
+    return ServiceRequest.fromRow(ServiceRequestsRow(row));
   }
 
   Future<void> updateStatus({
