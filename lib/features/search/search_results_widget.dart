@@ -193,7 +193,7 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
         key: scaffoldKey,
         backgroundColor: DegloorTheme.background,
         appBar: AppBar(
-          backgroundColor: Colors.white,
+          backgroundColor: DegloorTheme.cardBackground,
           elevation: 0,
           surfaceTintColor: Colors.transparent,
           automaticallyImplyLeading: false,
@@ -258,7 +258,7 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
         body: Column(
           children: [
             Container(
-              color: Colors.white,
+              color: DegloorTheme.cardBackground,
               width: double.infinity,
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
               child: SingleChildScrollView(
@@ -279,7 +279,7 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
               ),
             ),
             Container(
-              color: Colors.white,
+              color: DegloorTheme.cardBackground,
               height: 50,
               child: ListView(
                 scrollDirection: Axis.horizontal,
@@ -428,9 +428,10 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
           runSpacing: 8,
           children: [
             for (final term in _recent)
-              ActionChip(
-                label: Text(term),
-                onPressed: () {
+              DegloorFilterChip(
+                label: term,
+                selected: false,
+                onTap: () {
                   _searchController
                     ..text = term
                     ..selection = TextSelection.collapsed(offset: term.length);

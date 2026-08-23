@@ -43,20 +43,28 @@ class BusinessCardWidget extends StatelessWidget {
             // 1. Image
               Stack(
                 children: [
-                  CachedNetworkImage(
-                    imageUrl: imgDesc ?? 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=400&q=80',
-                    width: 110,
-                    height: double.infinity,
-                    fit: BoxFit.cover,
-                    memCacheWidth: memCachePx(context, 110),
-                    memCacheHeight: memCachePx(context, 140),
-                    placeholder: (context, url) => Container(color: DegloorTheme.accent),
-                    errorWidget: (context, url, error) => Container(
-                      width: 110,
-                      color: DegloorTheme.accent,
-                      child: const Icon(Icons.storefront_rounded, color: DegloorTheme.textSecondary),
-                    ),
-                  ),
+                  imgDesc == null || imgDesc!.isEmpty
+                      ? degloorImageFallback(
+                          width: 110,
+                          height: 130,
+                          icon: Icons.storefront_rounded,
+                        )
+                      : CachedNetworkImage(
+                          imageUrl: imgDesc!,
+                          width: 110,
+                          height: double.infinity,
+                          fit: BoxFit.cover,
+                          memCacheWidth: memCachePx(context, 110),
+                          memCacheHeight: memCachePx(context, 140),
+                          placeholder: (context, url) =>
+                              Container(color: DegloorTheme.accent),
+                          errorWidget: (context, url, error) =>
+                              degloorImageFallback(
+                            width: 110,
+                            height: 130,
+                            icon: Icons.storefront_rounded,
+                          ),
+                        ),
                   if (verified)
                     Positioned(
                       top: 6,

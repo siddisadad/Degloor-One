@@ -499,25 +499,27 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                         height: 260.0,
                         child: Stack(
                           children: [
-                            CachedNetworkImage(
-                              imageUrl: business.imageUrl ??
-                                  'https://images.unsplash.com/photo-1534723452862-4c874018d66d?auto=format&fit=crop&w=400&h=300&q=80',
-                              height: 260.0,
-                              fit: BoxFit.cover,
-                              memCacheWidth: memCachePx(
-                                context,
-                                MediaQuery.sizeOf(context).width,
-                              ),
-                              memCacheHeight: memCachePx(context, 260),
-                              errorWidget: (context, url, error) => Container(
-                                color: FlutterFlowTheme.of(context).primaryBackground,
-                                child: Icon(
-                                  Icons.image_not_supported_rounded,
-                                  color: FlutterFlowTheme.of(context).secondaryText,
-                                  size: 48,
-                                ),
-                              ),
-                            ),
+                            business.imageUrl == null ||
+                                    business.imageUrl!.isEmpty
+                                ? degloorImageFallback(
+                                    height: 260,
+                                    icon: Icons.storefront_rounded,
+                                  )
+                                : CachedNetworkImage(
+                                    imageUrl: business.imageUrl!,
+                                    height: 260.0,
+                                    fit: BoxFit.cover,
+                                    memCacheWidth: memCachePx(
+                                      context,
+                                      MediaQuery.sizeOf(context).width,
+                                    ),
+                                    memCacheHeight: memCachePx(context, 260),
+                                    errorWidget: (context, url, error) =>
+                                        degloorImageFallback(
+                                      height: 260,
+                                      icon: Icons.storefront_rounded,
+                                    ),
+                                  ),
                             Align(
                               alignment: const AlignmentDirectional(0.0, 1.0),
                               child: Container(

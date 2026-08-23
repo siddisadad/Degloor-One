@@ -409,7 +409,7 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                 children: [
                   for (final cat in shopCategories)
                     Padding(
-                      padding: const EdgeInsets.only(right: 20),
+                      padding: const EdgeInsets.only(right: DegloorTheme.spacingMD),
                       child: ModernCategoryItem(
                         label: cat.name,
                         icon: getIconFromData(cat.iconName),
@@ -420,7 +420,7 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                       ),
                     ),
                   Padding(
-                    padding: const EdgeInsets.only(right: 20),
+                    padding: const EdgeInsets.only(right: DegloorTheme.spacingMD),
                     child: ModernCategoryItem(
                       label: l10n?.services ?? 'Services',
                       icon: const Icon(Icons.handyman_rounded),
@@ -428,7 +428,7 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.only(right: 20),
+                    padding: const EdgeInsets.only(right: DegloorTheme.spacingMD),
                     child: ModernCategoryItem(
                       label: 'Jobs',
                       icon: const Icon(Icons.work_rounded),
@@ -446,23 +446,30 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
   }
 
   Widget _nearbyBusinesses(AppLocalizations? l10n) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _sectionHeader(
-          l10n?.nearbyBusinesses ?? 'Nearby Businesses',
-          onSeeAll: () => context.pushNamed('SearchResults'),
-        ),
-        const SizedBox(height: DegloorTheme.spacingSM),
-        SizedBox(
-          height: 210,
-          child: FutureBuilder<List<Shop>>(
-            future: _model.openNowBusinessesFuture,
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) return const SizedBox();
-              final businesses = snapshot.data!;
-              if (businesses.isEmpty) return const SizedBox();
-              return ListView.builder(
+    return FutureBuilder<List<Shop>>(
+      future: _model.openNowBusinessesFuture,
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const SizedBox(
+            height: 210,
+            child: Center(
+              child: CircularProgressIndicator(color: DegloorTheme.primary),
+            ),
+          );
+        }
+        final businesses = snapshot.data!;
+        if (businesses.isEmpty) return const SizedBox.shrink();
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _sectionHeader(
+              l10n?.nearbyBusinesses ?? 'Nearby Businesses',
+              onSeeAll: () => context.pushNamed('SearchResults'),
+            ),
+            const SizedBox(height: DegloorTheme.spacingSM),
+            SizedBox(
+              height: 210,
+              child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(
                   horizontal: DegloorTheme.spacingMD,
@@ -472,9 +479,7 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                   final biz = businesses[index];
                   return ModernBusinessCard(
                     name: biz.name,
-                    imageUrl: biz.imageUrl ??
-                        'https://images.unsplash.com/photo-1542838132-92c53300491e'
-                            '?auto=format&fit=crop&w=400&q=80',
+                    imageUrl: biz.imageUrl,
                     category: _categoryIdToName[biz.categoryId] ?? 'Shop',
                     rating: biz.rating ?? 0.0,
                     distance: biz.distanceKm != null
@@ -486,39 +491,47 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                     ),
                   );
                 },
-              );
-            },
-          ),
-        ),
-        const SizedBox(height: DegloorTheme.spacingLG),
-      ],
+              ),
+            ),
+            const SizedBox(height: DegloorTheme.spacingLG),
+          ],
+        );
+      },
     );
   }
 
   Widget _popularProducts() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _sectionHeader(
-          'Popular Products',
-          onSeeAll: () => context.pushNamed('SearchResults'),
-        ),
-        const SizedBox(height: DegloorTheme.spacingSM),
-        SizedBox(
-          height: 230,
-          child: FutureBuilder<List<CatalogProduct>>(
-            future: _model.recommendedProductsFuture,
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) return const SizedBox();
-              final products = snapshot.data!;
-              if (products.isEmpty) return const SizedBox();
-              return ListView.separated(
+    return FutureBuilder<List<CatalogProduct>>(
+      future: _model.recommendedProductsFuture,
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const SizedBox(
+            height: 230,
+            child: Center(
+              child: CircularProgressIndicator(color: DegloorTheme.primary),
+            ),
+          );
+        }
+        final products = snapshot.data!;
+        if (products.isEmpty) return const SizedBox.shrink();
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _sectionHeader(
+              'Popular Products',
+              onSeeAll: () => context.pushNamed('SearchResults'),
+            ),
+            const SizedBox(height: DegloorTheme.spacingSM),
+            SizedBox(
+              height: 230,
+              child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(
                   horizontal: DegloorTheme.spacingMD,
                 ),
                 itemCount: products.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 12),
+                separatorBuilder: (_, __) =>
+                    const SizedBox(width: DegloorTheme.spacingSM + 4),
                 itemBuilder: (context, index) {
                   final prod = products[index];
                   return SizedBox(
@@ -526,9 +539,7 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                     child: ModernProductCard(
                       name: prod.name,
                       price: prod.price ?? 0.0,
-                      imageUrl: prod.imageUrl ??
-                          'https://images.unsplash.com/photo-1546069901-ba9599a7e63c'
-                              '?auto=format&fit=crop&w=400&q=80',
+                      imageUrl: prod.imageUrl,
                       onTap: () => context.pushNamed(
                         ProductDetailWidget.routeName,
                         pathParameters: {'productId': prod.id},
@@ -536,33 +547,40 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                     ),
                   );
                 },
-              );
-            },
-          ),
-        ),
-        const SizedBox(height: DegloorTheme.spacingLG),
-      ],
+              ),
+            ),
+            const SizedBox(height: DegloorTheme.spacingLG),
+          ],
+        );
+      },
     );
   }
 
   Widget _servicesNearYou() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _sectionHeader(
-          'Services Near You',
-          onSeeAll: () => context.pushNamed('LocalServices'),
-        ),
-        const SizedBox(height: DegloorTheme.spacingSM),
-        SizedBox(
-          height: 118,
-          child: FutureBuilder<List<ServiceProviderCard>>(
-            future: _servicesFuture,
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) return const SizedBox();
-              final providers = snapshot.data!;
-              if (providers.isEmpty) return const SizedBox();
-              return ListView.separated(
+    return FutureBuilder<List<ServiceProviderCard>>(
+      future: _servicesFuture,
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const SizedBox(
+            height: 118,
+            child: Center(
+              child: CircularProgressIndicator(color: DegloorTheme.primary),
+            ),
+          );
+        }
+        final providers = snapshot.data!;
+        if (providers.isEmpty) return const SizedBox.shrink();
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _sectionHeader(
+              'Services Near You',
+              onSeeAll: () => context.pushNamed('LocalServices'),
+            ),
+            const SizedBox(height: DegloorTheme.spacingSM),
+            SizedBox(
+              height: 118,
+              child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(
                   horizontal: DegloorTheme.spacingMD,
@@ -616,12 +634,12 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                     ),
                   );
                 },
-              );
-            },
-          ),
-        ),
-        const SizedBox(height: DegloorTheme.spacingLG),
-      ],
+              ),
+            ),
+            const SizedBox(height: DegloorTheme.spacingLG),
+          ],
+        );
+      },
     );
   }
 }

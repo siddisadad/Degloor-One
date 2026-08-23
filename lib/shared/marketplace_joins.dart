@@ -195,12 +195,16 @@ class ServiceProviderCard {
 
   String get categoryName => category?.displayName ?? 'General';
 
-  /// Photo URL, or a size-aware fallback when the join has no avatar.
-  String avatarImageUrl({int width = 100, int height = 100}) {
+  /// Joined avatar URL, or null when the provider has no photo.
+  String? get photoUrl {
     final url = user?.avatarUrl?.trim();
-    if (url != null && url.isNotEmpty) return url;
-    return 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde'
-        '?auto=format&fit=crop&w=$width&h=$height&q=80';
+    if (url == null || url.isEmpty) return null;
+    return url;
+  }
+
+  /// Photo URL for widgets that still require a string.
+  String avatarImageUrl({int width = 100, int height = 100}) {
+    return photoUrl ?? '';
   }
 
   String get hourlyRateLabel {

@@ -40,13 +40,18 @@ class ModernCategoryItem extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            label,
-            textAlign: TextAlign.center,
-            style: DegloorTheme.labelSmall.copyWith(
-              color: DegloorTheme.textPrimary,
-              fontWeight: FontWeight.w700,
+          const SizedBox(height: DegloorTheme.spacingSM),
+          SizedBox(
+            width: 72,
+            child: Text(
+              label,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: DegloorTheme.labelSmall.copyWith(
+                color: DegloorTheme.textPrimary,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
         ],

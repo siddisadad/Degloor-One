@@ -68,16 +68,10 @@ class _UserProfileReportsWidgetState extends State<UserProfileReportsWidget> {
       child: Scaffold(
         key: scaffoldKey,
         backgroundColor: DegloorTheme.background,
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          automaticallyImplyLeading: false,
-          leading: degloorBackLeading(
-            context,
-            color: DegloorTheme.textPrimary,
-            show: widget.showBack ? true : null,
-          ),
-          title: Text('My Profile', style: DegloorTheme.headingMedium),
-          elevation: 0,
+        appBar: degloorAppBar(
+          context,
+          title: 'My Profile',
+          showBack: widget.showBack,
         ),
         body: SafeArea(
           child: Align(

@@ -283,14 +283,34 @@ class _ServicesWidgetState extends State<ServicesWidget> {
                                 children: [
                                   ClipRRect(
                                     borderRadius: BorderRadius.circular(8.0),
-                                    child: CachedNetworkImage(
-                                      imageUrl: provider.avatarImageUrl(),
-                                      width: 60.0,
-                                      height: 60.0,
-                                      fit: BoxFit.cover,
-                                      memCacheWidth: memCachePx(context, 60),
-                                      memCacheHeight: memCachePx(context, 60),
-                                    ),
+                                    child: provider.photoUrl == null
+                                        ? degloorImageFallback(
+                                            width: 60,
+                                            height: 60,
+                                            icon: Icons.person_rounded,
+                                          )
+                                        : CachedNetworkImage(
+                                            imageUrl: provider.photoUrl!,
+                                            width: 60.0,
+                                            height: 60.0,
+                                            fit: BoxFit.cover,
+                                            memCacheWidth:
+                                                memCachePx(context, 60),
+                                            memCacheHeight:
+                                                memCachePx(context, 60),
+                                            placeholder: (_, __) =>
+                                                degloorImageFallback(
+                                              width: 60,
+                                              height: 60,
+                                              icon: Icons.person_rounded,
+                                            ),
+                                            errorWidget: (_, __, ___) =>
+                                                degloorImageFallback(
+                                              width: 60,
+                                              height: 60,
+                                              icon: Icons.person_rounded,
+                                            ),
+                                          ),
                                   ),
                                   const SizedBox(width: 12.0),
                                   Expanded(
