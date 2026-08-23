@@ -57,6 +57,31 @@ void main() {
     );
   });
 
+  test('showcase checkout rejects another user address', () {
+    expect(
+      () => OrderService.placeShowcaseOrder(
+        userId: ShowcaseCatalog.customer2,
+        businessId: ShowcaseCatalog.bizPatil,
+        cartId: '',
+        addressId: 'addr-home',
+        items: [
+          {
+            'product_id': ShowcaseCatalog.prodRice,
+            'quantity': 1,
+            'price': 1.0,
+          },
+        ],
+      ),
+      throwsA(
+        isA<Exception>().having(
+          (error) => error.toString(),
+          'message',
+          contains('Delivery address not found'),
+        ),
+      ),
+    );
+  });
+
   test('showcase delivery OTP marks the order delivered', () async {
     await DeliveryService.confirmDeliveryWithOtp(
       orderId: ShowcaseCatalog.orderOut,

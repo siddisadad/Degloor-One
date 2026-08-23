@@ -1,7 +1,4 @@
 import 'package:degloor_one/backend/supabase/supabase.dart';
-import 'package:degloor_one/components/button/button_widget.dart';
-import 'package:degloor_one/components/profile_option/profile_option_widget.dart';
-import 'package:degloor_one/components/report_item/report_item_widget.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'user_profile_reports_widget.dart' show UserProfileReportsWidget;
 import 'package:flutter/material.dart';
@@ -11,74 +8,10 @@ class UserProfileReportsModel
   ///  State fields for stateful widgets in this page.
 
   Future<List<UsersRow>>? userProfileFuture;
-  Future<List<ComplaintsRow>>? complaintsFuture;
-
-  // Model for ProfileOption.
-  late ProfileOptionModel profileOptionModel1;
-  // Model for ProfileOption.
-  late ProfileOptionModel profileOptionModel2;
-  // Model for ProfileOption.
-  late ProfileOptionModel profileOptionModel3;
-  // Model for ProfileOption.
-  late ProfileOptionModel profileOptionModel4;
-  // Model for ProfileOption.
-  late ProfileOptionModel profileOptionModel5;
-  // Model for ProfileOption.
-  late ProfileOptionModel profileOptionModel6;
-  // Model for ProfileOption.
-  late ProfileOptionModel profileOptionModel7;
-  // Model for ProfileOption.
-  late ProfileOptionModel profileOptionModel8;
-  // Model for ProfileOption.
-  late ProfileOptionModel profileOptionModel9;
-  // Model for ProfileOption.
-  late ProfileOptionModel profileOptionModel10;
-  // Model for Button.
-  late ButtonModel buttonModel1;
-  // Model for ReportItem.
-  late ReportItemModel reportItemModel1;
-  // Model for ReportItem.
-  late ReportItemModel reportItemModel2;
-  // Model for ReportItem.
-  late ReportItemModel reportItemModel3;
-  // Model for Button.
-  late ButtonModel buttonModel2;
 
   @override
-  void initState(BuildContext context) {
-    profileOptionModel1 = createModel(context, () => ProfileOptionModel());
-    profileOptionModel2 = createModel(context, () => ProfileOptionModel());
-    profileOptionModel3 = createModel(context, () => ProfileOptionModel());
-    profileOptionModel4 = createModel(context, () => ProfileOptionModel());
-    profileOptionModel5 = createModel(context, () => ProfileOptionModel());
-    profileOptionModel6 = createModel(context, () => ProfileOptionModel());
-    profileOptionModel7 = createModel(context, () => ProfileOptionModel());
-    profileOptionModel8 = createModel(context, () => ProfileOptionModel());
-    profileOptionModel9 = createModel(context, () => ProfileOptionModel());
-    profileOptionModel10 = createModel(context, () => ProfileOptionModel());
-    buttonModel1 = createModel(context, () => ButtonModel());
-    reportItemModel1 = createModel(context, () => ReportItemModel());
-    reportItemModel2 = createModel(context, () => ReportItemModel());
-    reportItemModel3 = createModel(context, () => ReportItemModel());
-    buttonModel2 = createModel(context, () => ButtonModel());
-  }
+  void initState(BuildContext context) {}
 
   @override
-  void dispose() {
-    profileOptionModel1.dispose();
-    profileOptionModel2.dispose();
-    profileOptionModel3.dispose();
-    profileOptionModel4.dispose();
-    profileOptionModel5.dispose();
-    profileOptionModel6.dispose();
-    profileOptionModel7.dispose();
-    profileOptionModel8.dispose();
-    profileOptionModel9.dispose();
-    profileOptionModel10.dispose();
-    buttonModel1.dispose();
-    reportItemModel1.dispose();
-    reportItemModel2.dispose();
-    reportItemModel3.dispose();
-    buttonModel2.dispose();
-  }
+  void dispose() {}
 }

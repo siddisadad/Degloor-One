@@ -1,3 +1,4 @@
+import 'package:degloor_one/core/degloor_theme.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 
@@ -65,6 +66,7 @@ class MyApp extends StatefulWidget {
 }
 
 class MyAppState extends State<MyApp> {
+  final scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
   /// The current theme mode of the application.
   ThemeMode _themeMode = FlutterFlowTheme.themeMode;
 
@@ -116,7 +118,7 @@ class MyAppState extends State<MyApp> {
   }
 
   void _showGlobalNotification(NotificationsRow notification) {
-    ScaffoldMessenger.of(context).showSnackBar(
+    scaffoldMessengerKey.currentState?.showSnackBar(
       SnackBar(
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -192,6 +194,7 @@ class MyAppState extends State<MyApp> {
 
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
+      scaffoldMessengerKey: scaffoldMessengerKey,
       title: 'DEGLOOR ONE',
       localizationsDelegates: const [
         AppLocalizations.delegate,
@@ -205,47 +208,7 @@ class MyAppState extends State<MyApp> {
         Locale('hi', ''),
       ],
       locale: Locale(appState.locale),
-      theme: ThemeData(
-        brightness: Brightness.light,
-        useMaterial3: true,
-        fontFamily: 'Inter',
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF0D2B5C),
-          primary: const Color(0xFF0D2B5C),
-          secondary: const Color(0xFFFF9800),
-          surface: Colors.white,
-        ),
-        appBarTheme: const AppBarTheme(
-          centerTitle: true,
-          backgroundColor: Colors.white,
-          elevation: 0,
-          titleTextStyle: TextStyle(
-            color: Color(0xFF1A1A1A),
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-      darkTheme: ThemeData(
-        brightness: Brightness.dark,
-        useMaterial3: true,
-        fontFamily: 'Inter',
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF0D2B5C),
-          primary: const Color(0xFF0D2B5C),
-          secondary: const Color(0xFFFF9800),
-          brightness: Brightness.dark,
-        ),
-        appBarTheme: const AppBarTheme(
-          centerTitle: true,
-          elevation: 0,
-          titleTextStyle: TextStyle(
-            color: Color(0xFFF5F5F5),
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
+      theme: DegloorTheme.lightTheme,
       themeMode: _themeMode,
       routerConfig: _router,
     );

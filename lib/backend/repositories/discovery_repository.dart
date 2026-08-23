@@ -43,6 +43,17 @@ class DiscoveryRepository {
     );
   }
 
+  Future<List<ProductsRow>> searchProducts(DiscoverySearch query) {
+    return ProductsTable().searchInRadius(
+      latitude: query.latitude,
+      longitude: query.longitude,
+      radiusKm: query.radiusKm,
+      searchTerm: query.searchTerm,
+      limit: query.page.limit,
+      offset: query.page.offset,
+    );
+  }
+
   Future<List<BusinessCategoriesRow>> categories() {
     return BusinessCategoriesTable().queryRows(
       queryFn: (q) => q.order('display_order', ascending: true),

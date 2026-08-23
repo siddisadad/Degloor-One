@@ -1,3 +1,4 @@
+import 'package:degloor_one/core/degloor_theme.dart';
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/delivery_service.dart';
 import 'package:degloor_one/backend/discovery_service.dart';
@@ -8,7 +9,6 @@ import 'package:degloor_one/components/degloor_app_bar.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/components/order_status_chip.dart';
 import 'package:degloor_one/shared/order_lifecycle.dart';
-import 'package:degloor_one/shared/otp_copy.dart';
 import 'package:degloor_one/backend/whatsapp_service.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
@@ -246,113 +246,128 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
   }
 
   Widget _buildStatusStepper(int currentIndex) {
-    final statuses = ['Placed', 'Accepted', 'Ready', 'On the Way', 'Delivered'];
-    return Column(
-      children: List.generate(statuses.length, (index) {
-        final isCompleted = index <= currentIndex;
-        final isLast = index == statuses.length - 1;
+    final statuses = [
+      {'title': 'Order Placed', 'desc': 'We have received your order'},
+      {'title': 'Accepted', 'desc': 'The shop has started preparing'},
+      {'title': 'Ready', 'desc': 'Packed and waiting for pickup'},
+      {'title': 'On the Way', 'desc': 'Rider is delivering your order'},
+      {'title': 'Delivered', 'desc': 'Enjoy your purchase!'},
+    ];
+    
+    return Container(
+      padding: const EdgeInsets.all(DegloorTheme.spacingMD),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(DegloorTheme.radiusMD),
+        border: Border.all(color: DegloorTheme.border),
+      ),
+      child: Column(
+        children: List.generate(statuses.length, (index) {
+          final isCompleted = index <= currentIndex;
+          final isLast = index == statuses.length - 1;
 
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Column(
+          return IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: 24,
-                  height: 24,
-                  decoration: BoxDecoration(
-                    color: isCompleted
-                        ? FlutterFlowTheme.of(context).primary
-                        : FlutterFlowTheme.of(context).alternate,
-                    shape: BoxShape.circle,
-                  ),
-                  child: isCompleted
-                      ? const Icon(Icons.check, size: 16, color: Colors.white)
-                      : null,
+                Column(
+                  children: [
+                    Container(
+                      width: 20,
+                      height: 20,
+                      decoration: BoxDecoration(
+                        color: isCompleted ? DegloorTheme.success : Colors.white,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: isCompleted ? DegloorTheme.success : DegloorTheme.border,
+                          width: 2,
+                        ),
+                      ),
+                      child: isCompleted
+                          ? const Icon(Icons.check, size: 12, color: Colors.white)
+                          : null,
+                    ),
+                    if (!isLast)
+                      Expanded(
+                        child: Container(
+                          width: 2,
+                          color: isCompleted ? DegloorTheme.success : DegloorTheme.border,
+                        ),
+                      ),
+                  ],
                 ),
-                if (!isLast)
-                  Container(
-                    width: 2,
-                    height: 40,
-                    color: isCompleted
-                        ? FlutterFlowTheme.of(context).primary
-                        : FlutterFlowTheme.of(context).alternate,
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          statuses[index]['title']!,
+                          style: DegloorTheme.titleMedium.copyWith(
+                            color: isCompleted ? DegloorTheme.textPrimary : DegloorTheme.textSecondary,
+                            fontWeight: isCompleted ? FontWeight.w700 : FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          statuses[index]['desc']!,
+                          style: DegloorTheme.bodySmall.copyWith(
+                            color: isCompleted ? DegloorTheme.textSecondary : DegloorTheme.textSecondary.withValues(alpha: 0.6),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
+                ),
               ],
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    statuses[index],
-                    style: FlutterFlowTheme.of(context).bodyLarge.override(
-                          font: GoogleFonts.inter(),
-                          fontWeight: isCompleted ? FontWeight.bold : FontWeight.normal,
-                          color: isCompleted
-                              ? FlutterFlowTheme.of(context).primaryText
-                              : FlutterFlowTheme.of(context).secondaryText,
-                        ),
-                  ),
-                  if (index == currentIndex)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 4.0),
-                      child: Text(
-                        'This step is in progress or completed.',
-                        style: FlutterFlowTheme.of(context).labelSmall,
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          ],
-        );
-      }),
+          );
+        }),
+      ),
     );
   }
 
   Widget _buildOtpCard(String? otp) {
-    final theme = FlutterFlowTheme.of(context);
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(DegloorTheme.spacingLG),
       decoration: BoxDecoration(
-        color: theme.primary.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(theme.designToken.radius.xl),
-        border: Border.all(color: theme.primary.withValues(alpha: 0.35)),
+        gradient: LinearGradient(
+          colors: [DegloorTheme.primary, DegloorTheme.primary.withValues(alpha: 0.8)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(DegloorTheme.radiusLG),
+        boxShadow: DegloorTheme.cardShadow,
       ),
       child: Column(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.vpn_key_rounded, color: FlutterFlowTheme.of(context).primary),
-              const SizedBox(width: 12),
-              Text(
-                'Delivery Verification OTP',
-                style: FlutterFlowTheme.of(context).titleSmall.override(
-                      font: GoogleFonts.inter(),
-                      color: FlutterFlowTheme.of(context).primary,
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
-            ],
+          Text(
+            'DELIVERY CODE',
+            style: DegloorTheme.labelSmall.copyWith(color: Colors.white.withValues(alpha: 0.7), letterSpacing: 2),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           Text(
             otp ?? '----',
             style: GoogleFonts.inter(
-              fontSize: 32,
+              fontSize: 36,
               fontWeight: FontWeight.w900,
-              letterSpacing: 8,
-              color: FlutterFlowTheme.of(context).primary,
+              letterSpacing: 12,
+              color: Colors.white,
             ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            OtpCopy.deliveryHint,
-            textAlign: TextAlign.center,
-            style: FlutterFlowTheme.of(context).labelSmall,
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(DegloorTheme.radiusSM),
+            ),
+            child: Text(
+              'Share this code with the rider only',
+              style: DegloorTheme.bodySmall.copyWith(color: Colors.white, fontWeight: FontWeight.w500),
+            ),
           ),
         ],
       ),

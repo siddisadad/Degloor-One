@@ -8,6 +8,8 @@ import 'package:degloor_one/auth/base_auth_user_provider.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/features/main_scaffold.dart';
+import 'package:degloor_one/features/catalogue/product_detail_widget.dart';
 import 'package:degloor_one/index.dart';
 
 export 'package:go_router/go_router.dart';
@@ -121,10 +123,59 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           path: InitialRedirectWidget.routePath,
           builder: (context, params) => const InitialRedirectWidget(),
         ),
-        FFRoute(
-          name: CustomerHomeWidget.routeName,
-          path: CustomerHomeWidget.routePath,
-          builder: (context, params) => const CustomerHomeWidget(),
+        StatefulShellRoute.indexedStack(
+          builder: (context, state, navigationShell) =>
+              MainScaffold(navigationShell: navigationShell),
+          branches: [
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  name: CustomerHomeWidget.routeName,
+                  path: CustomerHomeWidget.routePath,
+                  builder: (context, state) => const CustomerHomeWidget(),
+                ),
+              ],
+            ),
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  name: 'Explore',
+                  path: '/explore',
+                  builder: (context, state) => SearchResultsWidget(
+                    searchTerm: state.uri.queryParameters['searchTerm'],
+                    categoryId: state.uri.queryParameters['categoryId'],
+                    openNow: state.uri.queryParameters['openNow'] == 'true',
+                  ),
+                ),
+              ],
+            ),
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  name: CartWidget.routeName,
+                  path: CartWidget.routePath,
+                  builder: (context, state) => const CartWidget(),
+                  redirect: (context, state) =>
+                      !kBypassAuth && !appStateNotifier.loggedIn
+                          ? '/authentication'
+                          : null,
+                ),
+              ],
+            ),
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  name: UserProfileReportsWidget.routeName,
+                  path: UserProfileReportsWidget.routePath,
+                  builder: (context, state) => const UserProfileReportsWidget(),
+                  redirect: (context, state) =>
+                      !kBypassAuth && !appStateNotifier.loggedIn
+                          ? '/authentication'
+                          : null,
+                ),
+              ],
+            ),
+          ],
         ),
         FFRoute(
           name: LocationRadiusSelectorWidget.routeName,
@@ -160,6 +211,13 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           ),
         ),
         FFRoute(
+          name: ProductDetailWidget.routeName,
+          path: ProductDetailWidget.routePath,
+          builder: (context, params) => ProductDetailWidget(
+            productId: params.getParam<String>('productId', ParamType.string)!,
+          ),
+        ),
+        FFRoute(
           name: BusinessRegistrationWidget.routeName,
           path: BusinessRegistrationWidget.routePath,
           builder: (context, params) => const BusinessRegistrationWidget(),
@@ -183,18 +241,6 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           name: AdminControlPanelWidget.routeName,
           path: AdminControlPanelWidget.routePath,
           builder: (context, params) => const AdminControlPanelWidget(),
-          requireAuth: true,
-        ),
-        FFRoute(
-          name: UserProfileReportsWidget.routeName,
-          path: UserProfileReportsWidget.routePath,
-          builder: (context, params) => const UserProfileReportsWidget(),
-          requireAuth: true,
-        ),
-        FFRoute(
-          name: CartWidget.routeName,
-          path: CartWidget.routePath,
-          builder: (context, params) => const CartWidget(),
           requireAuth: true,
         ),
         FFRoute(
@@ -305,7 +351,7 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           builder: (context, params) => const ManageJobsWidget(),
           requireAuth: true,
         )
-      ].map((r) => r.toRoute(appStateNotifier)).toList(),
+      ].map<RouteBase>((r) => r is FFRoute ? r.toRoute(appStateNotifier) : r as RouteBase).toList(),
     );
 
 extension NavParamExtensions on Map<String, String?> {

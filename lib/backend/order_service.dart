@@ -224,6 +224,16 @@ class OrderService {
       });
     }
 
+    final ownedAddress = ShowcaseCatalog.query(
+      'addresses',
+      ShowcaseQuery()
+        ..eq('id', addressId)
+        ..eq('user_id', userId),
+    );
+    if (ownedAddress.isEmpty) {
+      throw Exception('Delivery address not found');
+    }
+
     final fee = deliveryFee ?? 25.0;
     final order = ShowcaseCatalog.insert('orders', {
       'user_id': userId,
