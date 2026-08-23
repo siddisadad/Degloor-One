@@ -1,6 +1,7 @@
 import 'package:degloor_one/backend/repositories/address_repository.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/core/error_handler.dart';
+import 'package:degloor_one/shared/saved_address.dart';
 
 class AddressService {
   AddressService({AddressRepository? repository})
@@ -13,13 +14,14 @@ class AddressService {
   static const _signInMessage = 'Please sign in to manage addresses';
   static const _missingMessage = 'Address not found';
 
-  Future<List<AddressesRow>> listForUser(String userId) {
-    if (userId.isEmpty) return Future.value(const []);
-    return _repository.forUser(userId);
+  Future<List<SavedAddress>> listForUser(String userId) async {
+    if (userId.isEmpty) return const [];
+    final rows = await _repository.forUser(userId);
+    return rows.map(SavedAddress.fromRow).toList();
   }
 
   /// Default first; otherwise the newest saved row.
-  static AddressesRow? pickDefault(List<AddressesRow> rows) {
+  static SavedAddress? pickDefault(List<SavedAddress> rows) {
     if (rows.isEmpty) return null;
     for (final row in rows) {
       if (row.isDefault) return row;
@@ -27,11 +29,11 @@ class AddressService {
     return rows.first;
   }
 
-  Future<AddressesRow?> defaultFor(String userId) async {
+  Future<SavedAddress?> defaultFor(String userId) async {
     return pickDefault(await listForUser(userId));
   }
 
-  Future<AddressesRow> requireForUser({
+  Future<SavedAddress> requireForUser({
     required String userId,
     required String id,
   }) async {
@@ -42,10 +44,10 @@ class AddressService {
     if (row == null) {
       throw Exception(_missingMessage);
     }
-    return row;
+    return SavedAddress.fromRow(row);
   }
 
-  Future<AddressesRow> add({
+  Future<SavedAddress> add({
     required String userId,
     required String title,
     required String addressText,
@@ -89,7 +91,7 @@ class AddressService {
         exceptId: row.id,
       );
     }
-    return row;
+    return SavedAddress.fromRow(row);
   }
 
   Future<void> delete({
