@@ -139,8 +139,12 @@ class _ServiceProviderProfileWidgetState
                                 ),
                               ],
                             ),
-                            // if (provider['is_verified'] == true)
-                            //   Icon(Icons.verified_rounded, color: FlutterFlowTheme.of(context).primary, size: 32),
+                            if (provider.isVerified)
+                              Icon(
+                                Icons.verified_rounded,
+                                color: FlutterFlowTheme.of(context).primary,
+                                size: 32,
+                              ),
                           ],
                         ),
                         const SizedBox(height: 24),
