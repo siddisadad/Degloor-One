@@ -18,7 +18,7 @@ void main() {
     expect(categories.map((row) => row.id), contains('scat-electric'));
   });
 
-  test('providers paginate and filter by category', () async {}
+  test('providers paginate and filter by category', () async {
     expect(kUseShowcaseData, isTrue);
     final first = await ServiceMarketplaceService.instance.providers(
       page: const PageQuery(limit: 1),
