@@ -65,7 +65,6 @@ class _ShortcutTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: DegloorTheme.cardBackground,
-      elevation: 0,
       borderRadius: BorderRadius.circular(DegloorTheme.radiusMD),
       child: InkWell(
         onTap: onTap,
