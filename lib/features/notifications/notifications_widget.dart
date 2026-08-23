@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/notification_service.dart';
-import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/app_notification.dart';
 import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/components/load_more_control.dart';
@@ -27,14 +27,14 @@ class NotificationsWidget extends StatefulWidget {
 class _NotificationsWidgetState extends State<NotificationsWidget> {
   late NotificationsModel _model;
   final scaffoldKey = GlobalKey<ScaffoldState>();
-  List<NotificationsRow> _notifications = [];
+  List<AppNotification> _notifications = [];
   bool _isLoading = true;
   bool _loadingMore = false;
   bool _hasMore = true;
   int _offset = 0;
   int _loadToken = 0;
   static const _pageSize = 20;
-  StreamSubscription<List<NotificationsRow>>? _notificationsSubscription;
+  StreamSubscription<List<AppNotification>>? _notificationsSubscription;
 
   @override
   void initState() {

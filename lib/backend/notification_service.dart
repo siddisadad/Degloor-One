@@ -1,6 +1,7 @@
 import 'package:degloor_one/backend/repositories/notification_repository.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/core/error_handler.dart';
+import 'package:degloor_one/shared/app_notification.dart';
 import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
@@ -12,15 +13,15 @@ class NotificationService {
 
   static final instance = NotificationService();
 
-  /// Kept for existing call sites.
-  static NotificationRepository get repository => instance._repository;
-
-  Future<PageResult<NotificationsRow>> listForUser(
+  Future<PageResult<AppNotification>> listForUser(
     String userId, {
     PageQuery page = const PageQuery(),
   }) async {
     final rows = await _repository.forUser(userId, page: page);
-    return PageResult(items: rows, hasMore: rows.length >= page.limit);
+    return PageResult(
+      items: rows.map(AppNotification.fromRow).toList(),
+      hasMore: rows.length >= page.limit,
+    );
   }
 
   Future<int> unreadCount(String userId) => _repository.unreadCount(userId);
@@ -36,8 +37,11 @@ class NotificationService {
 
   Future<void> clearAll(String userId) => _repository.deleteAll(userId);
 
-  Stream<List<NotificationsRow>> watchForUser(String userId) =>
-      _repository.watchForUser(userId);
+  Stream<List<AppNotification>> watchForUser(String userId) {
+    return _repository
+        .watchForUser(userId)
+        .map((rows) => rows.map(AppNotification.fromRow).toList());
+  }
 
   static Future<void> sendNotification({
     required String userId,

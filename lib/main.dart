@@ -13,6 +13,7 @@ import 'auth/supabase_auth/auth_util.dart';
 
 import 'package:degloor_one/backend/notification_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/app_notification.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 import 'package:degloor_one/core/web_channel_buffers.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
@@ -91,7 +92,7 @@ class MyAppState extends State<MyApp> {
 
   /// A stream of the current authenticated user.
   late Stream<BaseAuthUser> userStream;
-  StreamSubscription<List<NotificationsRow>>? _notificationSubscription;
+  StreamSubscription<List<AppNotification>>? _notificationSubscription;
   StreamSubscription<BaseAuthUser>? _userSubscription;
   StreamSubscription<dynamic>? _jwtSubscription;
   StreamSubscription<AuthState>? _authSubscription;
@@ -100,7 +101,7 @@ class MyAppState extends State<MyApp> {
     _notificationSubscription?.cancel();
     if (userId.isEmpty) return;
 
-    _notificationSubscription = NotificationService.repository
+    _notificationSubscription = NotificationService.instance
         .watchForUser(userId)
         .listen((notifications) {
       if (notifications.isEmpty) return;
@@ -117,7 +118,7 @@ class MyAppState extends State<MyApp> {
     });
   }
 
-  void _showGlobalNotification(NotificationsRow notification) {
+  void _showGlobalNotification(AppNotification notification) {
     scaffoldMessengerKey.currentState?.showSnackBar(
       SnackBar(
         content: Column(

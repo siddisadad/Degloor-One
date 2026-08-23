@@ -3,6 +3,7 @@ import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/backend/notification_service.dart';
 import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/app_notification.dart';
 import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
@@ -17,6 +18,8 @@ void main() {
     );
     expect(page.items, hasLength(1));
     expect(page.hasMore, isTrue);
+    expect(page.items, everyElement(isA<AppNotification>()));
+    expect(page.items, isNot(anyElement(isA<NotificationsRow>())));
     expect(
       page.items.every((row) => row.userId == GuestAuthUser.guestUid),
       isTrue,
