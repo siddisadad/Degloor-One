@@ -4,12 +4,21 @@ import 'package:degloor_one/backend/service_marketplace_service.dart';
 import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/page_query.dart';
+import 'package:degloor_one/shared/service_category.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
 void main() {
   setUp(ShowcaseCatalog.reset);
 
-  test('providers paginate and filter by category', () async {
+  test('service categories use the domain type', () async {
+    final categories = await ServiceMarketplaceService.instance.categories();
+    expect(categories, isNotEmpty);
+    expect(categories, everyElement(isA<ServiceCategory>()));
+    expect(categories, isNot(anyElement(isA<ServiceCategoriesRow>())));
+    expect(categories.map((row) => row.id), contains('scat-electric'));
+  });
+
+  test('providers paginate and filter by category', () async {}
     expect(kUseShowcaseData, isTrue);
     final first = await ServiceMarketplaceService.instance.providers(
       page: const PageQuery(limit: 1),

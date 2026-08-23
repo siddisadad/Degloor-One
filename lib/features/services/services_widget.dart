@@ -1,6 +1,7 @@
 import 'package:degloor_one/backend/service_marketplace_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/page_query.dart';
+import 'package:degloor_one/shared/service_category.dart';
 import 'package:degloor_one/components/degloor_app_bar.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/components/modern/modern_category_item.dart';
@@ -155,7 +156,7 @@ class _ServicesWidgetState extends State<ServicesWidget> {
               ),
               SizedBox(
                 height: 118,
-                child: FutureBuilder<List<ServiceCategoriesRow>>(
+                child: FutureBuilder<List<ServiceCategory>>(
                   future: _model.categoriesFuture,
                   builder: (context, snapshot) {
                     if (snapshot.hasError) {
