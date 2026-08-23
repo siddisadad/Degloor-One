@@ -76,6 +76,31 @@ void main() {
     expect(categories.map((row) => row.name), isNot(contains('dairy')));
   });
 
+  test('add product creates a typed category for a new name', () async {
+    final added = await BusinessService.instance.addProduct(
+      userId: GuestAuthUser.guestUid,
+      name: 'Turmeric',
+      price: 25,
+      categoryName: 'Spices',
+    );
+    expect(added.categoryId, isNotEmpty);
+
+    final created = ShowcaseCatalog.query(
+      'product_categories',
+      ShowcaseQuery()
+        ..eq('business_id', ShowcaseCatalog.bizPatil)
+        ..eq('name', 'Spices'),
+    );
+    expect(created, hasLength(1));
+    expect(created.single['id'], added.categoryId);
+    expect(created.single['created_at'], isNotNull);
+
+    final categories = await BusinessService.instance
+        .productCategories(GuestAuthUser.guestUid);
+    expect(categories, everyElement(isA<ProductCategory>()));
+    expect(categories.map((row) => row.name), contains('Spices'));
+  });
+
   test('product mutations stay scoped to the owner', () async {
     await expectLater(
       BusinessService.instance.deleteProduct(
