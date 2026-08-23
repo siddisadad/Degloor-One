@@ -2,8 +2,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/backend/delivery_service.dart';
 import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
+import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/order_lifecycle.dart';
 import 'package:degloor_one/shared/page_query.dart';
+import 'package:degloor_one/shared/placed_order.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -92,6 +94,8 @@ void main() {
     final ready = await DeliveryService.instance.readyOrders(
       page: const PageQuery(limit: 20),
     );
+    expect(ready.items, everyElement(isA<PlacedOrder>()));
+    expect(ready.items, isNot(anyElement(isA<OrdersRow>())));
     expect(ready.items.map((row) => row.id), contains(ShowcaseCatalog.orderReady));
     expect(
       ready.items.every((row) => row.status == OrderLifecycle.ready),

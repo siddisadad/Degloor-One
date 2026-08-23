@@ -8,6 +8,7 @@ import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/components/load_more_control.dart';
 import 'package:degloor_one/components/order_list_card.dart';
 import 'package:degloor_one/shared/page_query.dart';
+import 'package:degloor_one/shared/placed_order.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:flutter/material.dart';
@@ -28,7 +29,7 @@ class CustomerOrdersWidget extends StatefulWidget {
 class _CustomerOrdersWidgetState extends State<CustomerOrdersWidget> {
   late CustomerOrdersModel _model;
   final scaffoldKey = GlobalKey<ScaffoldState>();
-  List<OrdersRow> _orders = [];
+  List<PlacedOrder> _orders = [];
   bool _isLoading = true;
   bool _loadingMore = false;
   bool _hasMore = true;

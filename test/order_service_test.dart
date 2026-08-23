@@ -9,6 +9,7 @@ import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/join_rows.dart';
 import 'package:degloor_one/shared/order_lifecycle.dart';
 import 'package:degloor_one/shared/page_query.dart';
+import 'package:degloor_one/shared/placed_order.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
 void main() {
@@ -265,6 +266,8 @@ void main() {
     );
     expect(page.items, hasLength(1));
     expect(page.hasMore, isTrue);
+    expect(page.items, everyElement(isA<PlacedOrder>()));
+    expect(page.items, isNot(anyElement(isA<OrdersRow>())));
     expect(
       page.items.every((row) => row.userId == GuestAuthUser.guestUid),
       isTrue,
@@ -274,6 +277,7 @@ void main() {
       orderId: ShowcaseCatalog.orderOut,
       userId: GuestAuthUser.guestUid,
     );
+    expect(own, isA<PlacedOrder>());
     expect(own?.id, ShowcaseCatalog.orderOut);
 
     final other = await OrderService.instance.forCustomer(
@@ -290,6 +294,8 @@ void main() {
     );
     expect(page.items, hasLength(1));
     expect(page.hasMore, isTrue);
+    expect(page.items, everyElement(isA<PlacedOrder>()));
+    expect(page.items, isNot(anyElement(isA<OrdersRow>())));
     expect(
       page.items.every((row) => row.businessId == ShowcaseCatalog.bizPatil),
       isTrue,

@@ -14,6 +14,7 @@ import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
 import 'package:degloor_one/shared/page_query.dart';
+import 'package:degloor_one/shared/placed_order.dart';
 import 'package:degloor_one/shared/user_profile.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -39,10 +40,10 @@ class _DeliveryDashboardWidgetState extends State<DeliveryDashboardWidget> {
 
   DeliveryPartnersRow? _partner;
   DeliveryAssignmentsRow? _assignment;
-  OrdersRow? _activeOrder;
+  PlacedOrder? _activeOrder;
   UserProfile? _customer;
   final Map<String, BusinessesRow> _shops = {};
-  List<OrdersRow> _ready = [];
+  List<PlacedOrder> _ready = [];
   bool _loading = true;
   bool _loadingMore = false;
   bool _hasMore = true;
@@ -122,7 +123,7 @@ class _DeliveryDashboardWidgetState extends State<DeliveryDashboardWidget> {
       }
 
       DeliveryAssignmentsRow? assignment = _assignment;
-      OrdersRow? activeOrder = _activeOrder;
+      PlacedOrder? activeOrder = _activeOrder;
       UserProfile? customer = _customer;
       if (reset) {
         assignment =
@@ -602,7 +603,7 @@ class _DeliveryDashboardWidgetState extends State<DeliveryDashboardWidget> {
     );
   }
 
-  Widget _readyCard(OrdersRow order) {
+  Widget _readyCard(PlacedOrder order) {
     final shop = _shops[order.businessId];
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),

@@ -8,6 +8,7 @@ import 'package:degloor_one/core/api/order_api.dart';
 import 'package:degloor_one/shared/join_rows.dart';
 import 'package:degloor_one/shared/order_lifecycle.dart';
 import 'package:degloor_one/shared/page_query.dart';
+import 'package:degloor_one/shared/placed_order.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
 class OrderOwnerActions {
@@ -86,7 +87,7 @@ class OrderService {
 
   String statusLabel(String status) => OrderLifecycle.label(status);
 
-  Future<PageResult<OrdersRow>> listForUser(
+  Future<PageResult<PlacedOrder>> listForUser(
     String userId, {
     PageQuery page = const PageQuery(),
   }) async {
@@ -94,10 +95,13 @@ class OrderService {
       return const PageResult(items: [], hasMore: false);
     }
     final rows = await _repository.forUser(userId, page: page);
-    return PageResult(items: rows, hasMore: rows.length >= page.limit);
+    return PageResult(
+      items: rows.map(PlacedOrder.fromRow).toList(),
+      hasMore: rows.length >= page.limit,
+    );
   }
 
-  Future<PageResult<OrdersRow>> listForBusiness(
+  Future<PageResult<PlacedOrder>> listForBusiness(
     String businessId, {
     PageQuery page = const PageQuery(),
   }) async {
@@ -105,7 +109,10 @@ class OrderService {
       return const PageResult(items: [], hasMore: false);
     }
     final rows = await _repository.forBusiness(businessId, page: page);
-    return PageResult(items: rows, hasMore: rows.length >= page.limit);
+    return PageResult(
+      items: rows.map(PlacedOrder.fromRow).toList(),
+      hasMore: rows.length >= page.limit,
+    );
   }
 
   Future<int> pendingCount(String businessId) {
@@ -116,13 +123,17 @@ class OrderService {
     );
   }
 
-  Future<OrdersRow?> findById(String orderId) => _repository.byId(orderId);
+  Future<PlacedOrder?> findById(String orderId) async {
+    final row = await _repository.byId(orderId);
+    return row == null ? null : PlacedOrder.fromRow(row);
+  }
 
-  Future<OrdersRow?> forCustomer({
+  Future<PlacedOrder?> forCustomer({
     required String orderId,
     required String userId,
-  }) {
-    return _repository.forCustomer(orderId: orderId, userId: userId);
+  }) async {
+    final row = await _repository.forCustomer(orderId: orderId, userId: userId);
+    return row == null ? null : PlacedOrder.fromRow(row);
   }
 
   Future<List<OrderStatusHistoryRow>> historyFor(String orderId) {
@@ -133,14 +144,18 @@ class OrderService {
     return _repository.itemsWithProducts(orderId);
   }
 
-  Stream<List<OrdersRow>> watchBusiness(String businessId) =>
-      _repository.watchBusiness(businessId);
+  Stream<List<PlacedOrder>> watchBusiness(String businessId) =>
+      _repository.watchBusiness(businessId).map(
+            (rows) => rows.map(PlacedOrder.fromRow).toList(),
+          );
 
-  Stream<List<OrdersRow>> watchUserOrder({
+  Stream<List<PlacedOrder>> watchUserOrder({
     required String orderId,
     required String userId,
   }) =>
-      _repository.watchUserOrder(orderId: orderId, userId: userId);
+      _repository.watchUserOrder(orderId: orderId, userId: userId).map(
+            (rows) => rows.map(PlacedOrder.fromRow).toList(),
+          );
 
   /// Checkout. Live path ignores client prices; showcase does the same.
   Future<String> placeOrder({

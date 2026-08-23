@@ -4,6 +4,7 @@ import 'package:degloor_one/backend/discovery_service.dart';
 import 'package:degloor_one/backend/order_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/page_query.dart';
+import 'package:degloor_one/shared/placed_order.dart';
 import 'package:degloor_one/backend/whatsapp_service.dart';
 import 'package:degloor_one/components/degloor_app_bar.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
@@ -34,7 +35,7 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
-  List<OrdersRow> _orders = [];
+  List<PlacedOrder> _orders = [];
   final Map<String, String> _customerNames = {};
   final Map<String, String> _customerPhones = {};
   bool _loading = true;
@@ -44,7 +45,7 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
   int _loadToken = 0;
   static const _pageSize = 20;
   BusinessesRow? _business;
-  StreamSubscription<List<OrdersRow>>? _ordersSubscription;
+  StreamSubscription<List<PlacedOrder>>? _ordersSubscription;
 
   @override
   void initState() {
@@ -291,7 +292,7 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
     );
   }
 
-  Widget _orderActions(OrdersRow order, OrderOwnerActions actions) {
+  Widget _orderActions(PlacedOrder order, OrderOwnerActions actions) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -419,7 +420,7 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
     );
   }
 
-  Future<void> _showOtpVerificationDialog(OrdersRow order) async {
+  Future<void> _showOtpVerificationDialog(PlacedOrder order) async {
     final otpController = TextEditingController();
     String? errorText;
 
