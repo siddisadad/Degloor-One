@@ -8,6 +8,7 @@ class UserProfileReportsModel
   ///  State fields for stateful widgets in this page.
 
   Future<List<UsersRow>>? userProfileFuture;
+  Future<List<ComplaintsRow>>? complaintsFuture;
 
   @override
   void initState(BuildContext context) {}

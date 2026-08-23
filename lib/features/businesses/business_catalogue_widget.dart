@@ -1,6 +1,8 @@
 import 'package:degloor_one/features/catalogue/product_detail_widget.dart';
 import 'package:degloor_one/core/degloor_theme.dart';
 import 'package:degloor_one/backend/cart_service.dart';
+import 'package:degloor_one/backend/shop_service.dart';
+import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_icon_button.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
@@ -45,26 +47,18 @@ class _BusinessCatalogueWidgetState extends State<BusinessCatalogueWidget> with 
 
   Future<void> _fetchData() async {
     try {
-      final products = await ProductsTable().queryRows(
-        queryFn: (q) => q.eq('business_id', widget.businessId).eq('is_available', true),
-      );
-      final categories = await ProductCategoriesTable().queryRows(
-        queryFn: (q) => q.eq('business_id', widget.businessId),
-      );
-
-      final grouped = <String, List<ProductsRow>>{};
-      for (var p in products) {
-        final catId = p.categoryId ?? 'Uncategorized';
-        grouped.putIfAbsent(catId, () => []).add(p);
-      }
+      final catalog = await ShopService.instance.catalog(widget.businessId);
 
       setState(() {
-        _model.allProducts = products;
-        _model.categories = categories;
-        _model.groupedProducts = grouped;
+        _model.allProducts = catalog.products;
+        _model.categories = catalog.categories;
+        _model.groupedProducts = catalog.grouped;
         _model.isLoading = false;
 
-        final tabsCount = categories.length + (grouped.containsKey('Uncategorized') ? 1 : 0);
+        final tabsCount = catalog.categories
+                .where((c) => catalog.grouped.containsKey(c.id))
+                .length +
+            (catalog.grouped.containsKey('Uncategorized') ? 1 : 0);
         if (tabsCount > 0) {
           _tabController = TabController(length: tabsCount, vsync: this);
         }
@@ -90,8 +84,20 @@ class _BusinessCatalogueWidgetState extends State<BusinessCatalogueWidget> with 
 
     if (_model.allProducts.isEmpty) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Catalogue')),
-        body: const Center(child: Text('No products available for this business.')),
+        backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+        appBar: AppBar(
+          backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+          title: Text(
+            'Products',
+            style: FlutterFlowTheme.of(context).headlineSmall,
+          ),
+          elevation: 0,
+        ),
+        body: const EmptyStateView(
+          icon: Icons.inventory_2_outlined,
+          title: 'No products yet',
+          description: 'This Degloor shop has not listed items yet.',
+        ),
       );
     }
 
@@ -149,15 +155,24 @@ class _BusinessCatalogueWidgetState extends State<BusinessCatalogueWidget> with 
           ],
         ),
       ),
-      body: _tabController == null
-        ? const Center(child: Text('No products found'))
-        : TabBarView(
-            controller: _tabController,
-            children: [
-              ...catList.map((c) => _buildProductList(_model.groupedProducts[c.id]!)),
-              if (hasUncategorized) _buildProductList(_model.groupedProducts['Uncategorized']!),
-            ],
-          ),
+      body: Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 520),
+          child: _tabController == null
+              ? const Center(child: Text('No products found'))
+              : TabBarView(
+                  controller: _tabController,
+                  children: [
+                    ...catList.map((c) =>
+                        _buildProductList(_model.groupedProducts[c.id]!)),
+                    if (hasUncategorized)
+                      _buildProductList(
+                          _model.groupedProducts['Uncategorized']!),
+                  ],
+                ),
+        ),
+      ),
     );
   }
 
