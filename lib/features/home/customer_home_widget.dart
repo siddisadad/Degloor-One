@@ -285,7 +285,8 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                           const Icon(Icons.search_rounded, color: DegloorTheme.textSecondary),
                           const SizedBox(width: 12),
                           Text(
-                            'What are you looking for?',
+                            AppLocalizations.of(context)?.searchPlaceholder ??
+                                'What are you looking for?',
                             style: DegloorTheme.bodyLarge.copyWith(color: DegloorTheme.textSecondary),
                           ),
                         ],

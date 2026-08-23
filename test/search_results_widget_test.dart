@@ -1,0 +1,44 @@
+import 'package:degloor_one/app_state.dart';
+import 'package:degloor_one/features/search/search_results_widget.dart';
+import 'package:degloor_one/shared/showcase_catalog.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+void main() {
+  setUpAll(() {
+    GoogleFonts.config.allowRuntimeFetching = false;
+  });
+
+  setUp(() async {
+    ShowcaseCatalog.reset();
+    FFAppState.reset();
+    SharedPreferences.setMockInitialValues({});
+    await FFAppState.instance.initializePersistedState();
+    FFAppState.instance.userLocation = ShowcaseCatalog.degloor;
+  });
+
+  testWidgets('master search field accepts a query and shows product hits',
+      (tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: SearchResultsWidget(),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    expect(find.byType(TextField), findsOneWidget);
+    expect(find.text('All'), findsOneWidget);
+    expect(find.text('Shops'), findsOneWidget);
+    expect(find.text('Products'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField), 'milk');
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(find.text('Fresh Milk (1L)'), findsWidgets);
+    expect(find.textContaining('Patil'), findsWidgets);
+  });
+}
