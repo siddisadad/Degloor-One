@@ -3,7 +3,6 @@ import 'package:degloor_one/core/degloor_theme.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/backend/cart_service.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
-import 'package:flutter/material.dart';
 
 class ProductDetailWidget extends StatefulWidget {
   const ProductDetailWidget({super.key, required this.productId});
@@ -157,11 +156,10 @@ class _ProductDetailWidgetState extends State<ProductDetailWidget> {
                             productId: product.id,
                             quantity: _quantity,
                           );
-                          if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Added to cart')),
-                            );
-                          }
+                          if (!context.mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Added to cart')),
+                          );
                         } finally {
                           if (mounted) setState(() => _isAdding = false);
                         }

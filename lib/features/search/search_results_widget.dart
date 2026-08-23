@@ -1,25 +1,18 @@
 import 'package:degloor_one/core/degloor_theme.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/backend/discovery_service.dart';
-import 'package:degloor_one/backend/location_service.dart';
 import 'package:degloor_one/backend/repositories/discovery_repository.dart';
+import 'package:degloor_one/backend/location_service.dart';
 import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/l10n/app_localizations.dart';
 import 'package:degloor_one/components/business_card/business_card_widget.dart';
-import 'package:degloor_one/components/button/button_widget.dart';
-import 'package:degloor_one/components/filter_chip/filter_chip_widget.dart';
-import 'package:degloor_one/components/text_field/text_field_widget.dart';
-import 'package:degloor_one/flutter_flow/flutter_flow_icon_button.dart';
-import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
-import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart' as ff_widgets;
 import 'package:degloor_one/app_state.dart';
 import 'package:degloor_one/components/discovery_radius_bar.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/core/error_handler.dart';
 import 'package:degloor_one/shared/discovery_radius.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'search_results_model.dart';
 export 'search_results_model.dart';
 
@@ -44,7 +37,6 @@ class SearchResultsWidget extends StatefulWidget {
 
 class _SearchResultsWidgetState extends State<SearchResultsWidget> {
   late SearchResultsModel _model;
-
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   List<BusinessesRow> _businesses = [];
@@ -144,7 +136,6 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
   @override
   void dispose() {
     _model.dispose();
-
     super.dispose();
   }
 
@@ -157,544 +148,217 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
       },
       child: Scaffold(
         key: scaffoldKey,
-        backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+        backgroundColor: DegloorTheme.background,
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_rounded, color: Colors.black),
+            onPressed: () => context.safePop(),
+          ),
+          title: Text(
+            _currentSearchTerm?.isNotEmpty == true ? _currentSearchTerm! : 'Search results',
+            style: DegloorTheme.titleMedium,
+          ),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.tune_rounded, color: DegloorTheme.primary),
+              onPressed: () => _showSortSheet(),
+            ),
+          ],
+        ),
         body: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // Filters Row
             Container(
-              decoration: BoxDecoration(
-                color: FlutterFlowTheme.of(context).secondaryBackground,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+              color: Colors.white,
+              height: 50,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 children: [
-                  Padding(
-                    padding:
-                        const EdgeInsetsDirectional.fromSTEB(20.0, 12.0, 20.0, 12.0),
-                    child: Container(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Row(
-                            children: [
-                              FlutterFlowIconButton(
-                                borderRadius: 8.0,
-                                buttonSize: 40.0,
-                                fillColor: Colors.transparent,
-                                icon: Icon(
-                                  Icons.arrow_back_rounded,
-                                  color:
-                                      FlutterFlowTheme.of(context).primaryText,
-                                  size: 24.0,
-                                ),
-                                onPressed: () async {
-                                  context.safePop();
-                                },
-                              ),
-                              Expanded(
-                                child: wrapWithModel(
-                                  model: _model.textFieldModel,
-                                  updateCallback: () => safeSetState(() {}),
-                                  child: TextFieldWidget(
-                                    label: '',
-                                    labelPresent: false,
-                                    helper: '',
-                                    helperPresent: false,
-                                    leadingIcon: Icon(
-                                      Icons.search_rounded,
-                                      color: FlutterFlowTheme.of(context)
-                                          .primaryText,
-                                      size: 24.0,
-                                    ),
-                                    leadingIconPresent: true,
-                                    trailingIconPresent: false,
-                                    hint: AppLocalizations.of(context)!.searchPlaceholder,
-                                    value: _currentSearchTerm,
-                                    onSubmit: (val) {
-                                      _performSearch(val);
-                                    },
-                                    variant: 'filled',
-                                    error: false,
-                                  ),
-                                ),
-                              ),
-                              FlutterFlowIconButton(
-                                borderColor:
-                                    FlutterFlowTheme.of(context).alternate,
-                                borderRadius: 8.0,
-                                borderWidth: 1.0,
-                                buttonSize: 40.0,
-                                fillColor: Colors.transparent,
-                                icon: Icon(
-                                  Icons.tune_rounded,
-                                  color: FlutterFlowTheme.of(context).primary,
-                                  size: 24.0,
-                                ),
-                                onPressed: () async {
-                                  await showModalBottomSheet(
-                                    context: context,
-                                    builder: (context) => Container(
-                                      padding: const EdgeInsets.all(24),
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text('Sort By', style: FlutterFlowTheme.of(context).titleMedium),
-                                          const SizedBox(height: 16),
-                                          ListTileTheme(
-                                            data: const ListTileThemeData(
-                                              iconColor: DegloorTheme.primary,
-                                              textColor: DegloorTheme.textPrimary,
-                                            ),
-                                            child: Column(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                Material(
-                                                  color: Colors.transparent,
-                                                  child: ListTile(
-                                                    leading: const Icon(Icons.social_distance_rounded),
-                                                    title: const Text('Distance (Nearest First)'),
-                                                    onTap: () {
-                                                      setState(() {
-                                                        _businesses.sort((a, b) => (a.distanceKm ?? 0).compareTo(b.distanceKm ?? 0));
-                                                      });
-                                                      Navigator.pop(context);
-                                                    },
-                                                  ),
-                                                ),
-                                                Material(
-                                                  color: Colors.transparent,
-                                                  child: ListTile(
-                                                    leading: const Icon(Icons.star_rounded, color: Colors.amber),
-                                                    title: const Text('Rating (Highest First)'),
-                                                    onTap: () {
-                                                      setState(() {
-                                                        _businesses.sort((a, b) => (b.rating ?? 0).compareTo(a.rating ?? 0));
-                                                      });
-                                                      Navigator.pop(context);
-                                                    },
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ].divide(const SizedBox(width: 16.0)),
-                          ),
-                          SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                wrapWithModel(
-                                  model: _model.filterChipModel1,
-                                  updateCallback: () => safeSetState(() {}),
-                                  child: FilterChipWidget(
-                                    hasIcon: true,
-                                    label:
-                                        '${FFAppState.instance.discoveryRadius.toInt()} km',
-                                    selected: true,
-                                    onTap: () async {
-                                      final result =
-                                          await showModalBottomSheet<double>(
-                                        context: context,
-                                        backgroundColor:
-                                            FlutterFlowTheme.of(context)
-                                                .secondaryBackground,
-                                        shape: const RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.vertical(
-                                            top: Radius.circular(20),
-                                          ),
-                                        ),
-                                        builder: (context) {
-                                          var draft = snapDiscoveryRadius(
-                                            FFAppState
-                                                .instance.discoveryRadius,
-                                          );
-                                          return StatefulBuilder(
-                                            builder: (context, setSheetState) {
-                                              return Padding(
-                                                padding:
-                                                    const EdgeInsets.fromLTRB(
-                                                        24, 12, 24, 28),
-                                                child: Column(
-                                                  mainAxisSize:
-                                                      MainAxisSize.min,
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment
-                                                          .stretch,
-                                                  children: [
-                                                    Center(
-                                                      child: Container(
-                                                        width: 36,
-                                                        height: 4,
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          color:
-                                                              FlutterFlowTheme.of(
-                                                                      context)
-                                                                  .alternate,
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(4),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    const SizedBox(height: 16),
-                                                    Text(
-                                                      'Search radius',
-                                                      style: FlutterFlowTheme
-                                                              .of(context)
-                                                          .titleMedium,
-                                                    ),
-                                                    const SizedBox(height: 4),
-                                                    Text(
-                                                      'Show shops within this distance of your pin.',
-                                                      style: FlutterFlowTheme
-                                                              .of(context)
-                                                          .bodySmall
-                                                          .override(
-                                                            fontFamily:
-                                                                GoogleFonts
-                                                                        .inter()
-                                                                    .fontFamily,
-                                                            color: FlutterFlowTheme
-                                                                    .of(context)
-                                                                .secondaryText,
-                                                          ),
-                                                    ),
-                                                    const SizedBox(height: 16),
-                                                    DiscoveryRadiusBar(
-                                                      selectedKm: draft,
-                                                      onChanged: (radius) {
-                                                        setSheetState(() =>
-                                                            draft = radius);
-                                                      },
-                                                    ),
-                                                    const SizedBox(height: 20),
-                                                    ff_widgets.FFButtonWidget(
-                                                      onPressed: () =>
-                                                          Navigator.pop(
-                                                              context, draft),
-                                                      text: 'Apply',
-                                                      options: ff_widgets
-                                                          .FFButtonOptions(
-                                                        width:
-                                                            double.infinity,
-                                                        height: 48,
-                                                        color:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .primary,
-                                                        textStyle:
-                                                            const TextStyle(
-                                                          color: Colors.white,
-                                                          fontWeight:
-                                                              FontWeight.w700,
-                                                        ),
-                                                        elevation: 0,
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(12),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              );
-                                            },
-                                          );
-                                        },
-                                      );
-                                      if (result != null) {
-                                        setState(() {
-                                          FFAppState.instance.discoveryRadius =
-                                              result;
-                                        });
-                                        _performSearch(_currentSearchTerm,
-                                            categoryId: _currentCategoryId);
-                                      }
-                                    },
-                                  ),
-                                ),
-                                wrapWithModel(
-                                  model: _model.filterChipModel2,
-                                  updateCallback: () => safeSetState(() {}),
-                                  child: FilterChipWidget(
-                                    hasIcon: false,
-                                    label: AppLocalizations.of(context)!.verified,
-                                    selected: _onlyVerified,
-                                    onTap: () {
-                                      setState(() {
-                                        _onlyVerified = !_onlyVerified;
-                                        _performSearch(_currentSearchTerm, categoryId: _currentCategoryId);
-                                      });
-                                    },
-                                  ),
-                                ),
-                                wrapWithModel(
-                                  model: _model.filterChipModel3,
-                                  updateCallback: () => safeSetState(() {}),
-                                  child: FilterChipWidget(
-                                    hasIcon: false,
-                                    label: AppLocalizations.of(context)!.openNow,
-                                    selected: _onlyOpen,
-                                    onTap: () {
-                                      setState(() {
-                                        _onlyOpen = !_onlyOpen;
-                                        _performSearch(_currentSearchTerm, categoryId: _currentCategoryId);
-                                      });
-                                    },
-                                  ),
-                                ),
-                                wrapWithModel(
-                                  model: _model.filterChipModel4,
-                                  updateCallback: () => safeSetState(() {}),
-                                  child: FilterChipWidget(
-                                    hasIcon: false,
-                                    label: 'Rating 4.0+',
-                                    selected: _minRating4,
-                                    onTap: () {
-                                      setState(() {
-                                        _minRating4 = !_minRating4;
-                                        _performSearch(_currentSearchTerm, categoryId: _currentCategoryId);
-                                      });
-                                    },
-                                  ),
-                                ),
-                              ].divide(const SizedBox(width: 0.0)),
-                            ),
-                          ),
-                        ].divide(const SizedBox(height: 16.0)),
-                      ),
-                    ),
+                  _filterChip(
+                    '${FFAppState.instance.discoveryRadius.toInt()} km',
+                    true,
+                    onTap: _showRadiusSheet,
+                    hasIcon: true,
                   ),
-                  Container(
-                    height: 1.0,
-                    decoration: BoxDecoration(
-                      color: FlutterFlowTheme.of(context).alternate,
-                    ),
+                  _filterChip(
+                    AppLocalizations.of(context)!.verified,
+                    _onlyVerified,
+                    onTap: () => setState(() { _onlyVerified = !_onlyVerified; _performSearch(_currentSearchTerm); }),
+                  ),
+                  _filterChip(
+                    AppLocalizations.of(context)!.openNow,
+                    _onlyOpen,
+                    onTap: () => setState(() { _onlyOpen = !_onlyOpen; _performSearch(_currentSearchTerm); }),
+                  ),
+                  _filterChip(
+                    'Rating 4.0+',
+                    _minRating4,
+                    onTap: () => setState(() { _minRating4 = !_minRating4; _performSearch(_currentSearchTerm); }),
                   ),
                 ],
               ),
             ),
-            Expanded(
-              child: Container(
-                child: SingleChildScrollView(
-                  primary: false,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(24.0),
-                        child: Container(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Builder(
-                                builder: (context) {
-                                  final businesses = _businesses;
-                                  final showNoResults = businesses.isEmpty && !_isLoading;
+            const Divider(height: 1),
 
-                                  return Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.stretch,
-                                    children: [
-                                      if (businesses.isNotEmpty) ...[
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment
-                                                      .spaceBetween,
-                                          children: [
-                                            Text(
-                                              '${businesses.length} shops within ${FFAppState.instance.discoveryRadius.toInt()} km',
-                                              style: FlutterFlowTheme.of(
-                                                          context)
-                                                      .labelLarge.override(
-                                                        fontFamily:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .labelLargeFamily,
-                                                        color:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .secondaryText,
-                                                      ),
-                                            ),
-                                          ],
-                                        ),
-                                        ...businesses.map((business) {
-                                          return InkWell(
-                                            splashColor: Colors.transparent,
-                                            focusColor: Colors.transparent,
-                                            hoverColor: Colors.transparent,
-                                            highlightColor:
-                                                Colors.transparent,
-                                            onTap: () async {
-                                              context.pushNamed(
-                                                'BusinessProfile',
-                                                queryParameters: {
-                                                  'businessId':
-                                                      serializeParam(
-                                                    business.id,
-                                                    ParamType.string,
-                                                  ),
-                                                }.withoutNulls,
-                                              );
-                                            },
-                                            child: BusinessCardWidget(
-                                              key: Key(
-                                                  'search_${business.id}'),
-                                              name: business.name,
-                                              category: _categoryIdToName[
-                                                      business.categoryId] ??
-                                                  'Local Business',
-                                              distance: business.distanceKm !=
-                                                      null
-                                                  ? (business.distanceKm! <
-                                                          1.0
-                                                      ? '${(business.distanceKm! * 1000).toInt()} m'
-                                                      : '${business.distanceKm!.toStringAsFixed(1)} km')
-                                                  : 'Nearby',
-                                              imgDesc: business.imageUrl ??
-                                                  'https://images.unsplash.com/photo-1534723452862-4c874018d66d?auto=format&fit=crop&w=400&h=300&q=80',
-                                              rating: (business.rating ?? 0.0)
-                                                  .toString(),
-                                              status:
-                                                  (business.isOpen ?? false)
-                                                      ? 'Open'
-                                                      : 'Closed',
-                                              verified:
-                                                  business.isVerified ??
-                                                      false,
-                                              isOpen:
-                                                  business.isOpen ?? false,
-                                            ),
-                                          );
-                                        }),
-                                        if (_hasMore)
-                                          Padding(
-                                            padding: const EdgeInsets.symmetric(vertical: 16.0),
-                                            child: ff_widgets.FFButtonWidget(
-                                              onPressed: () => _performSearch(_currentSearchTerm, categoryId: _currentCategoryId, loadMore: true),
-                                              text: 'Load More',
-                                              options: ff_widgets.FFButtonOptions(
-                                                height: 40.0,
-                                                color: FlutterFlowTheme.of(context).primary,
-                                                textStyle: FlutterFlowTheme.of(context).titleSmall.override(
-                                                  fontFamily: GoogleFonts.inter().fontFamily,
-                                                  color: Colors.white,
-                                                ),
-                                                borderRadius: BorderRadius.circular(8.0),
-                                              ),
-                                            ),
-                                          ),
-                                      ],
-                                      if (_isLoading && businesses.isEmpty)
-                                        const Center(
-                                          child: Padding(
-                                            padding: EdgeInsets.all(32.0),
-                                            child: CircularProgressIndicator(),
-                                          ),
-                                        ),
-                                      if (showNoResults)
-                                        EmptyStateView(
-                                          icon: FFAppState.instance.userLocation == null
-                                              ? Icons.location_off_rounded
-                                              : Icons.search_off_rounded,
-                                          title: FFAppState.instance.userLocation == null
-                                              ? AppLocalizations.of(context)!.locationRequired
-                                              : AppLocalizations.of(context)!.noResultsFound,
-                                          description: FFAppState.instance.userLocation == null
-                                              ? AppLocalizations.of(context)!.enableLocationDescription
-                                              : AppLocalizations.of(context)!.noResultsDescription,
-                                          buttonText: FFAppState.instance.userLocation == null
-                                              ? AppLocalizations.of(context)!.enableLocation
-                                              : null,
-                                          onTap: FFAppState.instance.userLocation == null
-                                              ? () => LocationService.updateCurrentLocation(context)
-                                              : null,
-                                        ),
-                                    ].divide(const SizedBox(height: 16.0)),
-                                  );
-                                },
-                              ),
-                              if (_businesses.isEmpty &&
-                                  !_isLoading &&
-                                  nextDiscoveryRadius(FFAppState
-                                          .instance.discoveryRadius) !=
-                                      null)
-                                Padding(
-                                  padding: const EdgeInsets.all(16.0),
-                                  child: Column(
-                                    children: [
-                                      Text(
-                                        'Looking for more?',
-                                        style: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .override(
-                                              fontFamily: GoogleFonts.inter()
-                                                  .fontFamily,
-                                              color: FlutterFlowTheme.of(
-                                                      context)
-                                                  .secondaryText,
-                                            ),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      wrapWithModel(
-                                        model: _model.buttonModel,
-                                        updateCallback: () =>
-                                            safeSetState(() {}),
-                                        child: ButtonWidget(
-                                          iconPresent: false,
-                                          iconEndPresent: false,
-                                          content:
-                                              'Increase radius to ${nextDiscoveryRadius(FFAppState.instance.discoveryRadius)!.toInt()} km',
-                                          variant: 'outline',
-                                          size: 'small',
-                                          fullWidth: false,
-                                          loading: false,
-                                          disabled: false,
-                                          onTap: () async {
-                                            final next = nextDiscoveryRadius(
-                                                FFAppState.instance
-                                                    .discoveryRadius);
-                                            if (next == null) return;
-                                            setState(() {
-                                              FFAppState.instance
-                                                      .discoveryRadius =
-                                                  next;
-                                            });
-                                            _performSearch(
-                                                _currentSearchTerm,
-                                                categoryId:
-                                                    _currentCategoryId);
-                                          },
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+            // Results List
+            Expanded(
+              child: _isLoading && _businesses.isEmpty
+                  ? const Center(child: CircularProgressIndicator())
+                  : _businesses.isEmpty
+                      ? _buildEmptyState()
+                      : ListView.separated(
+                          padding: const EdgeInsets.all(DegloorTheme.spacingMD),
+                          itemCount: _businesses.length + (_hasMore ? 1 : 0),
+                          separatorBuilder: (context, index) => const SizedBox(height: 12),
+                          itemBuilder: (context, index) {
+                            if (index == _businesses.length) {
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                child: TextButton(
+                                  onPressed: () => _performSearch(_currentSearchTerm, loadMore: true),
+                                  child: const Text('Load More'),
                                 ),
-                            ].divide(const SizedBox(height: 16.0)),
-                          ),
+                              );
+                            }
+                            final biz = _businesses[index];
+                            return InkWell(
+                              onTap: () => context.pushNamed('BusinessProfile', queryParameters: {'businessId': biz.id}),
+                              borderRadius: BorderRadius.circular(DegloorTheme.radiusMD),
+                              child: BusinessCardWidget(
+                                name: biz.name,
+                                category: _categoryIdToName[biz.categoryId] ?? 'Local Business',
+                                distance: biz.distanceKm != null ? '${biz.distanceKm!.toStringAsFixed(1)} km' : 'Nearby',
+                                imgDesc: biz.imageUrl,
+                                rating: (biz.rating ?? 0.0).toStringAsFixed(1),
+                                status: (biz.isOpen ?? false) ? 'Open' : 'Closed',
+                                verified: biz.isVerified ?? false,
+                                isOpen: biz.isOpen ?? false,
+                              ),
+                            );
+                          },
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
             ),
           ],
         ),
       ),
     );
+  }
+
+  Widget _filterChip(String label, bool isSelected, {required VoidCallback onTap, bool hasIcon = false}) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: FilterChip(
+        label: Text(label),
+        selected: isSelected,
+        onSelected: (_) => onTap(),
+        backgroundColor: Colors.white,
+        selectedColor: DegloorTheme.primary.withValues(alpha: 0.1),
+        checkmarkColor: DegloorTheme.primary,
+        labelStyle: TextStyle(
+          color: isSelected ? DegloorTheme.primary : DegloorTheme.textSecondary,
+          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          fontSize: 12,
+        ),
+        shape: StadiumBorder(side: BorderSide(color: isSelected ? DegloorTheme.primary : DegloorTheme.border)),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    if (FFAppState.instance.userLocation == null) {
+      return EmptyStateView(
+        icon: Icons.location_off_rounded,
+        title: AppLocalizations.of(context)!.locationRequired,
+        description: AppLocalizations.of(context)!.enableLocationDescription,
+        buttonText: AppLocalizations.of(context)!.enableLocation,
+        onTap: () => LocationService.updateCurrentLocation(context),
+      );
+    }
+    return EmptyStateView(
+      icon: Icons.search_off_rounded,
+      title: AppLocalizations.of(context)!.noResultsFound,
+      description: AppLocalizations.of(context)!.noResultsDescription,
+    );
+  }
+
+  void _showSortSheet() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Sort By', style: DegloorTheme.headingMedium),
+            const SizedBox(height: 16),
+            ListTile(
+              leading: const Icon(Icons.social_distance_rounded),
+              title: const Text('Distance (Nearest First)'),
+              onTap: () {
+                setState(() => _businesses.sort((a, b) => (a.distanceKm ?? 0).compareTo(b.distanceKm ?? 0)));
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.star_rounded, color: Colors.amber),
+              title: const Text('Rating (Highest First)'),
+              onTap: () {
+                setState(() => _businesses.sort((a, b) => (b.rating ?? 0).compareTo(a.rating ?? 0)));
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showRadiusSheet() async {
+    final result = await showModalBottomSheet<double>(
+      context: context,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (context) {
+        var draft = snapDiscoveryRadius(FFAppState.instance.discoveryRadius);
+        return StatefulBuilder(
+          builder: (context, setSheetState) => Padding(
+            padding: const EdgeInsets.fromLTRB(24, 12, 24, 28),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Center(child: Container(width: 36, height: 4, decoration: BoxDecoration(color: DegloorTheme.border, borderRadius: BorderRadius.circular(4)))),
+                const SizedBox(height: 24),
+                Text('Search radius', style: DegloorTheme.headingMedium),
+                const SizedBox(height: 8),
+                Text('Show shops within this distance of your pin.', style: DegloorTheme.bodySmall),
+                const SizedBox(height: 24),
+                DiscoveryRadiusBar(
+                  selectedKm: draft,
+                  onChanged: (radius) => setSheetState(() => draft = radius),
+                ),
+                const SizedBox(height: 32),
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(context, draft),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: DegloorTheme.primary,
+                    minimumSize: const Size(double.infinity, 50),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: const Text('Apply', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+    if (result != null) {
+      setState(() => FFAppState.instance.discoveryRadius = result);
+      _performSearch(_currentSearchTerm);
+    }
   }
 }

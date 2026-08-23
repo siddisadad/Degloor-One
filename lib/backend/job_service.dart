@@ -1,3 +1,4 @@
+import 'package:degloor_one/backend/business_service.dart';
 import 'package:degloor_one/backend/repositories/job_repository.dart';
 import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
@@ -42,11 +43,15 @@ class JobService {
     required String jobType,
     String? salaryRange,
     String? locationText,
-  }) {
+  }) async {
     final trimmed = title.trim();
     if (trimmed.isEmpty) {
       throw Exception('Job title is required');
     }
+    await BusinessService.instance.requireOwnedBusiness(
+      userId: posterId,
+      businessId: businessId,
+    );
     return _repository.insert({
       'business_id': businessId,
       'poster_id': posterId,

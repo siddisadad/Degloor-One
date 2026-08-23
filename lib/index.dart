@@ -59,7 +59,7 @@ export 'package:degloor_one/features/businesses/edit_business_profile_widget.dar
     show EditBusinessProfileWidget;
 export 'package:degloor_one/features/analytics/business_analytics_widget.dart'
     show BusinessAnalyticsWidget;
-export 'package:degloor_one/pages/jobs_marketplace/jobs_marketplace_widget.dart'
+export 'package:degloor_one/features/jobs/jobs_marketplace_widget.dart'
     show JobsMarketplaceWidget;
-export 'package:degloor_one/pages/manage_jobs/manage_jobs_widget.dart'
+export 'package:degloor_one/features/jobs/manage_jobs_widget.dart'
     show ManageJobsWidget;

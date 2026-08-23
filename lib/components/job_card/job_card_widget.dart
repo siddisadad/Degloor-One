@@ -1,11 +1,7 @@
-import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
-import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
-import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
+import 'package:degloor_one/core/degloor_theme.dart';
 import 'package:flutter/material.dart';
-import 'job_card_model.dart';
-export 'job_card_model.dart';
 
-class JobCardWidget extends StatefulWidget {
+class JobCardWidget extends StatelessWidget {
   const JobCardWidget({
     super.key,
     required this.title,
@@ -14,7 +10,7 @@ class JobCardWidget extends StatefulWidget {
     required this.salary,
     required this.jobType,
     required this.onActionPressed,
-    this.actionText = 'Apply',
+    this.actionText = 'Apply Now',
     this.showAction = true,
   });
 
@@ -28,172 +24,73 @@ class JobCardWidget extends StatefulWidget {
   final Future Function() onActionPressed;
 
   @override
-  State<JobCardWidget> createState() => _JobCardWidgetState();
-}
-
-class _JobCardWidgetState extends State<JobCardWidget> {
-  late JobCardModel _model;
-
-  @override
-  void setState(VoidCallback callback) {
-    super.setState(callback);
-    _model.onUpdate();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _model = createModel(context, () => JobCardModel());
-  }
-
-  @override
-  void dispose() {
-    _model.maybeDispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Container(
-      width: double.infinity,
       decoration: BoxDecoration(
-        color: FlutterFlowTheme.of(context).secondaryBackground,
-        boxShadow: const [
-          BoxShadow(
-            blurRadius: 4,
-            color: Color(0x33000000),
-            offset: Offset(0, 2),
-          )
-        ],
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: FlutterFlowTheme.of(context).alternate,
-        ),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(DegloorTheme.radiusMD),
+        border: Border.all(color: DegloorTheme.border),
+        boxShadow: DegloorTheme.softShadow,
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(DegloorTheme.spacingMD),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.title,
-                        style: FlutterFlowTheme.of(context).titleMedium.override(
-                              fontFamily: 'Inter',
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                            ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: DegloorTheme.primary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(DegloorTheme.radiusSM),
                       ),
-                      Padding(
-                        padding: const EdgeInsetsDirectional.fromSTEB(0, 4, 0, 0),
-                        child: Text(
-                          widget.companyName,
-                          style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                fontFamily: 'Inter',
-                                color: FlutterFlowTheme.of(context).primary,
-                                fontWeight: FontWeight.w500,
-                              ),
-                        ),
+                      child: Text(
+                        jobType,
+                        style: DegloorTheme.labelSmall.copyWith(color: DegloorTheme.primary, fontWeight: FontWeight.bold),
                       ),
-                    ],
-                  ),
-                ),
-                Container(
-                  decoration: BoxDecoration(
-                    color: FlutterFlowTheme.of(context).accent1,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsetsDirectional.fromSTEB(8, 4, 8, 4),
-                    child: Text(
-                      widget.jobType,
-                      style: FlutterFlowTheme.of(context).bodySmall.override(
-                            fontFamily: 'Inter',
-                            color: FlutterFlowTheme.of(context).primary,
-                            fontWeight: FontWeight.w600,
-                          ),
                     ),
-                  ),
+                    const Icon(Icons.bookmark_border_rounded, color: DegloorTheme.textSecondary, size: 20),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Text(title, style: DegloorTheme.headingMedium.copyWith(fontSize: 18)),
+                const SizedBox(height: 4),
+                Text(companyName, style: DegloorTheme.bodyLarge.copyWith(color: DegloorTheme.primary, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    const Icon(Icons.location_on_outlined, size: 16, color: DegloorTheme.textSecondary),
+                    const SizedBox(width: 4),
+                    Expanded(child: Text(location, style: DegloorTheme.bodySmall)),
+                    const Icon(Icons.payments_outlined, size: 16, color: DegloorTheme.success),
+                    const SizedBox(width: 4),
+                    Text(salary, style: DegloorTheme.bodySmall.copyWith(color: DegloorTheme.success, fontWeight: FontWeight.bold)),
+                  ],
                 ),
               ],
             ),
-            Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(0, 12, 0, 0),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.location_on_outlined,
-                    color: FlutterFlowTheme.of(context).secondaryText,
-                    size: 16,
-                  ),
-                  Padding(
-                    padding: const EdgeInsetsDirectional.fromSTEB(4, 0, 0, 0),
-                    child: Text(
-                      widget.location,
-                      style: FlutterFlowTheme.of(context).bodySmall.override(
-                            fontFamily: 'Inter',
-                            color: FlutterFlowTheme.of(context).secondaryText,
-                          ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsetsDirectional.fromSTEB(16, 0, 0, 0),
-                    child: Icon(
-                      Icons.payments_outlined,
-                      color: FlutterFlowTheme.of(context).success,
-                      size: 16,
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsetsDirectional.fromSTEB(4, 0, 0, 0),
-                    child: Text(
-                      widget.salary,
-                      style: FlutterFlowTheme.of(context).bodySmall.override(
-                            fontFamily: 'Inter',
-                            color: FlutterFlowTheme.of(context).success,
-                            fontWeight: FontWeight.w600,
-                          ),
-                    ),
-                  ),
-                ],
+          ),
+          if (showAction)
+            Container(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              child: ElevatedButton(
+                onPressed: () async => await onActionPressed(),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: DegloorTheme.primary,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  minimumSize: const Size(double.infinity, 44),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(DegloorTheme.radiusMD)),
+                ),
+                child: Text(actionText, style: const TextStyle(fontWeight: FontWeight.bold)),
               ),
             ),
-            if (widget.showAction)
-              Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(0, 16, 0, 0),
-                child: FFButtonWidget(
-                  onPressed: () async {
-                    await widget.onActionPressed();
-                  },
-                  text: widget.actionText,
-                  options: FFButtonOptions(
-                    width: double.infinity,
-                    height: 44,
-                    padding: const EdgeInsetsDirectional.fromSTEB(0, 0, 0, 0),
-                    iconPadding: const EdgeInsetsDirectional.fromSTEB(0, 0, 0, 0),
-                    color: FlutterFlowTheme.of(context).primary,
-                    textStyle: FlutterFlowTheme.of(context).titleSmall.override(
-                          fontFamily: 'Inter',
-                          color: Colors.white,
-                        ),
-                    elevation: 0,
-                    borderSide: const BorderSide(
-                      color: Colors.transparent,
-                    ),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-              ),
-          ],
-        ),
+        ],
       ),
     );
   }

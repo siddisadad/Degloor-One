@@ -1,8 +1,11 @@
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
+import 'package:degloor_one/backend/business_service.dart';
 import 'package:degloor_one/backend/job_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/components/degloor_app_bar.dart';
+import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/components/job_card/job_card_widget.dart';
-import 'package:degloor_one/flutter_flow/flutter_flow_icon_button.dart';
+import 'package:degloor_one/core/error_handler.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
@@ -33,15 +36,16 @@ class _ManageJobsWidgetState extends State<ManageJobsWidget> {
   }
 
   Future<void> _fetchBusiness() async {
-    final businesses = await BusinessesTable().queryRows(
-      queryFn: (q) => q.eq('owner_id', currentUserUid),
-    );
-    if (businesses.isNotEmpty) {
+    try {
+      final shop =
+          await BusinessService.instance.requireOwned(currentUserUid);
+      if (!mounted) return;
       setState(() {
-        _model.businessId = businesses.first.id;
+        _model.businessId = shop.id;
         _isLoading = false;
       });
-    } else {
+    } catch (_) {
+      if (!mounted) return;
       setState(() {
         _isLoading = false;
       });
@@ -145,7 +149,14 @@ class _ManageJobsWidgetState extends State<ManageJobsWidget> {
                   } catch (e) {
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Error: $e')),
+                        SnackBar(
+                          content: Text(
+                            AppLogger.userFacingMessage(
+                              e,
+                              fallback: 'Unable to post the job. Please try again.',
+                            ),
+                          ),
+                        ),
                       );
                     }
                     return;
@@ -303,78 +314,73 @@ class _ManageJobsWidgetState extends State<ManageJobsWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    if (_model.businessId == null) return const Scaffold(body: Center(child: Text('No business found. Please register your business first.')));
+    if (_isLoading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+    if (_model.businessId == null) {
+      return Scaffold(
+        appBar: degloorAppBar(context, title: 'Manage Jobs'),
+        backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+        body: const EmptyStateView(
+          icon: Icons.storefront_outlined,
+          title: 'No shop yet',
+          description: 'Register your Degloor shop before posting jobs.',
+        ),
+      );
+    }
 
     return Scaffold(
       key: scaffoldKey,
       backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-      appBar: AppBar(
-        backgroundColor: FlutterFlowTheme.of(context).secondaryBackground,
-        automaticallyImplyLeading: false,
-        leading: FlutterFlowIconButton(
-          buttonSize: 60,
-          icon: Icon(Icons.arrow_back_rounded, color: FlutterFlowTheme.of(context).primaryText, size: 24),
-          onPressed: () => context.safePop(),
-        ),
-        title: Text('Manage Jobs', style: FlutterFlowTheme.of(context).headlineMedium.override(fontFamily: 'Inter', fontWeight: FontWeight.bold, fontSize: 20)),
-        elevation: 0,
-      ),
+      appBar: degloorAppBar(context, title: 'Manage Jobs'),
       floatingActionButton: FloatingActionButton(
         onPressed: _showPostJobDialog,
         backgroundColor: FlutterFlowTheme.of(context).primary,
         child: const Icon(Icons.add, color: Colors.white),
       ),
-      body: FutureBuilder<List<JobsRow>>(
-        future: _fetchMyJobs(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator());
-          final jobs = snapshot.data ?? [];
-          if (jobs.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.work_outline_rounded, size: 64, color: FlutterFlowTheme.of(context).secondaryText),
-                  const SizedBox(height: 16),
-                  Text('You haven\'t posted any jobs yet.', style: FlutterFlowTheme.of(context).titleMedium),
-                  const SizedBox(height: 24),
-                  FFButtonWidget(
-                    onPressed: _showPostJobDialog,
-                    text: 'Post Your First Job',
-                    options: FFButtonOptions(
-                      width: 200,
-                      height: 44,
-                      color: FlutterFlowTheme.of(context).primary,
-                      textStyle: const TextStyle(color: Colors.white),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }
+      body: Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 520),
+          child: FutureBuilder<List<JobsRow>>(
+            future: _fetchMyJobs(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              final jobs = snapshot.data ?? [];
+              if (jobs.isEmpty) {
+                return EmptyStateView(
+                  icon: Icons.work_outline_rounded,
+                  title: 'No jobs posted',
+                  description: 'Add an opening for Degloor customers to apply.',
+                  buttonText: 'Post Your First Job',
+                  onTap: _showPostJobDialog,
+                );
+              }
 
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: jobs.length,
-            itemBuilder: (context, index) {
-              final job = jobs[index];
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 16.0),
-                child: JobCardWidget(
-                  title: job.title,
-                  companyName: 'My Business', // Could fetch business name if needed
-                  location: 'Degloor',
-                  salary: job.salaryRange ?? 'Not disclosed',
-                  jobType: job.jobType,
-                  actionText: 'View Applications',
-                  onActionPressed: () async => _viewApplications(job),
-                ),
+              return ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: jobs.length,
+                itemBuilder: (context, index) {
+                  final job = jobs[index];
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 16.0),
+                    child: JobCardWidget(
+                      title: job.title,
+                      companyName: 'My Business',
+                      location: 'Degloor',
+                      salary: job.salaryRange ?? 'Not disclosed',
+                      jobType: job.jobType,
+                      actionText: 'View Applications',
+                      onActionPressed: () async => _viewApplications(job),
+                    ),
+                  );
+                },
               );
             },
-          );
-        },
+          ),
+        ),
       ),
     );
   }

@@ -26,6 +26,7 @@ class MainScaffold extends StatelessWidget {
         child: BottomNavigationBar(
           currentIndex: navigationShell.currentIndex,
           onTap: (index) => navigationShell.goBranch(index),
+          type: BottomNavigationBarType.fixed,
           items: const [
             BottomNavigationBarItem(
               icon: Icon(Icons.home_outlined),
@@ -36,6 +37,11 @@ class MainScaffold extends StatelessWidget {
               icon: Icon(Icons.search_rounded),
               activeIcon: Icon(Icons.search_rounded),
               label: 'Explore',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.handyman_outlined),
+              activeIcon: Icon(Icons.handyman_rounded),
+              label: 'Services',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.shopping_cart_outlined),

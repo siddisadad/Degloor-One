@@ -75,6 +75,74 @@ void main() {
     expect(provider['service_categories']['name'], 'Electrician');
   });
 
+  test('guest can register as a provider once', () async {
+    final profile = await ServiceMarketplaceService.instance.register(
+      userId: GuestAuthUser.guestUid,
+      categoryId: 'scat-electric',
+      experienceYears: '5',
+      hourlyRate: '200',
+      bio: 'Fan and wiring repair in Degloor.',
+    );
+    expect(profile.userId, GuestAuthUser.guestUid);
+    expect(profile.categoryId, 'scat-electric');
+    expect(profile.experienceYears, 5);
+    expect(profile.hourlyRate, 200);
+    expect(profile.isVerified, isFalse);
+
+    await expectLater(
+      ServiceMarketplaceService.instance.register(
+        userId: GuestAuthUser.guestUid,
+        categoryId: 'scat-plumb',
+        experienceYears: '2',
+        hourlyRate: '150',
+        bio: 'Second profile',
+      ),
+      throwsA(
+        isA<Exception>().having(
+          (error) => error.toString(),
+          'message',
+          contains('already'),
+        ),
+      ),
+    );
+  });
+
+  test('register rejects a missing category or signed-out user', () async {
+    await expectLater(
+      ServiceMarketplaceService.instance.register(
+        userId: '',
+        categoryId: 'scat-electric',
+        experienceYears: '1',
+        hourlyRate: '100',
+        bio: 'Wiring',
+      ),
+      throwsA(
+        isA<Exception>().having(
+          (error) => error.toString(),
+          'message',
+          contains('sign in'),
+        ),
+      ),
+    );
+
+    await expectLater(
+      ServiceMarketplaceService.instance.register(
+        userId: GuestAuthUser.guestUid,
+        categoryId: 'missing-category',
+        experienceYears: '1',
+        hourlyRate: '100',
+        bio: 'Wiring',
+      ),
+      throwsA(
+        isA<Exception>().having(
+          (error) => error.toString(),
+          'message',
+          contains('category'),
+        ),
+      ),
+    );
+  });
+
   test('seeded pending request can be accepted by the provider', () async {
     await ServiceMarketplaceService.instance.updateStatus(
       requestId: 'sr-1',

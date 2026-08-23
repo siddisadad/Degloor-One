@@ -1,35 +1,23 @@
-import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
-import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
+import 'package:degloor_one/core/degloor_theme.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'business_card_model.dart';
-export 'business_card_model.dart';
 
-class BusinessCardWidget extends StatefulWidget {
+class BusinessCardWidget extends StatelessWidget {
   const BusinessCardWidget({
     super.key,
-    String? category,
-    String? distance,
-    String? imgDesc,
-    String? name,
-    String? rating,
-    String? status,
-    bool? verified,
-    bool? isOpen,
-  })  : category = category ?? 'Hardware & Construction',
-        distance = distance ?? '0.8 km',
-        imgDesc = imgDesc ??
-            'https://dimg.dreamflow.cloud/v1/image/hardware%20store%20shelves',
-        name = name ?? 'Business Name',
-        rating = rating ?? '0.0',
-        status = status ?? 'Closed',
-        verified = verified ?? false,
-        isOpen = isOpen ?? false;
+    this.category = 'Local Business',
+    this.distance = 'Nearby',
+    this.imgDesc,
+    this.name = 'Business Name',
+    this.rating = '0.0',
+    this.status = 'Closed',
+    this.verified = false,
+    this.isOpen = false,
+  });
 
   final String category;
   final String distance;
-  final String imgDesc;
+  final String? imgDesc;
   final String name;
   final String rating;
   final String status;
@@ -37,282 +25,127 @@ class BusinessCardWidget extends StatefulWidget {
   final bool isOpen;
 
   @override
-  State<BusinessCardWidget> createState() => _BusinessCardWidgetState();
-}
-
-class _BusinessCardWidgetState extends State<BusinessCardWidget> {
-  late BusinessCardModel _model;
-
-  @override
-  void setState(VoidCallback callback) {
-    super.setState(callback);
-    _model.onUpdate();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _model = createModel(context, () => BusinessCardModel());
-  }
-
-  @override
-  void dispose() {
-    _model.maybeDispose();
-
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 16.0),
-      child: Container(
-        decoration: BoxDecoration(
-          color: FlutterFlowTheme.of(context).secondaryBackground,
-          boxShadow: [
-            FlutterFlowTheme.of(context).designToken.shadow.sm,
-          ],
-          borderRadius: BorderRadius.circular(
-            FlutterFlowTheme.of(context).designToken.radius.lg,
-          ),
-          border: Border.all(
-            color: FlutterFlowTheme.of(context).alternate,
-          ),
-        ),
-        child: Padding(
-          padding: EdgeInsets.all(
-            FlutterFlowTheme.of(context).designToken.spacing.md,
-          ),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(DegloorTheme.radiusMD),
+        boxShadow: DegloorTheme.softShadow,
+        border: Border.all(color: DegloorTheme.border),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(DegloorTheme.radiusMD),
+        child: IntrinsicHeight(
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(
-                  FlutterFlowTheme.of(context).designToken.radius.md,
-                ),
-                child: Container(
-                  width: 80.0,
-                  height: 80.0,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(
-                      FlutterFlowTheme.of(context).designToken.radius.md,
-                    ),
-                  ),
-                  child: CachedNetworkImage(
-                    fadeInDuration: const Duration(),
-                    fadeOutDuration: const Duration(),
-                    imageUrl: valueOrDefault<String>(
-                      widget.imgDesc,
-                      'https://dimg.dreamflow.cloud/v1/image/hardware%20store%20shelves',
-                    ),
-                    width: 80.0,
-                    height: 80.0,
+              // 1. Image
+              Stack(
+                children: [
+                  CachedNetworkImage(
+                    imageUrl: imgDesc ?? 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=400&q=80',
+                    width: 110,
+                    height: double.infinity,
                     fit: BoxFit.cover,
+                    placeholder: (context, url) => Container(color: DegloorTheme.accent),
                     errorWidget: (context, url, error) => Container(
-                      color: FlutterFlowTheme.of(context).primaryBackground,
-                      child: Icon(
-                        Icons.image_not_supported_rounded,
-                        color: FlutterFlowTheme.of(context).secondaryText,
-                        size: 24,
+                      width: 110,
+                      color: DegloorTheme.accent,
+                      child: const Icon(Icons.storefront_rounded, color: DegloorTheme.textSecondary),
+                    ),
+                  ),
+                  if (verified)
+                    Positioned(
+                      top: 6,
+                      left: 6,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: const BoxDecoration(
+                          color: DegloorTheme.primary,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.verified_rounded, color: Colors.white, size: 12),
                       ),
                     ),
+                ],
+              ),
+
+              // 2. Info
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(DegloorTheme.spacingMD),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: DegloorTheme.titleMedium.copyWith(fontSize: 16),
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: DegloorTheme.accent,
+                              borderRadius: BorderRadius.circular(DegloorTheme.radiusSM),
+                            ),
+                            child: Row(
+                              children: [
+                                Text(
+                                  rating,
+                                  style: DegloorTheme.labelSmall.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: DegloorTheme.primary,
+                                  ),
+                                ),
+                                const SizedBox(width: 2),
+                                const Icon(Icons.star_rounded, color: DegloorTheme.secondary, size: 14),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        category,
+                        style: DegloorTheme.bodySmall.copyWith(color: DegloorTheme.textSecondary),
+                      ),
+                      const Spacer(),
+                      Row(
+                        children: [
+                          const Icon(Icons.location_on_outlined, size: 14, color: DegloorTheme.textSecondary),
+                          const SizedBox(width: 4),
+                          Text(distance, style: DegloorTheme.bodySmall),
+                          const SizedBox(width: 12),
+                          Container(
+                            width: 6,
+                            height: 6,
+                            decoration: BoxDecoration(
+                              color: isOpen ? DegloorTheme.success : DegloorTheme.error,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            isOpen ? 'Open' : 'Closed',
+                            style: DegloorTheme.bodySmall.copyWith(
+                              color: isOpen ? DegloorTheme.success : DegloorTheme.error,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
               ),
-              Expanded(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              valueOrDefault<String>(
-                                widget.rating,
-                                '4.8',
-                              ),
-                              style: FlutterFlowTheme.of(context)
-                                  .labelSmall
-                                  .override(
-                                    fontFamily: FlutterFlowTheme.of(context)
-                                        .labelSmallFamily,
-                                    color: FlutterFlowTheme.of(context).secondary,
-                                    useGoogleFonts: GoogleFonts.asMap()
-                                        .containsKey(FlutterFlowTheme.of(context)
-                                            .labelSmallFamily),
-                                  ),
-                            ),
-                            Icon(
-                              Icons.star_rounded,
-                              color: FlutterFlowTheme.of(context).secondary,
-                              size: 14.0,
-                            ),
-                          ].divide(SizedBox(
-                              width: FlutterFlowTheme.of(context)
-                                  .designToken
-                                  .spacing
-                                  .xs)),
-                        ),
-                          if (widget.verified)
-                            Container(
-                              decoration: BoxDecoration(
-                                color: FlutterFlowTheme.of(context)
-                                    .primary
-                                    .withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(
-                                  FlutterFlowTheme.of(context)
-                                      .designToken
-                                      .radius
-                                      .xs,
-                                ),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsetsDirectional.fromSTEB(
-                                    8.0, 2.0, 8.0, 2.0),
-                                child: Text(
-                                  'Verified',
-                                  style: FlutterFlowTheme.of(context)
-                                      .labelSmall
-                                      .override(
-                                        fontFamily: FlutterFlowTheme.of(context)
-                                            .labelSmallFamily,
-                                        color: FlutterFlowTheme.of(context).primary,
-                                        fontSize: 10.0,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                ),
-                              ),
-                            ),
-                      ],
-                    ),
-                    Text(
-                      valueOrDefault<String>(
-                        widget.name,
-                        'Sharma Hardware & Steel',
-                      ),
-                      maxLines: 1,
-                      style: FlutterFlowTheme.of(context).titleMedium,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    Text(
-                      valueOrDefault<String>(
-                        widget.category,
-                        'Hardware & Construction',
-                      ),
-                      style: FlutterFlowTheme.of(context).bodySmall.override(
-                            fontFamily:
-                                FlutterFlowTheme.of(context).bodySmallFamily,
-                            color: FlutterFlowTheme.of(context).secondaryText,
-                            useGoogleFonts: GoogleFonts.asMap().containsKey(
-                                FlutterFlowTheme.of(context).bodySmallFamily),
-                          ),
-                    ),
-                    Row(
-                      children: [
-                        Flexible(
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.location_on_outlined,
-                                color:
-                                    FlutterFlowTheme.of(context).secondaryText,
-                                size: 14.0,
-                              ),
-                              Flexible(
-                                child: Text(
-                                  valueOrDefault<String>(
-                                    widget.distance,
-                                    '0.8 km',
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: FlutterFlowTheme.of(context)
-                                      .bodySmall
-                                      .override(
-                                        fontFamily: FlutterFlowTheme.of(context)
-                                            .bodySmallFamily,
-                                        color: FlutterFlowTheme.of(context)
-                                            .secondaryText,
-                                        useGoogleFonts: GoogleFonts.asMap()
-                                            .containsKey(
-                                                FlutterFlowTheme.of(context)
-                                                    .bodySmallFamily),
-                                      ),
-                                ),
-                              ),
-                            ].divide(SizedBox(
-                                width: FlutterFlowTheme.of(context)
-                                    .designToken
-                                    .spacing
-                                    .xs)),
-                          ),
-                        ),
-                        Flexible(
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.schedule_rounded,
-                                color:
-                                    FlutterFlowTheme.of(context).secondaryText,
-                                size: 14.0,
-                              ),
-                              Flexible(
-                                child: Text(
-                                  valueOrDefault<String>(
-                                    widget.status,
-                                    'Open',
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: FlutterFlowTheme.of(context)
-                                      .bodySmall
-                                      .override(
-                                        fontFamily: FlutterFlowTheme.of(context)
-                                            .bodySmallFamily,
-                                        color: valueOrDefault<Color>(
-                                          valueOrDefault<bool>(
-                                            widget.isOpen,
-                                            true,
-                                          )
-                                              ? FlutterFlowTheme.of(context)
-                                                  .success
-                                              : FlutterFlowTheme.of(context)
-                                                  .error,
-                                          FlutterFlowTheme.of(context).success,
-                                        ),
-                                        useGoogleFonts: GoogleFonts.asMap()
-                                            .containsKey(
-                                                FlutterFlowTheme.of(context)
-                                                    .bodySmallFamily),
-                                      ),
-                                ),
-                              ),
-                            ].divide(SizedBox(
-                                width: FlutterFlowTheme.of(context)
-                                    .designToken
-                                    .spacing
-                                    .xs)),
-                          ),
-                        ),
-                      ].divide(SizedBox(
-                          width: FlutterFlowTheme.of(context)
-                              .designToken
-                              .spacing
-                              .md)),
-                    ),
-                  ].divide(SizedBox(
-                      height:
-                          FlutterFlowTheme.of(context).designToken.spacing.xs)),
-                ),
-              ),
-            ].divide(SizedBox(
-                width: FlutterFlowTheme.of(context).designToken.spacing.md)),
+            ],
           ),
         ),
       ),
