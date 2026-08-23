@@ -1,4 +1,5 @@
 import 'package:degloor_one/components/brand_mark.dart';
+import 'package:degloor_one/components/degloor_app_bar.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
@@ -42,6 +43,12 @@ class _OrderSuccessWidgetState extends State<OrderSuccessWidget> {
     final theme = FlutterFlowTheme.of(context);
     return Scaffold(
       backgroundColor: theme.primaryBackground,
+      appBar: AppBar(
+        backgroundColor: theme.primaryBackground,
+        elevation: 0,
+        automaticallyImplyLeading: false,
+        leading: degloorBackButton(context, color: theme.primaryText),
+      ),
       body: SafeArea(
         child: Align(
           alignment: Alignment.topCenter,

@@ -20,6 +20,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
 
+    expect(find.byIcon(Icons.arrow_back_rounded), findsOneWidget);
     expect(find.text('Fresh Milk (1L)'), findsOneWidget);
     expect(find.text('₹60'), findsOneWidget);
     expect(find.text('Add to Cart'), findsOneWidget);
@@ -38,6 +39,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
 
+    expect(find.byIcon(Icons.arrow_back_rounded), findsOneWidget);
     expect(find.text('Product not found'), findsOneWidget);
     expect(find.text('Add to Cart'), findsNothing);
   });

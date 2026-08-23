@@ -1,6 +1,7 @@
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/admin_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/components/degloor_app_bar.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/core/error_handler.dart';
 import 'package:degloor_one/shared/shop.dart';
@@ -115,6 +116,10 @@ class _AdminControlPanelWidgetState extends State<AdminControlPanelWidget> {
           appBar: AppBar(
             backgroundColor: FlutterFlowTheme.of(context).secondaryBackground,
             automaticallyImplyLeading: false,
+            leading: degloorBackButton(
+              context,
+              color: FlutterFlowTheme.of(context).primaryText,
+            ),
             title: Text(
               'Admin Control',
               style: FlutterFlowTheme.of(context).headlineMedium.override(

@@ -30,6 +30,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 50));
 
     expect(find.byType(TextField), findsOneWidget);
+    expect(find.byIcon(Icons.arrow_back_rounded), findsOneWidget);
     expect(find.text('All'), findsWidgets);
     expect(find.text('Products'), findsWidgets);
 
@@ -39,5 +40,39 @@ void main() {
 
     expect(find.text('Fresh Milk (1L)'), findsWidgets);
     expect(find.textContaining('Patil'), findsWidgets);
+  });
+
+  testWidgets('search back arrow pops a pushed results page', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (context) => Scaffold(
+            body: TextButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const SearchResultsWidget(),
+                  ),
+                );
+              },
+              child: const Text('Open search'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Open search'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    expect(find.byType(TextField), findsOneWidget);
+    expect(find.byIcon(Icons.arrow_back_rounded), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.arrow_back_rounded));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Open search'), findsOneWidget);
+    expect(find.byType(TextField), findsNothing);
   });
 }

@@ -4,6 +4,7 @@ import 'package:degloor_one/app_state.dart';
 import 'package:degloor_one/backend/discovery_service.dart';
 import 'package:degloor_one/backend/location_service.dart';
 import 'package:degloor_one/components/business_card/business_card_widget.dart';
+import 'package:degloor_one/components/degloor_app_bar.dart';
 import 'package:degloor_one/components/discovery_radius_bar.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/components/modern/modern_product_list_item.dart';
@@ -175,8 +176,6 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
     super.dispose();
   }
 
-  bool get _canPop => Navigator.of(context).canPop();
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -192,16 +191,12 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
           backgroundColor: Colors.white,
           elevation: 0,
           surfaceTintColor: Colors.transparent,
-          leading: _canPop
-              ? IconButton(
-                  icon: const Icon(
-                    Icons.arrow_back_rounded,
-                    color: DegloorTheme.textPrimary,
-                  ),
-                  onPressed: () => context.safePop(),
-                )
-              : null,
-          titleSpacing: _canPop ? 0 : 16,
+          automaticallyImplyLeading: false,
+          leading: degloorBackButton(
+            context,
+            color: DegloorTheme.textPrimary,
+          ),
+          titleSpacing: 0,
           title: TextField(
             controller: _searchController,
             focusNode: _searchFocus,
