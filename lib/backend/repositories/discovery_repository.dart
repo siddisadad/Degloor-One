@@ -69,4 +69,19 @@ class DiscoveryRepository {
       queryFn: (q) => q.eq('owner_id', userId),
     );
   }
+
+  Future<int> reviewCount(String businessId) async {
+    if (businessId.isEmpty) return 0;
+    final rows = await ReviewsTable().queryRows(
+      queryFn: (q) => q.eq('business_id', businessId),
+    );
+    return rows.length;
+  }
+
+  Future<List<BusinessAnalyticsRow>> analyticsFor(String businessId) {
+    if (businessId.isEmpty) return Future.value(const []);
+    return BusinessAnalyticsTable().queryRows(
+      queryFn: (q) => q.eq('business_id', businessId),
+    );
+  }
 }

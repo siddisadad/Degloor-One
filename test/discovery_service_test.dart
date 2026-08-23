@@ -63,4 +63,19 @@ void main() {
     expect(shops, hasLength(1));
     expect(shops.first.name, isNotEmpty);
   });
+
+  test('shop insights count reviews and analytics events', () async {
+    final insights =
+        await DiscoveryService.instance.insightsFor(ShowcaseCatalog.bizPatil);
+    expect(insights.reviewCount, 2);
+    expect(insights.profileViews, 18);
+    expect(insights.callClicks, 5);
+    expect(insights.whatsappClicks, 7);
+    expect(insights.directionsClicks, 3);
+
+    expect(
+      await DiscoveryService.instance.insightsFor(''),
+      ShopInsights.empty,
+    );
+  });
 }

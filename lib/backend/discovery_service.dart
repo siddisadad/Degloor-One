@@ -30,4 +30,52 @@ class DiscoveryService {
 
   Future<List<BusinessesRow>> ownedBy(String userId) =>
       _repository.ownedBy(userId);
+
+  Future<ShopInsights> insightsFor(String businessId) async {
+    if (businessId.isEmpty) return ShopInsights.empty;
+    final reviews = await _repository.reviewCount(businessId);
+    final events = await _repository.analyticsFor(businessId);
+    var views = 0;
+    var calls = 0;
+    var whatsapp = 0;
+    var directions = 0;
+    for (final event in events) {
+      final type = event.eventType;
+      if (type == 'PROFILE_VIEW') views++;
+      if (type == 'CALL_CLICK') calls++;
+      if (type == 'WHATSAPP_CLICK') whatsapp++;
+      if (type == 'DIRECTIONS_CLICK') directions++;
+    }
+    return ShopInsights(
+      reviewCount: reviews,
+      profileViews: views,
+      callClicks: calls,
+      whatsappClicks: whatsapp,
+      directionsClicks: directions,
+    );
+  }
+}
+
+class ShopInsights {
+  const ShopInsights({
+    required this.reviewCount,
+    required this.profileViews,
+    required this.callClicks,
+    required this.whatsappClicks,
+    required this.directionsClicks,
+  });
+
+  static const empty = ShopInsights(
+    reviewCount: 0,
+    profileViews: 0,
+    callClicks: 0,
+    whatsappClicks: 0,
+    directionsClicks: 0,
+  );
+
+  final int reviewCount;
+  final int profileViews;
+  final int callClicks;
+  final int whatsappClicks;
+  final int directionsClicks;
 }
