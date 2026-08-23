@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/backend/supabase/supabase_connection.dart';
+import 'package:degloor_one/backend/user_service.dart';
 import 'package:degloor_one/components/auth_page_header.dart';
 import 'package:degloor_one/components/brand_mark.dart';
 import 'package:degloor_one/components/social_button/social_button_widget.dart';
@@ -53,11 +54,7 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
   Future<void> _probeServer() async {
     if (SupabaseConnection.shouldSkipAuthRequest) return;
     try {
-      await SupaFlow.client
-          .from('users')
-          .select('id')
-          .limit(1)
-          .timeout(const Duration(seconds: 4));
+      await UserService.instance.probeReachable();
     } catch (e) {
       if (!mounted) return;
       if (SupabaseConnection.looksUnreachable(e) || e is TimeoutException) {
