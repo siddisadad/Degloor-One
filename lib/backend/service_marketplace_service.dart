@@ -37,6 +37,49 @@ class ServiceMarketplaceService {
   Future<ServiceProvidersRow?> forUser(String userId) =>
       _repository.forUser(userId);
 
+  Future<ServiceProvidersRow> register({
+    required String userId,
+    required String categoryId,
+    required String experienceYears,
+    required String hourlyRate,
+    required String bio,
+  }) async {
+    if (userId.isEmpty) {
+      throw Exception('Please sign in to register as a provider');
+    }
+    if (categoryId.isEmpty) {
+      throw Exception('Please select a service category');
+    }
+    final trimmedBio = bio.trim();
+    if (trimmedBio.isEmpty) {
+      throw Exception('Please write a short bio');
+    }
+    final years = int.tryParse(experienceYears.trim());
+    if (years == null || years < 0) {
+      throw Exception('Please enter your years of experience');
+    }
+    final rate = double.tryParse(hourlyRate.trim());
+    if (rate == null || rate <= 0) {
+      throw Exception('Please enter your hourly rate');
+    }
+    final categories = await _repository.categories();
+    if (!categories.any((row) => row.id == categoryId)) {
+      throw Exception('Please select a service category');
+    }
+    final existing = await _repository.forUser(userId);
+    if (existing != null) {
+      throw Exception('You already have a service profile');
+    }
+    return _repository.insertProvider({
+      'user_id': userId,
+      'category_id': categoryId,
+      'experience_years': years,
+      'hourly_rate': rate,
+      'bio': trimmedBio,
+      'is_verified': false,
+    });
+  }
+
   Future<Map<String, dynamic>?> providerById(String id) =>
       _repository.providerById(id);
 

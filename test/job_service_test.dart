@@ -78,4 +78,23 @@ void main() {
       hasLength(1),
     );
   });
+
+  test('posting a job is scoped to the shop owner', () async {
+    await expectLater(
+      JobService.instance.post(
+        businessId: ShowcaseCatalog.bizPatil,
+        posterId: ShowcaseCatalog.customer2,
+        title: 'Night stocker',
+        description: 'Should not write',
+        jobType: 'Part-time',
+      ),
+      throwsA(
+        isA<Exception>().having(
+          (error) => error.toString(),
+          'message',
+          contains('No shop found'),
+        ),
+      ),
+    );
+  });
 }

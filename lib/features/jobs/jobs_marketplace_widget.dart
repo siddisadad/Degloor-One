@@ -3,13 +3,12 @@ import 'dart:async';
 import 'package:degloor_one/backend/job_service.dart';
 import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/components/apply_job_sheet/apply_job_sheet_widget.dart';
+import 'package:degloor_one/components/degloor_app_bar.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/components/job_card/job_card_widget.dart';
-import 'package:degloor_one/flutter_flow/flutter_flow_icon_button.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'jobs_marketplace_model.dart';
 export 'jobs_marketplace_model.dart';
 
@@ -116,37 +115,13 @@ class _JobsMarketplaceWidgetState extends State<JobsMarketplaceWidget> {
       child: Scaffold(
         key: scaffoldKey,
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-        appBar: AppBar(
-          backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-          automaticallyImplyLeading: false,
-          leading: FlutterFlowIconButton(
-            borderColor: Colors.transparent,
-            borderRadius: 8,
-            borderWidth: 1,
-            buttonSize: 40,
-            icon: Icon(
-              Icons.arrow_back_rounded,
-              color: FlutterFlowTheme.of(context).primaryText,
-              size: 22,
-            ),
-            onPressed: () async {
-              context.safePop();
-            },
-          ),
-          title: Text(
-            'Local jobs',
-            style: FlutterFlowTheme.of(context).headlineMedium.override(
-                  font: GoogleFonts.inter(fontWeight: FontWeight.w700),
-                  color: FlutterFlowTheme.of(context).primaryText,
-                  fontSize: 22,
-                ),
-          ),
-          actions: const [],
-          centerTitle: false,
-          elevation: 0,
-        ),
+        appBar: degloorAppBar(context, title: 'Local jobs'),
         body: SafeArea(
-          child: Column(
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 520),
+              child: Column(
             children: [
               Container(
                 width: double.infinity,
@@ -292,6 +267,8 @@ class _JobsMarketplaceWidgetState extends State<JobsMarketplaceWidget> {
                           ),
               ),
             ],
+              ),
+            ),
           ),
         ),
       ),

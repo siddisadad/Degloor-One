@@ -55,6 +55,10 @@ class ServiceMarketplaceRepository {
     return rows.isEmpty ? null : rows.first;
   }
 
+  Future<ServiceProvidersRow> insertProvider(Map<String, dynamic> data) {
+    return ServiceProvidersTable().insert(data);
+  }
+
   Future<ServiceRequestsRow> insertRequest(Map<String, dynamic> data) {
     return ServiceRequestsTable().insert(data);
   }
