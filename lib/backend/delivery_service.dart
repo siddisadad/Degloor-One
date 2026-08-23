@@ -1,10 +1,61 @@
+import 'package:degloor_one/backend/repositories/delivery_repository.dart';
 import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/core/error_handler.dart';
 import 'package:degloor_one/shared/order_lifecycle.dart';
+import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
 class DeliveryService {
+  DeliveryService({DeliveryRepository? repository})
+      : _repository = repository ?? DeliveryRepository();
+
+  final DeliveryRepository _repository;
+
+  static final instance = DeliveryService();
+
+  Future<DeliveryPartnersRow?> partnerForUser(String userId) {
+    return _repository.partnerForUser(userId);
+  }
+
+  Future<DeliveryPartnersRow> registerPartner(String userId) {
+    if (userId.isEmpty) {
+      throw Exception('Please sign in to register as a delivery partner');
+    }
+    return _repository.registerPartner(userId);
+  }
+
+  Future<void> setAvailability({
+    required String partnerId,
+    required bool available,
+    required bool verified,
+  }) async {
+    if (!available) {
+      await _repository.setAvailability(
+        partnerId: partnerId,
+        available: false,
+      );
+      return;
+    }
+    if (!verified) {
+      throw Exception(
+        'Your account is pending verification. Please wait for admin approval.',
+      );
+    }
+    await _repository.setAvailability(partnerId: partnerId, available: true);
+  }
+
+  Future<DeliveryAssignmentsRow?> activeForPartner(String partnerId) {
+    return _repository.activeForPartner(partnerId);
+  }
+
+  Future<PageResult<OrdersRow>> readyOrders({
+    PageQuery page = const PageQuery(),
+  }) async {
+    final rows = await _repository.readyOrders(page: page);
+    return PageResult(items: rows, hasMore: rows.length >= page.limit);
+  }
+
   static Future<DeliveryAssignmentsRow?> activeAssignment(String orderId) async {
     if (orderId.isEmpty) return null;
     final rows = await DeliveryAssignmentsTable().querySingleRow(
@@ -146,6 +197,23 @@ class DeliveryService {
     }
     if (name == 'accept_delivery_order') {
       final orderId = params['p_order_id'] as String;
+      final partners = ShowcaseCatalog.query(
+        'delivery_partners',
+        ShowcaseQuery()..eq('user_id', ShowcaseCatalog.riderId),
+      );
+      if (partners.isEmpty || partners.first['is_verified'] != true) {
+        throw Exception('Not a verified delivery partner');
+      }
+      final partnerId = '${partners.first['id']}';
+      final active = ShowcaseCatalog.query(
+        'delivery_assignments',
+        ShowcaseQuery()
+          ..eq('delivery_partner_id', partnerId)
+          ..neq('status', 'delivered'),
+      );
+      if (active.isNotEmpty) {
+        throw Exception('You already have an active delivery');
+      }
       final orders = ShowcaseCatalog.query(
         'orders',
         ShowcaseQuery()..eq('id', orderId),
@@ -160,6 +228,11 @@ class DeliveryService {
         {'status': OrderLifecycle.shipping},
         ShowcaseQuery()..eq('id', orderId),
       );
+      ShowcaseCatalog.insert('delivery_assignments', {
+        'order_id': orderId,
+        'delivery_partner_id': partnerId,
+        'status': 'assigned',
+      });
       ShowcaseCatalog.insert('order_status_history', {
         'order_id': orderId,
         'status': OrderLifecycle.shipping,

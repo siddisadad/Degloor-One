@@ -1,7 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/backend/delivery_service.dart';
 import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/shared/order_lifecycle.dart';
+import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -71,6 +73,77 @@ void main() {
     expect(
       DeliveryService.canConfirmDelivery(OrderLifecycle.cancelled),
       isFalse,
+    );
+  });
+
+  test('partner lookup and ready orders use the catalog', () async {
+    ShowcaseCatalog.reset();
+    final rider = await DeliveryService.instance.partnerForUser(
+      ShowcaseCatalog.riderId,
+    );
+    expect(rider?.id, 'dp-amit');
+    expect(rider?.isVerified, isTrue);
+
+    expect(
+      await DeliveryService.instance.partnerForUser(GuestAuthUser.guestUid),
+      isNull,
+    );
+
+    final ready = await DeliveryService.instance.readyOrders(
+      page: const PageQuery(limit: 20),
+    );
+    expect(ready.items.map((row) => row.id), contains(ShowcaseCatalog.orderReady));
+    expect(
+      ready.items.every((row) => row.status == OrderLifecycle.ready),
+      isTrue,
+    );
+  });
+
+  test('active assignment for the rider is the out-for-delivery job', () async {
+    ShowcaseCatalog.reset();
+    final assignment = await DeliveryService.instance.activeForPartner('dp-amit');
+    expect(assignment?.id, 'da-1');
+    expect(assignment?.orderId, ShowcaseCatalog.orderOut);
+  });
+
+  test('availability stays off until the partner is verified', () async {
+    ShowcaseCatalog.reset();
+    final created = await DeliveryService.instance.registerPartner(
+      GuestAuthUser.guestUid,
+    );
+    expect(created.isVerified, isFalse);
+    await expectLater(
+      DeliveryService.instance.setAvailability(
+        partnerId: created.id,
+        available: true,
+        verified: created.isVerified,
+      ),
+      throwsA(isA<Exception>()),
+    );
+  });
+
+  test('accept writes an assignment after the current job is finished', () async {
+    ShowcaseCatalog.reset();
+    await expectLater(
+      DeliveryService.acceptOrder(ShowcaseCatalog.orderReady),
+      throwsA(isA<Exception>()),
+    );
+
+    ShowcaseCatalog.update(
+      'delivery_assignments',
+      {'status': 'delivered'},
+      ShowcaseQuery()..eq('id', 'da-1'),
+    );
+    await DeliveryService.acceptOrder(ShowcaseCatalog.orderReady);
+    final claimed = await DeliveryService.instance.activeForPartner('dp-amit');
+    expect(claimed?.orderId, ShowcaseCatalog.orderReady);
+    expect(claimed?.status, 'assigned');
+    expect(
+      ShowcaseCatalog.query(
+        'orders',
+        ShowcaseQuery()..eq('id', ShowcaseCatalog.orderReady),
+      ).single['status'],
+      OrderLifecycle.shipping,
     );
   });
 }
