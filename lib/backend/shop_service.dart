@@ -10,6 +10,7 @@ import 'package:degloor_one/shared/marketplace_joins.dart';
 import 'package:degloor_one/shared/product_category.dart';
 import 'package:degloor_one/shared/shop.dart';
 import 'package:degloor_one/shared/shop_hours.dart';
+import 'package:degloor_one/shared/shop_review_draft.dart';
 
 class ShopEvents {
   static const profileView = 'PROFILE_VIEW';
@@ -251,12 +252,14 @@ class ShopService {
     if (existing != null) {
       throw Exception('You have already reviewed this shop');
     }
-    await _repository.insertReview({
-      'user_id': userId,
-      'business_id': businessId,
-      'rating': rating,
-      'comment': comment.trim(),
-    });
+    await _repository.insertReview(
+      ShopReviewDraft(
+        userId: userId,
+        businessId: businessId,
+        rating: rating,
+        comment: comment.trim(),
+      ),
+    );
     final ownerId = shop.ownerId;
     if (ownerId != null && ownerId.isNotEmpty) {
       await NotificationService.notifyNewReview(

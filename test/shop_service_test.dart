@@ -1,9 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/backend/shop_service.dart';
+import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/catalog_product.dart';
 import 'package:degloor_one/shared/listing_complaint.dart';
+import 'package:degloor_one/shared/marketplace_joins.dart';
 import 'package:degloor_one/shared/product_category.dart';
 import 'package:degloor_one/shared/shop.dart';
 import 'package:degloor_one/shared/shop_hours.dart';
@@ -57,6 +59,8 @@ void main() {
     final reviews =
         await ShopService.instance.reviews(ShowcaseCatalog.bizPatil);
     expect(reviews.items, hasLength(2));
+    expect(reviews.items, everyElement(isA<ShopReview>()));
+    expect(reviews.items, isNot(anyElement(isA<ReviewsRow>())));
     expect(reviews.distribution[5], 1);
     expect(reviews.distribution[4], 1);
     expect(reviews.distribution[1], 0);
@@ -90,10 +94,21 @@ void main() {
     final reviews =
         await ShopService.instance.reviews(ShowcaseCatalog.bizHotel);
     expect(reviews.items, hasLength(2));
+    expect(reviews.items, everyElement(isA<ShopReview>()));
+    expect(reviews.items, isNot(anyElement(isA<ReviewsRow>())));
     expect(
       reviews.items.any((row) => row.userId == GuestAuthUser.guestUid),
       isTrue,
     );
+    final stored = ShowcaseCatalog.query(
+      'reviews',
+      ShowcaseQuery()
+        ..eq('user_id', GuestAuthUser.guestUid)
+        ..eq('business_id', ShowcaseCatalog.bizHotel),
+    ).single;
+    expect(stored['rating'], 4);
+    expect(stored['comment'], 'Good thali');
+    expect(stored.containsKey('author'), isFalse);
   });
 
   test('guest already has the seeded hotel complaint', () async {
