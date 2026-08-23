@@ -18,11 +18,48 @@ class OrderService {
     String userId, {
     PageQuery page = const PageQuery(),
   }) async {
+    if (userId.isEmpty) {
+      return const PageResult(items: [], hasMore: false);
+    }
     final rows = await _repository.forUser(userId, page: page);
     return PageResult(items: rows, hasMore: rows.length >= page.limit);
   }
 
+  Future<PageResult<OrdersRow>> listForBusiness(
+    String businessId, {
+    PageQuery page = const PageQuery(),
+  }) async {
+    if (businessId.isEmpty) {
+      return const PageResult(items: [], hasMore: false);
+    }
+    final rows = await _repository.forBusiness(businessId, page: page);
+    return PageResult(items: rows, hasMore: rows.length >= page.limit);
+  }
+
   Future<OrdersRow?> findById(String orderId) => _repository.byId(orderId);
+
+  Future<OrdersRow?> forCustomer({
+    required String orderId,
+    required String userId,
+  }) {
+    return _repository.forCustomer(orderId: orderId, userId: userId);
+  }
+
+  Future<List<OrderStatusHistoryRow>> historyFor(String orderId) {
+    return _repository.historyFor(orderId);
+  }
+
+  Future<List<Map<String, dynamic>>> itemsWithProducts(String orderId) async {
+    if (orderId.isEmpty) return const [];
+    if (kUseShowcaseData) {
+      return ShowcaseCatalog.orderItemsWithProducts(orderId);
+    }
+    final items = await SupaFlow.client
+        .from('order_items')
+        .select('*, products(*)')
+        .eq('order_id', orderId);
+    return List<Map<String, dynamic>>.from(items);
+  }
 
   Stream<List<OrdersRow>> watchBusiness(String businessId) =>
       _repository.watchBusiness(businessId);

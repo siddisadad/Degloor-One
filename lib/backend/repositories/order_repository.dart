@@ -34,6 +34,18 @@ class OrderRepository {
     return rows.isEmpty ? null : rows.first;
   }
 
+  Future<OrdersRow?> forCustomer({
+    required String orderId,
+    required String userId,
+  }) async {
+    if (orderId.isEmpty || userId.isEmpty) return null;
+    final rows = await OrdersTable().queryRows(
+      queryFn: (q) => q.eq('id', orderId).eq('user_id', userId),
+      limit: 1,
+    );
+    return rows.isEmpty ? null : rows.first;
+  }
+
   Stream<List<OrdersRow>> watchBusiness(String businessId) {
     return OrdersTable().stream(
       primaryKey: 'id',

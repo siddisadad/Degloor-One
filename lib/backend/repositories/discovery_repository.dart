@@ -55,4 +55,18 @@ class DiscoveryRepository {
       queryFn: (q) => q.inFilter('id', ids),
     );
   }
+
+  Future<List<BusinessesRow>> businessesByIds(List<String> ids) {
+    if (ids.isEmpty) return Future.value(const []);
+    return BusinessesTable().queryRows(
+      queryFn: (q) => q.inFilter('id', ids),
+    );
+  }
+
+  Future<List<BusinessesRow>> ownedBy(String userId) {
+    if (userId.isEmpty) return Future.value(const []);
+    return BusinessesTable().queryRows(
+      queryFn: (q) => q.eq('owner_id', userId),
+    );
+  }
 }

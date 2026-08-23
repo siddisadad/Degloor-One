@@ -7,6 +7,7 @@ import 'package:degloor_one/backend/order_service.dart';
 import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/order_lifecycle.dart';
+import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
 void main() {
@@ -202,5 +203,49 @@ void main() {
       ),
       throwsA(isA<Exception>()),
     );
+  });
+
+  test('customer order pages stay scoped to the signed-in user', () async {
+    final page = await OrderService.instance.listForUser(
+      GuestAuthUser.guestUid,
+      page: const PageQuery(limit: 1),
+    );
+    expect(page.items, hasLength(1));
+    expect(page.hasMore, isTrue);
+    expect(
+      page.items.every((row) => row.userId == GuestAuthUser.guestUid),
+      isTrue,
+    );
+
+    final own = await OrderService.instance.forCustomer(
+      orderId: ShowcaseCatalog.orderOut,
+      userId: GuestAuthUser.guestUid,
+    );
+    expect(own?.id, ShowcaseCatalog.orderOut);
+
+    final other = await OrderService.instance.forCustomer(
+      orderId: ShowcaseCatalog.orderOut,
+      userId: ShowcaseCatalog.customer2,
+    );
+    expect(other, isNull);
+  });
+
+  test('shop orders paginate and line items join products', () async {
+    final page = await OrderService.instance.listForBusiness(
+      ShowcaseCatalog.bizPatil,
+      page: const PageQuery(limit: 1),
+    );
+    expect(page.items, hasLength(1));
+    expect(page.hasMore, isTrue);
+    expect(
+      page.items.every((row) => row.businessId == ShowcaseCatalog.bizPatil),
+      isTrue,
+    );
+
+    final items = await OrderService.instance.itemsWithProducts(
+      ShowcaseCatalog.orderOut,
+    );
+    expect(items, isNotEmpty);
+    expect(items.first['products'], isA<Map<String, dynamic>>());
   });
 }
