@@ -44,6 +44,7 @@ class ShowcaseCatalog {
   static const prodPaneer = 'prod-paneer';
 
   static const cartGuest = 'cart-guest';
+  static const orderReady = 'order-ready';
   static const orderOut = 'order-out-for-delivery';
   static const orderDelivered = 'order-delivered';
 
@@ -670,6 +671,19 @@ class ShowcaseCatalog {
           'created_at': _ago(const Duration(minutes: 50)),
         },
         {
+          'id': orderReady,
+          'user_id': customer2,
+          'business_id': bizPatil,
+          'total_amount': 145.0,
+          'status': 'ready',
+          'payment_status': 'pending',
+          'delivery_address_id': 'addr-home',
+          'delivery_fee': 25.0,
+          'payment_method': 'COD',
+          'delivery_otp': '3310',
+          'created_at': _ago(const Duration(minutes: 20)),
+        },
+        {
           'id': orderOut,
           'user_id': guestId,
           'business_id': bizPatil,
@@ -705,6 +719,13 @@ class ShowcaseCatalog {
           'price_at_purchase': 120.0,
         },
         {
+          'id': 'oi-ready',
+          'order_id': orderReady,
+          'product_id': prodRice,
+          'quantity': 1,
+          'price_at_purchase': 120.0,
+        },
+        {
           'id': 'oi-1',
           'order_id': orderOut,
           'product_id': prodMilk,
@@ -727,6 +748,11 @@ class ShowcaseCatalog {
         },
       ],
       'order_status_history': [
+        _hist(orderReady, 'placed', 'Order placed', const Duration(minutes: 20)),
+        _hist(orderReady, 'accepted', 'Patil Kirana accepted',
+            const Duration(minutes: 12)),
+        _hist(orderReady, 'ready', 'Packed and waiting for a rider',
+            const Duration(minutes: 5)),
         _hist(orderOut, 'placed', 'Order placed', const Duration(hours: 3)),
         _hist(orderOut, 'accepted', 'Patil Kirana accepted',
             const Duration(hours: 2, minutes: 40)),
