@@ -113,7 +113,7 @@ public class AdminService {
                 "products", products.count(),
                 "orders", orders.count(),
                 "partners", partners.count(),
-                "openComplaints", complaints.findAll().stream().filter(c -> !"resolved".equals(c.getStatus())).count()
+                "openComplaints", complaints.countByStatusNot("resolved")
         );
     }
 }

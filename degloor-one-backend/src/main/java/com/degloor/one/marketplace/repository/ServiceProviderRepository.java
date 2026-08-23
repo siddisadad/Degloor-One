@@ -8,5 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ServiceProviderRepository extends JpaRepository<ServiceProvider, UUID> {
     Optional<ServiceProvider> findByUserId(UUID userId);
-    List<ServiceProvider> findByCategoryId(UUID categoryId);
+    List<ServiceProvider> findAllByOrderByIdAsc();
+    List<ServiceProvider> findByCategoryIdOrderByIdAsc(UUID categoryId);
 }

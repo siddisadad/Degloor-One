@@ -21,9 +21,12 @@ Flutter (UI + local state + API client)
         │  HTTPS / REST  /api/v1
         ▼
 Spring Boot (controllers → services → repositories)
-        │
+        │  JPA specifications / derived queries / JPQL
+        ▼
    PostgreSQL (Flyway)
 ```
+
+Java repositories own table access. Shop/job search uses JPA specifications. Checkout and cart load products in one `findAllById`. Delivery ready-orders use `ShopOrderRepository.findUnassignedByStatus`. Admin open-complaint and analytics event totals are SQL counts, not `findAll()` scans.
 
 Optional: Redis for short-lived OTP (v1 stores hashed OTP on the order row).
 

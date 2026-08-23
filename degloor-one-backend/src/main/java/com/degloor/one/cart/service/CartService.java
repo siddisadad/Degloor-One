@@ -15,7 +15,10 @@ import com.degloor.one.product.repository.ProductRepository;
 import com.degloor.one.user.entity.UserAccount;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -150,10 +153,15 @@ public class CartService {
 
     private CartResponse toResponse(Cart cart) {
         Business shop = businesses.findById(cart.getBusinessId()).orElse(null);
+        List<CartItem> cartItems = items.findByCartId(cart.getId());
+        Map<UUID, Product> catalog = products.findAllById(
+                        cartItems.stream().map(CartItem::getProductId).toList())
+                .stream()
+                .collect(Collectors.toMap(Product::getId, Function.identity()));
         List<CartItemResponse> rows = new ArrayList<>();
         double subtotal = 0;
-        for (CartItem item : items.findByCartId(cart.getId())) {
-            Product product = products.findById(item.getProductId()).orElse(null);
+        for (CartItem item : cartItems) {
+            Product product = catalog.get(item.getProductId());
             if (product == null) {
                 continue;
             }

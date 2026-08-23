@@ -10,13 +10,19 @@ import com.degloor.one.business.entity.BusinessHours;
 import com.degloor.one.business.repository.BusinessCategoryRepository;
 import com.degloor.one.business.repository.BusinessHoursRepository;
 import com.degloor.one.business.repository.BusinessRepository;
+import com.degloor.one.business.repository.BusinessSpecifications;
 import com.degloor.one.common.exception.BusinessException;
 import com.degloor.one.common.security.Roles;
 import com.degloor.one.common.util.Geo;
 import com.degloor.one.user.entity.UserAccount;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,18 +47,19 @@ public class BusinessService {
     }
 
     public List<BusinessResponse> search(String q, UUID categoryId, Double lat, Double lng, Double radiusKm, Boolean verifiedOnly) {
-        return businesses.findAll().stream()
-                .filter(b -> categoryId == null || categoryId.equals(b.getCategoryId()))
-                .filter(b -> verifiedOnly == null || !verifiedOnly || b.isVerified())
-                .filter(b -> q == null || q.isBlank()
-                        || b.getName().toLowerCase().contains(q.toLowerCase())
-                        || (b.getDescription() != null && b.getDescription().toLowerCase().contains(q.toLowerCase())))
+        Specification<Business> spec = BusinessSpecifications.search(q, categoryId, verifiedOnly);
+        if (lat != null && lng != null && radiusKm != null) {
+            spec = spec.and(BusinessSpecifications.withinBoundingBox(lat, lng, radiusKm));
+        }
+        List<Business> rows = businesses.findAll(spec);
+        Map<UUID, List<HoursResponse>> hoursByShop = hoursByBusiness(rows.stream().map(Business::getId).toList());
+        return rows.stream()
                 .map(b -> {
                     Double distance = null;
                     if (lat != null && lng != null && b.getLatitude() != null && b.getLongitude() != null) {
                         distance = Geo.haversineKm(lat, lng, b.getLatitude(), b.getLongitude());
                     }
-                    return BusinessResponse.from(b, hoursFor(b.getId()), distance);
+                    return BusinessResponse.from(b, hoursByShop.getOrDefault(b.getId(), List.of()), distance);
                 })
                 .filter(b -> radiusKm == null || b.distanceKm() == null || b.distanceKm() <= radiusKm)
                 .sorted(Comparator.comparing(BusinessResponse::distanceKm, Comparator.nullsLast(Double::compareTo)))
@@ -139,6 +146,17 @@ public class BusinessService {
 
     private List<HoursResponse> hoursFor(UUID businessId) {
         return hours.findByBusinessIdOrderByDayOfWeekAsc(businessId).stream().map(HoursResponse::from).toList();
+    }
+
+    private Map<UUID, List<HoursResponse>> hoursByBusiness(Collection<UUID> businessIds) {
+        if (businessIds.isEmpty()) {
+            return Map.of();
+        }
+        Map<UUID, List<HoursResponse>> map = new HashMap<>();
+        for (BusinessHours row : hours.findByBusinessIdInOrderByDayOfWeekAsc(businessIds)) {
+            map.computeIfAbsent(row.getBusinessId(), ignored -> new ArrayList<>()).add(HoursResponse.from(row));
+        }
+        return map;
     }
 
     private void replaceHours(UUID businessId, List<HoursRequest> rows) {

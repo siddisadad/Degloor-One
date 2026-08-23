@@ -36,6 +36,8 @@ Seed login (password for every demo user is `password`):
 | `rider@degloor.local` | delivery_partner |
 | `admin@degloor.local` | admin |
 
+Controllers call services. Services call Spring Data repositories. Search, counts, and unassigned-order lookups live on the repository layer (`*Specifications`, `@Query`), not `findAll()` plus in-memory filters.
+
 ## Tests
 
 This environment has no Docker daemon for Testcontainers. Tests use H2 (`MODE=PostgreSQL`).
