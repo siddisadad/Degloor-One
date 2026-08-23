@@ -57,8 +57,10 @@ class ServiceMarketplaceService {
       ServiceRequestActions.forStatus(status);
 
   Future<List<ServiceCategory>> categories() async {
-    final native = await NativeServiceBridge.getCategories();
-    if (native.isNotEmpty) return native;
+    if (!kUseShowcaseData) {
+      final native = await NativeServiceBridge.getCategories();
+      if (native.isNotEmpty) return native;
+    }
     final rows = await _repository.categories();
     return rows.map(ServiceCategory.fromRow).toList();
   }
@@ -67,11 +69,13 @@ class ServiceMarketplaceService {
     String? categoryId,
     PageQuery page = const PageQuery(),
   }) async {
-    final native = await NativeServiceBridge.getProviders(categoryId);
-    if (native.isNotEmpty) {
-      return PageResult(items: native, hasMore: false);
+    if (!kUseShowcaseData) {
+      final native = await NativeServiceBridge.getProviders(categoryId);
+      if (native.isNotEmpty) {
+        return PageResult(items: native, hasMore: false);
+      }
     }
-    
+
     final rows = await _repository.providers(
       categoryId: categoryId,
       page: page,

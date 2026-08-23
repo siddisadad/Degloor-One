@@ -1,3 +1,5 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:degloor_one/components/cached_remote_image.dart';
 import 'package:degloor_one/features/catalogue/product_detail_widget.dart';
 import 'package:degloor_one/core/degloor_theme.dart';
 import 'package:degloor_one/backend/cart_service.dart';
@@ -220,11 +222,24 @@ class _BusinessCatalogueWidgetState extends State<BusinessCatalogueWidget> with 
                     ClipRRect(
                       borderRadius: BorderRadius.circular(DegloorTheme.radiusSM),
                       child: product.imageUrl != null
-                          ? Image.network(
-                              product.imageUrl!,
+                          ? CachedNetworkImage(
+                              imageUrl: product.imageUrl!,
                               width: 100,
                               height: 100,
                               fit: BoxFit.cover,
+                              memCacheWidth: memCachePx(context, 100),
+                              memCacheHeight: memCachePx(context, 100),
+                              placeholder: (_, __) =>
+                                  Container(color: DegloorTheme.accent),
+                              errorWidget: (_, __, ___) => Container(
+                                width: 100,
+                                height: 100,
+                                color: DegloorTheme.accent,
+                                child: const Icon(
+                                  Icons.image_not_supported_rounded,
+                                  color: DegloorTheme.textSecondary,
+                                ),
+                              ),
                             )
                           : Container(
                               width: 100,

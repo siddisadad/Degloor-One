@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/backend/discovery_service.dart';
@@ -10,7 +11,29 @@ import 'package:degloor_one/shared/shop_category.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  const discoveryChannel = MethodChannel('com.deshmukh.degloorone/discovery');
+
   setUp(ShowcaseCatalog.reset);
+
+  tearDown(() {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(discoveryChannel, null);
+  });
+
+  test('showcase discovery categories skip the native channel', () async {
+    var invoked = 0;
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(discoveryChannel, (call) async {
+      invoked += 1;
+      return const [];
+    });
+
+    expect(kUseShowcaseData, isTrue);
+    final categories = await DiscoveryService.instance.categories();
+    expect(invoked, 0);
+    expect(categories, isNotEmpty);
+  });
 
   test('discovery search paginates nearby Degloor businesses', () async {
     expect(kUseShowcaseData, isTrue);

@@ -18,14 +18,25 @@ import 'package:degloor_one/shared/shop.dart';
 import 'package:degloor_one/shared/shop_category.dart';
 import 'package:degloor_one/shared/user_profile.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show kIsWeb, visibleForTesting;
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:provider/provider.dart';
 import 'package:degloor_one/app_state.dart';
+import 'package:degloor_one/core/app_flags.dart';
 import 'package:degloor_one/core/error_handler.dart';
 import 'customer_home_model.dart';
 export 'customer_home_model.dart';
+
+@visibleForTesting
+bool discoveryInputsChanged({
+  required LatLng? previousLocation,
+  required double? previousRadius,
+  required LatLng? nextLocation,
+  required double nextRadius,
+}) {
+  return previousLocation != nextLocation || previousRadius != nextRadius;
+}
 
 class CustomerHomeWidget extends StatefulWidget {
   const CustomerHomeWidget({super.key});
@@ -45,13 +56,26 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
   Future<List<ShopCategory>>? _categoriesFuture;
   Future<List<ServiceProviderCard>>? _servicesFuture;
   final Map<String, String> _categoryIdToName = {};
+  LatLng? _lastDiscoveryLocation;
+  double? _lastDiscoveryRadius;
 
   void _onAppStateChanged() {
-    if (mounted) {
-      _resolveLocation();
-      _fetchBusinesses();
-      setState(() {});
+    if (!mounted) return;
+    final userLoc = FFAppState.instance.userLocation;
+    final radius = FFAppState.instance.discoveryRadius;
+    if (!discoveryInputsChanged(
+      previousLocation: _lastDiscoveryLocation,
+      previousRadius: _lastDiscoveryRadius,
+      nextLocation: userLoc,
+      nextRadius: radius,
+    )) {
+      return;
     }
+    if (userLoc != _lastDiscoveryLocation) {
+      _resolveLocation();
+    }
+    _fetchBusinesses();
+    setState(() {});
   }
 
   @override
@@ -59,6 +83,8 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
     super.initState();
     _model = createModel(context, () => CustomerHomeModel());
 
+    _lastDiscoveryLocation = FFAppState.instance.userLocation;
+    _lastDiscoveryRadius = FFAppState.instance.discoveryRadius;
     FFAppState.instance.addListener(_onAppStateChanged);
 
     if (loggedIn && currentUserUid.length > 10) {
@@ -86,7 +112,7 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
   }
 
   Future<void> _resolveLocation() async {
-    if (kIsWeb) return;
+    if (kIsWeb || kUseShowcaseData) return;
     final userLoc = FFAppState.instance.userLocation;
     if (userLoc != null) {
       try {
@@ -116,6 +142,8 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
   void _fetchBusinesses() {
     final userLoc = FFAppState.instance.userLocation;
     final radius = FFAppState.instance.discoveryRadius;
+    _lastDiscoveryLocation = userLoc;
+    _lastDiscoveryRadius = radius;
 
     if (userLoc != null) {
       _model.openNowBusinessesFuture = DiscoveryService.instance

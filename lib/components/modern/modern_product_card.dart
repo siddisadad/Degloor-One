@@ -1,5 +1,7 @@
-import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:degloor_one/components/cached_remote_image.dart';
 import 'package:degloor_one/core/degloor_theme.dart';
+import 'package:flutter/material.dart';
 
 class ModernProductCard extends StatelessWidget {
   const ModernProductCard({
@@ -33,16 +35,26 @@ class ModernProductCard extends StatelessWidget {
                   borderRadius: const BorderRadius.vertical(
                     top: Radius.circular(DegloorTheme.radiusMD),
                   ),
-                  child: Image.network(
-                    imageUrl,
+                  child: CachedNetworkImage(
+                    imageUrl: imageUrl,
                     height: 140,
                     width: double.infinity,
                     fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Container(
+                    memCacheWidth: memCachePx(context, 164),
+                    memCacheHeight: memCachePx(context, 140),
+                    placeholder: (context, url) => Container(
                       height: 140,
                       width: double.infinity,
                       color: DegloorTheme.accent,
-                      child: const Icon(Icons.image_not_supported_rounded, color: DegloorTheme.textSecondary),
+                    ),
+                    errorWidget: (context, url, error) => Container(
+                      height: 140,
+                      width: double.infinity,
+                      color: DegloorTheme.accent,
+                      child: const Icon(
+                        Icons.image_not_supported_rounded,
+                        color: DegloorTheme.textSecondary,
+                      ),
                     ),
                   ),
                 ),

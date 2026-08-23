@@ -143,8 +143,10 @@ class DiscoveryService {
   }
 
   Future<List<ShopCategory>> categories() async {
-    final native = await NativeServiceBridge.getDiscoveryCategories();
-    if (native.isNotEmpty) return native;
+    if (!kUseShowcaseData) {
+      final native = await NativeServiceBridge.getDiscoveryCategories();
+      if (native.isNotEmpty) return native;
+    }
     final rows = await _repository.categories();
     return rows.map(ShopCategory.fromRow).toList();
   }
