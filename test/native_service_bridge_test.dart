@@ -66,4 +66,45 @@ void main() {
     });
     expect(await NativeServiceBridge.getProviders(null), isEmpty);
   });
+
+  test('getProviders skips a junk id and still reads a string rate', () async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (call) async {
+      return [
+        {
+          'id': {'nested': true},
+          'users': {'full_name': 'Ghost'},
+        },
+        {
+          'id': 'sp-ok',
+          'hourly_rate': '350',
+          'users': {'full_name': 'Amit'},
+          'service_categories': {'name': 'Plumber'},
+        },
+      ];
+    });
+
+    final providers = await NativeServiceBridge.getProviders(null);
+    expect(providers, hasLength(1));
+    expect(providers.single.id, 'sp-ok');
+    expect(providers.single.hourlyRate, 350);
+    expect(providers.single.categoryName, 'Plumber');
+  });
+
+  test('getCategories skips rows that are not maps or missing a name', () async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (call) async {
+      expect(call.method, 'getNativeCategories');
+      return [
+        'bad-row',
+        {'id': 'scat-bad'},
+        {'id': 'scat-electric', 'name': 'Electrician'},
+      ];
+    });
+
+    final categories = await NativeServiceBridge.getCategories();
+    expect(categories, hasLength(1));
+    expect(categories.single.id, 'scat-electric');
+    expect(categories.single.name, 'Electrician');
+  });
 }

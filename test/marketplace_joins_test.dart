@@ -31,6 +31,14 @@ void main() {
     expect(provider.isVerified, isTrue);
     expect(provider.hourlyRate, 400);
     expect(provider.hourlyRateLabel, '₹400/hr');
+    expect(
+      ServiceProviderCard.fromJoin({
+        'id': 'sp-string-rate',
+        'hourly_rate': '450.5',
+        'experience_years': '10',
+      }).hourlyRate,
+      450.5,
+    );
     expect(provider.avatarImageUrl(), 'https://example.com/a.png');
   });
 

@@ -55,10 +55,10 @@ public class ServiceMarketplaceBridge implements MethodChannel.MethodCallHandler
         // Mock data logic in Java
         allProviders.add(createProvider(
             "sp-native-1", "user-electrician", "scat-electric",
-            "Ravi Electrician", "Native Java Electrician", 450.0, 10));
+            "Ravi Electrician", "Electrician", "Native Java Electrician", 450.0, 10));
         allProviders.add(createProvider(
             "sp-native-2", "user-plumber", "scat-plumb",
-            "Amit Plumber", "Native Java Plumber", 350.0, 5));
+            "Amit Plumber", "Plumber", "Native Java Plumber", 350.0, 5));
 
         if (categoryId == null || categoryId.isEmpty()) {
             return allProviders;
@@ -78,6 +78,7 @@ public class ServiceMarketplaceBridge implements MethodChannel.MethodCallHandler
         String userId,
         String categoryId,
         String displayName,
+        String categoryName,
         String bio,
         double rate,
         int years
@@ -94,11 +95,11 @@ public class ServiceMarketplaceBridge implements MethodChannel.MethodCallHandler
         Map<String, Object> user = new HashMap<>();
         user.put("full_name", displayName);
         p.put("users", user);
-        
+
         Map<String, Object> cat = new HashMap<>();
-        cat.put("name", "Native Service");
+        cat.put("name", categoryName);
         p.put("service_categories", cat);
-        
+
         return p;
     }
 }
