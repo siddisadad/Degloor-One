@@ -1,5 +1,6 @@
 import 'package:degloor_one/backend/native_service_bridge.dart';
 import 'package:degloor_one/backend/repositories/discovery_repository.dart';
+import 'package:degloor_one/backend/shop_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/backend/user_service.dart';
 import 'package:degloor_one/shared/page_query.dart';
@@ -47,23 +48,13 @@ class DiscoveryService {
     if (businessId.isEmpty) return ShopInsights.empty;
     final reviews = await _repository.reviewCount(businessId);
     final events = await _repository.analyticsFor(businessId);
-    var views = 0;
-    var calls = 0;
-    var whatsapp = 0;
-    var directions = 0;
-    for (final event in events) {
-      final type = event.eventType;
-      if (type == 'PROFILE_VIEW') views++;
-      if (type == 'CALL_CLICK') calls++;
-      if (type == 'WHATSAPP_CLICK') whatsapp++;
-      if (type == 'DIRECTIONS_CLICK') directions++;
-    }
+    final summary = ShopService.summarizeEvents(events);
     return ShopInsights(
       reviewCount: reviews,
-      profileViews: views,
-      callClicks: calls,
-      whatsappClicks: whatsapp,
-      directionsClicks: directions,
+      profileViews: summary.profileViews,
+      callClicks: summary.callClicks,
+      whatsappClicks: summary.whatsappClicks,
+      directionsClicks: summary.directionsClicks,
     );
   }
 }

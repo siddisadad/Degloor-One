@@ -6,6 +6,20 @@ import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/core/error_handler.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
+class ProfileCompleteness {
+  const ProfileCompleteness({
+    required this.ratio,
+    required this.hint,
+  });
+
+  static const empty = ProfileCompleteness(ratio: 0, hint: '');
+
+  final double ratio;
+  final String hint;
+
+  int get percent => (ratio * 100).toInt();
+}
+
 class BusinessService {
   BusinessService({BusinessRepository? repository})
       : _repository = repository ?? BusinessRepository();
@@ -13,6 +27,29 @@ class BusinessService {
   final BusinessRepository _repository;
 
   static final instance = BusinessService();
+
+  static ProfileCompleteness completeness(BusinessesRow? shop) {
+    if (shop == null) return ProfileCompleteness.empty;
+    var score = 0;
+    if (shop.name.trim().isNotEmpty) score += 10;
+    if ((shop.description ?? '').trim().isNotEmpty) score += 15;
+    if ((shop.categoryId ?? '').isNotEmpty) score += 10;
+    if ((shop.whatsappNumber ?? '').trim().isNotEmpty) score += 10;
+    if ((shop.addressText ?? '').trim().isNotEmpty) score += 15;
+    if ((shop.latitude ?? 0) != 0 && (shop.longitude ?? 0) != 0) score += 20;
+    if ((shop.imageUrl ?? '').trim().isNotEmpty) score += 20;
+
+    final hint = (shop.imageUrl ?? '').isEmpty
+        ? 'Add business photos to reach 100%'
+        : (shop.description ?? '').isEmpty
+            ? 'Describe what you provide to help customers find you'
+            : (shop.addressText ?? '').isEmpty
+                ? 'Add your shop address for better visibility'
+                : (shop.latitude ?? 0) == 0
+                    ? 'Pin your location on the map for accurate delivery'
+                    : 'Your profile looks great!';
+    return ProfileCompleteness(ratio: score / 100, hint: hint);
+  }
 
   static const _signInMessage = 'Please sign in to manage your shop';
   static const _missingShopMessage = 'No shop found for this account';

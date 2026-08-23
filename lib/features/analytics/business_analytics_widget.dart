@@ -1,4 +1,3 @@
-import '/backend/supabase/supabase.dart';
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/shop_service.dart';
 import 'package:degloor_one/components/degloor_app_bar.dart';
@@ -34,7 +33,7 @@ class _BusinessAnalyticsWidgetState extends State<BusinessAnalyticsWidget>
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   bool _isLoading = true;
-  List<BusinessAnalyticsRow> _analyticsData = [];
+  ShopEventSummary _summary = ShopEventSummary.empty;
   int _selectedPeriod = 7; // 7, 30, 0 (Overall)
 
   @override
@@ -70,14 +69,14 @@ class _BusinessAnalyticsWidgetState extends State<BusinessAnalyticsWidget>
       );
       if (!mounted) return;
       safeSetState(() {
-        _analyticsData = rows;
+        _summary = ShopService.summarizeEvents(rows);
         _isLoading = false;
       });
     } catch (e) {
       AppLogger.error('Error fetching analytics', e);
       if (mounted) {
         safeSetState(() {
-          _analyticsData = [];
+          _summary = ShopEventSummary.empty;
           _isLoading = false;
         });
       }
@@ -90,13 +89,12 @@ class _BusinessAnalyticsWidgetState extends State<BusinessAnalyticsWidget>
     super.dispose();
   }
 
-  // Helper getters for stats
-  int get profileViews => _analyticsData.where((e) => e.eventType == 'PROFILE_VIEW').length;
-  int get callClicks => _analyticsData.where((e) => e.eventType == 'CALL_CLICK').length;
-  int get whatsappClicks => _analyticsData.where((e) => e.eventType == 'WHATSAPP_CLICK').length;
-  int get directionsClicks => _analyticsData.where((e) => e.eventType == 'DIRECTIONS_CLICK').length;
-  int get inquiries => callClicks + whatsappClicks;
-  double get conversionRate => profileViews > 0 ? (inquiries / profileViews * 100) : 0.0;
+  int get profileViews => _summary.profileViews;
+  int get callClicks => _summary.callClicks;
+  int get whatsappClicks => _summary.whatsappClicks;
+  int get directionsClicks => _summary.directionsClicks;
+  int get inquiries => _summary.inquiries;
+  double get conversionRate => _summary.conversionRate;
 
   @override
   Widget build(BuildContext context) {
@@ -214,13 +212,7 @@ class _BusinessAnalyticsWidgetState extends State<BusinessAnalyticsWidget>
   }
 
   Widget _buildBarChart() {
-    // Group data by date
-    final Map<String, int> dailyCounts = {};
-    for (var event in _analyticsData) {
-      final date = DateFormat('MM/dd').format(event.createdAt);
-      dailyCounts[date] = (dailyCounts[date] ?? 0) + 1;
-    }
-
+    final dailyCounts = _summary.dailyCounts;
     final sortedDates = dailyCounts.keys.toList()..sort();
     // Take last 7 or 14 points to avoid clutter
     final displayDates = sortedDates.length > 10
