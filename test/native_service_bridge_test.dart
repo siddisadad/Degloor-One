@@ -41,6 +41,24 @@ void main() {
     expect(providers.single.hourlyRateLabel, '₹450/hr');
   });
 
+  test('getProviders skips rows that are not maps', () async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (call) async {
+      return [
+        'bad-row',
+        {
+          'id': 'sp-ok',
+          'users': {'full_name': 'Asha'},
+        },
+      ];
+    });
+
+    final providers = await NativeServiceBridge.getProviders(null);
+    expect(providers, hasLength(1));
+    expect(providers.single.id, 'sp-ok');
+    expect(providers.single.displayName, 'Asha');
+  });
+
   test('getProviders returns empty when the channel fails', () async {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (call) async {

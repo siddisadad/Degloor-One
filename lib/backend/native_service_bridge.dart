@@ -29,9 +29,11 @@ class NativeServiceBridge {
       });
       if (result == null) return [];
 
-      return result
-          .map((row) => ServiceProviderCard.fromJoin(Map<String, dynamic>.from(row as Map)))
-          .toList();
+      return [
+        for (final row in result)
+          if (row is Map)
+            ServiceProviderCard.fromJoin(Map<String, dynamic>.from(row)),
+      ];
     } catch (e) {
       return [];
     }
