@@ -1,8 +1,8 @@
 import 'package:degloor_one/core/degloor_theme.dart';
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/shop_service.dart';
-import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/backend/user_service.dart';
+import 'package:degloor_one/shared/listing_complaint.dart';
 import 'package:degloor_one/shared/user_profile.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/app_state.dart';
@@ -222,7 +222,7 @@ class _UserProfileReportsWidgetState extends State<UserProfileReportsWidget> {
                     ),
                     const SizedBox(height: 12),
                     _sectionHeader('My Reports'),
-                    FutureBuilder<List<ComplaintsRow>>(
+                    FutureBuilder<List<ListingComplaint>>(
                       future: _model.complaintsFuture,
                       builder: (context, snapshot) {
                         if (!snapshot.hasData) {

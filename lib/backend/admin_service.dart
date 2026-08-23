@@ -1,6 +1,6 @@
 import 'package:degloor_one/backend/notification_service.dart';
 import 'package:degloor_one/backend/repositories/admin_repository.dart';
-import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/listing_complaint.dart';
 import 'package:degloor_one/shared/shop.dart';
 import 'package:degloor_one/shared/shop_category.dart';
 import 'package:degloor_one/shared/user_profile.dart';
@@ -68,9 +68,10 @@ class AdminService {
     );
   }
 
-  Future<List<ComplaintsRow>> pendingComplaints(String adminUserId) async {
+  Future<List<ListingComplaint>> pendingComplaints(String adminUserId) async {
     await requireAdmin(adminUserId);
-    return _repository.pendingComplaints();
+    final rows = await _repository.pendingComplaints();
+    return rows.map(ListingComplaint.fromRow).toList();
   }
 
   Future<void> resolveComplaint({

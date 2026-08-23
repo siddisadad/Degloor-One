@@ -3,6 +3,7 @@ import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/backend/shop_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/catalog_product.dart';
+import 'package:degloor_one/shared/listing_complaint.dart';
 import 'package:degloor_one/shared/product_category.dart';
 import 'package:degloor_one/shared/shop.dart';
 import 'package:degloor_one/shared/shop_hours.dart';
@@ -98,6 +99,8 @@ void main() {
   test('guest already has the seeded hotel complaint', () async {
     final complaints = await ShopService.instance
         .complaintsForUser(GuestAuthUser.guestUid);
+    expect(complaints, everyElement(isA<ListingComplaint>()));
+    expect(complaints, isNot(anyElement(isA<ComplaintsRow>())));
     expect(complaints, hasLength(1));
     expect(complaints.single.id, 'cmp-1');
     expect(complaints.single.status, 'pending');
@@ -105,12 +108,16 @@ void main() {
   });
 
   test('reportListing stores a pending complaint', () async {
-    await ShopService.instance.reportListing(
+    final created = await ShopService.instance.reportListing(
       userId: GuestAuthUser.guestUid,
       businessId: ShowcaseCatalog.bizHotel,
       subject: 'Closed early',
       description: 'Shop closed before advertised hours.',
     );
+    expect(created, isA<ListingComplaint>());
+    expect(created, isNot(isA<ComplaintsRow>()));
+    expect(created.subject, 'Closed early');
+    expect(created.status, 'pending');
     final complaints = await ShopService.instance
         .complaintsForUser(GuestAuthUser.guestUid);
     expect(complaints, hasLength(2));

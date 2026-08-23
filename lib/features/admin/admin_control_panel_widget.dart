@@ -1,8 +1,8 @@
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/admin_service.dart';
-import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/core/error_handler.dart';
+import 'package:degloor_one/shared/listing_complaint.dart';
 import 'package:degloor_one/shared/shop.dart';
 import 'package:degloor_one/shared/shop_category.dart';
 import 'package:degloor_one/components/action_item/action_item_widget.dart';
@@ -37,11 +37,11 @@ class _AdminControlPanelWidgetState extends State<AdminControlPanelWidget> {
     return AdminService.instance.verificationQueue(currentUserUid);
   }
 
-  Future<List<ComplaintsRow>> fetchPendingComplaints() {
+  Future<List<ListingComplaint>> fetchPendingComplaints() {
     return AdminService.instance.pendingComplaints(currentUserUid);
   }
 
-  Future<void> _resolveComplaint(ComplaintsRow complaint) async {
+  Future<void> _resolveComplaint(ListingComplaint complaint) async {
     try {
       await AdminService.instance.resolveComplaint(
         adminUserId: currentUserUid,
@@ -265,7 +265,7 @@ class _AdminControlPanelWidgetState extends State<AdminControlPanelWidget> {
               // Complaints Tab
               SingleChildScrollView(
                 padding: const EdgeInsets.all(24.0),
-                child: FutureBuilder<List<ComplaintsRow>>(
+                child: FutureBuilder<List<ListingComplaint>>(
                   future: fetchPendingComplaints(),
                   builder: (context, snapshot) {
                     final complaints = snapshot.data ?? [];
