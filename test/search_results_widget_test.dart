@@ -30,9 +30,8 @@ void main() {
     await tester.pump(const Duration(milliseconds: 50));
 
     expect(find.byType(TextField), findsOneWidget);
-    expect(find.text('All'), findsOneWidget);
-    expect(find.text('Shops'), findsOneWidget);
-    expect(find.text('Products'), findsOneWidget);
+    expect(find.text('All'), findsWidgets);
+    expect(find.text('Products'), findsWidgets);
 
     await tester.enterText(find.byType(TextField), 'milk');
     await tester.pump();

@@ -14,7 +14,6 @@ import 'package:degloor_one/l10n/app_localizations.dart';
 import 'package:degloor_one/shared/discovery_radius.dart';
 import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/shared/search_history.dart';
-import 'package:degloor_one/shared/shop.dart';
 import 'package:flutter/material.dart';
 import 'search_results_model.dart';
 export 'search_results_model.dart';
@@ -394,7 +393,7 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
 
   Widget _recentList() {
     if (_recent.isEmpty) {
-      return EmptyStateView(
+      return const EmptyStateView(
         icon: Icons.search_rounded,
         title: 'Search Degloor',
         description:
