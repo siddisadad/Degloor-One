@@ -28,14 +28,14 @@ void main() {
 
   test('partner location rejects invalid coordinates', () async {
     await expectLater(
-      DeliveryService.updatePartnerLocation(latitude: 120, longitude: 77),
+      DeliveryService.instance.updatePartnerLocation(latitude: 120, longitude: 77),
       throwsA(isA<Exception>()),
     );
   });
 
   test('partner location writes showcase coordinates', () async {
     ShowcaseCatalog.reset();
-    await DeliveryService.updatePartnerLocation(
+    await DeliveryService.instance.updatePartnerLocation(
       latitude: 18.55,
       longitude: 77.58,
       partnerId: 'dp-amit',
@@ -50,12 +50,12 @@ void main() {
 
   test('active assignment is scoped to the order', () async {
     ShowcaseCatalog.reset();
-    final assignment = await DeliveryService.activeAssignment(
+    final assignment = await DeliveryService.instance.activeAssignment(
       ShowcaseCatalog.orderOut,
     );
     expect(assignment?.id, 'da-1');
     expect(
-      await DeliveryService.activeAssignment('order-pending'),
+      await DeliveryService.instance.activeAssignment('order-pending'),
       isNull,
     );
   });
@@ -63,7 +63,7 @@ void main() {
   test('accept only claims ready orders', () async {
     ShowcaseCatalog.reset();
     await expectLater(
-      DeliveryService.acceptOrder(ShowcaseCatalog.orderOut),
+      DeliveryService.instance.acceptOrder(ShowcaseCatalog.orderOut),
       throwsA(isA<Exception>()),
     );
     expect(
@@ -125,7 +125,7 @@ void main() {
   test('accept writes an assignment after the current job is finished', () async {
     ShowcaseCatalog.reset();
     await expectLater(
-      DeliveryService.acceptOrder(ShowcaseCatalog.orderReady),
+      DeliveryService.instance.acceptOrder(ShowcaseCatalog.orderReady),
       throwsA(isA<Exception>()),
     );
 
@@ -134,7 +134,7 @@ void main() {
       {'status': 'delivered'},
       ShowcaseQuery()..eq('id', 'da-1'),
     );
-    await DeliveryService.acceptOrder(ShowcaseCatalog.orderReady);
+    await DeliveryService.instance.acceptOrder(ShowcaseCatalog.orderReady);
     final claimed = await DeliveryService.instance.activeForPartner('dp-amit');
     expect(claimed?.orderId, ShowcaseCatalog.orderReady);
     expect(claimed?.status, 'assigned');
@@ -144,6 +144,34 @@ void main() {
         ShowcaseQuery()..eq('id', ShowcaseCatalog.orderReady),
       ).single['status'],
       OrderLifecycle.shipping,
+    );
+  });
+
+  test('watchPartner streams the assigned rider', () async {
+    ShowcaseCatalog.reset();
+    final assignment = await DeliveryService.instance.activeAssignment(
+      ShowcaseCatalog.orderOut,
+    );
+    expect(assignment?.deliveryPartnerId, 'dp-amit');
+    final partners = await DeliveryService.instance
+        .watchPartner(assignment!.deliveryPartnerId)
+        .first;
+    expect(partners.single.id, 'dp-amit');
+  });
+
+  test('fetchMyDeliveryOtp returns the showcase code for an active order', () async {
+    ShowcaseCatalog.reset();
+    expect(
+      await DeliveryService.instance.fetchMyDeliveryOtp(ShowcaseCatalog.orderOut),
+      '4821',
+    );
+    expect(
+      await DeliveryService.instance.fetchMyDeliveryOtp('order-pending'),
+      '2201',
+    );
+    expect(
+      await DeliveryService.instance.fetchMyDeliveryOtp('missing-order'),
+      isNull,
     );
   });
 }

@@ -239,7 +239,7 @@ class _DeliveryDashboardWidgetState extends State<DeliveryDashboardWidget> {
       return;
     }
     try {
-      await DeliveryService.acceptOrder(orderId);
+      await DeliveryService.instance.acceptOrder(orderId);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -262,7 +262,7 @@ class _DeliveryDashboardWidgetState extends State<DeliveryDashboardWidget> {
 
   Future<void> _confirmPickup(String assignmentId) async {
     try {
-      await DeliveryService.confirmPickup(assignmentId);
+      await DeliveryService.instance.confirmPickup(assignmentId);
       if (!mounted) return;
       await _load(reset: true);
     } catch (e) {
@@ -336,7 +336,7 @@ class _DeliveryDashboardWidgetState extends State<DeliveryDashboardWidget> {
               ),
               onPressed: () async {
                 try {
-                  await DeliveryService.confirmDeliveryWithOtp(
+                  await DeliveryService.instance.confirmDeliveryWithOtp(
                     orderId: orderId,
                     otp: otpController.text.trim(),
                   );
