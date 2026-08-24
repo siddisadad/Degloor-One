@@ -3,6 +3,8 @@ import 'package:degloor_one/backend/notification_service.dart';
 import 'package:degloor_one/backend/repositories/service_marketplace_repository.dart';
 import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/core/api/api_client.dart';
+import 'package:degloor_one/core/api/marketplace_api.dart';
 import 'package:degloor_one/shared/marketplace_joins.dart';
 import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/shared/service_category.dart';
@@ -113,6 +115,24 @@ class ServiceMarketplaceService {
     if (rate == null || rate <= 0) {
       throw Exception('Please enter your hourly rate');
     }
+    if (JavaApiConfig.enabled) {
+      final categories = await MarketplaceApi.categories();
+      if (!categories.any((row) => '${row['id']}' == categoryId)) {
+        throw Exception('Please select a service category');
+      }
+      final providers = await MarketplaceApi.providers();
+      if (providers.any((row) => '${row['userId'] ?? ''}' == userId)) {
+        throw Exception('You already have a service profile');
+      }
+      return ServiceProviderProfile.fromJson(
+        await MarketplaceApi.register(
+          categoryId: categoryId,
+          bio: trimmedBio,
+          hourlyRate: rate,
+          experienceYears: years,
+        ),
+      );
+    }
     final categories = await _repository.categories();
     if (!categories.any((row) => row.id == categoryId)) {
       throw Exception('Please select a service category');
@@ -153,6 +173,23 @@ class ServiceMarketplaceService {
     final trimmed = description.trim();
     if (trimmed.isEmpty) {
       throw Exception('Please enter a description');
+    }
+
+    if (JavaApiConfig.enabled) {
+      try {
+        return ServiceRequest.fromJson(
+          await MarketplaceApi.createRequest(
+            providerId: providerId,
+            description: trimmed,
+            scheduledAt: scheduledAt,
+          ),
+        );
+      } on JavaApiException catch (error) {
+        if (error.code == 'PROVIDER_NOT_FOUND' || error.code.contains('404')) {
+          throw Exception('Service provider not found');
+        }
+        rethrow;
+      }
     }
 
     if (kUseShowcaseData) {
@@ -203,6 +240,24 @@ class ServiceMarketplaceService {
     final status = nextStatus.trim().toLowerCase();
     if (!ServiceRequestStatus.all.contains(status)) {
       throw Exception('Invalid service request status');
+    }
+
+    if (JavaApiConfig.enabled) {
+      try {
+        await MarketplaceApi.updateStatus(
+          requestId: requestId,
+          status: status,
+        );
+        return;
+      } on JavaApiException catch (error) {
+        if (error.code == 'FORBIDDEN') {
+          throw Exception('Not allowed to update this request');
+        }
+        if (error.code == 'REQUEST_NOT_FOUND' || error.code.contains('404')) {
+          throw Exception('Service request not found');
+        }
+        rethrow;
+      }
     }
 
     if (kUseShowcaseData) {
