@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:degloor_one/core/api/api_client.dart';
 import 'package:degloor_one/core/error_handler.dart';
 
 void main() {
@@ -27,6 +28,30 @@ void main() {
     expect(
       AppLogger.userFacingMessage(Exception('Invalid OTP')),
       'Invalid OTP',
+    );
+  });
+
+  test('Java auth and cart codes become customer sentences', () {
+    expect(
+      AppLogger.userFacingMessage(
+        JavaApiException('FORBIDDEN', 'stack'),
+      ),
+      'You do not have permission for this action.',
+    );
+    expect(
+      AppLogger.userFacingMessage(
+        JavaApiException('UNAUTHORIZED', 'Please sign in to continue'),
+      ),
+      'Please sign in to continue.',
+    );
+    expect(
+      AppLogger.userFacingMessage(
+        JavaApiException(
+          'CART_NEEDS_REPLACEMENT',
+          'Your cart has items from another shop. Clear it to add this item.',
+        ),
+      ),
+      'Your cart has items from another shop. Clear it to add this item.',
     );
   });
 }

@@ -316,4 +316,22 @@ void main() {
     expect(source.contains(_barrel), isFalse);
     expect(source.contains(_table), isFalse);
   });
+
+  test('Java public catalog GETs do not include owner or applicant routes', () {
+    const path =
+        'degloor-one-backend/src/main/java/com/degloor/one/common/security/SecurityConfig.java';
+    final source = File(path).readAsStringSync();
+    expect(source.contains('/api/v1/jobs/**'), isFalse);
+    expect(source.contains('/api/v1/businesses/**'), isFalse);
+    expect(source.contains('/api/v1/businesses/mine'), isTrue);
+    expect(source.contains('authenticationEntryPoint'), isTrue);
+  });
+
+  test('Java API client refreshes an expired access token once', () {
+    const path = 'lib/core/api/api_client.dart';
+    final source = File(path).readAsStringSync();
+    expect(source.contains('_tryRefresh'), isTrue);
+    expect(source.contains("path != '/api/v1/auth/refresh'"), isTrue);
+    expect(source.contains('allowRefresh: false'), isTrue);
+  });
 }

@@ -6,6 +6,8 @@ import com.degloor.one.business.repository.BusinessCategoryRepository;
 import com.degloor.one.business.repository.BusinessRepository;
 import com.degloor.one.common.exception.BusinessException;
 import com.degloor.one.common.response.PageResponse;
+import com.degloor.one.common.security.CurrentUser;
+import com.degloor.one.common.security.Roles;
 import com.degloor.one.delivery.entity.DeliveryPartner;
 import com.degloor.one.delivery.repository.DeliveryPartnerRepository;
 import com.degloor.one.order.repository.ShopOrderRepository;
@@ -50,20 +52,28 @@ public class AdminService {
         this.complaints = complaints;
     }
 
+    private void requireAdmin() {
+        Roles.requireAdmin(CurrentUser.require());
+    }
+
     public PageResponse<ProfileResponse> users(int page, int size) {
+        requireAdmin();
         return PageResponse.from(users.findAll(PageRequest.of(Math.max(page, 0), Math.min(Math.max(size, 1), 50)))
                 .map(ProfileResponse::from));
     }
 
     public PageResponse<Business> businesses(int page, int size) {
+        requireAdmin();
         return PageResponse.from(businesses.findAll(PageRequest.of(Math.max(page, 0), Math.min(Math.max(size, 1), 50))));
     }
 
     public PageResponse<Product> products(int page, int size) {
+        requireAdmin();
         return PageResponse.from(products.findAll(PageRequest.of(Math.max(page, 0), Math.min(Math.max(size, 1), 50))));
     }
 
     public PageResponse<Map<String, Object>> orders(int page, int size) {
+        requireAdmin();
         return PageResponse.from(orders.findAll(PageRequest.of(Math.max(page, 0), Math.min(Math.max(size, 1), 50)))
                 .map(o -> Map.<String, Object>of(
                         "id", o.getId().toString(),
@@ -77,15 +87,18 @@ public class AdminService {
     }
 
     public PageResponse<DeliveryPartner> partners(int page, int size) {
+        requireAdmin();
         return PageResponse.from(partners.findAll(PageRequest.of(Math.max(page, 0), Math.min(Math.max(size, 1), 50))));
     }
 
     public PageResponse<Complaint> complaints(int page, int size) {
+        requireAdmin();
         return PageResponse.from(complaints.findAllByOrderByCreatedAtDesc(PageRequest.of(Math.max(page, 0), Math.min(Math.max(size, 1), 50))));
     }
 
     @Transactional
     public Business verifyBusiness(UUID id, boolean verified) {
+        requireAdmin();
         Business b = businesses.findById(id)
                 .orElseThrow(() -> BusinessException.notFound("BUSINESS_NOT_FOUND", "Business not found"));
         b.setVerified(verified);
@@ -94,6 +107,7 @@ public class AdminService {
 
     @Transactional
     public DeliveryPartner verifyPartner(UUID id, boolean verified) {
+        requireAdmin();
         DeliveryPartner p = partners.findById(id)
                 .orElseThrow(() -> BusinessException.notFound("PARTNER_NOT_FOUND", "Delivery partner not found"));
         p.setVerified(verified);
@@ -102,6 +116,7 @@ public class AdminService {
 
     @Transactional
     public Complaint resolveComplaint(UUID id, String status) {
+        requireAdmin();
         Complaint c = complaints.findById(id)
                 .orElseThrow(() -> BusinessException.notFound("COMPLAINT_NOT_FOUND", "Complaint not found"));
         String next = status == null ? "resolved" : status.toLowerCase();
@@ -113,6 +128,7 @@ public class AdminService {
     }
 
     public Map<String, Object> reports() {
+        requireAdmin();
         return Map.of(
                 "users", users.count(),
                 "businesses", businesses.count(),
@@ -124,11 +140,13 @@ public class AdminService {
     }
 
     public List<BusinessCategory> listCategories() {
+        requireAdmin();
         return categories.findAllByOrderByDisplayOrderAsc();
     }
 
     @Transactional
     public BusinessCategory createCategory(String name) {
+        requireAdmin();
         String trimmed = name.trim();
         if (trimmed.isEmpty()) {
             throw BusinessException.badRequest("INVALID_NAME", "Category name cannot be empty");
