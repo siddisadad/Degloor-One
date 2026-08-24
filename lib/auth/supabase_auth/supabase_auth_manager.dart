@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:degloor_one/auth/auth_manager.dart';
-import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/auth/java_auth_user.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/backend/supabase/supabase_connection.dart';
@@ -25,14 +24,19 @@ class SupabaseAuthManager extends AuthManager
     with EmailSignInManager, GoogleSignInManager, PhoneSignInManager {
   @override
   Future signOut() async {
+    updateAuthUser(JavaAuthUser.signedOut());
+    updateJwtToken(null);
+
     if (kBypassAuth) {
-      installGuestSession();
+      // In guest mode, signOut just clears the global currentUser.
+      // The UI will navigate to Authentication screen.
       return;
     }
     if (JavaApiConfig.enabled) {
       await AuthApi.logout();
       final signedOut = JavaAuthUser.signedOut();
-      currentUser = signedOut;
+      updateAuthUser(signedOut);
+      updateJwtToken(null);
       AppStateNotifier.instance.update(signedOut);
       return;
     }
@@ -262,8 +266,9 @@ class SupabaseAuthManager extends AuthManager
   ) async {
     try {
       final user = JavaAuthUser.fromTokenResponse(await signIn());
-      if (user.uid == null || user.uid!.length <= 10) return null;
-      currentUser = user;
+      if (user.id.isEmpty || user.id.length <= 10) return null;
+      updateAuthUser(user);
+      updateJwtToken(JavaApiClient.instance.accessToken);
       AppStateNotifier.instance.update(user);
       return user;
     } on JavaApiException catch (error) {

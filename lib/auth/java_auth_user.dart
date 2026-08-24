@@ -75,6 +75,7 @@ class JavaAuthUser extends BaseAuthUser {
     try {
       await AuthApi.refresh();
       apply(JavaAuthUser.fromJson(await AuthApi.me()));
+      updateAuthUser(this);
     } on JavaApiException catch (error) {
       if (error.code == 'INVALID_REFRESH' ||
           error.code == 'UNAUTHORIZED' ||

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/supabase/supabase_connection.dart';
 import 'package:degloor_one/core/app_flags.dart';
@@ -38,12 +39,6 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
   void initState() {
     super.initState();
     _model = createModel(context, () => AuthenticationModel());
-    if (kBypassAuth) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) context.goNamed('CustomerHome');
-      });
-      return;
-    }
     if (SupabaseConnection.shouldSkipAuthRequest) {
       _serverWarning = SupabaseConnection.unreachableMessage;
     } else {
@@ -251,6 +246,28 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
                             ],
                           ),
                           const SizedBox(height: 24),
+                          if (kBypassAuth || _serverWarning != null)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 24.0),
+                              child: FFButtonWidget(
+                                text: 'Continue as Guest',
+                                onPressed: () {
+                                  installGuestSession();
+                                  updateAuthUser(currentUser!);
+                                  context.goNamed('CustomerHome');
+                                },
+                                options: FFButtonOptions(
+                                  width: double.infinity,
+                                  height: 50,
+                                  color: Colors.transparent,
+                                  textStyle: TextStyle(
+                                      color: FlutterFlowTheme.of(context).secondaryText,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w600),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                            ),
                           // Social Buttons
                           Row(
                             children: [
