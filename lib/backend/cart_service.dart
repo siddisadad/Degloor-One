@@ -5,6 +5,7 @@ import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/core/api/api_client.dart';
 import 'package:degloor_one/core/api/cart_api.dart';
 import 'package:degloor_one/core/error_handler.dart';
+import 'package:degloor_one/data/datasources/supabase_cart_maps.dart';
 import 'package:degloor_one/shared/checkout_line_item.dart';
 import 'package:degloor_one/shared/join_rows.dart';
 import 'package:degloor_one/shared/rpc_row.dart';
@@ -365,7 +366,7 @@ class CartService {
       queryFn: (q) =>
           q.eq('user_id', userId).order('created_at', ascending: false),
     );
-    return rows.map(ShoppingCart.fromRow).toList();
+    return rows.map(shoppingCartFromRow).toList();
   }
 
   static Future<List<CartLine>> itemsForCart(String cartId) async {
