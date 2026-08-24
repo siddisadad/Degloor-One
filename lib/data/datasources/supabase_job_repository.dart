@@ -1,6 +1,7 @@
 import 'package:degloor_one/backend/repositories/job_repository.dart' as tables;
 import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/data/datasources/supabase_job_maps.dart';
 import 'package:degloor_one/data/repositories/job_repository.dart';
 import 'package:degloor_one/shared/job_application.dart';
 import 'package:degloor_one/shared/job_application_draft.dart';
@@ -37,7 +38,7 @@ class SupabaseJobRepository implements JobRepository {
     PageQuery page = const PageQuery(),
   }) async {
     final rows = await _inner.forBusiness(businessId, page: page);
-    return rows.map(JobPosting.fromRow).toList();
+    return rows.map(jobPostingFromRow).toList();
   }
 
   @override
@@ -51,7 +52,7 @@ class SupabaseJobRepository implements JobRepository {
       businessId: businessId,
       posterId: posterId,
     );
-    return JobPosting.fromRow(row);
+    return jobPostingFromRow(row);
   }
 
   @override
@@ -67,7 +68,7 @@ class SupabaseJobRepository implements JobRepository {
         throw Exception('You have already applied for this job');
       }
       final row = await _inner.insertApplication(draft);
-      return JobApplication.fromRow(row);
+      return jobApplicationFromRow(row);
     }
 
     final response = await SupaFlow.client.rpc(
@@ -81,7 +82,7 @@ class SupabaseJobRepository implements JobRepository {
     if (row == null) {
       throw Exception('Failed to apply for this job');
     }
-    return JobApplication.fromRow(JobApplicationsRow(row));
+    return jobApplicationFromRow(JobApplicationsRow(row));
   }
 
   @override

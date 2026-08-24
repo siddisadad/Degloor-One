@@ -72,4 +72,20 @@ void main() {
     expect(review.rating, 5);
     expect(ShopReview.fromJoin({'id': 'rv-2', 'rating': 4}).authorName, 'Anonymous');
   });
+
+  test('JobApplicant maps Java applicant JSON onto the user join', () {
+    final applicant = JobApplicant.fromJson({
+      'id': 'app-1',
+      'status': 'applied',
+      'experienceSummary': 'Counter work',
+      'fullName': 'Ravi',
+      'phoneNumber': '9876543210',
+    });
+    expect(applicant.user?.displayName(fallback: 'Unknown Applicant'), 'Ravi');
+    expect(applicant.user?.phoneNumber, '9876543210');
+    expect(
+      JobApplicant.fromJson({'id': 'app-2', 'status': 'applied'}).user,
+      isNull,
+    );
+  });
 }

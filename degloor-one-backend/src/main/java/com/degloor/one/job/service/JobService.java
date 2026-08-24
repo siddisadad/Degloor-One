@@ -12,8 +12,12 @@ import com.degloor.one.job.repository.JobApplicationRepository;
 import com.degloor.one.job.repository.JobPostingRepository;
 import com.degloor.one.job.repository.JobSpecifications;
 import com.degloor.one.user.entity.UserAccount;
+import com.degloor.one.user.repository.UserRepository;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,11 +27,18 @@ public class JobService {
     private final JobPostingRepository jobs;
     private final JobApplicationRepository applications;
     private final BusinessService businesses;
+    private final UserRepository users;
 
-    public JobService(JobPostingRepository jobs, JobApplicationRepository applications, BusinessService businesses) {
+    public JobService(
+            JobPostingRepository jobs,
+            JobApplicationRepository applications,
+            BusinessService businesses,
+            UserRepository users
+    ) {
         this.jobs = jobs;
         this.applications = applications;
         this.businesses = businesses;
+        this.users = users;
     }
 
     public List<JobResponse> search(String q, String category) {
@@ -83,7 +94,7 @@ public class JobService {
         app.setApplicantId(user.getId());
         app.setExperienceSummary(req.experienceSummary().trim());
         app.setStatus("applied");
-        return ApplicationResponse.from(applications.save(app));
+        return ApplicationResponse.from(applications.save(app), user);
     }
 
     @Transactional
@@ -95,7 +106,14 @@ public class JobService {
 
     public List<ApplicationResponse> applicationsFor(UserAccount user, UUID jobId) {
         requireOwned(user, jobId);
-        return applications.findByJobIdOrderByCreatedAtDesc(jobId).stream().map(ApplicationResponse::from).toList();
+        List<JobApplication> apps = applications.findByJobIdOrderByCreatedAtDesc(jobId);
+        Map<UUID, UserAccount> applicants = users
+                .findAllById(apps.stream().map(JobApplication::getApplicantId).toList())
+                .stream()
+                .collect(Collectors.toMap(UserAccount::getId, Function.identity()));
+        return apps.stream()
+                .map(app -> ApplicationResponse.from(app, applicants.get(app.getApplicantId())))
+                .toList();
     }
 
     private JobPosting require(UUID id) {

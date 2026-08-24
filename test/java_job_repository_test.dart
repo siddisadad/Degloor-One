@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('Java job JSON maps to JobPosting', () {
-    final job = JavaJobRepository.postingFromJson({
+    final job = JobPosting.fromJson({
       'id': 'job-counter',
       'businessId': 'biz-patil',
       'posterId': 'user-1',
@@ -31,7 +31,7 @@ void main() {
   });
 
   test('Java job JSON falls back when createdAt and flags are omitted', () {
-    final job = JavaJobRepository.postingFromJson({
+    final job = JobPosting.fromJson({
       'id': 'job-night',
       'title': 'Night stocker',
       'description': 'Restock after closing.',
@@ -44,7 +44,7 @@ void main() {
   });
 
   test('Java application JSON maps to JobApplication', () {
-    final application = JavaJobRepository.applicationFromJson({
+    final application = JobApplication.fromJson({
       'id': 'app-1',
       'jobId': 'job-counter',
       'applicantId': 'customer-2',
@@ -57,6 +57,24 @@ void main() {
     expect(application.applicantId, 'customer-2');
     expect(application.status, 'applied');
     expect(application.createdAt.millisecondsSinceEpoch, 0);
+  });
+
+  test('Java applicant JSON maps the user join', () {
+    final named = JobApplicant.fromJson({
+      'id': 'app-1',
+      'jobId': 'job-counter',
+      'applicantId': 'customer-2',
+      'experienceSummary': 'Stocked a kirana for 6 months.',
+      'status': 'applied',
+      'fullName': 'Asha Patil',
+      'phoneNumber': '9876543210',
+    });
+    expect(named.user?.displayName(fallback: 'Unknown Applicant'), 'Asha Patil');
+    expect(named.user?.phoneNumber, '9876543210');
+    expect(
+      JobApplicant.fromJson({'id': 'app-2', 'status': 'applied'}).user,
+      isNull,
+    );
   });
 
   test('Java listing JSON attaches a shop join when provided', () {

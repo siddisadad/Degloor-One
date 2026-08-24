@@ -126,6 +126,21 @@ void main() {
     expect(source.contains(_table), isFalse);
   });
 
+  test('job leftover domain types stay off Supabase tables', () {
+    const paths = [
+      'lib/shared/job_posting.dart',
+      'lib/shared/job_application.dart',
+    ];
+    final offenders = <String>[];
+    for (final path in paths) {
+      final source = File(path).readAsStringSync();
+      if (source.contains(_barrel) || source.contains(_table)) {
+        offenders.add(path);
+      }
+    }
+    expect(offenders, isEmpty, reason: offenders.join('\n'));
+  });
+
   test('delivery leftover domain types stay off Supabase tables', () {
     const paths = [
       'lib/shared/delivery_assignment.dart',

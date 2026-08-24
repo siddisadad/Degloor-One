@@ -49,11 +49,17 @@ class JoinedUser {
   static JoinedUser? fromJoin(dynamic value) {
     final map = asJoinMap(value);
     if (map == null || map.isEmpty) return null;
-    return JoinedUser(
-      fullName: _text(map['full_name']),
-      avatarUrl: _text(map['avatar_url']),
-      phoneNumber: _text(map['phone_number']),
+    final user = JoinedUser(
+      fullName: _text(map['full_name'] ?? map['fullName']),
+      avatarUrl: _text(map['avatar_url'] ?? map['avatarUrl']),
+      phoneNumber: _text(map['phone_number'] ?? map['phoneNumber']),
     );
+    if (user.fullName == null &&
+        user.avatarUrl == null &&
+        user.phoneNumber == null) {
+      return null;
+    }
+    return user;
   }
 
   String displayName({String fallback = 'Unknown'}) {
@@ -148,6 +154,17 @@ class JobApplicant {
       status: _text(data['status']) ?? 'applied',
       experienceSummary: _text(data['experience_summary']),
       user: JoinedUser.fromJoin(data['users']),
+    );
+  }
+
+  /// Java `ApplicationResponse`.
+  factory JobApplicant.fromJson(Map<String, dynamic> json) {
+    return JobApplicant(
+      id: '${json['id'] ?? ''}',
+      status: _text(json['status']) ?? 'applied',
+      experienceSummary: _text(json['experienceSummary']),
+      user: JoinedUser.fromJoin(json['user'] ?? json['users']) ??
+          JoinedUser.fromJoin(json),
     );
   }
 }

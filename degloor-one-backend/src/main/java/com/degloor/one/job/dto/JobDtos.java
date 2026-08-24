@@ -2,6 +2,7 @@ package com.degloor.one.job.dto;
 
 import com.degloor.one.job.entity.JobApplication;
 import com.degloor.one.job.entity.JobPosting;
+import com.degloor.one.user.entity.UserAccount;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.Instant;
@@ -52,14 +53,26 @@ public final class JobDtos {
 
     public record ApplyRequest(@NotBlank String experienceSummary) {}
 
-    public record ApplicationResponse(String id, String jobId, String applicantId, String experienceSummary, String status) {
-        public static ApplicationResponse from(JobApplication a) {
+    public record ApplicationResponse(
+            String id,
+            String jobId,
+            String applicantId,
+            String experienceSummary,
+            String status,
+            String fullName,
+            String phoneNumber,
+            String avatarUrl
+    ) {
+        public static ApplicationResponse from(JobApplication a, UserAccount applicant) {
             return new ApplicationResponse(
                     a.getId().toString(),
                     a.getJobId().toString(),
                     a.getApplicantId().toString(),
                     a.getExperienceSummary(),
-                    a.getStatus()
+                    a.getStatus(),
+                    applicant == null ? null : applicant.getFullName(),
+                    applicant == null ? null : applicant.getPhoneNumber(),
+                    applicant == null ? null : applicant.getAvatarUrl()
             );
         }
     }
