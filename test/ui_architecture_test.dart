@@ -152,6 +152,29 @@ void main() {
     expect(source.contains(_table), isFalse);
   });
 
+  test('order leftover table repo stays off product joins and RPCs', () {
+    const path = 'lib/backend/repositories/order_repository.dart';
+    final source = File(path).readAsStringSync();
+    expect(source.contains("from('order_items')"), isFalse);
+    expect(source.contains('SupaFlow.client.rpc'), isFalse);
+    expect(source.contains('core/api/order_api.dart'), isFalse);
+  });
+
+  test('delivery service stays off OrderApi', () {
+    const path = 'lib/backend/delivery_service.dart';
+    final source = File(path).readAsStringSync();
+    expect(source.contains('core/api/order_api.dart'), isFalse);
+    expect(source.contains('OrderApi.'), isFalse);
+  });
+
+  test('order tracking fetches OTP through OrderService', () {
+    const path = 'lib/features/orders/order_tracking_widget.dart';
+    final source = File(path).readAsStringSync();
+    expect(source.contains('OrderService.instance.deliveryOtp'), isTrue);
+    expect(source.contains('fetchMyDeliveryOtp'), isFalse);
+    expect(source.contains('core/api/order_api.dart'), isFalse);
+  });
+
   test('job leftover domain types stay off Supabase tables', () {
     const paths = [
       'lib/shared/job_posting.dart',

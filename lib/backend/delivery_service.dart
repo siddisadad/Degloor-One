@@ -1,9 +1,9 @@
 import 'package:degloor_one/backend/repositories/delivery_repository.dart';
+import 'package:degloor_one/backend/order_service.dart';
 import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/core/api/api_client.dart';
 import 'package:degloor_one/core/api/delivery_api.dart';
-import 'package:degloor_one/core/api/order_api.dart';
 import 'package:degloor_one/core/error_handler.dart';
 import 'package:degloor_one/data/datasources/supabase_order_maps.dart';
 import 'package:degloor_one/shared/delivery_assignment.dart';
@@ -185,25 +185,8 @@ class DeliveryService {
         current == OrderLifecycle.outForDelivery;
   }
 
-  Future<String?> fetchMyDeliveryOtp(String orderId) async {
-    if (JavaApiConfig.enabled) {
-      return OrderApi.deliveryOtp(orderId);
-    }
-    if (kUseShowcaseData) {
-      final orders = ShowcaseCatalog.query(
-        'orders',
-        ShowcaseQuery()..eq('id', orderId),
-      );
-      if (orders.isEmpty) return null;
-      final status = OrderLifecycle.normalizeStatus('${orders.first['status']}');
-      if (OrderLifecycle.isTerminal(status)) return null;
-      return orders.first['delivery_otp'] as String?;
-    }
-    final result = await SupaFlow.client.rpc(
-      'get_my_delivery_otp',
-      params: {'p_order_id': orderId},
-    );
-    return result as String?;
+  Future<String?> fetchMyDeliveryOtp(String orderId) {
+    return OrderService.instance.deliveryOtp(orderId);
   }
 
   static String messageFor(Object error) {

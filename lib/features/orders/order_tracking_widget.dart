@@ -196,7 +196,7 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
                     // OTP is fetched via RPC so partners cannot read it from the orders row.
                     if (actions.showDeliveryOtp)
                       FutureBuilder<String?>(
-                        future: DeliveryService.instance.fetchMyDeliveryOtp(order.id),
+                        future: OrderService.instance.deliveryOtp(order.id),
                         builder: (context, otpSnapshot) =>
                             _buildOtpCard(otpSnapshot.data),
                       ),

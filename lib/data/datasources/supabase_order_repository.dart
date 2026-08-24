@@ -73,8 +73,40 @@ class SupabaseOrderRepository implements OrderRepository {
   }
 
   @override
-  Future<List<OrderLine>> itemsWithProducts(String orderId) {
-    return _inner.itemsWithProducts(orderId);
+  Future<List<OrderLine>> itemsWithProducts(String orderId) async {
+    if (orderId.isEmpty) return const [];
+    if (kUseShowcaseData) {
+      return ShowcaseCatalog.orderItemsWithProducts(orderId)
+          .map(OrderLine.fromJoin)
+          .toList();
+    }
+    final items = await SupaFlow.client
+        .from('order_items')
+        .select('*, products(*)')
+        .eq('order_id', orderId);
+    return List<Map<String, dynamic>>.from(items)
+        .map(OrderLine.fromJoin)
+        .toList();
+  }
+
+  @override
+  Future<String?> deliveryOtp(String orderId) async {
+    if (orderId.isEmpty) return null;
+    if (kUseShowcaseData) {
+      final orders = ShowcaseCatalog.query(
+        'orders',
+        ShowcaseQuery()..eq('id', orderId),
+      );
+      if (orders.isEmpty) return null;
+      final status = OrderLifecycle.normalizeStatus('${orders.first['status']}');
+      if (OrderLifecycle.isTerminal(status)) return null;
+      return orders.first['delivery_otp'] as String?;
+    }
+    final result = await SupaFlow.client.rpc(
+      'get_my_delivery_otp',
+      params: {'p_order_id': orderId},
+    );
+    return result as String?;
   }
 
   @override

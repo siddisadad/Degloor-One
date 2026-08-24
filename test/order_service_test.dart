@@ -393,6 +393,15 @@ void main() {
     expect(await OrderService.instance.historyFor('order-missing'), isEmpty);
   });
 
+  test('deliveryOtp returns the showcase code for an active order', () async {
+    expect(
+      await OrderService.instance.deliveryOtp(ShowcaseCatalog.orderOut),
+      '4821',
+    );
+    expect(await OrderService.instance.deliveryOtp(''), isNull);
+    expect(await OrderService.instance.deliveryOtp('order-missing'), isNull);
+  });
+
   test('Java order JSON maps to PlacedOrder, lines, and history', () {
     final order = PlacedOrder.fromJson({
       'id': 'ord-1',
@@ -515,6 +524,9 @@ class _RecordingOrderRepository implements OrderRepository {
 
   @override
   Future<List<OrderLine>> itemsWithProducts(String orderId) async => const [];
+
+  @override
+  Future<String?> deliveryOtp(String orderId) async => null;
 
   @override
   Stream<List<PlacedOrder>> watchBusiness(String businessId) =>

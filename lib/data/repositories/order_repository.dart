@@ -30,6 +30,9 @@ abstract class OrderRepository {
 
   Future<List<OrderLine>> itemsWithProducts(String orderId);
 
+  /// Customer tracking code. Partners cannot read this from the orders row.
+  Future<String?> deliveryOtp(String orderId);
+
   Stream<List<PlacedOrder>> watchBusiness(String businessId);
 
   Stream<List<PlacedOrder>> watchUserOrder({

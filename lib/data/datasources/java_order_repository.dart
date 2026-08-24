@@ -128,6 +128,12 @@ class JavaOrderRepository implements OrderRepository {
   }
 
   @override
+  Future<String?> deliveryOtp(String orderId) {
+    if (orderId.isEmpty) return Future.value(null);
+    return OrderApi.deliveryOtp(orderId);
+  }
+
+  @override
   Stream<List<PlacedOrder>> watchBusiness(String businessId) {
     return Stream.fromFuture(
       forBusiness(businessId).then((page) => page.items),

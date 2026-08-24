@@ -144,6 +144,12 @@ class OrderService {
     return _repository.itemsWithProducts(orderId);
   }
 
+  /// Customer tracking code. Partners cannot read this from the orders row.
+  Future<String?> deliveryOtp(String orderId) async {
+    if (orderId.isEmpty) return null;
+    return _repository.deliveryOtp(orderId);
+  }
+
   Stream<List<PlacedOrder>> watchBusiness(String businessId) {
     return _repository.watchBusiness(businessId);
   }

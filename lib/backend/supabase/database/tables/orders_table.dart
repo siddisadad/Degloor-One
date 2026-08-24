@@ -6,25 +6,6 @@ class OrdersTable extends SupabaseTable<OrdersRow> {
 
   @override
   OrdersRow createRow(Map<String, dynamic> data) => OrdersRow(data);
-
-  Future<double> calculateDeliveryFee({
-    required String businessId,
-    required String addressId,
-  }) async {
-    if (kUseShowcaseData) return 25.0;
-    try {
-      final response = await SupaFlow.client.rpc(
-        'calculate_delivery_fee',
-        params: {
-          'business_id': businessId,
-          'address_id': addressId,
-        },
-      );
-      return (response as num?)?.toDouble() ?? 0.0;
-    } catch (e) {
-      return 0.0;
-    }
-  }
 }
 
 class OrdersRow extends SupabaseDataRow {
