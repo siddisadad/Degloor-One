@@ -15,6 +15,7 @@ import 'package:degloor_one/backend/notification_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/data/datasources/bind_address_service.dart';
 import 'package:degloor_one/data/datasources/bind_cart_service.dart';
+import 'package:degloor_one/data/datasources/bind_delivery_service.dart';
 import 'package:degloor_one/data/datasources/bind_discovery_service.dart';
 import 'package:degloor_one/data/datasources/bind_job_service.dart';
 import 'package:degloor_one/data/datasources/bind_order_service.dart';
@@ -48,6 +49,7 @@ void main() async {
   bindJobService();
   bindCartService();
   bindOrderService();
+  bindDeliveryService();
 
   await FlutterFlowTheme.initialize();
 
