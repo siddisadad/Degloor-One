@@ -78,7 +78,8 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
               return EmptyStateView(
                 icon: Icons.receipt_long_outlined,
                 title: 'Order not found',
-                description: 'This order is missing or belongs to another account.',
+                description:
+                    'This order is missing or belongs to another account.',
                 buttonText: 'My orders',
                 onTap: () => context.goNamed('CustomerOrders'),
               );
@@ -94,152 +95,165 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 520),
                 child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(
-                          child: Text(
-                            'Order #${order.id.substring(0, 8)}',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: FlutterFlowTheme.of(context)
-                                .titleMedium
-                                .override(
-                                  font: GoogleFonts.inter(),
-                                  fontWeight: FontWeight.w800,
-                                ),
-                          ),
-                        ),
-                        OrderStatusChip(status: order.status),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    if (isCancelled)
-                      Container(
-                        width: double.infinity,
-                        margin: const EdgeInsets.only(bottom: 24),
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: FlutterFlowTheme.of(context).error.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(
-                            FlutterFlowTheme.of(context).designToken.radius.lg,
-                          ),
-                          border: Border.all(color: FlutterFlowTheme.of(context).error),
-                        ),
-                        child: Row(
+                        Row(
                           children: [
-                            Icon(Icons.cancel_rounded, color: FlutterFlowTheme.of(context).error),
-                            const SizedBox(width: 12),
                             Expanded(
                               child: Text(
-                                'This order was cancelled.',
-                                style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                'Order #${order.id.substring(0, 8)}',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: FlutterFlowTheme.of(context)
+                                    .titleMedium
+                                    .override(
                                       font: GoogleFonts.inter(),
-                                      color: FlutterFlowTheme.of(context).error,
-                                      fontWeight: FontWeight.bold,
+                                      fontWeight: FontWeight.w800,
                                     ),
                               ),
                             ),
+                            OrderStatusChip(status: order.status),
                           ],
                         ),
-                      ),
-                    if (actions.canCancel)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 16),
-                        child: FFButtonWidget(
-                          onPressed: () async {
-                            try {
-                              await OrderService.instance.cancelOrder(
-                                orderId: order.id,
-                                actorUserId: currentUserUid,
-                                reason: 'Cancelled by customer',
-                              );
-                            } catch (e) {
-                              if (!context.mounted) return;
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    AppLogger.userFacingMessage(
-                                      e,
-                                      fallback:
-                                          'Unable to cancel the order. Please try again.',
-                                    ),
+                        const SizedBox(height: 16),
+                        if (isCancelled)
+                          Container(
+                            width: double.infinity,
+                            margin: const EdgeInsets.only(bottom: 24),
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: FlutterFlowTheme.of(context)
+                                  .error
+                                  .withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(
+                                FlutterFlowTheme.of(context)
+                                    .designToken
+                                    .radius
+                                    .lg,
+                              ),
+                              border: Border.all(
+                                  color: FlutterFlowTheme.of(context).error),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(Icons.cancel_rounded,
+                                    color: FlutterFlowTheme.of(context).error),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    'This order was cancelled.',
+                                    style: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .override(
+                                          font: GoogleFonts.inter(),
+                                          color: FlutterFlowTheme.of(context)
+                                              .error,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                   ),
-                                  backgroundColor:
-                                      FlutterFlowTheme.of(context).error,
                                 ),
-                              );
-                            }
+                              ],
+                            ),
+                          ),
+                        if (actions.canCancel)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 16),
+                            child: FFButtonWidget(
+                              onPressed: () async {
+                                try {
+                                  await OrderService.instance.cancelOrder(
+                                    orderId: order.id,
+                                    actorUserId: currentUserUid,
+                                    reason: 'Cancelled by customer',
+                                  );
+                                } catch (e) {
+                                  if (!context.mounted) return;
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        AppLogger.userFacingMessage(
+                                          e,
+                                          fallback:
+                                              'Unable to cancel the order. Please try again.',
+                                        ),
+                                      ),
+                                      backgroundColor:
+                                          FlutterFlowTheme.of(context).error,
+                                    ),
+                                  );
+                                }
+                              },
+                              text: 'Cancel order',
+                              options: FFButtonOptions(
+                                width: double.infinity,
+                                height: 48,
+                                color: FlutterFlowTheme.of(context).error,
+                                textStyle: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                        // Status Stepper
+                        if (actions.showStepper)
+                          _buildStatusStepper(statusIndex),
+
+                        const SizedBox(height: 32),
+
+                        // OTP is fetched via RPC so partners cannot read it from the orders row.
+                        if (actions.showDeliveryOtp)
+                          FutureBuilder<String?>(
+                            future: DeliveryService.instance
+                                .fetchMyDeliveryOtp(order.id),
+                            builder: (context, otpSnapshot) =>
+                                _buildOtpCard(otpSnapshot.data),
+                          ),
+
+                        const SizedBox(height: 24),
+
+                        // Delivery Partner Info
+                        _buildDeliveryPartnerInfo(order.id),
+
+                        const SizedBox(height: 24),
+
+                        // Business Info
+                        _buildBusinessInfo(order.businessId, order),
+
+                        const SizedBox(height: 24),
+
+                        // Order Summary
+                        _buildOrderSummary(order),
+
+                        const SizedBox(height: 32),
+
+                        // Help / Report
+                        FFButtonWidget(
+                          onPressed: () {
+                            context.pushNamed('MyProfile');
                           },
-                          text: 'Cancel order',
+                          text: 'Report an Issue',
                           options: FFButtonOptions(
                             width: double.infinity,
-                            height: 48,
-                            color: FlutterFlowTheme.of(context).error,
-                            textStyle: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700,
+                            height: 50,
+                            color: Colors.transparent,
+                            textStyle: TextStyle(
+                              color: FlutterFlowTheme.of(context).error,
+                              fontWeight: FontWeight.bold,
                             ),
+                            borderSide: BorderSide(
+                                color: FlutterFlowTheme.of(context).error),
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                      ),
-                    // Status Stepper
-                    if (actions.showStepper) _buildStatusStepper(statusIndex),
-
-                    const SizedBox(height: 32),
-
-                    // OTP is fetched via RPC so partners cannot read it from the orders row.
-                    if (actions.showDeliveryOtp)
-                      FutureBuilder<String?>(
-                        future: DeliveryService.instance.fetchMyDeliveryOtp(order.id),
-                        builder: (context, otpSnapshot) =>
-                            _buildOtpCard(otpSnapshot.data),
-                      ),
-
-                    const SizedBox(height: 24),
-
-                    // Delivery Partner Info
-                    _buildDeliveryPartnerInfo(order.id),
-
-                    const SizedBox(height: 24),
-
-                    // Business Info
-                    _buildBusinessInfo(order.businessId, order),
-
-                    const SizedBox(height: 24),
-
-                    // Order Summary
-                    _buildOrderSummary(order),
-
-                    const SizedBox(height: 32),
-
-                    // Help / Report
-                    FFButtonWidget(
-                      onPressed: () {
-                        context.pushNamed('MyProfile');
-                      },
-                      text: 'Report an Issue',
-                      options: FFButtonOptions(
-                        width: double.infinity,
-                        height: 50,
-                        color: Colors.transparent,
-                        textStyle: TextStyle(
-                          color: FlutterFlowTheme.of(context).error,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        borderSide: BorderSide(color: FlutterFlowTheme.of(context).error),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
               ),
             );
           },
@@ -256,7 +270,7 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
       {'title': 'On the Way', 'desc': 'Rider is delivering your order'},
       {'title': 'Delivered', 'desc': 'Enjoy your purchase!'},
     ];
-    
+
     return Container(
       padding: const EdgeInsets.all(DegloorTheme.spacingMD),
       decoration: BoxDecoration(
@@ -279,22 +293,28 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
                       width: 20,
                       height: 20,
                       decoration: BoxDecoration(
-                        color: isCompleted ? DegloorTheme.success : Colors.white,
+                        color:
+                            isCompleted ? DegloorTheme.success : Colors.white,
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: isCompleted ? DegloorTheme.success : DegloorTheme.border,
+                          color: isCompleted
+                              ? DegloorTheme.success
+                              : DegloorTheme.border,
                           width: 2,
                         ),
                       ),
                       child: isCompleted
-                          ? const Icon(Icons.check, size: 12, color: Colors.white)
+                          ? const Icon(Icons.check,
+                              size: 12, color: Colors.white)
                           : null,
                     ),
                     if (!isLast)
                       Expanded(
                         child: Container(
                           width: 2,
-                          color: isCompleted ? DegloorTheme.success : DegloorTheme.border,
+                          color: isCompleted
+                              ? DegloorTheme.success
+                              : DegloorTheme.border,
                         ),
                       ),
                   ],
@@ -309,15 +329,21 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
                         Text(
                           statuses[index]['title']!,
                           style: DegloorTheme.titleMedium.copyWith(
-                            color: isCompleted ? DegloorTheme.textPrimary : DegloorTheme.textSecondary,
-                            fontWeight: isCompleted ? FontWeight.w700 : FontWeight.w500,
+                            color: isCompleted
+                                ? DegloorTheme.textPrimary
+                                : DegloorTheme.textSecondary,
+                            fontWeight:
+                                isCompleted ? FontWeight.w700 : FontWeight.w500,
                           ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           statuses[index]['desc']!,
                           style: DegloorTheme.bodySmall.copyWith(
-                            color: isCompleted ? DegloorTheme.textSecondary : DegloorTheme.textSecondary.withValues(alpha: 0.6),
+                            color: isCompleted
+                                ? DegloorTheme.textSecondary
+                                : DegloorTheme.textSecondary
+                                    .withValues(alpha: 0.6),
                           ),
                         ),
                       ],
@@ -337,7 +363,10 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
       padding: const EdgeInsets.all(DegloorTheme.spacingLG),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [DegloorTheme.primary, DegloorTheme.primary.withValues(alpha: 0.8)],
+          colors: [
+            DegloorTheme.primary,
+            DegloorTheme.primary.withValues(alpha: 0.8)
+          ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -348,7 +377,8 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
         children: [
           Text(
             'DELIVERY CODE',
-            style: DegloorTheme.labelSmall.copyWith(color: Colors.white.withValues(alpha: 0.7), letterSpacing: 2),
+            style: DegloorTheme.labelSmall.copyWith(
+                color: Colors.white.withValues(alpha: 0.7), letterSpacing: 2),
           ),
           const SizedBox(height: 12),
           Text(
@@ -369,7 +399,8 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
             ),
             child: Text(
               'Share this code with the rider only',
-              style: DegloorTheme.bodySmall.copyWith(color: Colors.white, fontWeight: FontWeight.w500),
+              style: DegloorTheme.bodySmall
+                  .copyWith(color: Colors.white, fontWeight: FontWeight.w500),
             ),
           ),
         ],
@@ -385,7 +416,8 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
         if (assignment == null) return Container();
 
         return StreamBuilder<List<DeliveryPartner>>(
-          stream: DeliveryService.instance.watchPartner(assignment.deliveryPartnerId),
+          stream: DeliveryService.instance
+              .watchPartner(assignment.deliveryPartnerId),
           builder: (context, partnerSnapshot) {
             final partner = partnerSnapshot.data?.firstOrNull;
             if (partner == null) return Container();
@@ -437,7 +469,8 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
                                 ],
                               ),
                             ),
-                            if (user?.phoneNumber != null && user!.phoneNumber!.trim().isNotEmpty)
+                            if (user?.phoneNumber != null &&
+                                user!.phoneNumber!.trim().isNotEmpty)
                               IconButton(
                                 icon: Icon(
                                   Icons.chat_bubble_rounded,
@@ -522,23 +555,23 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
                   child: SizedBox(
                     width: 60,
                     height: 60,
-                    child: business.imageUrl == null ||
-                            business.imageUrl!.isEmpty
-                        ? ColoredBox(
-                            color: FlutterFlowTheme.of(context)
-                                .primary
-                                .withValues(alpha: 0.08),
-                            child: Icon(
-                              Icons.storefront_rounded,
-                              color: FlutterFlowTheme.of(context).primary,
-                            ),
-                          )
-                        : CachedRemoteImage(
-                            url: business.imageUrl!,
-                            width: 60,
-                            height: 60,
-                            placeholderIcon: Icons.storefront_rounded,
-                          ),
+                    child:
+                        business.imageUrl == null || business.imageUrl!.isEmpty
+                            ? ColoredBox(
+                                color: FlutterFlowTheme.of(context)
+                                    .primary
+                                    .withValues(alpha: 0.08),
+                                child: Icon(
+                                  Icons.storefront_rounded,
+                                  color: FlutterFlowTheme.of(context).primary,
+                                ),
+                              )
+                            : CachedRemoteImage(
+                                url: business.imageUrl!,
+                                width: 60,
+                                height: 60,
+                                placeholderIcon: Icons.storefront_rounded,
+                              ),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -549,9 +582,9 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
                       Text(
                         business.name,
                         style: FlutterFlowTheme.of(context).titleSmall.override(
-                          font: GoogleFonts.inter(),
-                          fontWeight: FontWeight.bold,
-                        ),
+                              font: GoogleFonts.inter(),
+                              fontWeight: FontWeight.bold,
+                            ),
                       ),
                       Text(
                         business.addressText ?? 'Degloor',
@@ -570,11 +603,13 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
                         color: FlutterFlowTheme.of(context).info,
                       ),
                       onPressed: () {
-                        if (business.phoneNumber != null && business.phoneNumber!.isNotEmpty) {
+                        if (business.phoneNumber != null &&
+                            business.phoneNumber!.isNotEmpty) {
                           launchURL('tel:${business.phoneNumber}');
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Phone number not available')),
+                            const SnackBar(
+                                content: Text('Phone number not available')),
                           );
                         }
                       },
@@ -585,10 +620,12 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
                         color: FlutterFlowTheme.of(context).success,
                       ),
                       onPressed: () async {
-                        if (business.whatsappNumber != null && business.whatsappNumber!.isNotEmpty) {
+                        if (business.whatsappNumber != null &&
+                            business.whatsappNumber!.isNotEmpty) {
                           final opened = await WhatsAppService.launchWhatsApp(
                             phoneNumber: business.whatsappNumber!,
-                            message: 'Hello, I have a query regarding my order #${widget.orderId.substring(0, 8)}.',
+                            message:
+                                'Hello, I have a query regarding my order #${widget.orderId.substring(0, 8)}.',
                           );
                           if (!opened && context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
@@ -601,7 +638,8 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
                           }
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('WhatsApp not available')),
+                            const SnackBar(
+                                content: Text('WhatsApp not available')),
                           );
                         }
                       },
@@ -637,10 +675,35 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
             final items = snapshot.data ?? [];
             return Column(
               children: items.map((item) {
+                final imageUrl = item.product?.imageUrl;
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 4.0),
                   child: Row(
                     children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: SizedBox(
+                          width: 40,
+                          height: 40,
+                          child: imageUrl == null || imageUrl.isEmpty
+                              ? ColoredBox(
+                                  color: FlutterFlowTheme.of(context)
+                                      .primary
+                                      .withValues(alpha: 0.08),
+                                  child: Icon(
+                                    Icons.shopping_bag_outlined,
+                                    size: 20,
+                                    color: FlutterFlowTheme.of(context).primary,
+                                  ),
+                                )
+                              : CachedRemoteImage(
+                                  url: imageUrl,
+                                  width: 40,
+                                  height: 40,
+                                ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
                       Expanded(
                         child: Text(
                           '${item.quantity}× ${item.product?.name ?? 'Item'}',
@@ -663,7 +726,8 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Delivery Fee', style: FlutterFlowTheme.of(context).labelMedium),
+            Text('Delivery Fee',
+                style: FlutterFlowTheme.of(context).labelMedium),
             Text('₹${order.deliveryFee?.toStringAsFixed(2) ?? '0.00'}'),
           ],
         ),

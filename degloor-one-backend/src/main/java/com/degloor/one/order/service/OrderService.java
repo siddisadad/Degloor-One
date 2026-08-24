@@ -273,7 +273,7 @@ public class OrderService {
         history.save(row);
     }
 
-    private OrderResponse toResponse(ShopOrder order) {
+    public OrderResponse toResponse(ShopOrder order) {
         List<OrderItem> items = orderItems.findByOrderId(order.getId());
         Map<UUID, Product> catalog = products.findAllById(
                         items.stream().map(OrderItem::getProductId).toList())
