@@ -115,4 +115,13 @@ class BusinessesRow extends SupabaseDataRow {
 
   double? get distanceKm => getField<double>('distance_km');
   set distanceKm(double? value) => setField<double>('distance_km', value);
+
+  String? get subcategory => getField<String>('sub_category');
+  set subcategory(String? value) => setField<String>('sub_category', value);
+
+  String? get source => getField<String>('source');
+  set source(String? value) => setField<String>('source', value);
+
+  DateTime? get updatedAt => getField<DateTime>('updated_at');
+  set updatedAt(DateTime? value) => setField<DateTime>('updated_at', value);
 }

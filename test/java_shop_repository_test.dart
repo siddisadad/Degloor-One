@@ -46,6 +46,8 @@ void main() {
     expect(row.rating, 4.5);
     expect(row.distanceKm, 1.2);
     expect(row.createdAt.toUtc().year, 2026);
+    expect(row.photos, ['https://example.com/shop.png']);
+    expect(row.imageUrl, 'https://example.com/shop.png');
     expect(row.subcategory, 'Kirana');
     expect(row.discoveryRadius, 10);
     expect(row.reviewCount, 3);

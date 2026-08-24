@@ -25,6 +25,7 @@ void main() {
       'longitude': 77.58,
       'discovery_radius': 5,
       'is_verified': false,
+      'source': 'owner',
     });
     expect(
       draft.toInsertJson(ownerId: 'user-1').keys,

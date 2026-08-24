@@ -115,6 +115,9 @@ class ShopDraft {
       'longitude': longitude,
       'discovery_radius': discoveryRadius ?? 5,
       'is_verified': false,
+      'source': 'owner',
+      if ((imageUrl ?? '').isNotEmpty) 'image_url': imageUrl,
+      if ((imageUrl ?? '').isNotEmpty) 'photos': [imageUrl],
     };
   }
 

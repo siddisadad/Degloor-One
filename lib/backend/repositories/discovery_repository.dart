@@ -1,4 +1,5 @@
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/data/datasources/supabase_shop_maps.dart';
 import 'package:degloor_one/data/repositories/discovery_repository.dart'
     show DiscoverySearch;
 import 'package:degloor_one/shared/shop.dart';
@@ -10,29 +11,7 @@ export 'package:degloor_one/data/repositories/discovery_repository.dart'
 /// [DiscoveryService]. Table-backed implementation; Java lives under
 /// `lib/data/datasources`.
 class DiscoveryRepository {
-  Shop _toShop(BusinessesRow row) {
-    return Shop(
-      id: row.id,
-      name: row.name,
-      createdAt: row.createdAt,
-      ownerId: row.ownerId,
-      ownerName: row.ownerName,
-      description: row.description,
-      categoryId: row.categoryId,
-      cityId: row.cityId,
-      addressText: row.addressText,
-      whatsappNumber: row.whatsappNumber,
-      phoneNumber: row.phoneNumber,
-      rating: row.rating,
-      isOpen: row.isOpen,
-      isVerified: row.isVerified,
-      imageUrl: row.imageUrl,
-      latitude: row.latitude,
-      longitude: row.longitude,
-      discoveryRadius: row.discoveryRadius,
-      distanceKm: row.distanceKm,
-    );
-  }
+  Shop _toShop(BusinessesRow row) => shopFromRow(row);
 
   Future<List<Shop>> search(DiscoverySearch query) async {
     final rows = await BusinessesTable().searchInRadius(

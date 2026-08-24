@@ -219,7 +219,13 @@ public class BusinessService {
         }
         b.setImageUrl(req.imageUrl());
         if (req.photos() != null) {
-            b.setPhotos(req.photos());
+            b.setPhotos(new ArrayList<>(req.photos()));
+            if ((req.imageUrl() == null || req.imageUrl().isBlank()) && !req.photos().isEmpty()) {
+                b.setImageUrl(req.photos().get(0));
+            }
+        } else if (req.imageUrl() != null && !req.imageUrl().isBlank()
+                && (b.getPhotos() == null || b.getPhotos().isEmpty())) {
+            b.setPhotos(new ArrayList<>(List.of(req.imageUrl())));
         }
     }
 
