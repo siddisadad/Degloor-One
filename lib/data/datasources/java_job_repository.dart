@@ -15,40 +15,6 @@ class JavaJobRepository implements JobRepository {
 
   final JavaApiClient _client;
 
-  static DateTime _createdAt(dynamic value) {
-    if (value is String) {
-      return DateTime.tryParse(value) ?? DateTime.fromMillisecondsSinceEpoch(0);
-    }
-    return DateTime.fromMillisecondsSinceEpoch(0);
-  }
-
-  static JobPosting postingFromJson(Map<String, dynamic> json) {
-    return JobPosting(
-      id: '${json['id'] ?? ''}',
-      title: '${json['title'] ?? ''}',
-      description: '${json['description'] ?? ''}',
-      jobType: '${json['jobType'] ?? ''}',
-      isActive: json['active'] as bool? ?? json['isActive'] as bool? ?? true,
-      createdAt: _createdAt(json['createdAt']),
-      businessId: json['businessId'] == null ? null : '${json['businessId']}',
-      posterId: json['posterId'] == null ? null : '${json['posterId']}',
-      category: json['category'] as String?,
-      salaryRange: json['salaryRange'] as String?,
-      locationText: json['locationText'] as String?,
-    );
-  }
-
-  static JobApplication applicationFromJson(Map<String, dynamic> json) {
-    return JobApplication(
-      id: '${json['id'] ?? ''}',
-      jobId: '${json['jobId'] ?? ''}',
-      applicantId: '${json['applicantId'] ?? ''}',
-      status: '${json['status'] ?? JobApplicationDraft.applied}',
-      createdAt: _createdAt(json['createdAt']),
-      experienceSummary: json['experienceSummary'] as String?,
-    );
-  }
-
   static JobApplicant applicantFromJson(Map<String, dynamic> json) {
     return JobApplicant(
       id: '${json['id'] ?? ''}',
@@ -61,7 +27,7 @@ class JavaJobRepository implements JobRepository {
     Map<String, dynamic> json, {
     JoinedShop? shop,
   }) {
-    final posting = postingFromJson(json);
+    final posting = JobPosting.fromJson(json);
     return JobListing(
       id: posting.id,
       title: posting.title.isEmpty ? 'Job Title' : posting.title,
@@ -122,7 +88,7 @@ class JavaJobRepository implements JobRepository {
     );
     final listings = <JobListing>[];
     for (final row in rows) {
-      final posting = postingFromJson(row);
+      final posting = JobPosting.fromJson(row);
       if (jobType != null && jobType != 'All' && posting.jobType != jobType) {
         continue;
       }
@@ -141,7 +107,7 @@ class JavaJobRepository implements JobRepository {
     if (businessId.isEmpty) return const [];
     final rows = await _jobRows();
     final jobs = [
-      for (final row in rows) postingFromJson(row),
+      for (final row in rows) JobPosting.fromJson(row),
     ].where((job) => job.businessId == businessId).toList();
     return _page(jobs, page);
   }
@@ -160,7 +126,7 @@ class JavaJobRepository implements JobRepository {
       if (draft.salaryRange != null) 'salaryRange': draft.salaryRange,
       if (draft.locationText != null) 'locationText': draft.locationText,
     });
-    final job = postingFromJson(Map<String, dynamic>.from(data as Map));
+    final job = JobPosting.fromJson(Map<String, dynamic>.from(data as Map));
     if (job.posterId != null && job.posterId != posterId) {
       throw Exception('Unable to post this job. Please try again.');
     }
@@ -174,7 +140,7 @@ class JavaJobRepository implements JobRepository {
         '/api/v1/jobs/${draft.jobId}/apply',
         {'experienceSummary': draft.experienceSummary},
       );
-      return applicationFromJson(Map<String, dynamic>.from(data as Map));
+      return JobApplication.fromJson(Map<String, dynamic>.from(data as Map));
     } on JavaApiException catch (error) {
       if (error.code == 'ALREADY_APPLIED') {
         throw Exception('You have already applied for this job');

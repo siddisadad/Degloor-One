@@ -1,7 +1,7 @@
-import 'package:degloor_one/backend/supabase/database/tables/job_applications_table.dart';
+import 'package:degloor_one/shared/job_application_draft.dart';
 
 /// Application without the applicant join. Screens use this instead of
-/// [JobApplicationsRow]. Owner lists stay on [JobApplicant].
+/// a table row. Owner lists stay on [JobApplicant].
 class JobApplication {
   const JobApplication({
     required this.id,
@@ -19,14 +19,18 @@ class JobApplication {
   final DateTime createdAt;
   final String? experienceSummary;
 
-  factory JobApplication.fromRow(JobApplicationsRow row) {
+  /// Java `ApplicationResponse`.
+  factory JobApplication.fromJson(Map<String, dynamic> json) {
+    final created = json['createdAt'];
     return JobApplication(
-      id: row.id,
-      jobId: row.jobId,
-      applicantId: row.applicantId,
-      status: row.status,
-      createdAt: row.createdAt,
-      experienceSummary: row.experienceSummary,
+      id: '${json['id'] ?? ''}',
+      jobId: '${json['jobId'] ?? ''}',
+      applicantId: '${json['applicantId'] ?? ''}',
+      status: '${json['status'] ?? JobApplicationDraft.applied}',
+      createdAt: created is String
+          ? DateTime.tryParse(created) ?? DateTime.fromMillisecondsSinceEpoch(0)
+          : DateTime.fromMillisecondsSinceEpoch(0),
+      experienceSummary: json['experienceSummary'] as String?,
     );
   }
 }

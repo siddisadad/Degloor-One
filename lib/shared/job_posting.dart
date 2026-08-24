@@ -1,6 +1,4 @@
-import 'package:degloor_one/backend/supabase/database/tables/jobs_table.dart';
-
-/// Shop-owned job. Screens use this instead of [JobsRow].
+/// Shop-owned job. Screens use this instead of a table row.
 /// Marketplace cards stay on [JobListing].
 class JobPosting {
   const JobPosting({
@@ -29,19 +27,23 @@ class JobPosting {
   final String? salaryRange;
   final String? locationText;
 
-  factory JobPosting.fromRow(JobsRow row) {
+  /// Java `JobResponse`.
+  factory JobPosting.fromJson(Map<String, dynamic> json) {
+    final created = json['createdAt'];
     return JobPosting(
-      id: row.id,
-      title: row.title,
-      description: row.description,
-      jobType: row.jobType,
-      isActive: row.isActive,
-      createdAt: row.createdAt,
-      businessId: row.businessId,
-      posterId: row.posterId,
-      category: row.category,
-      salaryRange: row.salaryRange,
-      locationText: row.locationText,
+      id: '${json['id'] ?? ''}',
+      title: '${json['title'] ?? ''}',
+      description: '${json['description'] ?? ''}',
+      jobType: '${json['jobType'] ?? ''}',
+      isActive: json['active'] as bool? ?? json['isActive'] as bool? ?? true,
+      createdAt: created is String
+          ? DateTime.tryParse(created) ?? DateTime.fromMillisecondsSinceEpoch(0)
+          : DateTime.fromMillisecondsSinceEpoch(0),
+      businessId: json['businessId'] == null ? null : '${json['businessId']}',
+      posterId: json['posterId'] == null ? null : '${json['posterId']}',
+      category: json['category'] as String?,
+      salaryRange: json['salaryRange'] as String?,
+      locationText: json['locationText'] as String?,
     );
   }
 }

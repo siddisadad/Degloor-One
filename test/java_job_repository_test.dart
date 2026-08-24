@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('Java job JSON maps to JobPosting', () {
-    final job = JavaJobRepository.postingFromJson({
+    final job = JobPosting.fromJson({
       'id': 'job-counter',
       'businessId': 'biz-patil',
       'posterId': 'user-1',
@@ -31,7 +31,7 @@ void main() {
   });
 
   test('Java job JSON falls back when createdAt and flags are omitted', () {
-    final job = JavaJobRepository.postingFromJson({
+    final job = JobPosting.fromJson({
       'id': 'job-night',
       'title': 'Night stocker',
       'description': 'Restock after closing.',
@@ -44,7 +44,7 @@ void main() {
   });
 
   test('Java application JSON maps to JobApplication', () {
-    final application = JavaJobRepository.applicationFromJson({
+    final application = JobApplication.fromJson({
       'id': 'app-1',
       'jobId': 'job-counter',
       'applicantId': 'customer-2',
