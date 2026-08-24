@@ -35,4 +35,20 @@ class ListingComplaint {
       businessId: row.businessId,
     );
   }
+
+  factory ListingComplaint.fromJson(Map<String, dynamic> json) {
+    final created = json['createdAt'];
+    return ListingComplaint(
+      id: '${json['id'] ?? ''}',
+      userId: '${json['userId'] ?? ''}',
+      subject: '${json['subject'] ?? ''}',
+      description: '${json['description'] ?? ''}',
+      status: '${json['status'] ?? ''}',
+      createdAt: created is String
+          ? DateTime.tryParse(created) ?? DateTime.fromMillisecondsSinceEpoch(0)
+          : DateTime.fromMillisecondsSinceEpoch(0),
+      orderId: json['orderId'] == null ? null : '${json['orderId']}',
+      businessId: json['businessId'] == null ? null : '${json['businessId']}',
+    );
+  }
 }

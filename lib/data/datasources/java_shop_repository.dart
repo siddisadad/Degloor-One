@@ -2,9 +2,9 @@ import 'package:degloor_one/core/api/api_client.dart';
 import 'package:degloor_one/data/repositories/shop_repository.dart';
 import 'package:degloor_one/shared/shop.dart';
 import 'package:degloor_one/shared/shop_draft.dart';
+import 'package:degloor_one/shared/shop_hours.dart';
 
 /// Shop access through the Java API. Table rows stay on the server.
-/// Nested hours on [BusinessResponse] stay unread until the hours slice.
 class JavaShopRepository implements ShopRepository {
   JavaShopRepository({JavaApiClient? client})
       : _client = client ?? JavaApiClient.instance;
@@ -35,6 +35,21 @@ class JavaShopRepository implements ShopRepository {
       longitude: (json['longitude'] as num?)?.toDouble(),
       distanceKm: (json['distanceKm'] as num?)?.toDouble(),
     );
+  }
+
+  static List<ShopHours> hoursFromJson(Map<String, dynamic> json) {
+    final raw = json['hours'];
+    if (raw is! List) return const [];
+    return raw
+        .whereType<Map>()
+        .map((row) {
+          final map = Map<String, dynamic>.from(row);
+          return ShopHours.fromJson({
+            ...map,
+            'businessId': map['businessId'] ?? json['id'],
+          });
+        })
+        .toList();
   }
 
   Map<String, dynamic> _body(ShopDraft draft) {

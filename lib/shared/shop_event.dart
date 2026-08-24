@@ -30,4 +30,19 @@ class ShopEvent {
       metadata: raw is Map<String, dynamic> ? raw : null,
     );
   }
+
+  factory ShopEvent.fromJson(Map<String, dynamic> json) {
+    final created = json['createdAt'];
+    final raw = json['metadata'];
+    return ShopEvent(
+      id: '${json['id'] ?? ''}',
+      businessId: '${json['businessId'] ?? ''}',
+      eventType: '${json['eventType'] ?? ''}',
+      createdAt: created is String
+          ? DateTime.tryParse(created) ?? DateTime.fromMillisecondsSinceEpoch(0)
+          : DateTime.fromMillisecondsSinceEpoch(0),
+      userId: json['userId'] == null ? null : '${json['userId']}',
+      metadata: raw is Map<String, dynamic> ? raw : null,
+    );
+  }
 }

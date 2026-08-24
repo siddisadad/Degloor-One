@@ -1,9 +1,9 @@
 import 'dart:typed_data';
 
-import 'package:degloor_one/backend/repositories/business_repository.dart';
 import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/core/error_handler.dart';
+import 'package:degloor_one/data/repositories/catalog_repository.dart';
 import 'package:degloor_one/data/repositories/shop_repository.dart';
 import 'package:degloor_one/shared/catalog_product.dart';
 import 'package:degloor_one/shared/catalog_product_draft.dart';
@@ -33,12 +33,12 @@ class ProfileCompleteness {
 class BusinessService {
   BusinessService({
     required ShopRepository shops,
-    BusinessRepository? catalog,
+    required CatalogRepository catalog,
   })  : _shops = shops,
-        _catalog = catalog ?? BusinessRepository();
+        _catalog = catalog;
 
   final ShopRepository _shops;
-  final BusinessRepository _catalog;
+  final CatalogRepository _catalog;
 
   static BusinessService? _instance;
 
@@ -50,9 +50,12 @@ class BusinessService {
     return bound;
   }
 
-  /// Called from the composition root with a concrete shop repository.
-  static void bind(ShopRepository shops) {
-    _instance = BusinessService(shops: shops);
+  /// Called from the composition root with concrete repositories.
+  static void bind(
+    ShopRepository shops, {
+    required CatalogRepository catalog,
+  }) {
+    _instance = BusinessService(shops: shops, catalog: catalog);
   }
 
   static ProfileCompleteness completeness(Shop? shop) {
@@ -177,14 +180,12 @@ class BusinessService {
 
   Future<List<CatalogProduct>> products(String userId) async {
     final shop = await requireOwned(userId);
-    final rows = await _catalog.productsFor(shop.id);
-    return rows.map(CatalogProduct.fromRow).toList();
+    return _catalog.productsFor(shop.id);
   }
 
   Future<List<ProductCategory>> productCategories(String userId) async {
     final shop = await requireOwned(userId);
-    final rows = await _catalog.productCategoriesFor(shop.id);
-    return rows.map(ProductCategory.fromRow).toList();
+    return _catalog.productCategoriesFor(shop.id);
   }
 
   Future<CatalogProduct> addProduct({
@@ -300,9 +301,7 @@ class BusinessService {
 
   Future<List<ShopHours>> hours(String userId) async {
     final shop = await requireOwned(userId);
-    final hours = (await _catalog.hoursFor(shop.id))
-        .map(ShopHours.fromRow)
-        .toList();
+    final hours = await _catalog.hoursFor(shop.id);
     final existingDays = hours.map((row) => row.dayOfWeek).toSet();
     for (var day = 0; day < 7; day++) {
       if (existingDays.contains(day)) continue;

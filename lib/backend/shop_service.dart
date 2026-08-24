@@ -1,8 +1,8 @@
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/business_service.dart';
 import 'package:degloor_one/backend/notification_service.dart';
-import 'package:degloor_one/backend/repositories/shop_detail_repository.dart';
 import 'package:degloor_one/core/error_handler.dart';
+import 'package:degloor_one/data/repositories/shop_detail_repository.dart';
 import 'package:degloor_one/data/repositories/shop_repository.dart';
 import 'package:degloor_one/shared/catalog_product.dart';
 import 'package:degloor_one/shared/listing_complaint.dart';
@@ -93,9 +93,9 @@ class ShopReviews {
 class ShopService {
   ShopService({
     required ShopRepository shops,
-    ShopDetailRepository? details,
+    required ShopDetailRepository details,
   })  : _shops = shops,
-        _details = details ?? ShopDetailRepository();
+        _details = details;
 
   final ShopRepository _shops;
   final ShopDetailRepository _details;
@@ -110,9 +110,12 @@ class ShopService {
     return bound;
   }
 
-  /// Called from the composition root with a concrete shop repository.
-  static void bind(ShopRepository shops) {
-    _instance = ShopService(shops: shops);
+  /// Called from the composition root with concrete repositories.
+  static void bind(
+    ShopRepository shops, {
+    required ShopDetailRepository details,
+  }) {
+    _instance = ShopService(shops: shops, details: details);
   }
 
   Future<Shop?> byId(String businessId) async {
@@ -122,13 +125,12 @@ class ShopService {
 
   Future<String?> categoryName(String? categoryId) async {
     if (categoryId == null || categoryId.isEmpty) return null;
-    final row = await _details.categoryById(categoryId);
-    return row?.name;
+    final category = await _details.categoryById(categoryId);
+    return category?.name;
   }
 
-  Future<List<ShopHours>> hours(String businessId) async {
-    final rows = await _details.hoursFor(businessId);
-    return rows.map(ShopHours.fromRow).toList();
+  Future<List<ShopHours>> hours(String businessId) {
+    return _details.hoursFor(businessId);
   }
 
   /// Weekday is Sunday=0 (`DateTime.weekday % 7`). Overnight windows
@@ -176,10 +178,7 @@ class ShopService {
       final hoursById = await _details.hoursForMany(businessIds);
       return {
         for (final id in businessIds)
-          id: isOpenFromHours(
-            (hoursById[id] ?? const []).map(ShopHours.fromRow).toList(),
-            now: at,
-          ),
+          id: isOpenFromHours(hoursById[id] ?? const [], now: at),
       };
     } catch (error) {
       AppLogger.error('Error checking multiple business open statuses', error);
@@ -189,12 +188,8 @@ class ShopService {
 
   Future<ShopCatalog> catalog(String businessId) async {
     if (businessId.isEmpty) return ShopCatalog.empty;
-    final products = (await _details.availableProducts(businessId))
-        .map(CatalogProduct.fromRow)
-        .toList();
-    final categories = (await _details.productCategories(businessId))
-        .map(ProductCategory.fromRow)
-        .toList();
+    final products = await _details.availableProducts(businessId);
+    final categories = await _details.productCategories(businessId);
     final grouped = <String, List<CatalogProduct>>{};
     for (final product in products) {
       final key = product.categoryId ?? 'Uncategorized';
@@ -209,8 +204,7 @@ class ShopService {
 
   Future<CatalogProduct?> productById(String productId) async {
     if (productId.isEmpty) return null;
-    final row = await _details.productById(productId);
-    return row == null ? null : CatalogProduct.fromRow(row);
+    return _details.productById(productId);
   }
 
   Future<void> trackEvent({
@@ -338,9 +332,8 @@ class ShopService {
       userId: userId,
       businessId: businessId,
     );
-    final events =
-        (await _details.analyticsFor(businessId)).map(ShopEvent.fromRow);
-    if (days <= 0) return events.toList();
+    final events = await _details.analyticsFor(businessId);
+    if (days <= 0) return events;
     final start = DateTime.now().subtract(Duration(days: days));
     return events
         .where((event) => !event.createdAt.isBefore(start))

@@ -102,6 +102,37 @@ void main() {
     expect(source.contains(_table), isFalse);
   });
 
+  test('shop detail and catalog interfaces stay off Supabase', () {
+    const paths = [
+      'lib/data/repositories/shop_detail_repository.dart',
+      'lib/data/repositories/catalog_repository.dart',
+      'lib/data/repositories/discovery_repository.dart',
+    ];
+    final offenders = <String>[];
+    for (final path in paths) {
+      final source = File(path).readAsStringSync();
+      if (source.contains(_barrel) ||
+          source.contains(_table) ||
+          source.contains('data/datasources')) {
+        offenders.add(path);
+      }
+    }
+    expect(offenders, isEmpty, reason: offenders.join('\n'));
+  });
+
+  test('Java leftover shop repositories stay off Supabase tables', () {
+    const paths = [
+      'lib/data/datasources/java_shop_detail_repository.dart',
+      'lib/data/datasources/java_catalog_repository.dart',
+      'lib/data/datasources/java_discovery_repository.dart',
+    ];
+    for (final path in paths) {
+      final source = File(path).readAsStringSync();
+      expect(source.contains(_barrel), isFalse, reason: path);
+      expect(source.contains(_table), isFalse, reason: path);
+    }
+  });
+
   test('profile address screens talk to the controller, not the service', () {
     const paths = [
       'lib/features/profile/add_address_widget.dart',

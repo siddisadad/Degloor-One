@@ -32,4 +32,15 @@ class ShopCategory {
       createdAt: createdAt,
     );
   }
+
+  factory ShopCategory.fromJson(Map<String, dynamic> json) {
+    final created = json['createdAt'];
+    return ShopCategory(
+      id: '${json['id'] ?? ''}',
+      name: '${json['name'] ?? ''}',
+      iconName: json['iconName'] as String?,
+      displayOrder: (json['displayOrder'] as num?)?.toInt(),
+      createdAt: created is String ? DateTime.tryParse(created) : null,
+    );
+  }
 }

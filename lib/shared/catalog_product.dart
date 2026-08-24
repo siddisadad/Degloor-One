@@ -48,4 +48,24 @@ class CatalogProduct {
       distanceKm: row.distanceKm,
     );
   }
+
+  factory CatalogProduct.fromJson(Map<String, dynamic> json) {
+    final created = json['createdAt'];
+    return CatalogProduct(
+      id: '${json['id'] ?? ''}',
+      businessId: '${json['businessId'] ?? ''}',
+      name: '${json['name'] ?? ''}',
+      createdAt: created is String
+          ? DateTime.tryParse(created) ?? DateTime.fromMillisecondsSinceEpoch(0)
+          : DateTime.fromMillisecondsSinceEpoch(0),
+      categoryId: json['categoryId'] == null ? null : '${json['categoryId']}',
+      description: json['description'] as String?,
+      price: (json['price'] as num?)?.toDouble(),
+      imageUrl: json['imageUrl'] as String?,
+      isAvailable: json['available'] as bool? ?? json['isAvailable'] as bool?,
+      stockQuantity: (json['stockQuantity'] as num?)?.toInt(),
+      trackInventory: json['trackInventory'] as bool?,
+      distanceKm: (json['distanceKm'] as num?)?.toDouble(),
+    );
+  }
 }

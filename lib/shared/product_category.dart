@@ -22,4 +22,16 @@ class ProductCategory {
       createdAt: row.createdAt,
     );
   }
+
+  factory ProductCategory.fromJson(Map<String, dynamic> json) {
+    final created = json['createdAt'];
+    return ProductCategory(
+      id: '${json['id'] ?? ''}',
+      businessId: '${json['businessId'] ?? ''}',
+      name: '${json['name'] ?? ''}',
+      createdAt: created is String
+          ? DateTime.tryParse(created) ?? DateTime.fromMillisecondsSinceEpoch(0)
+          : DateTime.fromMillisecondsSinceEpoch(0),
+    );
+  }
 }
