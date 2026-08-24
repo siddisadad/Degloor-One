@@ -1,3 +1,5 @@
+import 'package:degloor_one/shared/marketplace_joins.dart';
+
 /// Booking between a customer and a provider. Screens use this instead of
 /// a table row.
 class ServiceRequest {
@@ -9,6 +11,7 @@ class ServiceRequest {
     this.description,
     this.status,
     this.scheduledAt,
+    this.user,
   });
 
   final String id;
@@ -18,8 +21,9 @@ class ServiceRequest {
   final String? description;
   final String? status;
   final DateTime? scheduledAt;
+  final JoinedUser? user;
 
-  /// Java `RequestResponse`.
+  /// Java `RequestResponse`. Customer profile maps onto [JoinedUser].
   factory ServiceRequest.fromJson(Map<String, dynamic> json) {
     DateTime? parse(dynamic value) {
       if (value is String) return DateTime.tryParse(value);
@@ -35,6 +39,8 @@ class ServiceRequest {
       description: json['description'] as String?,
       status: json['status'] as String?,
       scheduledAt: parse(json['scheduledAt']),
+      user: JoinedUser.fromJoin(json['user'] ?? json['users']) ??
+          JoinedUser.fromJoin(json),
     );
   }
 }
