@@ -1,6 +1,4 @@
-import 'package:degloor_one/backend/supabase/database/tables/delivery_partners_table.dart';
-
-/// Degloor rider. Screens use this instead of [DeliveryPartnersRow].
+/// Degloor rider. Screens use this instead of a table row.
 class DeliveryPartner {
   const DeliveryPartner({
     required this.id,
@@ -23,20 +21,6 @@ class DeliveryPartner {
   final String? vehicleNumber;
   final double? currentLatitude;
   final double? currentLongitude;
-
-  factory DeliveryPartner.fromRow(DeliveryPartnersRow row) {
-    return DeliveryPartner(
-      id: row.id,
-      userId: row.userId,
-      isAvailable: row.isAvailable,
-      isVerified: row.isVerified,
-      createdAt: row.createdAt,
-      vehicleType: row.vehicleType,
-      vehicleNumber: row.vehicleNumber,
-      currentLatitude: row.currentLatitude,
-      currentLongitude: row.currentLongitude,
-    );
-  }
 
   factory DeliveryPartner.fromJson(Map<String, dynamic> json) {
     return DeliveryPartner(

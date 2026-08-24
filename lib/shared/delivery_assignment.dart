@@ -1,6 +1,4 @@
-import 'package:degloor_one/backend/supabase/database/tables/delivery_assignments_table.dart';
-
-/// Rider job for one order. Screens use this instead of [DeliveryAssignmentsRow].
+/// Rider job for one order. Screens use this instead of a table row.
 class DeliveryAssignment {
   const DeliveryAssignment({
     required this.id,
@@ -15,16 +13,6 @@ class DeliveryAssignment {
   final String deliveryPartnerId;
   final String status;
   final DateTime createdAt;
-
-  factory DeliveryAssignment.fromRow(DeliveryAssignmentsRow row) {
-    return DeliveryAssignment(
-      id: row.id,
-      orderId: row.orderId,
-      deliveryPartnerId: row.deliveryPartnerId,
-      status: row.status,
-      createdAt: row.createdAt,
-    );
-  }
 
   factory DeliveryAssignment.fromJson(Map<String, dynamic> json) {
     final created = json['createdAt'];

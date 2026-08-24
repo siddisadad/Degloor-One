@@ -227,5 +227,19 @@ void main() {
     expect(assignment.orderId, 'order-out');
     expect(assignment.deliveryPartnerId, 'dp-amit');
     expect(assignment.status, 'picked_up');
+
+    final order = PlacedOrder.fromJson({
+      'id': 'order-ready',
+      'userId': 'cust-1',
+      'businessId': 'biz-1',
+      'totalAmount': 120,
+      'status': 'ready',
+      'paymentStatus': 'paid',
+      'createdAt': '2026-08-24T10:00:00Z',
+    });
+    expect(order, isA<PlacedOrder>());
+    expect(order.id, 'order-ready');
+    expect(order.totalAmount, 120);
+    expect(order.status, 'ready');
   });
 }
