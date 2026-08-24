@@ -31,4 +31,23 @@ class AppNotification {
       type: row.type,
     );
   }
+
+  /// Java `NotificationResponse`. [userId] is the signed-in inbox owner.
+  factory AppNotification.fromJson(
+    Map<String, dynamic> json, {
+    required String userId,
+  }) {
+    final created = json['createdAt'];
+    return AppNotification(
+      id: '${json['id'] ?? ''}',
+      userId: userId,
+      title: '${json['title'] ?? ''}',
+      message: '${json['message'] ?? ''}',
+      isRead: json['read'] as bool? ?? json['isRead'] as bool? ?? false,
+      createdAt: created is String
+          ? DateTime.tryParse(created) ?? DateTime.fromMillisecondsSinceEpoch(0)
+          : DateTime.fromMillisecondsSinceEpoch(0),
+      type: json['type'] as String?,
+    );
+  }
 }

@@ -1,6 +1,8 @@
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/page_query.dart';
 
+/// Data access for the inbox. Widgets should go through [NotificationService].
+/// Table-backed implementation; Java leftover reads live on [NotificationService].
 class NotificationRepository {
   Future<List<NotificationsRow>> forUser(
     String userId, {

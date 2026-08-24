@@ -12,6 +12,12 @@ class NotificationApi {
     }) as Map);
   }
 
+  static Future<Map<String, dynamic>> unreadCount() async {
+    return Map<String, dynamic>.from(
+      await _http.get('/api/v1/notifications/unread-count') as Map,
+    );
+  }
+
   static Future<void> markRead(String id) =>
       _http.post('/api/v1/notifications/$id/read');
 
