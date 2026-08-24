@@ -402,11 +402,18 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
               padding: const EdgeInsetsDirectional.fromSTEB(8, 0, 0, 0),
               child: InkWell(
                 onTap: () async {
-                  await WhatsAppService.launchWhatsApp(
+                  final opened = await WhatsAppService.launchWhatsApp(
                     phoneNumber: phoneNumber,
                     message:
                         'Hello, this is regarding your order #$shortId on DEGLOOR ONE.',
                   );
+                  if (!opened && context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(WhatsAppService.unableToOpenMessage),
+                      ),
+                    );
+                  }
                 },
                 child: Icon(
                   Icons.chat_bubble_outline_rounded,

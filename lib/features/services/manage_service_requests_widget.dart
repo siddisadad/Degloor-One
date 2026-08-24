@@ -221,10 +221,24 @@ class _ManageServiceRequestsWidgetState
                                           padding: const EdgeInsets.only(right: 8.0),
                                           child: InkWell(
                                             onTap: () async {
-                                              await WhatsAppService.launchWhatsApp(
-                                                phoneNumber: _customerPhones[req.userId]!,
+                                              final opened =
+                                                  await WhatsAppService
+                                                      .launchWhatsApp(
+                                                phoneNumber:
+                                                    _customerPhones[req.userId]!,
                                                 message: 'Hello, I am responding to your service request on DEGLOOR ONE.',
                                               );
+                                              if (!opened && context.mounted) {
+                                                ScaffoldMessenger.of(context)
+                                                    .showSnackBar(
+                                                  const SnackBar(
+                                                    content: Text(
+                                                      WhatsAppService
+                                                          .unableToOpenMessage,
+                                                    ),
+                                                  ),
+                                                );
+                                              }
                                             },
                                             child: Icon(
                                               Icons.chat_bubble_outline_rounded,

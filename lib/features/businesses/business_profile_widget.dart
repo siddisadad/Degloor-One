@@ -778,7 +778,7 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                                               .showSnackBar(
                                             const SnackBar(
                                               content: Text(
-                                                'Unable to open WhatsApp. Please try again.',
+                                                WhatsAppService.unableToOpenMessage,
                                               ),
                                             ),
                                           );
