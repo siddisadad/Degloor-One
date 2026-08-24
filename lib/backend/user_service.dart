@@ -1,4 +1,6 @@
+import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/data/repositories/user_repository.dart';
+import 'package:degloor_one/shared/showcase_catalog.dart';
 import 'package:degloor_one/shared/user_profile.dart';
 import 'package:degloor_one/shared/user_profile_draft.dart';
 
@@ -25,7 +27,28 @@ class UserService {
 
   Future<UserProfile?> byId(String userId) async {
     if (userId.isEmpty) return null;
-    return _repository.byId(userId);
+    try {
+      final row = await _repository.byId(userId);
+      if (row != null) return row;
+    } catch (_) {}
+    return _catalogUser(userId);
+  }
+
+  static UserProfile? _catalogUser(String userId) {
+    final rows = ShowcaseCatalog.query(
+      'users',
+      ShowcaseQuery()..eq('id', userId),
+    );
+    if (rows.isEmpty) return null;
+    final row = rows.first;
+    return UserProfile(
+      id: '${row['id']}',
+      email: row['email']?.toString(),
+      fullName: row['full_name']?.toString(),
+      avatarUrl: row['avatar_url']?.toString(),
+      role: row['role']?.toString(),
+      phoneNumber: row['phone_number']?.toString(),
+    );
   }
 
   Future<List<UserProfile>> byIds(List<String> ids) async {

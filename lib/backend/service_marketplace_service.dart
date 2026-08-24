@@ -1,3 +1,4 @@
+import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/backend/native_service_bridge.dart';
 import 'package:degloor_one/backend/notification_service.dart';
 import 'package:degloor_one/backend/repositories/service_marketplace_repository.dart';
@@ -13,6 +14,7 @@ import 'package:degloor_one/shared/service_provider_profile.dart';
 import 'package:degloor_one/shared/service_request.dart';
 import 'package:degloor_one/shared/rpc_row.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
+import 'package:degloor_one/shared/user_role.dart';
 
 class ServiceRequestStatus {
   static const pending = 'pending';
@@ -169,7 +171,7 @@ class ServiceMarketplaceService {
     if (existing != null) {
       throw Exception('You already have a service profile');
     }
-    return _repository.insertProvider({
+    final created = await _repository.insertProvider({
       'user_id': userId,
       'category_id': categoryId,
       'experience_years': years,
@@ -177,6 +179,19 @@ class ServiceMarketplaceService {
       'bio': trimmedBio,
       'is_verified': false,
     });
+    _promoteServiceProvider(userId);
+    return created;
+  }
+
+  static void _promoteServiceProvider(String userId) {
+    ShowcaseCatalog.update(
+      'users',
+      UserRole.serviceProvider.toUpdateJson(),
+      ShowcaseQuery()..eq('id', userId),
+    );
+    if (userId == GuestAuthUser.guestUid) {
+      promoteGuestRole(UserRole.serviceProvider);
+    }
   }
 
   Future<ServiceProviderCard?> providerById(String id) async {

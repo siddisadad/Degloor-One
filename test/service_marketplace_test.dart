@@ -2,6 +2,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/backend/service_marketplace_service.dart';
+import 'package:degloor_one/backend/user_service.dart';
 import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/page_query.dart';
@@ -132,6 +133,10 @@ void main() {
     expect(profile.experienceYears, 5);
     expect(profile.hourlyRate, 200);
     expect(profile.isVerified, isFalse);
+    expect(
+      await UserService.instance.roleFor(GuestAuthUser.guestUid),
+      'service_provider',
+    );
 
     await expectLater(
       ServiceMarketplaceService.instance.register(

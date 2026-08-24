@@ -1,8 +1,10 @@
 import 'package:degloor_one/app_state.dart';
 import 'package:degloor_one/auth/guest_auth_user.dart';
+import 'package:degloor_one/shared/user_role.dart';
 import 'package:degloor_one/features/profile/profile_info_widget.dart';
 import 'package:degloor_one/features/profile/user_profile_reports_widget.dart';
 import 'package:degloor_one/l10n/app_localizations.dart';
+import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -106,6 +108,7 @@ void main() {
 
     expect(find.byIcon(Icons.arrow_back_rounded), findsOneWidget);
     expect(find.text('Guest Customer'), findsOneWidget);
+    expect(find.text('Customer'), findsOneWidget);
     expect(find.text('guest@local'), findsOneWidget);
 
     await tester.tap(find.text('Personal Information'));
@@ -222,6 +225,44 @@ void main() {
 
     await _openProfileTile(tester, 'सेवा अटी');
     expect(find.text('स्थानिक मार्केटप्लेस'), findsOneWidget);
+  });
+
+  testWidgets('business owner profile opens the shop dashboard', (tester) async {
+    ShowcaseCatalog.update(
+      'users',
+      UserRole.businessOwner.toUpdateJson(),
+      ShowcaseQuery()..eq('id', GuestAuthUser.guestUid),
+    );
+    promoteGuestRole(UserRole.businessOwner);
+    await tester.binding.setSurfaceSize(const Size(390, 844));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(_profileApp());
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    expect(find.text('Business owner'), findsOneWidget);
+    expect(find.text('Register your business'), findsNothing);
+    expect(find.text('My shop'), findsOneWidget);
+  });
+
+  testWidgets('service provider profile opens service requests', (tester) async {
+    ShowcaseCatalog.update(
+      'users',
+      UserRole.serviceProvider.toUpdateJson(),
+      ShowcaseQuery()..eq('id', GuestAuthUser.guestUid),
+    );
+    promoteGuestRole(UserRole.serviceProvider);
+    await tester.binding.setSurfaceSize(const Size(390, 844));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(_profileApp());
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    expect(find.text('Service provider'), findsOneWidget);
+    expect(find.text('Register your business'), findsNothing);
+    expect(find.text('My services'), findsOneWidget);
   });
 
   testWidgets('customer profile opens business registration', (tester) async {

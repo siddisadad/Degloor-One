@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/core/error_handler.dart';
@@ -144,14 +145,14 @@ class BusinessService {
     );
 
     // Java promotes customer → business_owner on POST /api/v1/businesses.
-    // Showcase still writes the owner role so the dashboard route works locally.
-    if (kUseShowcaseData) {
-      ShowcaseCatalog.update(
-        'users',
-        UserRole.businessOwner.toUpdateJson(),
-        ShowcaseQuery()..eq('id', userId),
-      );
-    }
+    // Local leftover writes the owner role so Profile can tell shops from
+    // customers when live `users` is empty.
+    ShowcaseCatalog.update(
+      'users',
+      UserRole.businessOwner.toUpdateJson(),
+      ShowcaseQuery()..eq('id', userId),
+    );
+    promoteGuestRole(UserRole.businessOwner);
     return shop;
   }
 
