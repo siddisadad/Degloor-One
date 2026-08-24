@@ -232,38 +232,46 @@ class _UserProfileReportsWidgetState extends State<UserProfileReportsWidget> {
                     ),
                     const SizedBox(height: 12),
                     _sectionHeader('My Reports'),
-                    FutureBuilder<List<ListingComplaint>>(
-                      future: _model.complaintsFuture,
-                      builder: (context, snapshot) {
-                        if (!snapshot.hasData) {
-                          return const Padding(
-                            padding: EdgeInsets.all(24),
-                            child: Center(child: CircularProgressIndicator()),
+                    if (_model.complaintsFuture == null)
+                      const EmptyStateView(
+                        icon: Icons.flag_outlined,
+                        title: 'No reports yet',
+                        description:
+                            'If something is wrong with a Degloor listing, report it from the shop page.',
+                      )
+                    else
+                      FutureBuilder<List<ListingComplaint>>(
+                        future: _model.complaintsFuture,
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData) {
+                            return const Padding(
+                              padding: EdgeInsets.all(24),
+                              child: Center(child: CircularProgressIndicator()),
+                            );
+                          }
+                          final complaints = snapshot.data!;
+                          if (complaints.isEmpty) {
+                            return const EmptyStateView(
+                              icon: Icons.flag_outlined,
+                              title: 'No reports yet',
+                              description:
+                                  'If something is wrong with a Degloor listing, report it from the shop page.',
+                            );
+                          }
+                          return Column(
+                            children: complaints
+                                .map(
+                                  (complaint) => _settingsTile(
+                                    Icons.flag_outlined,
+                                    complaint.subject,
+                                    '${complaint.status} · ${dateTimeFormat('MMM d, yyyy', complaint.createdAt)}',
+                                    () => _openReport(complaint),
+                                  ),
+                                )
+                                .toList(),
                           );
-                        }
-                        final complaints = snapshot.data!;
-                        if (complaints.isEmpty) {
-                          return const EmptyStateView(
-                            icon: Icons.flag_outlined,
-                            title: 'No reports yet',
-                            description:
-                                'If something is wrong with a Degloor listing, report it from the shop page.',
-                          );
-                        }
-                        return Column(
-                          children: complaints
-                              .map(
-                                (complaint) => _settingsTile(
-                                  Icons.flag_outlined,
-                                  complaint.subject,
-                                  '${complaint.status} · ${dateTimeFormat('MMM d, yyyy', complaint.createdAt)}',
-                                  () => _openReport(complaint),
-                                ),
-                              )
-                              .toList(),
-                        );
-                      },
-                    ),
+                        },
+                      ),
                     const SizedBox(height: 24),
                     Padding(
                       padding: const EdgeInsets.symmetric(
@@ -376,37 +384,43 @@ class _UserProfileReportsWidgetState extends State<UserProfileReportsWidget> {
     final businessId = complaint.businessId;
     return showModalBottomSheet<void>(
       context: context,
+      isScrollControlled: true,
       builder: (sheetContext) {
-        return Padding(
-          padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(complaint.subject, style: DegloorTheme.headingMedium),
-              const SizedBox(height: 8),
-              Text(
-                '${complaint.status} · ${dateTimeFormat('MMM d, yyyy', complaint.createdAt)}',
-                style: DegloorTheme.bodySmall,
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(complaint.subject, style: DegloorTheme.headingMedium),
+                  const SizedBox(height: 8),
+                  Text(
+                    '${complaint.status} · ${dateTimeFormat('MMM d, yyyy', complaint.createdAt)}',
+                    style: DegloorTheme.bodySmall,
+                  ),
+                  if (complaint.description.trim().isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    Text(complaint.description, style: DegloorTheme.bodyMedium),
+                  ],
+                  if (businessId != null && businessId.isNotEmpty) ...[
+                    const SizedBox(height: 24),
+                    ButtonWidget(
+                      content: 'View shop',
+                      onTap: () async {
+                        Navigator.pop(sheetContext);
+                        if (!context.mounted) return;
+                        await context.pushNamed(
+                          'BusinessProfile',
+                          queryParameters: {'businessId': businessId},
+                        );
+                      },
+                    ),
+                  ],
+                ],
               ),
-              if (complaint.description.trim().isNotEmpty) ...[
-                const SizedBox(height: 16),
-                Text(complaint.description, style: DegloorTheme.bodyMedium),
-              ],
-              if (businessId != null && businessId.isNotEmpty) ...[
-                const SizedBox(height: 24),
-                ButtonWidget(
-                  content: 'View shop',
-                  onTap: () async {
-                    Navigator.pop(sheetContext);
-                    context.pushNamed(
-                      'BusinessProfile',
-                      queryParameters: {'businessId': businessId},
-                    );
-                  },
-                ),
-              ],
-            ],
+            ),
           ),
         );
       },
