@@ -2,6 +2,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/backend/cart_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/data/datasources/bind_cart_service.dart';
+import 'package:degloor_one/data/datasources/java_cart_repository.dart';
+import 'package:degloor_one/data/repositories/cart_repository.dart';
 import 'package:degloor_one/shared/checkout_line_item.dart';
 import 'package:degloor_one/shared/join_rows.dart';
 import 'package:degloor_one/shared/shopping_cart.dart';
@@ -160,6 +163,33 @@ void main() {
     expect(result.message, 'Please choose a valid quantity.');
   });
 
+  test('CartService addProduct delegates to the bound repository', () async {
+    final fake = _RecordingCartRepository();
+    CartService.bind(fake);
+    addTearDown(bindCartService);
+
+    final result = await CartService.addProduct(
+      userId: GuestAuthUser.guestUid,
+      businessId: ShowcaseCatalog.bizHotel,
+      productId: ShowcaseCatalog.prodThali,
+    );
+    expect(result.added, isTrue);
+    expect(fake.addedProductIds, [ShowcaseCatalog.prodThali]);
+  });
+
+  test('CartService maps CartNeedsReplacement from the repository', () async {
+    CartService.bind(_ReplacementCartRepository());
+    addTearDown(bindCartService);
+
+    final result = await CartService.addProduct(
+      userId: GuestAuthUser.guestUid,
+      businessId: ShowcaseCatalog.bizHotel,
+      productId: ShowcaseCatalog.prodThali,
+    );
+    expect(result.needsReplacement, isTrue);
+    expect(result.added, isFalse);
+  });
+
   test('Java cart JSON maps to ShoppingCart and CartLine', () {
     final cart = ShoppingCart.fromJson({
       'id': 'cart-1',
@@ -196,5 +226,74 @@ void main() {
       'product_id': 'prod-rice',
       'quantity': 2,
     });
+
+    expect(
+      JavaCartRepository.linesFromJson({
+        'items': [
+          {
+            'id': 'ci-rice',
+            'productId': 'prod-rice',
+            'quantity': 2,
+          },
+        ],
+      }, cartId: 'cart-1'),
+      hasLength(1),
+    );
+    expect(
+      JavaCartRepository.quantityFromJson({
+        'items': [
+          {'quantity': 2},
+          {'quantity': 1},
+        ],
+      }),
+      3,
+    );
   });
+}
+
+class _RecordingCartRepository implements CartRepository {
+  final addedProductIds = <String>[];
+
+  @override
+  Future<void> addProduct({
+    required String userId,
+    required String businessId,
+    required String productId,
+    int quantity = 1,
+    bool replaceOtherBusiness = false,
+  }) async {
+    addedProductIds.add(productId);
+  }
+
+  @override
+  Future<void> updateQuantity({
+    required String itemId,
+    required int quantity,
+    required String userId,
+  }) async {}
+
+  @override
+  Future<void> clearCart({required String userId}) async {}
+
+  @override
+  Future<List<ShoppingCart>> cartsForUser(String userId) async => const [];
+
+  @override
+  Future<List<CartLine>> itemsForCart(String cartId) async => const [];
+
+  @override
+  Future<int> itemCount(String userId) async => 0;
+}
+
+class _ReplacementCartRepository extends _RecordingCartRepository {
+  @override
+  Future<void> addProduct({
+    required String userId,
+    required String businessId,
+    required String productId,
+    int quantity = 1,
+    bool replaceOtherBusiness = false,
+  }) async {
+    throw CartNeedsReplacement();
+  }
 }
