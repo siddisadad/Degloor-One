@@ -126,6 +126,13 @@ void main() {
     expect(source.contains(_table), isFalse);
   });
 
+  test('Java auth user stays off Supabase tables', () {
+    const path = 'lib/auth/java_auth_user.dart';
+    final source = File(path).readAsStringSync();
+    expect(source.contains(_barrel), isFalse);
+    expect(source.contains(_table), isFalse);
+  });
+
   test('shop leftover domain types stay off Supabase tables', () {
     const paths = [
       'lib/shared/shop_hours.dart',

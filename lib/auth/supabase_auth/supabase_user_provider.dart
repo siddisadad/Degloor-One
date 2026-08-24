@@ -1,9 +1,11 @@
 import 'package:rxdart/rxdart.dart';
 
 import 'package:degloor_one/auth/guest_auth_user.dart';
+import 'package:degloor_one/auth/java_auth_user.dart';
 import 'package:degloor_one/auth/password_recovery.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/backend/user_service.dart';
+import 'package:degloor_one/core/api/api_client.dart';
 
 export '../base_auth_user_provider.dart';
 
@@ -83,6 +85,11 @@ Stream<BaseAuthUser> degloorOneSupabaseUserStream() {
   if (kBypassAuth) {
     installGuestSession();
     return Stream<BaseAuthUser>.value(currentUser!);
+  }
+  if (JavaApiConfig.enabled) {
+    return Stream<BaseAuthUser>.value(
+      currentUser ?? JavaAuthUser.signedOut(),
+    );
   }
   final supabaseAuthStream = SupaFlow.client.auth.onAuthStateChange.debounce(
       (authState) => authState.event == AuthChangeEvent.tokenRefreshed

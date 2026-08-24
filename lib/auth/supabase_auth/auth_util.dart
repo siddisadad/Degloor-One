@@ -1,4 +1,5 @@
 import 'package:degloor_one/auth/guest_auth_user.dart';
+import 'package:degloor_one/auth/java_auth_user.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/backend/user_service.dart';
 import 'supabase_auth_manager.dart';
@@ -24,6 +25,7 @@ bool get currentUserEmailVerified => currentUser?.emailVerified ?? false;
 
 Future<String?> getCurrentUserRole() async {
   if (currentUser is GuestAuthUser) return 'customer';
+  if (currentUser is JavaAuthUser) return currentUser?.role;
   if (!loggedIn || currentUserUid.length < 10) return null;
   return UserService.instance.roleFor(currentUserUid);
 }
