@@ -204,6 +204,19 @@ void main() {
     expect(rows, hasLength(1));
     expect(rows.single, isA<BusinessesRow>());
     expect(rows.single.name, 'Ganesh Sweet Mart');
+
+    final users = List<UsersRow>.from(
+      UsersTable().rowsFromWire(<dynamic>[
+        <dynamic, dynamic>{
+          'id': '00000000-0000-4000-8000-000000000001',
+          'full_name': 'Guest Customer',
+          'email': 'guest@local',
+          'created_at': '2026-01-01T00:00:00.000Z',
+        },
+      ]),
+    );
+    expect(users, isA<List<UsersRow>>());
+    expect(users.single.fullName, 'Guest Customer');
   });
 
   test('table and search RPCs use local showcase data on the dead host',

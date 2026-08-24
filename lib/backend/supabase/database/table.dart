@@ -11,6 +11,16 @@ abstract class SupabaseTable<T extends SupabaseDataRow> {
 
   PostgrestFilterBuilder _select() => SupaFlow.client.from(tableName).select();
 
+  dynamic _applyPage(dynamic query, int? limit, int? offset) {
+    if (offset != null && limit != null) {
+      return query.range(offset, offset + limit - 1);
+    }
+    if (limit != null) {
+      return query.limit(limit);
+    }
+    return query;
+  }
+
   /// Chrome PostgREST payloads are `JSArray` / `Map<dynamic, dynamic>`.
   @visibleForTesting
   List<T> rowsFromWire(dynamic raw) {
@@ -39,15 +49,12 @@ abstract class SupabaseTable<T extends SupabaseDataRow> {
       return ShowcaseCatalog.query(tableName, captured).map(createRow).toList();
     }
     try {
-      final select = _select();
-      var query = queryFn(select);
-      if (offset != null && limit != null) {
-        query = query.range(offset, offset + limit - 1);
-      } else if (limit != null) {
-        query = query.limit(limit);
-      }
-      final rows = await query.select();
-      return rowsFromWire(rows);
+      // `_select()` already called `.select()`. A second `.select()` is
+      // inferred as `Future<List<T>>` (e.g. `List<UsersRow>`), and Chrome
+      // then rejects the live `JSArray`.
+      final dynamic query = _applyPage(queryFn(_select()), limit, offset);
+      final dynamic raw = await query;
+      return List<T>.from(rowsFromWire(raw));
     } catch (e) {
       AppLogger.error('Supabase queryRows error ($tableName)', e);
       rethrow;
@@ -63,8 +70,8 @@ abstract class SupabaseTable<T extends SupabaseDataRow> {
       return ShowcaseCatalog.query(tableName, captured).map(createRow).toList();
     }
     try {
-      final r = await queryFn(_select()).limit(1).select().maybeSingle();
-      final row = rowFromWire(r);
+      final dynamic raw = await queryFn(_select()).limit(1).maybeSingle();
+      final row = rowFromWire(raw);
       return [if (row != null) row];
     } catch (e) {
       AppLogger.error('Supabase querySingleRow error ($tableName)', e);
@@ -108,7 +115,8 @@ abstract class SupabaseTable<T extends SupabaseDataRow> {
         await update;
         return [];
       }
-      return rowsFromWire(await update.select());
+      final dynamic raw = await update.select();
+      return List<T>.from(rowsFromWire(raw));
     } catch (e) {
       AppLogger.error('Supabase update error ($tableName)', e);
       rethrow;
@@ -130,7 +138,8 @@ abstract class SupabaseTable<T extends SupabaseDataRow> {
         await delete;
         return [];
       }
-      return rowsFromWire(await delete.select());
+      final dynamic raw = await delete.select();
+      return List<T>.from(rowsFromWire(raw));
     } catch (e) {
       AppLogger.error('Supabase delete error ($tableName)', e);
       rethrow;
