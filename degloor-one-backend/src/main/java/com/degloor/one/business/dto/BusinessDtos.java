@@ -34,6 +34,7 @@ public final class BusinessDtos {
             String ownerName,
             String description,
             String categoryId,
+            String subCategory,
             String cityId,
             String addressText,
             String whatsappNumber,
@@ -44,11 +45,21 @@ public final class BusinessDtos {
             boolean open,
             boolean verified,
             String imageUrl,
+            List<String> photos,
+            String source,
             Instant createdAt,
+            Instant updatedAt,
             Double distanceKm,
             List<HoursResponse> hours
     ) {
         public static BusinessResponse from(Business b, List<HoursResponse> hours, Double distanceKm) {
+            List<String> photos = b.getPhotos() == null ? List.of() : List.copyOf(b.getPhotos());
+            if (photos.isEmpty() && b.getImageUrl() != null && !b.getImageUrl().isBlank()) {
+                photos = List.of(b.getImageUrl());
+            }
+            String cover = b.getImageUrl() == null || b.getImageUrl().isBlank()
+                    ? (photos.isEmpty() ? null : photos.get(0))
+                    : b.getImageUrl();
             return new BusinessResponse(
                     b.getId().toString(),
                     b.getOwnerId().toString(),
@@ -56,6 +67,7 @@ public final class BusinessDtos {
                     b.getOwnerName(),
                     b.getDescription(),
                     b.getCategoryId() == null ? null : b.getCategoryId().toString(),
+                    b.getSubCategory(),
                     b.getCityId() == null ? null : b.getCityId().toString(),
                     b.getAddressText(),
                     b.getWhatsappNumber(),
@@ -65,8 +77,11 @@ public final class BusinessDtos {
                     b.getRating(),
                     b.isOpen(),
                     b.isVerified(),
-                    b.getImageUrl(),
+                    cover,
+                    photos,
+                    b.getSource() == null || b.getSource().isBlank() ? "owner" : b.getSource(),
                     b.getCreatedAt(),
+                    b.getUpdatedAt(),
                     distanceKm,
                     hours
             );
@@ -78,6 +93,7 @@ public final class BusinessDtos {
             String ownerName,
             String description,
             UUID categoryId,
+            String subCategory,
             UUID cityId,
             String addressText,
             String whatsappNumber,
@@ -86,6 +102,7 @@ public final class BusinessDtos {
             Double longitude,
             Boolean open,
             String imageUrl,
+            List<String> photos,
             List<HoursRequest> hours
     ) {}
 }

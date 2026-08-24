@@ -1,15 +1,21 @@
 import 'package:degloor_one/backend/supabase/database/tables/business_analytics_table.dart';
 import 'package:degloor_one/backend/supabase/database/tables/business_categories_table.dart';
 import 'package:degloor_one/backend/supabase/database/tables/business_hours_table.dart';
+import 'package:degloor_one/backend/supabase/database/tables/businesses_table.dart';
 import 'package:degloor_one/backend/supabase/database/tables/complaints_table.dart';
 import 'package:degloor_one/backend/supabase/database/tables/product_categories_table.dart';
 import 'package:degloor_one/backend/supabase/database/tables/products_table.dart';
 import 'package:degloor_one/shared/catalog_product.dart';
 import 'package:degloor_one/shared/listing_complaint.dart';
 import 'package:degloor_one/shared/product_category.dart';
+import 'package:degloor_one/shared/shop.dart';
 import 'package:degloor_one/shared/shop_category.dart';
 import 'package:degloor_one/shared/shop_event.dart';
 import 'package:degloor_one/shared/shop_hours.dart';
+
+Shop shopFromRow(BusinessesRow row) {
+  return Shop.fromJson(Map<String, dynamic>.from(row.data));
+}
 
 ShopHours shopHoursFromRow(BusinessHoursRow row) {
   final rawId = row.data['id'];

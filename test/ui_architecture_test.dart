@@ -95,6 +95,14 @@ void main() {
     expect(offenders, isEmpty, reason: offenders.join('\n'));
   });
 
+  test('shop listing type keeps fromJson and stays off table rows', () {
+    final source = File('lib/shared/shop.dart').readAsStringSync();
+    expect(source.contains('factory Shop.fromJson'), isTrue);
+    expect(source.contains('BusinessesRow'), isFalse);
+    expect(source.contains(_barrel), isFalse);
+    expect(source.contains(_table), isFalse);
+  });
+
   test('Java shop repository stays off Supabase tables', () {
     const path = 'lib/data/datasources/java_shop_repository.dart';
     final source = File(path).readAsStringSync();

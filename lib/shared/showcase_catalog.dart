@@ -1077,10 +1077,13 @@ class ShowcaseCatalog {
       'is_open': open,
       'is_verified': verified,
       'image_url': image,
+      'photos': [image],
+      'source': 'owner',
       'latitude': lat,
       'longitude': lng,
       'discovery_radius': 12.0,
       'created_at': DateTime.now().subtract(const Duration(days: 30)).toIso8601String(),
+      'updated_at': DateTime.now().subtract(const Duration(days: 1)).toIso8601String(),
     };
   }
 

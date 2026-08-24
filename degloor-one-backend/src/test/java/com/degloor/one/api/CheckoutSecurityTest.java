@@ -51,6 +51,12 @@ class CheckoutSecurityTest {
                 "open", true
         )));
         postAuth(adminToken, "/api/v1/admin/businesses/" + businessId + "/verify", Map.of("verified", true));
+        mvc.perform(get("/api/v1/businesses/" + businessId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.source").value("owner"))
+                .andExpect(jsonPath("$.data.photos").isArray())
+                .andExpect(jsonPath("$.data.updatedAt").exists())
+                .andExpect(jsonPath("$.data.verified").value(true));
 
         String productId = dataId(postAuth(ownerToken, "/api/v1/products", Map.of(
                 "businessId", businessId,

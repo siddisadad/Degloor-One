@@ -11,45 +11,10 @@ class JavaShopRepository implements ShopRepository {
 
   final JavaApiClient _client;
 
-  static Shop fromJson(Map<String, dynamic> json) {
-    final created = json['createdAt'];
-    return Shop(
-      id: '${json['id'] ?? ''}',
-      name: '${json['name'] ?? ''}',
-      createdAt: created is String
-          ? DateTime.tryParse(created) ?? DateTime.fromMillisecondsSinceEpoch(0)
-          : DateTime.fromMillisecondsSinceEpoch(0),
-      ownerId: json['ownerId'] as String?,
-      ownerName: json['ownerName'] as String?,
-      description: json['description'] as String?,
-      categoryId: json['categoryId'] as String?,
-      cityId: json['cityId'] as String?,
-      addressText: json['addressText'] as String?,
-      whatsappNumber: json['whatsappNumber'] as String?,
-      phoneNumber: json['phoneNumber'] as String?,
-      rating: (json['rating'] as num?)?.toDouble(),
-      isOpen: json['open'] as bool? ?? json['isOpen'] as bool?,
-      isVerified: json['verified'] as bool? ?? json['isVerified'] as bool?,
-      imageUrl: json['imageUrl'] as String?,
-      latitude: (json['latitude'] as num?)?.toDouble(),
-      longitude: (json['longitude'] as num?)?.toDouble(),
-      distanceKm: (json['distanceKm'] as num?)?.toDouble(),
-    );
-  }
+  static Shop fromJson(Map<String, dynamic> json) => Shop.fromJson(json);
 
   static List<ShopHours> hoursFromJson(Map<String, dynamic> json) {
-    final raw = json['hours'];
-    if (raw is! List) return const [];
-    return raw
-        .whereType<Map>()
-        .map((row) {
-          final map = Map<String, dynamic>.from(row);
-          return ShopHours.fromJson({
-            ...map,
-            'businessId': map['businessId'] ?? json['id'],
-          });
-        })
-        .toList();
+    return Shop.fromJson(json).hours;
   }
 
   Map<String, dynamic> _body(ShopDraft draft) {
@@ -64,6 +29,7 @@ class JavaShopRepository implements ShopRepository {
       if (draft.latitude != null) 'latitude': draft.latitude,
       if (draft.longitude != null) 'longitude': draft.longitude,
       if (draft.imageUrl != null) 'imageUrl': draft.imageUrl,
+      if (draft.imageUrl != null) 'photos': [draft.imageUrl],
     };
   }
 

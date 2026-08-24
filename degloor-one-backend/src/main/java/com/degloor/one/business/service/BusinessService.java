@@ -92,6 +92,7 @@ public class BusinessService {
         }
         Business b = new Business();
         b.setOwnerId(user.getId());
+        b.setSource("owner");
         apply(b, req, user);
         businesses.save(b);
         replaceHours(b.getId(), req.hours());
@@ -132,6 +133,7 @@ public class BusinessService {
         b.setOwnerName(req.ownerName() == null || req.ownerName().isBlank() ? user.getFullName() : req.ownerName());
         b.setDescription(req.description());
         b.setCategoryId(req.categoryId());
+        b.setSubCategory(req.subCategory() == null || req.subCategory().isBlank() ? null : req.subCategory().trim());
         b.setCityId(req.cityId());
         b.setAddressText(req.addressText());
         b.setWhatsappNumber(req.whatsappNumber());
@@ -142,6 +144,15 @@ public class BusinessService {
             b.setOpen(req.open());
         }
         b.setImageUrl(req.imageUrl());
+        if (req.photos() != null) {
+            b.setPhotos(new ArrayList<>(req.photos()));
+            if ((req.imageUrl() == null || req.imageUrl().isBlank()) && !req.photos().isEmpty()) {
+                b.setImageUrl(req.photos().get(0));
+            }
+        } else if (req.imageUrl() != null && !req.imageUrl().isBlank()
+                && (b.getPhotos() == null || b.getPhotos().isEmpty())) {
+            b.setPhotos(new ArrayList<>(List.of(req.imageUrl())));
+        }
     }
 
     private List<HoursResponse> hoursFor(UUID businessId) {

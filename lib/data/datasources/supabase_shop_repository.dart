@@ -1,33 +1,12 @@
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/data/datasources/supabase_shop_maps.dart';
 import 'package:degloor_one/data/repositories/shop_repository.dart';
 import 'package:degloor_one/shared/shop.dart';
 import 'package:degloor_one/shared/shop_draft.dart';
 
 /// Showcase or live table access for `public.businesses`.
 class SupabaseShopRepository implements ShopRepository {
-  Shop _toShop(BusinessesRow row) {
-    return Shop(
-      id: row.id,
-      name: row.name,
-      createdAt: row.createdAt,
-      ownerId: row.ownerId,
-      ownerName: row.ownerName,
-      description: row.description,
-      categoryId: row.categoryId,
-      cityId: row.cityId,
-      addressText: row.addressText,
-      whatsappNumber: row.whatsappNumber,
-      phoneNumber: row.phoneNumber,
-      rating: row.rating,
-      isOpen: row.isOpen,
-      isVerified: row.isVerified,
-      imageUrl: row.imageUrl,
-      latitude: row.latitude,
-      longitude: row.longitude,
-      discoveryRadius: row.discoveryRadius,
-      distanceKm: row.distanceKm,
-    );
-  }
+  Shop _toShop(BusinessesRow row) => shopFromRow(row);
 
   @override
   Future<Shop?> byId(String businessId) async {
