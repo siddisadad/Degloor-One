@@ -80,9 +80,8 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
   void _listenToOrders() {
     if (_business == null) return;
     _ordersSubscription?.cancel();
-    _ordersSubscription = OrderService.instance
-        .watchBusiness(_business!.id)
-        .listen((_) {
+    _ordersSubscription =
+        OrderService.instance.watchBusiness(_business!.id).listen((_) {
       if (mounted) _loadPage(reset: true);
     });
     _loadPage(reset: true);
@@ -107,6 +106,18 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
         business.id,
         page: PageQuery(offset: _offset),
       );
+      for (final order in page.items) {
+        final id = order.userId;
+        if (id.isEmpty) continue;
+        final name = order.user?.fullName?.trim();
+        if (name != null && name.isNotEmpty) {
+          _customerNames[id] = name;
+        }
+        final phone = order.user?.phoneNumber?.trim();
+        if (phone != null && phone.isNotEmpty) {
+          _customerPhones[id] = phone;
+        }
+      }
       final existingUserIds = _customerNames.keys.toSet();
       final newUserIds = page.items
           .map((order) => order.userId)
@@ -257,24 +268,28 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
                                 );
                               }
                               final order = _orders[index];
-                              final actions =
-                                  OrderService.instance.ownerActions(order.status);
-                              final customerName =
-                                  _customerNames[order.userId] ?? 'Loading…';
+                              final actions = OrderService.instance
+                                  .ownerActions(order.status);
+                              final customerName = order.user?.displayName(
+                                    fallback: 'Unknown Customer',
+                                  ) ??
+                                  _customerNames[order.userId] ??
+                                  'Loading…';
+                              final customerPhone = order.user?.phoneNumber ??
+                                  _customerPhones[order.userId];
                               return OrderListCard(
                                 title: customerName,
                                 orderId: order.id,
                                 createdAt: order.createdAt,
                                 totalAmount: order.totalAmount,
                                 status: order.status,
-                                subtitle: _customerPhones[order.userId],
+                                subtitle: customerPhone,
                                 footer: !actions.isTerminal
                                     ? _orderActions(order, actions)
                                     : _buildInfoRow(
                                         'Customer',
                                         customerName,
-                                        phoneNumber:
-                                            _customerPhones[order.userId],
+                                        phoneNumber: customerPhone,
                                         orderId: order.id,
                                       ),
                               );
@@ -298,8 +313,10 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
       children: [
         _buildInfoRow(
           'Customer',
-          _customerNames[order.userId] ?? 'Loading…',
-          phoneNumber: _customerPhones[order.userId],
+          order.user?.displayName(fallback: 'Unknown Customer') ??
+              _customerNames[order.userId] ??
+              'Loading…',
+          phoneNumber: order.user?.phoneNumber ?? _customerPhones[order.userId],
           orderId: order.id,
         ),
         SizedBox(height: FlutterFlowTheme.of(context).designToken.spacing.sm),
@@ -374,7 +391,8 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
     );
   }
 
-  Widget _buildInfoRow(String label, String value, {String? phoneNumber, String? orderId}) {
+  Widget _buildInfoRow(String label, String value,
+      {String? phoneNumber, String? orderId}) {
     final theme = FlutterFlowTheme.of(context);
     final shortId = (orderId != null && orderId.length >= 8)
         ? orderId.substring(0, 8)
@@ -494,7 +512,8 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
                   );
                   if (context.mounted) Navigator.pop(context, true);
                 } catch (e) {
-                  setDialogState(() => errorText = DeliveryService.messageFor(e));
+                  setDialogState(
+                      () => errorText = DeliveryService.messageFor(e));
                 }
               },
               child: const Text('Verify & deliver'),

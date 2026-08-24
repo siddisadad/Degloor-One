@@ -1,3 +1,5 @@
+import 'package:degloor_one/shared/marketplace_joins.dart';
+
 /// Customer or shop order. Screens use this instead of a table row.
 class PlacedOrder {
   const PlacedOrder({
@@ -12,6 +14,7 @@ class PlacedOrder {
     this.deliveryFee,
     this.paymentMethod,
     this.deliveryOtp,
+    this.user,
   });
 
   final String id;
@@ -25,7 +28,9 @@ class PlacedOrder {
   final String? paymentMethod;
   final String? deliveryOtp;
   final DateTime createdAt;
+  final JoinedUser? user;
 
+  /// Java `OrderResponse`. Customer profile maps onto [JoinedUser].
   factory PlacedOrder.fromJson(Map<String, dynamic> json) {
     final created = json['createdAt'];
     return PlacedOrder(
@@ -43,6 +48,8 @@ class PlacedOrder {
       createdAt: created is String
           ? DateTime.tryParse(created) ?? DateTime.fromMillisecondsSinceEpoch(0)
           : DateTime.fromMillisecondsSinceEpoch(0),
+      user: JoinedUser.fromJoin(json['user'] ?? json['users']) ??
+          JoinedUser.fromJoin(json),
     );
   }
 }

@@ -27,6 +27,7 @@ import com.degloor.one.product.entity.Product;
 import com.degloor.one.product.repository.ProductRepository;
 import com.degloor.one.user.entity.Address;
 import com.degloor.one.user.entity.UserAccount;
+import com.degloor.one.user.repository.UserRepository;
 import com.degloor.one.user.service.UserService;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +36,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,6 +52,7 @@ public class OrderService {
     private final BusinessRepository businesses;
     private final CartService carts;
     private final UserService users;
+    private final UserRepository accounts;
     private final OtpService otpService;
     private final NotificationService notifications;
     private final DeliveryAssignmentRepository assignments;
@@ -62,6 +65,7 @@ public class OrderService {
             BusinessRepository businesses,
             CartService carts,
             UserService users,
+            UserRepository accounts,
             OtpService otpService,
             NotificationService notifications,
             DeliveryAssignmentRepository assignments
@@ -73,6 +77,7 @@ public class OrderService {
         this.businesses = businesses;
         this.carts = carts;
         this.users = users;
+        this.accounts = accounts;
         this.otpService = otpService;
         this.notifications = notifications;
         this.assignments = assignments;
@@ -158,7 +163,7 @@ public class OrderService {
 
     public PageResponse<OrderResponse> mine(UserAccount user, int page, int size) {
         var result = orders.findByUserIdOrderByCreatedAtDesc(user.getId(), PageRequest.of(Math.max(page, 0), Math.min(Math.max(size, 1), 50)));
-        return PageResponse.from(result.map(this::toResponse));
+        return pageWithCustomers(result);
     }
 
     public PageResponse<OrderResponse> forShop(UserAccount user, UUID businessId, int page, int size) {
@@ -166,7 +171,7 @@ public class OrderService {
                 .filter(b -> Roles.isAdmin(user) || b.getOwnerId().equals(user.getId()))
                 .orElseThrow(() -> BusinessException.forbidden("FORBIDDEN", "Not your business"));
         var result = orders.findByBusinessIdOrderByCreatedAtDesc(businessId, PageRequest.of(Math.max(page, 0), Math.min(Math.max(size, 1), 50)));
-        return PageResponse.from(result.map(this::toResponse));
+        return pageWithCustomers(result);
     }
 
     public OrderResponse get(UserAccount user, UUID id) {
@@ -274,6 +279,18 @@ public class OrderService {
     }
 
     public OrderResponse toResponse(ShopOrder order) {
+        return toResponse(order, accounts.findById(order.getUserId()).orElse(null));
+    }
+
+    private PageResponse<OrderResponse> pageWithCustomers(Page<ShopOrder> result) {
+        Map<UUID, UserAccount> customers = accounts
+                .findAllById(result.getContent().stream().map(ShopOrder::getUserId).toList())
+                .stream()
+                .collect(Collectors.toMap(UserAccount::getId, Function.identity(), (a, b) -> a));
+        return PageResponse.from(result.map(order -> toResponse(order, customers.get(order.getUserId()))));
+    }
+
+    private OrderResponse toResponse(ShopOrder order, UserAccount customer) {
         List<OrderItem> items = orderItems.findByOrderId(order.getId());
         Map<UUID, Product> catalog = products.findAllById(
                         items.stream().map(OrderItem::getProductId).toList())
@@ -283,7 +300,8 @@ public class OrderService {
                 order,
                 items,
                 history.findByOrderIdOrderByCreatedAtAsc(order.getId()),
-                catalog
+                catalog,
+                customer
         );
     }
 }

@@ -424,6 +424,23 @@ void main() {
     expect(order.deliveryFee, 25);
     expect(order.status, 'pending');
     expect(order.createdAt.toUtc().year, 2026);
+    expect(order.user, isNull);
+
+    final named = PlacedOrder.fromJson({
+      'id': 'ord-2',
+      'userId': 'user-1',
+      'businessId': 'biz-patil',
+      'totalAmount': 145,
+      'status': 'pending',
+      'paymentStatus': 'unpaid',
+      'fullName': 'Asha Patil',
+      'phoneNumber': '9876543210',
+    });
+    expect(
+      named.user?.displayName(fallback: 'Unknown Customer'),
+      'Asha Patil',
+    );
+    expect(named.user?.phoneNumber, '9876543210');
 
     final line = OrderLine.fromJson({
       'productId': 'prod-rice',
