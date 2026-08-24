@@ -23,6 +23,13 @@ class ServiceRequest {
   final DateTime? scheduledAt;
   final JoinedUser? user;
 
+  /// Joined customer avatar, or null when the request has no photo.
+  String? get photoUrl {
+    final url = user?.avatarUrl?.trim();
+    if (url == null || url.isEmpty) return null;
+    return url;
+  }
+
   /// Java `RequestResponse`. Customer profile maps onto [JoinedUser].
   factory ServiceRequest.fromJson(Map<String, dynamic> json) {
     DateTime? parse(dynamic value) {
