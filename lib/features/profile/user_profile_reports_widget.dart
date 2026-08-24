@@ -93,7 +93,7 @@ class _UserProfileReportsWidgetState extends State<UserProfileReportsWidget> {
                         future: _model.userProfileFuture,
                         builder: (context, snapshot) {
                           final user = snapshot.data?.firstOrNull;
-                          final name = user?.fullName ?? 'Guest User';
+                          final name = user?.fullName ?? 'Guest Customer';
                           final initials =
                               name.isNotEmpty ? name[0].toUpperCase() : 'U';
 
