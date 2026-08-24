@@ -1,8 +1,9 @@
-import 'package:degloor_one/backend/supabase/supabase_connection.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:flutter/material.dart';
 
-/// Shown on Auth screens when the compiled FlutterFlow Supabase host is down.
+/// Shown on Auth screens when a live host probe fails.
+/// Guest / dead FlutterFlow-host mode must not show this — Continue as Guest
+/// is the path, not restoring a project.
 class SupabaseUnreachableBanner extends StatelessWidget {
   const SupabaseUnreachableBanner({super.key, this.message});
 
@@ -10,11 +11,8 @@ class SupabaseUnreachableBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final text = message ??
-        (SupabaseConnection.shouldSkipAuthRequest
-            ? SupabaseConnection.unreachableMessage
-            : null);
-    if (text == null) return const SizedBox.shrink();
+    final text = message;
+    if (text == null || text.isEmpty) return const SizedBox.shrink();
 
     final theme = FlutterFlowTheme.of(context);
     return Padding(
