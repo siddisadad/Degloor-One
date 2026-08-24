@@ -59,6 +59,24 @@ void main() {
     expect(application.createdAt.millisecondsSinceEpoch, 0);
   });
 
+  test('Java applicant JSON maps the user join', () {
+    final named = JobApplicant.fromJson({
+      'id': 'app-1',
+      'jobId': 'job-counter',
+      'applicantId': 'customer-2',
+      'experienceSummary': 'Stocked a kirana for 6 months.',
+      'status': 'applied',
+      'fullName': 'Asha Patil',
+      'phoneNumber': '9876543210',
+    });
+    expect(named.user?.displayName(fallback: 'Unknown Applicant'), 'Asha Patil');
+    expect(named.user?.phoneNumber, '9876543210');
+    expect(
+      JobApplicant.fromJson({'id': 'app-2', 'status': 'applied'}).user,
+      isNull,
+    );
+  });
+
   test('Java listing JSON attaches a shop join when provided', () {
     final listing = JavaJobRepository.listingFromJson(
       {

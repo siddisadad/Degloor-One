@@ -15,14 +15,6 @@ class JavaJobRepository implements JobRepository {
 
   final JavaApiClient _client;
 
-  static JobApplicant applicantFromJson(Map<String, dynamic> json) {
-    return JobApplicant(
-      id: '${json['id'] ?? ''}',
-      status: '${json['status'] ?? JobApplicationDraft.applied}',
-      experienceSummary: json['experienceSummary'] as String?,
-    );
-  }
-
   static JobListing listingFromJson(
     Map<String, dynamic> json, {
     JoinedShop? shop,
@@ -156,7 +148,7 @@ class JavaJobRepository implements JobRepository {
     final rows = data is List ? data : const [];
     return rows
         .whereType<Map>()
-        .map((row) => applicantFromJson(Map<String, dynamic>.from(row)))
+        .map((row) => JobApplicant.fromJson(Map<String, dynamic>.from(row)))
         .toList();
   }
 }
