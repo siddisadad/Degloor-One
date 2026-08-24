@@ -30,6 +30,8 @@ export 'package:degloor_one/features/admin/admin_control_panel_widget.dart'
     show AdminControlPanelWidget;
 export 'package:degloor_one/features/profile/user_profile_reports_widget.dart'
     show UserProfileReportsWidget;
+export 'package:degloor_one/features/profile/profile_info_widget.dart'
+    show ProfileInfoWidget, ProfileInfoKind;
 export 'package:degloor_one/features/cart/cart_widget.dart' show CartWidget;
 export 'package:degloor_one/features/catalogue/manage_catalogue_widget.dart'
     show ManageCatalogueWidget;

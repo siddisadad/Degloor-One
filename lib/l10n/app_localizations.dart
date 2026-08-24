@@ -112,6 +112,12 @@ abstract class AppLocalizations {
   /// **'Search'**
   String get search;
 
+  /// No description provided for @explore.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore'**
+  String get explore;
+
   /// No description provided for @services.
   ///
   /// In en, this message translates to:
@@ -261,6 +267,168 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Try adjusting your filters or searching for something else'**
   String get noResultsDescription;
+
+  /// No description provided for @language.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get language;
+
+  /// No description provided for @languageSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Change your language'**
+  String get languageSubtitle;
+
+  /// No description provided for @selectLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Language'**
+  String get selectLanguage;
+
+  /// No description provided for @supportAndLegal.
+  ///
+  /// In en, this message translates to:
+  /// **'Support & Legal'**
+  String get supportAndLegal;
+
+  /// No description provided for @helpCenter.
+  ///
+  /// In en, this message translates to:
+  /// **'Help Center'**
+  String get helpCenter;
+
+  /// No description provided for @helpCenterSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'FAQs and Support'**
+  String get helpCenterSubtitle;
+
+  /// No description provided for @termsOfService.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms of Service'**
+  String get termsOfService;
+
+  /// No description provided for @termsOfServiceSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Legal agreements'**
+  String get termsOfServiceSubtitle;
+
+  /// No description provided for @aboutApp.
+  ///
+  /// In en, this message translates to:
+  /// **'About App'**
+  String get aboutApp;
+
+  /// No description provided for @aboutAppSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Version 1.0.0'**
+  String get aboutAppSubtitle;
+
+  /// No description provided for @helpIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'DEGLOOR ONE helps you find shops, services, and jobs around Degloor.'**
+  String get helpIntro;
+
+  /// No description provided for @helpFindShopsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Find shops'**
+  String get helpFindShopsTitle;
+
+  /// No description provided for @helpFindShopsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Use Home and Search to browse nearby listings. Open a shop to call, message on WhatsApp, or get directions.'**
+  String get helpFindShopsBody;
+
+  /// No description provided for @helpOrdersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Orders and reports'**
+  String get helpOrdersTitle;
+
+  /// No description provided for @helpOrdersBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Track your orders from Profile. If a listing is wrong or misleading, open the shop page and report it.'**
+  String get helpOrdersBody;
+
+  /// No description provided for @helpLanguageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get helpLanguageTitle;
+
+  /// No description provided for @helpLanguageBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose English, Marathi, or Hindi from Profile. Your choice is saved on this device.'**
+  String get helpLanguageBody;
+
+  /// No description provided for @termsIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'These terms apply when you use DEGLOOR ONE, the Degloor marketplace app.'**
+  String get termsIntro;
+
+  /// No description provided for @termsMarketplaceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A local marketplace'**
+  String get termsMarketplaceTitle;
+
+  /// No description provided for @termsMarketplaceBody.
+  ///
+  /// In en, this message translates to:
+  /// **'DEGLOOR ONE connects customers with shops and service providers in Degloor. Shop hours, catalogues, and prices are provided by those businesses.'**
+  String get termsMarketplaceBody;
+
+  /// No description provided for @termsConductTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your use of the app'**
+  String get termsConductTitle;
+
+  /// No description provided for @termsConductBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the app lawfully. Do not post false listings, abuse messaging, or attempt to access another account. We may remove listings or accounts that break these rules.'**
+  String get termsConductBody;
+
+  /// No description provided for @termsContactTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Questions'**
+  String get termsContactTitle;
+
+  /// No description provided for @termsContactBody.
+  ///
+  /// In en, this message translates to:
+  /// **'If you need a copy of these terms or have a question about DEGLOOR ONE, open Help Center from Profile.'**
+  String get termsContactBody;
+
+  /// No description provided for @aboutTagline.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything Local. One App.'**
+  String get aboutTagline;
+
+  /// No description provided for @aboutBody.
+  ///
+  /// In en, this message translates to:
+  /// **'DEGLOOR ONE is the Degloor marketplace for nearby shops, services, jobs, and delivery.'**
+  String get aboutBody;
+
+  /// No description provided for @aboutLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Degloor, Maharashtra'**
+  String get aboutLocation;
 }
 
 class _AppLocalizationsDelegate
