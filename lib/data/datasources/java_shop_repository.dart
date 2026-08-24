@@ -17,6 +17,18 @@ class JavaShopRepository implements ShopRepository {
     return Shop.fromJson(json).hours;
   }
 
+  static List<Map<String, dynamic>> pageItems(dynamic data) {
+    final raw = data is List
+        ? data
+        : data is Map
+            ? data['items'] ?? data['content']
+            : const [];
+    final rows = raw is List ? raw : const [];
+    return [
+      for (final row in rows.whereType<Map>()) Map<String, dynamic>.from(row),
+    ];
+  }
+
   Map<String, dynamic> _body(ShopDraft draft) {
     return {
       'name': draft.name,
@@ -28,8 +40,8 @@ class JavaShopRepository implements ShopRepository {
       if (draft.phoneNumber != null) 'phoneNumber': draft.phoneNumber,
       if (draft.latitude != null) 'latitude': draft.latitude,
       if (draft.longitude != null) 'longitude': draft.longitude,
+      if (draft.discoveryRadius != null) 'discoveryRadius': draft.discoveryRadius,
       if (draft.imageUrl != null) 'imageUrl': draft.imageUrl,
-      if (draft.imageUrl != null) 'photos': [draft.imageUrl],
     };
   }
 

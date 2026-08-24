@@ -1,3 +1,5 @@
+import 'dart:async';
+
 class AuthUserInfo {
   const AuthUserInfo({
     this.uid,
@@ -36,3 +38,22 @@ abstract class BaseAuthUser {
 
 BaseAuthUser? currentUser;
 bool get loggedIn => currentUser?.loggedIn ?? false;
+
+final StreamController<BaseAuthUser> _authStreamController =
+    StreamController<BaseAuthUser>.broadcast();
+
+void updateAuthUser(BaseAuthUser user) {
+  currentUser = user;
+  _authStreamController.add(user);
+}
+
+Stream<BaseAuthUser> get authUserStream => _authStreamController.stream;
+
+final StreamController<String?> _jwtStreamController =
+    StreamController<String?>.broadcast();
+
+void updateJwtToken(String? token) {
+  _jwtStreamController.add(token);
+}
+
+Stream<String?> get jwtTokenUpdateStream => _jwtStreamController.stream;

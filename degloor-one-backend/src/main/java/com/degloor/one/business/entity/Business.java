@@ -1,5 +1,6 @@
 package com.degloor.one.business.entity;
 
+import com.degloor.one.common.util.StringListConverter;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
@@ -11,8 +12,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
-import com.degloor.one.common.util.StringListConverter;
 
 @Entity
 @Table(name = "businesses")
@@ -40,6 +39,8 @@ public class Business {
     private String phoneNumber;
     private Double latitude;
     private Double longitude;
+    @Column(name = "discovery_radius", nullable = false)
+    private double discoveryRadius = 10;
     @Column(nullable = false)
     private double rating;
     @Column(name = "is_open", nullable = false)
@@ -49,7 +50,7 @@ public class Business {
     @Column(name = "image_url")
     private String imageUrl;
     @Convert(converter = StringListConverter.class)
-    @Column(nullable = false)
+    @Column(name = "photos", nullable = false)
     private List<String> photos = new ArrayList<>();
     @Column(nullable = false)
     private String source = "owner";
@@ -99,6 +100,8 @@ public class Business {
     public void setLatitude(Double latitude) { this.latitude = latitude; }
     public Double getLongitude() { return longitude; }
     public void setLongitude(Double longitude) { this.longitude = longitude; }
+    public double getDiscoveryRadius() { return discoveryRadius; }
+    public void setDiscoveryRadius(double discoveryRadius) { this.discoveryRadius = discoveryRadius; }
     public double getRating() { return rating; }
     public void setRating(double rating) { this.rating = rating; }
     public boolean isOpen() { return open; }

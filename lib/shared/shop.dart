@@ -16,14 +16,19 @@ class Shop {
     this.ownerName,
     this.description,
     this.categoryId,
+    this.categoryName,
     this.subcategory,
     this.cityId,
+    this.cityName,
     this.addressText,
     this.whatsappNumber,
     this.phoneNumber,
     this.rating,
+    this.reviewCount,
     this.isOpen,
+    this.currentlyOpen,
     this.isVerified,
+    this.verificationStatus,
     this.imageUrl,
     this.photos = const [],
     this.latitude,
@@ -42,14 +47,19 @@ class Shop {
   final String? ownerName;
   final String? description;
   final String? categoryId;
+  final String? categoryName;
   final String? subcategory;
   final String? cityId;
+  final String? cityName;
   final String? addressText;
   final String? whatsappNumber;
   final String? phoneNumber;
   final double? rating;
+  final int? reviewCount;
   final bool? isOpen;
+  final bool? currentlyOpen;
   final bool? isVerified;
+  final String? verificationStatus;
   final String? imageUrl;
   final List<String> photos;
   final double? latitude;
@@ -67,8 +77,10 @@ class Shop {
   }
 
   /// Java `BusinessResponse` or a table-shaped map. Accepts listing aliases
-  /// (`business_id`, `business_name`, `address`, `phone`, `opening_hours`,
+  /// (`businessId`, `businessName`, `address`, `phone`, `opening_hours`,
   /// `last_updated`) so screens stay off the wire format.
+  ///
+  /// `category` is the category name. It is never treated as [categoryId].
   factory Shop.fromJson(Map<String, dynamic> json) {
     final photos = _photos(json);
     final imageUrl = _str(json, const ['imageUrl', 'image_url']) ??
@@ -83,14 +95,21 @@ class Shop {
       ownerName: _str(json, const ['ownerName', 'owner_name']),
       description: _str(json, const ['description']),
       categoryId: _str(json, const ['categoryId', 'category_id']),
-      subcategory: _str(json, const ['subcategory', 'subCategory', 'sub_category']),
+      categoryName: _str(json, const ['categoryName', 'category_name', 'category']),
+      subcategory:
+          _str(json, const ['subcategory', 'subCategory', 'sub_category']),
       cityId: _str(json, const ['cityId', 'city_id']),
+      cityName: _str(json, const ['cityName', 'city_name', 'city']),
       addressText: _str(json, const ['addressText', 'address_text', 'address']),
       whatsappNumber: _str(json, const ['whatsappNumber', 'whatsapp_number']),
       phoneNumber: _str(json, const ['phoneNumber', 'phone_number', 'phone']),
       rating: _num(json, const ['rating']),
+      reviewCount: _int(json, const ['reviewCount', 'review_count']),
       isOpen: _bool(json, const ['open', 'isOpen', 'is_open']),
+      currentlyOpen: _bool(json, const ['currentlyOpen', 'currently_open']),
       isVerified: _bool(json, const ['verified', 'isVerified', 'is_verified']),
+      verificationStatus:
+          _str(json, const ['verificationStatus', 'verification_status']),
       imageUrl: imageUrl,
       photos: photos.isNotEmpty
           ? photos
@@ -126,6 +145,15 @@ class Shop {
     for (final key in keys) {
       final value = json[key];
       if (value is num) return value.toDouble();
+    }
+    return null;
+  }
+
+  static int? _int(Map<String, dynamic> json, List<String> keys) {
+    for (final key in keys) {
+      final value = json[key];
+      if (value is int) return value;
+      if (value is num) return value.toInt();
     }
     return null;
   }

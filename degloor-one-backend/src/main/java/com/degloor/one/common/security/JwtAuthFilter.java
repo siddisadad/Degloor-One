@@ -35,7 +35,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             try {
                 UUID userId = jwtService.userId(header.substring(7));
                 userRepository.findById(userId).ifPresent(user -> {
-                    String role = user.getRole().toUpperCase(Locale.ROOT);
+                    String rawRole = user.getRole();
+                    if (rawRole == null || rawRole.isBlank()) {
+                        rawRole = Roles.CUSTOMER;
+                    }
+                    String role = rawRole.toUpperCase(Locale.ROOT);
                     var auth = new UsernamePasswordAuthenticationToken(
                             user,
                             null,

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/supabase/supabase_connection.dart';
 import 'package:degloor_one/core/app_flags.dart';
@@ -38,12 +39,6 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
   void initState() {
     super.initState();
     _model = createModel(context, () => AuthenticationModel());
-    if (kBypassAuth) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) context.goNamed('CustomerHome');
-      });
-      return;
-    }
     if (SupabaseConnection.shouldSkipAuthRequest) {
       _serverWarning = SupabaseConnection.unreachableMessage;
     } else {
@@ -217,92 +212,55 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
                               borderRadius: BorderRadius.circular(14),
                             ),
                           ),
-                          const SizedBox(height: 16),
-                          FFButtonWidget(
-                            text: 'Continue with Phone',
-                            onPressed: _isLoading
-                                ? null
-                                : () => context.pushNamed('PhoneAuth'),
-                            options: FFButtonOptions(
-                              width: double.infinity,
-                              height: 54,
-                              color: Colors.transparent,
-                              textStyle: TextStyle(
-                                  color: FlutterFlowTheme.of(context).primary,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold),
-                              borderSide: BorderSide(
-                                color: FlutterFlowTheme.of(context).primary,
-                                width: 2,
+                          const SizedBox(height: 24),
+                          if (kBypassAuth || _serverWarning != null)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 24.0),
+                              child: FFButtonWidget(
+                                text: 'Continue as Guest',
+                                onPressed: () {
+                                  installGuestSession();
+                                  updateAuthUser(currentUser!);
+                                  context.goNamed('CustomerHome');
+                                },
+                                options: FFButtonOptions(
+                                  width: double.infinity,
+                                  height: 50,
+                                  color: Colors.transparent,
+                                  textStyle: TextStyle(
+                                      color: FlutterFlowTheme.of(context).secondaryText,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w600),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
                               ),
-                              borderRadius: BorderRadius.circular(12),
                             ),
-                          ),
-                          const SizedBox(height: 24),
-                          // OR Divider
-                          Row(
-                            children: [
-                              Expanded(child: Divider(color: FlutterFlowTheme.of(context).alternate)),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                                child: Text('OR', style: FlutterFlowTheme.of(context).labelSmall),
+                          wrapWithModel(
+                            model: _model.socialButtonModel1,
+                            updateCallback: () => setState(() {}),
+                            child: SocialButtonWidget(
+                              icon: const FaIcon(
+                                FontAwesomeIcons.google,
+                                size: 18,
                               ),
-                              Expanded(child: Divider(color: FlutterFlowTheme.of(context).alternate)),
-                            ],
-                          ),
-                          const SizedBox(height: 24),
-                          // Social Buttons
-                          Row(
-                            children: [
-                              Expanded(
-                                child: wrapWithModel(
-                                  model: _model.socialButtonModel1,
-                                  updateCallback: () => setState(() {}),
-                                  child: SocialButtonWidget(
-                                    icon: const FaIcon(
-                                      FontAwesomeIcons.google,
-                                      size: 18,
-                                    ),
-                                    label: 'Google',
-                                    onTap: () async {
-                                      if (_isLoading) return;
-                                      setState(() => _isLoading = true);
-                                      try {
-                                        final user = await authManager
-                                            .signInWithGoogle(context);
-                                        if (!context.mounted) return;
-                                        if (user != null) {
-                                          context.goNamed('_initialize');
-                                        }
-                                      } finally {
-                                        if (mounted) {
-                                          setState(() => _isLoading = false);
-                                        }
-                                      }
-                                    },
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: wrapWithModel(
-                                  model: _model.socialButtonModel2,
-                                  updateCallback: () => setState(() {}),
-                                  child: SocialButtonWidget(
-                                    icon: const FaIcon(
-                                      FontAwesomeIcons.apple,
-                                      size: 18,
-                                    ),
-                                    label: 'Apple',
-                                    onTap: () async {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(content: Text('Apple Sign-In coming soon!'))
-                                      );
-                                    },
-                                  ),
-                                ),
-                              ),
-                            ],
+                              label: 'Continue with Google',
+                              onTap: () async {
+                                if (_isLoading) return;
+                                setState(() => _isLoading = true);
+                                try {
+                                  final user = await authManager
+                                      .signInWithGoogle(context);
+                                  if (!context.mounted) return;
+                                  if (user != null) {
+                                    context.goNamed('_initialize');
+                                  }
+                                } finally {
+                                  if (mounted) {
+                                    setState(() => _isLoading = false);
+                                  }
+                                }
+                              },
+                            ),
                           ),
                         ],
                       ),

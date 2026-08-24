@@ -201,6 +201,39 @@ void main() {
     expect(source.contains('OrderApi.'), isFalse);
   });
 
+  test('delivery service and repository interface stay off Supabase', () {
+    const paths = [
+      'lib/backend/delivery_service.dart',
+      'lib/data/repositories/delivery_repository.dart',
+    ];
+    final offenders = <String>[];
+    for (final path in paths) {
+      final source = File(path).readAsStringSync();
+      if (source.contains(_barrel) ||
+          source.contains(_table) ||
+          source.contains('data/datasources') ||
+          source.contains('SupaFlow.client') ||
+          source.contains('core/api/delivery_api.dart')) {
+        offenders.add(path);
+      }
+    }
+    expect(offenders, isEmpty, reason: offenders.join('\n'));
+  });
+
+  test('Java delivery repository stays off Supabase tables', () {
+    const path = 'lib/data/datasources/java_delivery_repository.dart';
+    final source = File(path).readAsStringSync();
+    expect(source.contains(_barrel), isFalse);
+    expect(source.contains(_table), isFalse);
+  });
+
+  test('delivery leftover table repo stays off DeliveryApi', () {
+    const path = 'lib/backend/repositories/delivery_repository.dart';
+    final source = File(path).readAsStringSync();
+    expect(source.contains('core/api/delivery_api.dart'), isFalse);
+    expect(source.contains('SupaFlow.client.rpc'), isFalse);
+  });
+
   test('order tracking fetches OTP through OrderService', () {
     const path = 'lib/features/orders/order_tracking_widget.dart';
     final source = File(path).readAsStringSync();
@@ -349,6 +382,7 @@ void main() {
 
   test('shop leftover domain types stay off Supabase tables', () {
     const paths = [
+      'lib/shared/shop.dart',
       'lib/shared/shop_hours.dart',
       'lib/shared/catalog_product.dart',
       'lib/shared/shop_category.dart',
@@ -426,5 +460,26 @@ void main() {
     final source = File(path).readAsStringSync();
     expect(source.contains(_barrel), isFalse);
     expect(source.contains(_table), isFalse);
+  });
+
+  test('Java public catalog GETs do not include owner or applicant routes', () {
+    const path =
+        'degloor-one-backend/src/main/java/com/degloor/one/common/security/SecurityConfig.java';
+    final source = File(path).readAsStringSync();
+    expect(source.contains('/api/v1/jobs/**'), isFalse);
+    expect(source.contains('/api/v1/businesses/**'), isFalse);
+    expect(source.contains('/api/v1/businesses/mine'), isTrue);
+    expect(source.contains('/api/v1/businesses/search'), isTrue);
+    expect(source.contains('/api/v1/businesses/nearby'), isTrue);
+    expect(source.contains('/api/v1/businesses/category/*'), isTrue);
+    expect(source.contains('authenticationEntryPoint'), isTrue);
+  });
+
+  test('Java API client refreshes an expired access token once', () {
+    const path = 'lib/core/api/api_client.dart';
+    final source = File(path).readAsStringSync();
+    expect(source.contains('_tryRefresh'), isTrue);
+    expect(source.contains("path != '/api/v1/auth/refresh'"), isTrue);
+    expect(source.contains('allowRefresh: false'), isTrue);
   });
 }

@@ -187,6 +187,7 @@ class DiscoveryService {
       callClicks: summary.callClicks,
       whatsappClicks: summary.whatsappClicks,
       directionsClicks: summary.directionsClicks,
+      dailyCounts: summary.dailyCounts,
     );
   }
 }
@@ -222,6 +223,7 @@ class ShopInsights {
     required this.callClicks,
     required this.whatsappClicks,
     required this.directionsClicks,
+    required this.dailyCounts,
   });
 
   static const empty = ShopInsights(
@@ -230,6 +232,7 @@ class ShopInsights {
     callClicks: 0,
     whatsappClicks: 0,
     directionsClicks: 0,
+    dailyCounts: {},
   );
 
   final int reviewCount;
@@ -237,4 +240,5 @@ class ShopInsights {
   final int callClicks;
   final int whatsappClicks;
   final int directionsClicks;
+  final Map<String, int> dailyCounts;
 }

@@ -49,11 +49,10 @@ class JavaJobRepository implements JobRepository {
   Future<Map<String, JoinedShop>> _shopsById(Iterable<String> ids) async {
     final unique = ids.where((id) => id.isNotEmpty).toSet();
     if (unique.isEmpty) return {};
-    final data = await _client.get('/api/v1/businesses');
-    final rows = data is List ? data : const [];
+    final data = await _client.get('/api/v1/businesses', query: {'size': '50'});
     final shops = <String, JoinedShop>{};
-    for (final row in rows.whereType<Map>()) {
-      final shop = JavaShopRepository.fromJson(Map<String, dynamic>.from(row));
+    for (final row in JavaShopRepository.pageItems(data)) {
+      final shop = JavaShopRepository.fromJson(row);
       if (!unique.contains(shop.id)) continue;
       shops[shop.id] = JoinedShop(
         name: shop.name,

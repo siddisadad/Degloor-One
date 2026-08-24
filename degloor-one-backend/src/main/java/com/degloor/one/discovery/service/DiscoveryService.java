@@ -2,6 +2,7 @@ package com.degloor.one.discovery.service;
 
 import com.degloor.one.analytics.repository.BusinessEventRepository;
 import com.degloor.one.analytics.repository.BusinessEventRepository.EventTypeCount;
+import com.degloor.one.business.dto.BusinessDtos.BusinessQuery;
 import com.degloor.one.business.dto.BusinessDtos.BusinessResponse;
 import com.degloor.one.business.service.BusinessService;
 import com.degloor.one.discovery.dto.DiscoveryDtos.MasterSearchResponse;
@@ -61,8 +62,11 @@ public class DiscoveryService {
         boolean wantServices = all || "services".equalsIgnoreCase(scope);
         boolean wantJobs = all || "jobs".equalsIgnoreCase(scope);
 
-        List<BusinessResponse> shopList = wantShops ?
-                businesses.search(q, null, lat, lng, radiusKm, true) : List.of();
+        List<BusinessResponse> shopList = wantShops
+                ? businesses.search(new BusinessQuery(
+                        q, null, null, lat, lng, radiusKm, null, null, null, true, null, null, 0, 50
+                )).items()
+                : List.of();
 
         List<ProductResponse> productList = wantProducts ?
                 products.search(q, null, null, null, null, true, 0, 50, "name").items() : List.of();

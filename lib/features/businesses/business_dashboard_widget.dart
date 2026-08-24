@@ -44,6 +44,7 @@ class _BusinessDashboardWidgetState extends State<BusinessDashboardWidget> {
   int _whatsappClicks = 0;
   int _directionsClicks = 0;
   int _pendingOrders = 0;
+  Map<String, int> _dailyCounts = {};
 
   @override
   void initState() {
@@ -78,6 +79,7 @@ class _BusinessDashboardWidgetState extends State<BusinessDashboardWidget> {
         _callClicks = insights.callClicks;
         _whatsappClicks = insights.whatsappClicks;
         _directionsClicks = insights.directionsClicks;
+        _dailyCounts = insights.dailyCounts;
         _pendingOrders = pending;
         _isLoading = false;
       });
@@ -151,7 +153,7 @@ class _BusinessDashboardWidgetState extends State<BusinessDashboardWidget> {
           ),
           elevation: 0.0,
           label: Text(
-            'Quick Edit',
+            (_business?.imageUrl ?? '').isEmpty ? 'Add Photos' : 'Quick Edit',
             style: FlutterFlowTheme.of(context).labelLarge.override(
                   fontFamily: GoogleFonts.inter().fontFamily,
                   color: Colors.white,
@@ -293,10 +295,9 @@ class _BusinessDashboardWidgetState extends State<BusinessDashboardWidget> {
                                           ),
                                         );
                                         if (confirm == true) {
-                                          await authManager.signOut();
-                                          if (context.mounted) {
-                                            context.goNamed('Authentication');
-                                          }
+                                          await authManager.signOutToLogin(
+                                            context,
+                                          );
                                         }
                                       },
                                     ),
@@ -509,50 +510,50 @@ class _BusinessDashboardWidgetState extends State<BusinessDashboardWidget> {
                               ),
                               SizedBox(
                                 height: 180.0,
-                                child: FlutterFlowBarChart(
-                                  barData: [
-                                    FFBarChartData(
-                                      yData: [
-                                        45.0,
-                                        67.0,
-                                        32.0,
-                                        89.0,
-                                        54.0,
-                                        76.0,
-                                        90.0
-                                      ],
-                                      color: FlutterFlowTheme.of(context).primary,
-                                    )
-                                  ],
-                                  xLabels: const ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
-                                  barWidth: 24.0,
-                                  barBorderRadius: BorderRadius.circular(4.0),
-                                  groupSpace: 12.0,
-                                  alignment: BarChartAlignment.spaceEvenly,
-                                  chartStylingInfo: const ChartStylingInfo(
-                                    backgroundColor: Colors.transparent,
-                                    showBorder: false,
-                                  ),
-                                  axisBounds: const AxisBounds(
-                                    minY: 0.0,
-                                    maxX: 6.0,
-                                    maxY: 108.0,
-                                  ),
-                                  xAxisLabelInfo: AxisLabelInfo(
-                                    showLabels: true,
-                                    labelTextStyle: FlutterFlowTheme.of(context)
-                                        .bodySmall
-                                        .override(
-                                          fontFamily: GoogleFonts.inter().fontFamily,
-                                          color: FlutterFlowTheme.of(context).secondaryText,
-                                          fontSize: 10.0,
-                                        ),
-                                    reservedSize: 20.0,
-                                  ),
-                                  yAxisLabelInfo: const AxisLabelInfo(
-                                    reservedSize: 0.0,
-                                  ),
-                                ),
+                                child: () {
+                                  final last7Days = List.generate(7, (i) {
+                                    final date = DateTime.now().subtract(Duration(days: 6 - i));
+                                    return '${date.month.toString().padLeft(2, '0')}/${date.day.toString().padLeft(2, '0')}';
+                                  });
+                                  final yData = last7Days.map((d) => (_dailyCounts[d] ?? 0).toDouble()).toList();
+                                  
+                                  return FlutterFlowBarChart(
+                                    barData: [
+                                      FFBarChartData(
+                                        yData: yData,
+                                        color: FlutterFlowTheme.of(context).primary,
+                                      )
+                                    ],
+                                    xLabels: last7Days,
+                                    barWidth: 24.0,
+                                    barBorderRadius: BorderRadius.circular(4.0),
+                                    groupSpace: 12.0,
+                                    alignment: BarChartAlignment.spaceEvenly,
+                                    chartStylingInfo: const ChartStylingInfo(
+                                      backgroundColor: Colors.transparent,
+                                      showBorder: false,
+                                    ),
+                                    axisBounds: AxisBounds(
+                                      minY: 0.0,
+                                      maxX: 6.0,
+                                      maxY: yData.isEmpty ? 10.0 : (yData.reduce((a, b) => a > b ? a : b) + 5.0).clamp(10.0, 1000.0),
+                                    ),
+                                    xAxisLabelInfo: AxisLabelInfo(
+                                      showLabels: true,
+                                      labelTextStyle: FlutterFlowTheme.of(context)
+                                          .bodySmall
+                                          .override(
+                                            fontFamily: GoogleFonts.inter().fontFamily,
+                                            color: FlutterFlowTheme.of(context).secondaryText,
+                                            fontSize: 10.0,
+                                          ),
+                                      reservedSize: 20.0,
+                                    ),
+                                    yAxisLabelInfo: const AxisLabelInfo(
+                                      reservedSize: 0.0,
+                                    ),
+                                  );
+                                }(),
                               ),
                             ].divide(const SizedBox(height: 16.0)),
                           ),
@@ -797,8 +798,8 @@ class _BusinessDashboardWidgetState extends State<BusinessDashboardWidget> {
                                   size: 20.0,
                                 ),
                                 subtitle: (_business?.isVerified ?? false)
-                                    ? 'Your documents are up to date'
-                                    : 'Awaiting verification from admin',
+                                    ? 'Your business is officially verified'
+                                    : 'Verification is currently in progress',
                                 title: 'Verification Status',
                               ),
                             ),

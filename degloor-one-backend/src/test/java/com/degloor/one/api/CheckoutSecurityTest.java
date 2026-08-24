@@ -111,12 +111,74 @@ class CheckoutSecurityTest {
     }
 
     @Test
+    void customerCanOpenAShopAndBecomeOwner() throws Exception {
+        String email = "shop-" + id() + "@degloor.test";
+        String token = token(register(email, "password1", "Priya Kale"));
+        assertEquals("customer", users.findByEmailIgnoreCase(email).orElseThrow().getRole());
+
+        String businessId = dataId(postAuth(token, "/api/v1/businesses", Map.of(
+                "name", "Kale Kirana",
+                "ownerName", "Priya Kale",
+                "addressText", "Lane 2, Degloor",
+                "latitude", 18.5522,
+                "longitude", 77.5844,
+                "open", true
+        )));
+
+        assertEquals("business_owner", users.findByEmailIgnoreCase(email).orElseThrow().getRole());
+        mvc.perform(get("/api/v1/auth/me").header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.role").value("business_owner"));
+        mvc.perform(get("/api/v1/businesses/mine").header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].id").value(businessId));
+
+        String riderEmail = "rider-" + id() + "@degloor.test";
+        String riderToken = token(register(riderEmail, "password1", "Rider"));
+        promote(riderEmail, "delivery_partner");
+        postAuth(riderToken, "/api/v1/businesses", Map.of(
+                "name", "Rider Mart",
+                "addressText", "Stand, Degloor",
+                "latitude", 18.5522,
+                "longitude", 77.5844
+        )).andExpect(status().isForbidden());
+        assertEquals("delivery_partner", users.findByEmailIgnoreCase(riderEmail).orElseThrow().getRole());
+    }
+
+    @Test
     void invalidLoginFails() throws Exception {
         mvc.perform(post("/api/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(Map.of("email", "missing@degloor.test", "password", "nope"))))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value("INVALID_CREDENTIALS"));
+    }
+
+    @Test
+    void anonymousOwnerRoutesRequireSignIn() throws Exception {
+        mvc.perform(get("/api/v1/businesses/mine"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
+        mvc.perform(get("/api/v1/jobs/11111111-1111-4111-8111-111111111111/applications"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
+        mvc.perform(get("/api/v1/admin/users"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
+        mvc.perform(get("/api/v1/jobs")).andExpect(status().isOk());
+        mvc.perform(get("/api/v1/businesses")).andExpect(status().isOk());
+    }
+
+    @Test
+    void registerIgnoresClientSuppliedRole() throws Exception {
+        String body = mvc.perform(post("/api/v1/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"email":"role-%s@degloor.test","password":"password1","fullName":"Ravi","role":"admin"}
+                                """.formatted(id())))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        assertEquals("customer", mapper.readTree(body).path("data").path("user").path("role").asText());
     }
 
     private String register(String email, String password, String name) throws Exception {

@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:degloor_one/auth/auth_manager.dart';
-import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/auth/java_auth_user.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/backend/supabase/supabase_connection.dart';
@@ -25,18 +24,32 @@ class SupabaseAuthManager extends AuthManager
     with EmailSignInManager, GoogleSignInManager, PhoneSignInManager {
   @override
   Future signOut() async {
+    final signedOut = JavaAuthUser.signedOut();
+    updateAuthUser(signedOut);
+    updateJwtToken(null);
+    // Skip a second notifier update when MyApp already applied this user
+    // from [authUserStream] — that path resets [notifyOnAuthChange].
+    if (AppStateNotifier.instance.user?.loggedIn ?? true) {
+      AppStateNotifier.instance.update(signedOut);
+    }
+
     if (kBypassAuth) {
-      installGuestSession();
       return;
     }
     if (JavaApiConfig.enabled) {
       await AuthApi.logout();
-      final signedOut = JavaAuthUser.signedOut();
-      currentUser = signedOut;
-      AppStateNotifier.instance.update(signedOut);
       return;
     }
     return SupaFlow.client.auth.signOut();
+  }
+
+  /// Sign out without letting [AppStateNotifier] rebuild the current page
+  /// out from under the button, then go to login.
+  Future<void> signOutToLogin(BuildContext context) async {
+    final router = GoRouter.of(context);
+    router.prepareAuthEvent();
+    await signOut();
+    router.goNamed('Authentication');
   }
 
   @override
@@ -262,8 +275,9 @@ class SupabaseAuthManager extends AuthManager
   ) async {
     try {
       final user = JavaAuthUser.fromTokenResponse(await signIn());
-      if (user.uid == null || user.uid!.length <= 10) return null;
-      currentUser = user;
+      if (user.id.isEmpty || user.id.length <= 10) return null;
+      updateAuthUser(user);
+      updateJwtToken(JavaApiClient.instance.accessToken);
       AppStateNotifier.instance.update(user);
       return user;
     } on JavaApiException catch (error) {

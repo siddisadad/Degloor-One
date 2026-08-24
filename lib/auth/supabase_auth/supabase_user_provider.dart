@@ -83,11 +83,11 @@ class DegloorOneSupabaseUser extends BaseAuthUser {
 /// if we need to interact with the [currentUser] before logging in.
 Stream<BaseAuthUser> degloorOneSupabaseUserStream() {
   if (kBypassAuth) {
-    installGuestSession();
-    return Stream<BaseAuthUser>.value(currentUser!);
+    if (currentUser == null) installGuestSession();
+    return authUserStream.startWith(currentUser!);
   }
   if (JavaApiConfig.enabled) {
-    return Stream<BaseAuthUser>.value(
+    return authUserStream.startWith(
       currentUser ?? JavaAuthUser.signedOut(),
     );
   }
@@ -95,7 +95,7 @@ Stream<BaseAuthUser> degloorOneSupabaseUserStream() {
       (authState) => authState.event == AuthChangeEvent.tokenRefreshed
           ? TimerStream(authState, const Duration(seconds: 1))
           : Stream.value(authState));
-  return (!loggedIn
+  final mainStream = (!loggedIn
           ? Stream<AuthState?>.value(null).concatWith([supabaseAuthStream])
           : supabaseAuthStream)
       .asyncMap<BaseAuthUser>(
@@ -104,12 +104,17 @@ Stream<BaseAuthUser> degloorOneSupabaseUserStream() {
         PasswordRecovery.pending.value = true;
       }
       final user = authState?.session?.user;
+      final token = authState?.session?.accessToken;
       String? role;
       if (user != null && !kUsesDeadFlutterFlowHost) {
         role = await UserService.instance.roleFor(user.id);
       }
-      currentUser = DegloorOneSupabaseUser(user, role);
-      return currentUser!;
+      final authUser = DegloorOneSupabaseUser(user, role);
+      updateAuthUser(authUser);
+      updateJwtToken(token);
+      return authUser;
     },
   );
+
+  return mainStream.mergeWith([authUserStream]);
 }

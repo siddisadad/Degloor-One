@@ -207,6 +207,13 @@ class _UserProfileReportsWidgetState extends State<UserProfileReportsWidget> {
                       'Home, Work, Other',
                       () => context.pushNamed('AddressList'),
                     ),
+                    if (currentUser?.role == 'customer')
+                      _settingsTile(
+                        Icons.storefront_outlined,
+                        'Register your business',
+                        'List your shop on DEGLOOR ONE',
+                        () => context.pushNamed('BusinessRegistration'),
+                      ),
                     _settingsTile(
                       Icons.language_rounded,
                       l10n?.language ?? 'Language',
@@ -280,12 +287,7 @@ class _UserProfileReportsWidgetState extends State<UserProfileReportsWidget> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: DegloorTheme.spacingMD),
                       child: ButtonWidget(
-                        onTap: () async {
-                          await authManager.signOut();
-                          if (context.mounted) {
-                            context.goNamed('Authentication');
-                          }
-                        },
+                        onTap: () => authManager.signOutToLogin(context),
                         content: 'Sign Out',
                         variant: 'outline',
                         size: 'large',
