@@ -550,13 +550,14 @@ class _DeliveryDashboardWidgetState extends State<DeliveryDashboardWidget> {
                   message:
                       'Hello, this is your delivery partner regarding order #${order.id.substring(0, 8)} on DEGLOOR ONE.',
                 );
-                if (!opened && context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(WhatsAppService.unableToOpenMessage),
-                    ),
-                  );
-                }
+                  if (!opened) {
+                    if (!mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(WhatsAppService.unableToOpenMessage),
+                      ),
+                    );
+                  }
               },
               child: Row(
                 children: [

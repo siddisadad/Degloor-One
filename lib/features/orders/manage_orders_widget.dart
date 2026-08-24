@@ -407,7 +407,8 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
                     message:
                         'Hello, this is regarding your order #$shortId on DEGLOOR ONE.',
                   );
-                  if (!opened && context.mounted) {
+                  if (!opened) {
+                    if (!mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text(WhatsAppService.unableToOpenMessage),

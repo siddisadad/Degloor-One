@@ -15,7 +15,6 @@ import 'package:degloor_one/core/error_handler.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/l10n/app_localizations.dart';
 import 'package:degloor_one/shared/discovery_radius.dart';
-import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/shared/search_history.dart';
 import 'package:flutter/material.dart';
 import 'search_results_model.dart';

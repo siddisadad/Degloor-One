@@ -98,12 +98,10 @@ class _ServiceProviderProfileWidgetState
                           )
                         : CachedRemoteImage(
                             url: provider.photoUrl!,
-                            fit: BoxFit.cover,
                             placeholderIcon: Icons.person_rounded,
                           ),
                   ),
                   leading: FlutterFlowIconButton(
-                    borderColor: Colors.transparent,
                     borderRadius: 30.0,
                     borderWidth: 1.0,
                     buttonSize: 60.0,
