@@ -4,6 +4,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/backend/delivery_service.dart';
 import 'package:degloor_one/backend/order_service.dart';
+import 'package:degloor_one/data/datasources/bind_order_service.dart';
+import 'package:degloor_one/data/datasources/java_order_repository.dart';
+import 'package:degloor_one/data/datasources/supabase_order_repository.dart';
+import 'package:degloor_one/data/repositories/order_repository.dart';
 import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/checkout_line_item.dart';
@@ -19,7 +23,7 @@ void main() {
 
   test('showcase checkout writes pending / unpaid and clears the cart', () {
     expect(kUseShowcaseData, isTrue);
-    final order = OrderService.placeShowcaseOrder(
+    final order = SupabaseOrderRepository.placeShowcaseOrder(
       userId: GuestAuthUser.guestUid,
       businessId: ShowcaseCatalog.bizPatil,
       cartId: ShowcaseCatalog.cartGuest,
@@ -62,7 +66,7 @@ void main() {
 
   test('showcase checkout rejects another user address', () {
     expect(
-      () => OrderService.placeShowcaseOrder(
+      () => SupabaseOrderRepository.placeShowcaseOrder(
         userId: ShowcaseCatalog.customer2,
         businessId: ShowcaseCatalog.bizPatil,
         cartId: '',
@@ -200,7 +204,7 @@ void main() {
   });
 
   test('customer can cancel a pending order and stock is restored', () async {
-    final order = OrderService.placeShowcaseOrder(
+    final order = SupabaseOrderRepository.placeShowcaseOrder(
       userId: GuestAuthUser.guestUid,
       businessId: ShowcaseCatalog.bizPatil,
       cartId: ShowcaseCatalog.cartGuest,
@@ -437,5 +441,116 @@ void main() {
     expect(history.orderId, 'ord-1');
     expect(history.status, 'accepted');
     expect(history.notes, 'Order accepted by shop.');
+
+    final page = JavaOrderRepository.ordersFromPage({
+      'items': [
+        {
+          'id': 'ord-1',
+          'userId': 'user-1',
+          'businessId': 'biz-patil',
+          'totalAmount': 145,
+          'status': 'pending',
+          'paymentStatus': 'unpaid',
+        },
+      ],
+      'hasMore': false,
+    });
+    expect(page, hasLength(1));
+    expect(page.single.id, 'ord-1');
   });
+
+  test('OrderService placeOrder delegates to the bound repository', () async {
+    final fake = _RecordingOrderRepository();
+    OrderService.bind(fake);
+    addTearDown(bindOrderService);
+
+    final id = await OrderService.instance.placeOrder(
+      userId: GuestAuthUser.guestUid,
+      businessId: ShowcaseCatalog.bizPatil,
+      addressId: 'addr-home',
+      items: [
+        CheckoutLineItem(
+          productId: ShowcaseCatalog.prodRice,
+          quantity: 1,
+        ),
+      ],
+    );
+    expect(id, 'ord-bound');
+    expect(fake.placed, isTrue);
+  });
+}
+
+class _RecordingOrderRepository implements OrderRepository {
+  var placed = false;
+
+  @override
+  Future<PageResult<PlacedOrder>> forUser(
+    String userId, {
+    PageQuery page = const PageQuery(),
+  }) async =>
+      const PageResult(items: [], hasMore: false);
+
+  @override
+  Future<PageResult<PlacedOrder>> forBusiness(
+    String businessId, {
+    PageQuery page = const PageQuery(),
+  }) async =>
+      const PageResult(items: [], hasMore: false);
+
+  @override
+  Future<int> pendingCount(String businessId) async => 0;
+
+  @override
+  Future<PlacedOrder?> byId(String orderId) async => null;
+
+  @override
+  Future<PlacedOrder?> forCustomer({
+    required String orderId,
+    required String userId,
+  }) async =>
+      null;
+
+  @override
+  Future<List<OrderStatusChange>> historyFor(String orderId) async => const [];
+
+  @override
+  Future<List<OrderLine>> itemsWithProducts(String orderId) async => const [];
+
+  @override
+  Stream<List<PlacedOrder>> watchBusiness(String businessId) =>
+      const Stream.empty();
+
+  @override
+  Stream<List<PlacedOrder>> watchUserOrder({
+    required String orderId,
+    required String userId,
+  }) =>
+      const Stream.empty();
+
+  @override
+  Future<String> placeOrder({
+    required String userId,
+    required String businessId,
+    required String addressId,
+    required List<CheckoutLineItem> items,
+    String paymentMethod = 'COD',
+    String? cartId,
+  }) async {
+    placed = true;
+    return 'ord-bound';
+  }
+
+  @override
+  Future<void> cancelOrder({
+    required String orderId,
+    required String actorUserId,
+    String? reason,
+  }) async {}
+
+  @override
+  Future<void> updateOwnerStatus({
+    required String orderId,
+    required String nextStatus,
+    required String ownerId,
+  }) async {}
 }
