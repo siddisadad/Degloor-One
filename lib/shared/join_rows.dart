@@ -138,7 +138,13 @@ class OrderLine {
       productId: productId,
       quantity: (json['quantity'] as num?)?.toInt() ?? 0,
       priceAtPurchase: (json['priceAtPurchase'] as num?)?.toDouble() ?? 0,
-      product: productId.isEmpty ? null : JoinedProduct(id: productId),
+      product: productId.isEmpty
+          ? null
+          : JoinedProduct(
+              id: productId,
+              name: json['name'] as String?,
+              imageUrl: json['imageUrl'] as String?,
+            ),
     );
   }
 

@@ -2,7 +2,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:degloor_one/shared/join_rows.dart';
 
 void main() {
-  test('CartLine.fromJoin reads the product join and omits price on checkout', () {
+  test('CartLine.fromJoin reads the product join and omits price on checkout',
+      () {
     final line = CartLine.fromJoin({
       'id': 'ci-1',
       'cart_id': 'cart-1',
@@ -41,7 +42,8 @@ void main() {
     );
   });
 
-  test('OrderLine uses stored purchase price, not the joined catalog price', () {
+  test('OrderLine uses stored purchase price, not the joined catalog price',
+      () {
     final line = OrderLine.fromJoin({
       'id': 'oi-1',
       'order_id': 'o-1',
@@ -52,5 +54,28 @@ void main() {
     });
     expect(line.lineTotal, 240);
     expect(line.product?.price, 1.0);
+  });
+
+  test('OrderLine.fromJson maps Java product name and image', () {
+    final line = OrderLine.fromJson({
+      'productId': 'prod-rice',
+      'quantity': 2,
+      'priceAtPurchase': 120,
+      'name': 'Rice (1kg)',
+      'imageUrl': 'https://example.com/rice.png',
+    }, orderId: 'o-1');
+    expect(line.productId, 'prod-rice');
+    expect(line.product?.name, 'Rice (1kg)');
+    expect(line.product?.imageUrl, 'https://example.com/rice.png');
+    expect(line.product?.price, isNull);
+    expect(line.lineTotal, 240);
+
+    final bare = OrderLine.fromJson({
+      'productId': 'prod-tea',
+      'quantity': 1,
+      'priceAtPurchase': 20,
+    }, orderId: 'o-1');
+    expect(bare.product?.name, isNull);
+    expect(bare.product?.imageUrl, isNull);
   });
 }

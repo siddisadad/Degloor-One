@@ -416,12 +416,17 @@ void main() {
       'productId': 'prod-rice',
       'quantity': 2,
       'priceAtPurchase': 120,
+      'name': 'Rice (1kg)',
+      'imageUrl': 'https://example.com/rice.png',
     }, orderId: 'ord-1');
     expect(line.orderId, 'ord-1');
     expect(line.productId, 'prod-rice');
     expect(line.quantity, 2);
     expect(line.priceAtPurchase, 120);
     expect(line.lineTotal, 240);
+    expect(line.product?.name, 'Rice (1kg)');
+    expect(line.product?.imageUrl, 'https://example.com/rice.png');
+    expect(line.product?.price, isNull);
 
     final history = OrderStatusChange.fromJson({
       'status': 'accepted',
