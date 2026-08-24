@@ -295,10 +295,9 @@ class _BusinessDashboardWidgetState extends State<BusinessDashboardWidget> {
                                           ),
                                         );
                                         if (confirm == true) {
-                                          await authManager.signOut();
-                                          if (context.mounted) {
-                                            context.goNamed('Authentication');
-                                          }
+                                          await authManager.signOutToLogin(
+                                            context,
+                                          );
                                         }
                                       },
                                     ),

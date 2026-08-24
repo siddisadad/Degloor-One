@@ -24,23 +24,32 @@ class SupabaseAuthManager extends AuthManager
     with EmailSignInManager, GoogleSignInManager, PhoneSignInManager {
   @override
   Future signOut() async {
-    updateAuthUser(JavaAuthUser.signedOut());
+    final signedOut = JavaAuthUser.signedOut();
+    updateAuthUser(signedOut);
     updateJwtToken(null);
+    // Skip a second notifier update when MyApp already applied this user
+    // from [authUserStream] — that path resets [notifyOnAuthChange].
+    if (AppStateNotifier.instance.user?.loggedIn ?? true) {
+      AppStateNotifier.instance.update(signedOut);
+    }
 
     if (kBypassAuth) {
-      // In guest mode, signOut just clears the global currentUser.
-      // The UI will navigate to Authentication screen.
       return;
     }
     if (JavaApiConfig.enabled) {
       await AuthApi.logout();
-      final signedOut = JavaAuthUser.signedOut();
-      updateAuthUser(signedOut);
-      updateJwtToken(null);
-      AppStateNotifier.instance.update(signedOut);
       return;
     }
     return SupaFlow.client.auth.signOut();
+  }
+
+  /// Sign out without letting [AppStateNotifier] rebuild the current page
+  /// out from under the button, then go to login.
+  Future<void> signOutToLogin(BuildContext context) async {
+    final router = GoRouter.of(context);
+    router.prepareAuthEvent();
+    await signOut();
+    router.goNamed('Authentication');
   }
 
   @override

@@ -70,7 +70,12 @@ class _ButtonWidgetState extends State<ButtonWidget> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: widget.disabled ? null : widget.onTap,
+      behavior: HitTestBehavior.opaque,
+      onTap: widget.disabled || widget.onTap == null
+          ? null
+          : () {
+              widget.onTap!();
+            },
       child: Opacity(
         opacity: valueOrDefault<double>(
         valueOrDefault<bool>(
