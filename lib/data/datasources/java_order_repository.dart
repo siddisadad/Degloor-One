@@ -77,7 +77,7 @@ class JavaOrderRepository implements OrderRepository {
   @override
   Future<int> pendingCount(String businessId) async {
     if (businessId.isEmpty) return 0;
-    final data = await OrderApi.forShop(businessId, page: 0, size: 100);
+    final data = await OrderApi.forShop(businessId, size: 100);
     return ordersFromPage(data)
         .where((order) =>
             order.businessId == businessId &&

@@ -469,7 +469,7 @@ void main() {
       businessId: ShowcaseCatalog.bizPatil,
       addressId: 'addr-home',
       items: [
-        CheckoutLineItem(
+        const CheckoutLineItem(
           productId: ShowcaseCatalog.prodRice,
           quantity: 1,
         ),
