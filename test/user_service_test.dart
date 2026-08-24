@@ -3,6 +3,7 @@ import 'package:degloor_one/backend/user_service.dart';
 import 'package:degloor_one/backend/supabase/database/tables/users_table.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 import 'package:degloor_one/shared/user_profile.dart';
+import 'package:degloor_one/shared/user_profile_draft.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -42,17 +43,21 @@ void main() {
     const newId = '00000000-0000-4000-8000-000000000021';
     final created = await UserService.instance.ensureOnSignIn(
       userId: newId,
-      email: 'asha@degloor.local',
-      phone: '+919890000021',
-      fullName: 'Asha Patil',
+      draft: UserProfileDraft.fromSignIn(
+        email: 'asha@degloor.local',
+        phone: '+919890000021',
+        fullName: 'Asha Patil',
+      ),
     );
     expect(created.role, 'customer');
     expect(created.fullName, 'Asha Patil');
 
     final again = await UserService.instance.ensureOnSignIn(
       userId: newId,
-      email: 'other@degloor.local',
-      fullName: 'Other',
+      draft: UserProfileDraft.fromSignIn(
+        email: 'other@degloor.local',
+        fullName: 'Other',
+      ),
     );
     expect(again.id, newId);
     expect(again.fullName, 'Asha Patil');
@@ -62,8 +67,10 @@ void main() {
   test('updateProfile changes the guest name and phone', () async {
     await UserService.instance.updateProfile(
       userId: GuestAuthUser.guestUid,
-      fullName: '  Sadad Guest  ',
-      phoneNumber: '+919890009999',
+      draft: UserProfileDraft.fromProfile(
+        fullName: '  Sadad Guest  ',
+        phoneNumber: '+919890009999',
+      ),
     );
     final row = await UserService.instance.byId(GuestAuthUser.guestUid);
     expect(row!.fullName, 'Sadad Guest');
@@ -74,7 +81,7 @@ void main() {
     await expectLater(
       UserService.instance.updateProfile(
         userId: 'user-missing',
-        fullName: 'Nope',
+        draft: UserProfileDraft.fromProfile(fullName: 'Nope'),
       ),
       throwsA(
         isA<Exception>().having(

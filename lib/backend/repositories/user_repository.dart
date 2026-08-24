@@ -1,4 +1,5 @@
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/user_profile_draft.dart';
 
 /// Reads and writes for `public.users`. Widgets and auth should go through
 /// [UserService].
@@ -19,11 +20,15 @@ class UserRepository {
     );
   }
 
-  Future<UsersRow> insert(Map<String, dynamic> data) {
-    return UsersTable().insert(data);
+  Future<UsersRow> insert(
+    UserProfileDraft draft, {
+    required String userId,
+  }) {
+    return UsersTable().insert(draft.toInsertJson(userId: userId));
   }
 
-  Future<UsersRow?> update(String userId, Map<String, dynamic> data) async {
+  Future<UsersRow?> update(String userId, UserProfileDraft draft) async {
+    final data = draft.toUpdateJson();
     if (userId.isEmpty || data.isEmpty) return byId(userId);
     final rows = await UsersTable().update(
       data: data,

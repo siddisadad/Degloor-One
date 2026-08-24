@@ -5,6 +5,7 @@ import 'package:degloor_one/backend/shop_service.dart';
 import 'package:degloor_one/backend/user_service.dart';
 import 'package:degloor_one/shared/listing_complaint.dart';
 import 'package:degloor_one/shared/user_profile.dart';
+import 'package:degloor_one/shared/user_profile_draft.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/app_state.dart';
 import 'package:degloor_one/components/button/button_widget.dart';
@@ -450,8 +451,10 @@ class _PersonalInfoSheetState extends State<_PersonalInfoSheet> {
     try {
       await UserService.instance.updateProfile(
         userId: widget.userId,
-        fullName: _nameController.text,
-        phoneNumber: _phoneController.text,
+        draft: UserProfileDraft.fromProfile(
+          fullName: _nameController.text,
+          phoneNumber: _phoneController.text,
+        ),
       );
       if (mounted) Navigator.pop(context, true);
     } catch (error) {
