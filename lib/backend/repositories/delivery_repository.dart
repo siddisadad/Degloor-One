@@ -5,8 +5,7 @@ import 'package:degloor_one/shared/delivery_partner.dart';
 import 'package:degloor_one/shared/order_lifecycle.dart';
 import 'package:degloor_one/shared/page_query.dart';
 
-/// Data access for riders. Widgets should go through [DeliveryService].
-/// Table-backed implementation; Java leftover reads live on [DeliveryService].
+/// Table access for riders. Domain mapping lives on [SupabaseDeliveryRepository].
 class DeliveryRepository {
   Future<DeliveryPartner?> partnerForUser(String userId) async {
     if (userId.isEmpty) return null;
