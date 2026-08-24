@@ -190,6 +190,23 @@ class ServiceProviderCard {
     );
   }
 
+  /// Java `ProviderResponse`. User name joins stay on the table path.
+  factory ServiceProviderCard.fromJson(
+    Map<String, dynamic> json, {
+    JoinedCategory? category,
+  }) {
+    return ServiceProviderCard(
+      id: _id(json['id']),
+      userId: _text(json['userId'] ?? json['user_id']),
+      categoryId: _text(json['categoryId'] ?? json['category_id']),
+      bio: _text(json['bio']),
+      hourlyRate: _double(json['hourlyRate'] ?? json['hourly_rate']),
+      experienceYears: _int(json['experienceYears'] ?? json['experience_years']),
+      isVerified: json['verified'] == true || json['isVerified'] == true,
+      category: category,
+    );
+  }
+
   String get displayName => user?.displayName(fallback: 'Unknown Provider') ??
       'Unknown Provider';
 

@@ -1,15 +1,22 @@
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/data/datasources/supabase_marketplace_maps.dart';
 import 'package:degloor_one/shared/marketplace_joins.dart';
 import 'package:degloor_one/shared/page_query.dart';
+import 'package:degloor_one/shared/service_category.dart';
+import 'package:degloor_one/shared/service_provider_profile.dart';
+import 'package:degloor_one/shared/service_request.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
 /// Data access for the service marketplace. Widgets should go through
 /// [ServiceMarketplaceService].
+/// Table-backed implementation; Java leftover reads live on
+/// [ServiceMarketplaceService].
 class ServiceMarketplaceRepository {
-  Future<List<ServiceCategoriesRow>> categories() {
-    return ServiceCategoriesTable().queryRows(
+  Future<List<ServiceCategory>> categories() async {
+    final rows = await ServiceCategoriesTable().queryRows(
       queryFn: (q) => q.order('name', ascending: true),
     );
+    return rows.map(serviceCategoryFromRow).toList();
   }
 
   Future<List<ServiceProviderCard>> providers({
@@ -53,20 +60,22 @@ class ServiceMarketplaceRepository {
     return ServiceProviderCard.fromJoin(Map<String, dynamic>.from(row));
   }
 
-  Future<ServiceProvidersRow?> forUser(String userId) async {
+  Future<ServiceProviderProfile?> forUser(String userId) async {
     final rows = await ServiceProvidersTable().queryRows(
       queryFn: (q) => q.eq('user_id', userId),
       limit: 1,
     );
-    return rows.isEmpty ? null : rows.first;
+    return rows.isEmpty ? null : serviceProviderProfileFromRow(rows.first);
   }
 
-  Future<ServiceProvidersRow> insertProvider(Map<String, dynamic> data) {
-    return ServiceProvidersTable().insert(data);
+  Future<ServiceProviderProfile> insertProvider(Map<String, dynamic> data) async {
+    final row = await ServiceProvidersTable().insert(data);
+    return serviceProviderProfileFromRow(row);
   }
 
-  Future<ServiceRequestsRow> insertRequest(Map<String, dynamic> data) {
-    return ServiceRequestsTable().insert(data);
+  Future<ServiceRequest> insertRequest(Map<String, dynamic> data) async {
+    final row = await ServiceRequestsTable().insert(data);
+    return serviceRequestFromRow(row);
   }
 
   Future<void> updateRequestStatus({
@@ -79,10 +88,12 @@ class ServiceMarketplaceRepository {
     );
   }
 
-  Stream<List<ServiceRequestsRow>> watchForProvider(String providerId) {
-    return ServiceRequestsTable().stream(
-      primaryKey: 'id',
-      queryFn: (q) => q.eq('provider_id', providerId),
-    );
+  Stream<List<ServiceRequest>> watchForProvider(String providerId) {
+    return ServiceRequestsTable()
+        .stream(
+          primaryKey: 'id',
+          queryFn: (q) => q.eq('provider_id', providerId),
+        )
+        .map((rows) => rows.map(serviceRequestFromRow).toList());
   }
 }

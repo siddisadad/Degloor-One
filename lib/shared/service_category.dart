@@ -1,6 +1,4 @@
-import 'package:degloor_one/backend/supabase/database/tables/service_categories_table.dart';
-
-/// Local service type. Screens use this instead of [ServiceCategoriesRow].
+/// Local service type. Screens use this instead of a table row.
 class ServiceCategory {
   const ServiceCategory({
     required this.id,
@@ -14,19 +12,12 @@ class ServiceCategory {
   final String? iconName;
   final DateTime? createdAt;
 
-  factory ServiceCategory.fromRow(ServiceCategoriesRow row) {
-    final rawCreated = row.data['created_at'];
-    DateTime? createdAt;
-    if (rawCreated is DateTime) {
-      createdAt = rawCreated;
-    } else if (rawCreated != null) {
-      createdAt = DateTime.tryParse('$rawCreated');
-    }
+  /// Java `CategoryResponse`.
+  factory ServiceCategory.fromJson(Map<String, dynamic> json) {
     return ServiceCategory(
-      id: row.id,
-      name: row.name,
-      iconName: row.iconName,
-      createdAt: createdAt,
+      id: '${json['id'] ?? ''}',
+      name: '${json['name'] ?? ''}',
+      iconName: json['iconName'] as String?,
     );
   }
 }

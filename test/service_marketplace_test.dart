@@ -5,6 +5,7 @@ import 'package:degloor_one/backend/service_marketplace_service.dart';
 import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/page_query.dart';
+import 'package:degloor_one/shared/marketplace_joins.dart';
 import 'package:degloor_one/shared/service_category.dart';
 import 'package:degloor_one/shared/service_provider_profile.dart';
 import 'package:degloor_one/shared/service_request.dart';
@@ -216,5 +217,62 @@ void main() {
       ShowcaseQuery()..eq('id', 'sr-1'),
     );
     expect(rows.single['status'], 'accepted');
+  });
+
+  test('Java marketplace JSON maps to domain types', () {
+    final category = ServiceCategory.fromJson({
+      'id': 'scat-electric',
+      'name': 'Electrician',
+      'iconName': 'bolt',
+    });
+    expect(category, isA<ServiceCategory>());
+    expect(category.id, 'scat-electric');
+    expect(category.name, 'Electrician');
+    expect(category.iconName, 'bolt');
+
+    final card = ServiceProviderCard.fromJson({
+      'id': 'sp-ravi',
+      'userId': 'user-electrician',
+      'categoryId': 'scat-electric',
+      'bio': 'Wiring in Degloor.',
+      'hourlyRate': 200,
+      'experienceYears': 5,
+      'verified': true,
+    }, category: const JoinedCategory(name: 'Electrician'));
+    expect(card.id, 'sp-ravi');
+    expect(card.userId, 'user-electrician');
+    expect(card.hourlyRate, 200);
+    expect(card.isVerified, isTrue);
+    expect(card.categoryName, 'Electrician');
+    expect(card.displayName, 'Unknown Provider');
+
+    final profile = ServiceProviderProfile.fromJson({
+      'id': 'sp-ravi',
+      'userId': 'user-electrician',
+      'categoryId': 'scat-electric',
+      'bio': 'Wiring in Degloor.',
+      'hourlyRate': 200,
+      'experienceYears': 5,
+      'verified': false,
+    });
+    expect(profile, isA<ServiceProviderProfile>());
+    expect(profile.userId, 'user-electrician');
+    expect(profile.isVerified, isFalse);
+    expect(profile.createdAt.millisecondsSinceEpoch, 0);
+
+    final request = ServiceRequest.fromJson({
+      'id': 'sr-1',
+      'userId': GuestAuthUser.guestUid,
+      'providerId': 'sp-ravi',
+      'description': 'Fix the tube light.',
+      'status': 'pending',
+      'scheduledAt': '2026-08-25T10:00:00Z',
+      'createdAt': '2026-08-24T10:00:00Z',
+    });
+    expect(request, isA<ServiceRequest>());
+    expect(request.id, 'sr-1');
+    expect(request.providerId, 'sp-ravi');
+    expect(request.status, 'pending');
+    expect(request.createdAt.toUtc().year, 2026);
   });
 }

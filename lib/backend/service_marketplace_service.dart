@@ -2,7 +2,11 @@ import 'package:degloor_one/backend/native_service_bridge.dart';
 import 'package:degloor_one/backend/notification_service.dart';
 import 'package:degloor_one/backend/repositories/service_marketplace_repository.dart';
 import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
+import 'package:degloor_one/backend/supabase/database/tables/service_requests_table.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/core/api/api_client.dart';
+import 'package:degloor_one/core/api/marketplace_api.dart';
+import 'package:degloor_one/data/datasources/supabase_marketplace_maps.dart';
 import 'package:degloor_one/shared/marketplace_joins.dart';
 import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/shared/service_category.dart';
@@ -57,18 +61,37 @@ class ServiceMarketplaceService {
       ServiceRequestActions.forStatus(status);
 
   Future<List<ServiceCategory>> categories() async {
+    if (JavaApiConfig.enabled) {
+      final rows = await MarketplaceApi.categories();
+      return [for (final row in rows) ServiceCategory.fromJson(row)];
+    }
     if (!kUseShowcaseData) {
       final native = await NativeServiceBridge.getCategories();
       if (native.isNotEmpty) return native;
     }
-    final rows = await _repository.categories();
-    return rows.map(ServiceCategory.fromRow).toList();
+    return _repository.categories();
   }
 
   Future<PageResult<ServiceProviderCard>> providers({
     String? categoryId,
     PageQuery page = const PageQuery(),
   }) async {
+    if (JavaApiConfig.enabled) {
+      final names = await _javaCategoriesById();
+      final rows = await MarketplaceApi.providers(categoryId: categoryId);
+      final items = [
+        for (final row in rows)
+          ServiceProviderCard.fromJson(
+            row,
+            category: names['${row['categoryId'] ?? ''}'],
+          ),
+      ];
+      final paged = items.skip(page.offset).take(page.limit).toList();
+      return PageResult(
+        items: paged,
+        hasMore: page.offset + paged.length < items.length,
+      );
+    }
     if (!kUseShowcaseData) {
       final native = await NativeServiceBridge.getProviders(categoryId);
       if (native.isNotEmpty) {
@@ -84,8 +107,16 @@ class ServiceMarketplaceService {
   }
 
   Future<ServiceProviderProfile?> forUser(String userId) async {
-    final row = await _repository.forUser(userId);
-    return row == null ? null : ServiceProviderProfile.fromRow(row);
+    if (JavaApiConfig.enabled) {
+      if (userId.isEmpty) return null;
+      final rows = await MarketplaceApi.providers();
+      for (final row in rows) {
+        final profile = ServiceProviderProfile.fromJson(row);
+        if (profile.userId == userId) return profile;
+      }
+      return null;
+    }
+    return _repository.forUser(userId);
   }
 
   Future<ServiceProviderProfile> register({
@@ -121,7 +152,7 @@ class ServiceMarketplaceService {
     if (existing != null) {
       throw Exception('You already have a service profile');
     }
-    final row = await _repository.insertProvider({
+    return _repository.insertProvider({
       'user_id': userId,
       'category_id': categoryId,
       'experience_years': years,
@@ -129,16 +160,33 @@ class ServiceMarketplaceService {
       'bio': trimmedBio,
       'is_verified': false,
     });
-    return ServiceProviderProfile.fromRow(row);
   }
 
-  Future<ServiceProviderCard?> providerById(String id) =>
-      _repository.providerById(id);
+  Future<ServiceProviderCard?> providerById(String id) async {
+    if (JavaApiConfig.enabled) {
+      if (id.isEmpty) return null;
+      try {
+        final json = await MarketplaceApi.provider(id);
+        final names = await _javaCategoriesById();
+        return ServiceProviderCard.fromJson(
+          json,
+          category: names['${json['categoryId'] ?? ''}'],
+        );
+      } on JavaApiException catch (error) {
+        if (error.code == 'PROVIDER_NOT_FOUND' || error.code.contains('404')) {
+          return null;
+        }
+        rethrow;
+      }
+    }
+    return _repository.providerById(id);
+  }
 
   Stream<List<ServiceRequest>> watchForProvider(String providerId) {
-    return _repository
-        .watchForProvider(providerId)
-        .map((rows) => rows.map(ServiceRequest.fromRow).toList());
+    if (JavaApiConfig.enabled) {
+      return Stream.fromFuture(_javaInbox(providerId));
+    }
+    return _repository.watchForProvider(providerId);
   }
 
   Future<ServiceRequest> createRequest({
@@ -156,7 +204,7 @@ class ServiceMarketplaceService {
     }
 
     if (kUseShowcaseData) {
-      final row = await _repository.insertRequest({
+      final request = await _repository.insertRequest({
         'user_id': userId,
         'provider_id': providerId,
         'description': trimmed,
@@ -177,7 +225,7 @@ class ServiceMarketplaceService {
           type: 'service_request',
         );
       }
-      return ServiceRequest.fromRow(row);
+      return request;
     }
 
     final response = await SupaFlow.client.rpc(
@@ -192,7 +240,7 @@ class ServiceMarketplaceService {
     if (row == null) {
       throw Exception('Failed to send the service request');
     }
-    return ServiceRequest.fromRow(ServiceRequestsRow(row));
+    return serviceRequestFromRow(ServiceRequestsRow(row));
   }
 
   Future<void> updateStatus({
@@ -268,3 +316,32 @@ class ServiceMarketplaceService {
     );
   }
 }
+
+Future<Map<String, JoinedCategory>> _javaCategoriesById() async {
+  final rows = await MarketplaceApi.categories();
+  final names = <String, JoinedCategory>{};
+  for (final row in rows) {
+    final id = '${row['id'] ?? ''}';
+    final name = '${row['name'] ?? ''}'.trim();
+    if (id.isEmpty || name.isEmpty) continue;
+    names[id] = JoinedCategory(name: name);
+  }
+  return names;
+}
+
+Future<List<ServiceRequest>> _javaInbox(String providerId) async {
+  try {
+    final rows = await MarketplaceApi.inbox();
+    return [
+      for (final row in rows)
+        if (providerId.isEmpty || '${row['providerId'] ?? ''}' == providerId)
+          ServiceRequest.fromJson(row),
+    ];
+  } on JavaApiException catch (error) {
+    if (error.code == 'PROVIDER_NOT_FOUND' || error.code.contains('404')) {
+      return const [];
+    }
+    rethrow;
+  }
+}
+
