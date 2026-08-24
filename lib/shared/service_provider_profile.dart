@@ -1,8 +1,5 @@
-import 'package:degloor_one/backend/supabase/database/tables/service_providers_table.dart';
-
 /// Provider account without the user/category join. Screens use this
-/// instead of [ServiceProvidersRow]. Marketplace cards stay on
-/// [ServiceProviderCard].
+/// instead of a table row. Marketplace cards stay on [ServiceProviderCard].
 class ServiceProviderProfile {
   const ServiceProviderProfile({
     required this.id,
@@ -23,19 +20,6 @@ class ServiceProviderProfile {
   final String? bio;
   final double? hourlyRate;
   final int? experienceYears;
-
-  factory ServiceProviderProfile.fromRow(ServiceProvidersRow row) {
-    return ServiceProviderProfile(
-      id: row.id,
-      isVerified: row.isVerified,
-      createdAt: row.createdAt,
-      userId: row.userId,
-      categoryId: row.categoryId,
-      bio: row.bio,
-      hourlyRate: row.hourlyRate,
-      experienceYears: row.experienceYears,
-    );
-  }
 
   /// Java `ProviderResponse`.
   factory ServiceProviderProfile.fromJson(Map<String, dynamic> json) {

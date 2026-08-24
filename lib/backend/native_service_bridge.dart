@@ -33,7 +33,7 @@ class NativeServiceBridge {
       return [
         for (final row in _channelMaps(result is List ? result : null))
           if (_tryParse(
-                  () => ServiceCategory.fromRow(ServiceCategoriesRow(row)))
+                  () => _serviceCategoryFromRow(ServiceCategoriesRow(row)))
               case final category?)
             category,
       ];
@@ -89,6 +89,22 @@ ShopCategory _shopCategoryFromRow(BusinessCategoriesRow row) {
     name: row.name,
     iconName: row.iconName,
     displayOrder: row.displayOrder,
+    createdAt: createdAt,
+  );
+}
+
+ServiceCategory _serviceCategoryFromRow(ServiceCategoriesRow row) {
+  final rawCreated = row.data['created_at'];
+  DateTime? createdAt;
+  if (rawCreated is DateTime) {
+    createdAt = rawCreated;
+  } else if (rawCreated != null) {
+    createdAt = DateTime.tryParse('$rawCreated');
+  }
+  return ServiceCategory(
+    id: row.id,
+    name: row.name,
+    iconName: row.iconName,
     createdAt: createdAt,
   );
 }

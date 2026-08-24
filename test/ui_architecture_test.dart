@@ -126,6 +126,22 @@ void main() {
     expect(source.contains(_table), isFalse);
   });
 
+  test('marketplace leftover domain types stay off Supabase tables', () {
+    const paths = [
+      'lib/shared/service_category.dart',
+      'lib/shared/service_provider_profile.dart',
+      'lib/shared/service_request.dart',
+    ];
+    final offenders = <String>[];
+    for (final path in paths) {
+      final source = File(path).readAsStringSync();
+      if (source.contains(_barrel) || source.contains(_table)) {
+        offenders.add(path);
+      }
+    }
+    expect(offenders, isEmpty, reason: offenders.join('\n'));
+  });
+
   test('shop leftover domain types stay off Supabase tables', () {
     const paths = [
       'lib/shared/shop_hours.dart',

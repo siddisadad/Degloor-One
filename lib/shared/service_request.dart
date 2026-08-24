@@ -1,7 +1,5 @@
-import 'package:degloor_one/backend/supabase/database/tables/service_requests_table.dart';
-
 /// Booking between a customer and a provider. Screens use this instead of
-/// [ServiceRequestsRow].
+/// a table row.
 class ServiceRequest {
   const ServiceRequest({
     required this.id,
@@ -20,18 +18,6 @@ class ServiceRequest {
   final String? description;
   final String? status;
   final DateTime? scheduledAt;
-
-  factory ServiceRequest.fromRow(ServiceRequestsRow row) {
-    return ServiceRequest(
-      id: row.id,
-      createdAt: row.createdAt,
-      userId: row.userId,
-      providerId: row.providerId,
-      description: row.description,
-      status: row.status,
-      scheduledAt: row.scheduledAt,
-    );
-  }
 
   /// Java `RequestResponse`.
   factory ServiceRequest.fromJson(Map<String, dynamic> json) {

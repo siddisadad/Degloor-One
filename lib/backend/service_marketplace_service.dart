@@ -2,9 +2,11 @@ import 'package:degloor_one/backend/native_service_bridge.dart';
 import 'package:degloor_one/backend/notification_service.dart';
 import 'package:degloor_one/backend/repositories/service_marketplace_repository.dart';
 import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
+import 'package:degloor_one/backend/supabase/database/tables/service_requests_table.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/core/api/api_client.dart';
 import 'package:degloor_one/core/api/marketplace_api.dart';
+import 'package:degloor_one/data/datasources/supabase_marketplace_maps.dart';
 import 'package:degloor_one/shared/marketplace_joins.dart';
 import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/shared/service_category.dart';
@@ -67,8 +69,7 @@ class ServiceMarketplaceService {
       final native = await NativeServiceBridge.getCategories();
       if (native.isNotEmpty) return native;
     }
-    final rows = await _repository.categories();
-    return rows.map(ServiceCategory.fromRow).toList();
+    return _repository.categories();
   }
 
   Future<PageResult<ServiceProviderCard>> providers({
@@ -115,8 +116,7 @@ class ServiceMarketplaceService {
       }
       return null;
     }
-    final row = await _repository.forUser(userId);
-    return row == null ? null : ServiceProviderProfile.fromRow(row);
+    return _repository.forUser(userId);
   }
 
   Future<ServiceProviderProfile> register({
@@ -152,7 +152,7 @@ class ServiceMarketplaceService {
     if (existing != null) {
       throw Exception('You already have a service profile');
     }
-    final row = await _repository.insertProvider({
+    return _repository.insertProvider({
       'user_id': userId,
       'category_id': categoryId,
       'experience_years': years,
@@ -160,7 +160,6 @@ class ServiceMarketplaceService {
       'bio': trimmedBio,
       'is_verified': false,
     });
-    return ServiceProviderProfile.fromRow(row);
   }
 
   Future<ServiceProviderCard?> providerById(String id) async {
@@ -187,9 +186,7 @@ class ServiceMarketplaceService {
     if (JavaApiConfig.enabled) {
       return Stream.fromFuture(_javaInbox(providerId));
     }
-    return _repository
-        .watchForProvider(providerId)
-        .map((rows) => rows.map(ServiceRequest.fromRow).toList());
+    return _repository.watchForProvider(providerId);
   }
 
   Future<ServiceRequest> createRequest({
@@ -207,7 +204,7 @@ class ServiceMarketplaceService {
     }
 
     if (kUseShowcaseData) {
-      final row = await _repository.insertRequest({
+      final request = await _repository.insertRequest({
         'user_id': userId,
         'provider_id': providerId,
         'description': trimmed,
@@ -228,7 +225,7 @@ class ServiceMarketplaceService {
           type: 'service_request',
         );
       }
-      return ServiceRequest.fromRow(row);
+      return request;
     }
 
     final response = await SupaFlow.client.rpc(
@@ -243,7 +240,7 @@ class ServiceMarketplaceService {
     if (row == null) {
       throw Exception('Failed to send the service request');
     }
-    return ServiceRequest.fromRow(ServiceRequestsRow(row));
+    return serviceRequestFromRow(ServiceRequestsRow(row));
   }
 
   Future<void> updateStatus({
