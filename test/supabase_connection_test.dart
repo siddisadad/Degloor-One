@@ -79,7 +79,15 @@ void main() {
       SupabaseConnection.messageFor(
         Exception('net::ERR_NAME_NOT_RESOLVED'),
       ),
-      SupabaseConnection.unreachableMessage,
+      SupabaseConnection.guestUnreachableMessage,
+    );
+    expect(
+      SupabaseConnection.messageFor(Exception('net::ERR_NAME_NOT_RESOLVED')),
+      isNot(contains('SUPABASE_URL')),
+    );
+    expect(
+      SupabaseConnection.messageFor(Exception('net::ERR_NAME_NOT_RESOLVED')),
+      isNot(contains('Restore the Supabase project')),
     );
   });
 
@@ -101,14 +109,14 @@ void main() {
         Exception('AuthRetryableFetchException(message: $fetch)'),
         authMessage: fetch,
       ),
-      SupabaseConnection.unreachableMessage,
+      SupabaseConnection.guestUnreachableMessage,
     );
     expect(
       SupabaseConnection.messageFor(
         Exception('AuthException'),
         authMessage: fetch,
       ),
-      SupabaseConnection.unreachableMessage,
+      SupabaseConnection.guestUnreachableMessage,
     );
     expect(
       SupabaseConnection.messageFor(
@@ -117,7 +125,7 @@ void main() {
           'uri=https://uhaibenopzyzzuqjawlb.supabase.co/auth/v1/otp?)',
         ),
       ),
-      SupabaseConnection.unreachableMessage,
+      SupabaseConnection.guestUnreachableMessage,
     );
   });
 

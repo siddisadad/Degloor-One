@@ -10,14 +10,15 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
-  setUpAll(() {
+  setUpAll(() async {
     GoogleFonts.config.allowRuntimeFetching = false;
+    SharedPreferences.setMockInitialValues({});
+    await SupaFlow.initialize();
+    await FlutterFlowTheme.initialize();
   });
 
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
-    await SupaFlow.initialize();
-    await FlutterFlowTheme.initialize();
     FFAppState.reset();
     await FFAppState.instance.initializePersistedState();
   });
@@ -42,5 +43,37 @@ void main() {
       findsNothing,
     );
     expect(find.textContaining('SUPABASE_URL'), findsNothing);
+  });
+
+  testWidgets('sign in snackbar does not ask to restore the project',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(390, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      ChangeNotifierProvider<FFAppState>.value(
+        value: FFAppState.instance,
+        child: const MaterialApp(
+          home: AuthenticationWidget(),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    await tester.enterText(find.byType(TextField).at(0), 'guest@local');
+    await tester.enterText(find.byType(TextField).at(1), 'password');
+    await tester.ensureVisible(find.text('Sign In'));
+    await tester.tap(find.text('Sign In'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    expect(
+      find.text(SupabaseConnection.guestUnreachableMessage),
+      findsOneWidget,
+    );
+    expect(find.textContaining('SUPABASE_URL'), findsNothing);
+    expect(find.textContaining('Restore the Supabase project'), findsNothing);
+    expect(find.text('Continue as Guest'), findsOneWidget);
   });
 }
