@@ -21,6 +21,19 @@ class DeliveryService {
   static final instance = DeliveryService();
 
   Future<DeliveryPartner?> partnerForUser(String userId) async {
+    if (JavaApiConfig.enabled) {
+      if (userId.isEmpty) return null;
+      try {
+        final partner = DeliveryPartner.fromJson(await DeliveryApi.me());
+        if (partner.userId != userId) return null;
+        return partner;
+      } on JavaApiException catch (error) {
+        if (error.code == 'PARTNER_NOT_FOUND' || error.code.contains('404')) {
+          return null;
+        }
+        rethrow;
+      }
+    }
     final row = await _repository.partnerForUser(userId);
     return row == null ? null : DeliveryPartner.fromRow(row);
   }
@@ -28,6 +41,9 @@ class DeliveryService {
   Future<DeliveryPartner> registerPartner(String userId) async {
     if (userId.isEmpty) {
       throw Exception('Please sign in to register as a delivery partner');
+    }
+    if (JavaApiConfig.enabled) {
+      return DeliveryPartner.fromJson(await DeliveryApi.register());
     }
     final row = await _repository.registerPartner(userId);
     return DeliveryPartner.fromRow(row);
@@ -39,6 +55,10 @@ class DeliveryService {
     required bool verified,
   }) async {
     if (!available) {
+      if (JavaApiConfig.enabled) {
+        await DeliveryApi.setAvailability(false);
+        return;
+      }
       await _repository.setAvailability(
         partnerId: partnerId,
         available: false,
@@ -50,10 +70,28 @@ class DeliveryService {
         'Your account is pending verification. Please wait for admin approval.',
       );
     }
+    if (JavaApiConfig.enabled) {
+      await DeliveryApi.setAvailability(true);
+      return;
+    }
     await _repository.setAvailability(partnerId: partnerId, available: true);
   }
 
   Future<DeliveryAssignment?> activeForPartner(String partnerId) async {
+    if (JavaApiConfig.enabled) {
+      if (partnerId.isEmpty) return null;
+      try {
+        final data = await DeliveryApi.myOrders();
+        final assigned = _maps(data['assigned']);
+        if (assigned.isEmpty) return null;
+        return _assignmentFromOrder(assigned.first, partnerId);
+      } on JavaApiException catch (error) {
+        if (error.code == 'PARTNER_NOT_FOUND' || error.code.contains('404')) {
+          return null;
+        }
+        rethrow;
+      }
+    }
     final row = await _repository.activeForPartner(partnerId);
     return row == null ? null : DeliveryAssignment.fromRow(row);
   }
@@ -61,6 +99,24 @@ class DeliveryService {
   Future<PageResult<PlacedOrder>> readyOrders({
     PageQuery page = const PageQuery(),
   }) async {
+    if (JavaApiConfig.enabled) {
+      try {
+        final data = await DeliveryApi.myOrders();
+        final orders = [
+          for (final row in _maps(data['ready'])) _placedOrderFromJson(row),
+        ];
+        final items = orders.skip(page.offset).take(page.limit).toList();
+        return PageResult(
+          items: items,
+          hasMore: page.offset + items.length < orders.length,
+        );
+      } on JavaApiException catch (error) {
+        if (error.code == 'PARTNER_NOT_FOUND' || error.code.contains('404')) {
+          return const PageResult(items: [], hasMore: false);
+        }
+        rethrow;
+      }
+    }
     final rows = await _repository.readyOrders(page: page);
     return PageResult(
       items: rows.map(PlacedOrder.fromRow).toList(),
@@ -188,7 +244,7 @@ class DeliveryService {
       return;
     }
     if (name == 'confirm_delivery_pickup') {
-      await DeliveryApi.pickupAssignment('${params['p_assignment_id']}');
+      await DeliveryApi.pickup('${params['p_assignment_id']}');
     }
   }
 
@@ -295,4 +351,49 @@ class DeliveryService {
       });
     }
   }
+}
+
+List<Map<String, dynamic>> _maps(dynamic raw) {
+  final rows = raw is List ? raw : const [];
+  return [
+    for (final row in rows.whereType<Map>()) Map<String, dynamic>.from(row),
+  ];
+}
+
+DeliveryAssignment _assignmentFromOrder(
+  Map<String, dynamic> order,
+  String partnerId,
+) {
+  final orderId = '${order['id'] ?? ''}';
+  final status = OrderLifecycle.normalizeStatus('${order['status'] ?? ''}');
+  final created = order['createdAt'];
+  return DeliveryAssignment(
+    id: orderId,
+    orderId: orderId,
+    deliveryPartnerId: partnerId,
+    status: status == OrderLifecycle.outForDelivery ? 'picked_up' : 'assigned',
+    createdAt: created is String
+        ? DateTime.tryParse(created) ?? DateTime.fromMillisecondsSinceEpoch(0)
+        : DateTime.fromMillisecondsSinceEpoch(0),
+  );
+}
+
+PlacedOrder _placedOrderFromJson(Map<String, dynamic> json) {
+  final created = json['createdAt'];
+  return PlacedOrder(
+    id: '${json['id'] ?? ''}',
+    userId: '${json['userId'] ?? ''}',
+    businessId: '${json['businessId'] ?? ''}',
+    totalAmount: (json['totalAmount'] as num?)?.toDouble() ?? 0,
+    status: '${json['status'] ?? ''}',
+    paymentStatus: '${json['paymentStatus'] ?? ''}',
+    deliveryAddressId: json['deliveryAddressId'] == null
+        ? null
+        : '${json['deliveryAddressId']}',
+    deliveryFee: (json['deliveryFee'] as num?)?.toDouble(),
+    paymentMethod: json['paymentMethod'] as String?,
+    createdAt: created is String
+        ? DateTime.tryParse(created) ?? DateTime.fromMillisecondsSinceEpoch(0)
+        : DateTime.fromMillisecondsSinceEpoch(0),
+  );
 }

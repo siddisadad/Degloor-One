@@ -6,7 +6,31 @@ class DeliveryApi {
   static final _http = JavaApiClient.instance;
 
   static Future<Map<String, dynamic>> myOrders() async {
-    return Map<String, dynamic>.from(await _http.get('/api/v1/delivery/my-orders') as Map);
+    return Map<String, dynamic>.from(
+        await _http.get('/api/v1/delivery/my-orders') as Map);
+  }
+
+  static Future<Map<String, dynamic>> me() async {
+    return Map<String, dynamic>.from(
+        await _http.get('/api/v1/delivery/me') as Map);
+  }
+
+  static Future<Map<String, dynamic>> register({
+    String? vehicleType,
+    String? vehicleNumber,
+  }) async {
+    return Map<String, dynamic>.from(
+        await _http.post('/api/v1/delivery/register', {
+      if (vehicleType != null) 'vehicleType': vehicleType,
+      if (vehicleNumber != null) 'vehicleNumber': vehicleNumber,
+    }) as Map);
+  }
+
+  static Future<Map<String, dynamic>> setAvailability(bool available) async {
+    return Map<String, dynamic>.from(await _http.post(
+      '/api/v1/delivery/availability',
+      {'available': available},
+    ) as Map);
   }
 
   static Future<void> accept(String orderId) =>
@@ -18,8 +42,10 @@ class DeliveryApi {
   static Future<void> pickupAssignment(String assignmentId) =>
       _http.post('/api/v1/delivery/assignments/$assignmentId/pickup');
 
-  static Future<void> verifyOtp({required String orderId, required String otp}) {
-    return _http.post('/api/v1/delivery/orders/$orderId/otp/verify', {'otp': otp});
+  static Future<void> verifyOtp(
+      {required String orderId, required String otp}) {
+    return _http
+        .post('/api/v1/delivery/orders/$orderId/otp/verify', {'otp': otp});
   }
 
   static Future<void> updateLocation({

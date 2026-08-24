@@ -37,4 +37,20 @@ class DeliveryPartner {
       currentLongitude: row.currentLongitude,
     );
   }
+
+  factory DeliveryPartner.fromJson(Map<String, dynamic> json) {
+    return DeliveryPartner(
+      id: '${json['id'] ?? ''}',
+      userId: '${json['userId'] ?? ''}',
+      isAvailable:
+          json['available'] as bool? ?? json['isAvailable'] as bool? ?? false,
+      isVerified:
+          json['verified'] as bool? ?? json['isVerified'] as bool? ?? false,
+      createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+      vehicleType: json['vehicleType'] as String?,
+      vehicleNumber: json['vehicleNumber'] as String?,
+      currentLatitude: (json['currentLatitude'] as num?)?.toDouble(),
+      currentLongitude: (json['currentLongitude'] as num?)?.toDouble(),
+    );
+  }
 }
