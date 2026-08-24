@@ -726,11 +726,19 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                                           final url = Uri.parse('tel:${business.phoneNumber!.trim()}');
                                           if (await canLaunchUrl(url)) {
                                             await launchUrl(url);
-                                            // Log Call Click
                                             unawaited(
                                               ShopService.instance.trackEvent(
                                                 businessId: business.id,
                                                 eventType: ShopEvents.callClick,
+                                              ),
+                                            );
+                                          } else if (context.mounted) {
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                  'Unable to place the call. Please try again.',
+                                                ),
                                               ),
                                             );
                                           }
@@ -758,12 +766,24 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                                     label: AppLocalizations.of(context)!.whatsApp,
                                     onTap: () async {
                                       if (business.whatsappNumber != null && business.whatsappNumber!.trim().isNotEmpty) {
-                                        await WhatsAppService.launchWhatsApp(
+                                        final opened =
+                                            await WhatsAppService.launchWhatsApp(
                                           phoneNumber: business.whatsappNumber!.trim(),
                                           message:
                                               'Hello ${business.name}, I found your shop on DEGLOOR ONE app.',
                                         );
-                                        // Log WhatsApp Click
+                                        if (!context.mounted) return;
+                                        if (!opened) {
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            const SnackBar(
+                                              content: Text(
+                                                'Unable to open WhatsApp. Please try again.',
+                                              ),
+                                            ),
+                                          );
+                                          return;
+                                        }
                                         unawaited(
                                           ShopService.instance.trackEvent(
                                             businessId: business.id,
@@ -801,14 +821,31 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                                           final url = Uri.parse('https://www.google.com/maps/search/?api=1&query=${business.latitude},${business.longitude}');
                                           if (await canLaunchUrl(url)) {
                                             await launchUrl(url, mode: LaunchMode.externalApplication);
-                                            // Log Directions Click
                                             unawaited(
                                               ShopService.instance.trackEvent(
                                                 businessId: business.id,
                                                 eventType: ShopEvents.directionsClick,
                                               ),
                                             );
+                                          } else if (context.mounted) {
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                  'Unable to open maps. Please try again.',
+                                                ),
+                                              ),
+                                            );
                                           }
+                                        } else if (context.mounted) {
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            const SnackBar(
+                                              content: Text(
+                                                'Shop location is not available',
+                                              ),
+                                            ),
+                                          );
                                         }
                                       },
                                     ),
