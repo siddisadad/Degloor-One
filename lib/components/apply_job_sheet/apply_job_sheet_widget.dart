@@ -1,5 +1,6 @@
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/job_service.dart';
+import 'package:degloor_one/shared/job_application_draft.dart';
 import 'package:degloor_one/core/error_handler.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_model.dart';
@@ -195,9 +196,11 @@ class _ApplyJobSheetWidgetState extends State<ApplyJobSheetWidget> {
 
                     try {
                       await JobService.instance.apply(
-                        jobId: widget.jobId,
-                        applicantId: currentUserUid,
-                        experienceSummary: _model.experienceController!.text,
+                        JobApplicationDraft.fromForm(
+                          jobId: widget.jobId,
+                          applicantId: currentUserUid,
+                          experienceSummary: _model.experienceController!.text,
+                        ),
                       );
 
                       if (context.mounted) {

@@ -4,6 +4,7 @@ import 'package:degloor_one/backend/job_service.dart';
 import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/job_application.dart';
+import 'package:degloor_one/shared/job_application_draft.dart';
 import 'package:degloor_one/shared/job_posting.dart';
 import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
@@ -60,9 +61,11 @@ void main() {
     expect(owned.items.map((job) => job.id), contains(posted.id));
 
     final application = await JobService.instance.apply(
-      jobId: posted.id,
-      applicantId: ShowcaseCatalog.customer2,
-      experienceSummary: 'Stocked a kirana for 6 months.',
+      JobApplicationDraft.fromForm(
+        jobId: posted.id,
+        applicantId: ShowcaseCatalog.customer2,
+        experienceSummary: 'Stocked a kirana for 6 months.',
+      ),
     );
     expect(application, isA<JobApplication>());
     expect(application, isNot(isA<JobApplicationsRow>()));
@@ -70,9 +73,11 @@ void main() {
 
     await expectLater(
       JobService.instance.apply(
-        jobId: posted.id,
-        applicantId: ShowcaseCatalog.customer2,
-        experienceSummary: 'Applying again',
+        JobApplicationDraft.fromForm(
+          jobId: posted.id,
+          applicantId: ShowcaseCatalog.customer2,
+          experienceSummary: 'Applying again',
+        ),
       ),
       throwsA(isA<Exception>()),
     );
