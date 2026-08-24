@@ -1,5 +1,5 @@
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
-import 'package:degloor_one/backend/address_service.dart';
+import 'package:degloor_one/features/profile/address_controller.dart';
 import 'package:degloor_one/shared/saved_address.dart';
 import 'package:degloor_one/components/degloor_app_bar.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
@@ -30,11 +30,11 @@ class _AddressListWidgetState extends State<AddressListWidget> {
   void initState() {
     super.initState();
     _model = createModel(context, () => AddressListModel());
-    _addressesFuture = AddressService.instance.listForUser(currentUserUid);
+    _addressesFuture = AddressController.instance.listForUser(currentUserUid);
   }
 
   void _fetchAddresses() {
-    final next = AddressService.instance.listForUser(currentUserUid);
+    final next = AddressController.instance.listForUser(currentUserUid);
     if (!mounted) {
       _addressesFuture = next;
       return;
@@ -46,7 +46,7 @@ class _AddressListWidgetState extends State<AddressListWidget> {
 
   Future<void> _deleteAddress(String id) async {
     try {
-      await AddressService.instance.delete(id: id, userId: currentUserUid);
+      await AddressController.instance.delete(id: id, userId: currentUserUid);
       _fetchAddresses();
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -70,7 +70,7 @@ class _AddressListWidgetState extends State<AddressListWidget> {
 
   Future<void> _setDefaultAddress(String id) async {
     try {
-      await AddressService.instance.setDefault(id: id, userId: currentUserUid);
+      await AddressController.instance.setDefault(id: id, userId: currentUserUid);
       _fetchAddresses();
     } catch (e) {
       AppLogger.error('Error setting default address', e);

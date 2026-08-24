@@ -1,5 +1,5 @@
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
-import 'package:degloor_one/backend/address_service.dart';
+import 'package:degloor_one/features/profile/address_controller.dart';
 import 'package:degloor_one/shared/address_draft.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_google_map.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
@@ -74,7 +74,7 @@ class _AddAddressWidgetState extends State<AddAddressWidget> {
       }
 
       try {
-        await AddressService.instance.add(
+        await AddressController.instance.add(
           AddressDraft.fromForm(
             userId: currentUserUid,
             title: _model.titleTextController?.text ?? '',
