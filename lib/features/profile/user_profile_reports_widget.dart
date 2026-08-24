@@ -10,7 +10,9 @@ import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/app_state.dart';
 import 'package:degloor_one/components/button/button_widget.dart';
 import 'package:degloor_one/core/error_handler.dart';
+import 'package:degloor_one/features/profile/profile_info_widget.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
+import 'package:degloor_one/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'user_profile_reports_model.dart';
 export 'user_profile_reports_model.dart';
@@ -61,6 +63,7 @@ class _UserProfileReportsWidgetState extends State<UserProfileReportsWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return GestureDetector(
       onTap: () {
         FocusScope.of(context).unfocus();
@@ -206,29 +209,29 @@ class _UserProfileReportsWidgetState extends State<UserProfileReportsWidget> {
                     ),
                     _settingsTile(
                       Icons.language_rounded,
-                      'Language',
-                      'Change your language',
+                      l10n?.language ?? 'Language',
+                      l10n?.languageSubtitle ?? 'Change your language',
                       () => _showLanguageSelector(context),
                     ),
                     const SizedBox(height: 12),
-                    _sectionHeader('Support & Legal'),
+                    _sectionHeader(l10n?.supportAndLegal ?? 'Support & Legal'),
                     _settingsTile(
                       Icons.help_outline_rounded,
-                      'Help Center',
-                      'FAQs and Support',
-                      () {},
+                      l10n?.helpCenter ?? 'Help Center',
+                      l10n?.helpCenterSubtitle ?? 'FAQs and Support',
+                      () => context.pushNamed(ProfileInfoWidget.helpRouteName),
                     ),
                     _settingsTile(
                       Icons.description_outlined,
-                      'Terms of Service',
-                      'Legal agreements',
-                      () {},
+                      l10n?.termsOfService ?? 'Terms of Service',
+                      l10n?.termsOfServiceSubtitle ?? 'Legal agreements',
+                      () => context.pushNamed(ProfileInfoWidget.termsRouteName),
                     ),
                     _settingsTile(
                       Icons.info_outline_rounded,
-                      'About App',
-                      'Version 1.0.0',
-                      () {},
+                      l10n?.aboutApp ?? 'About App',
+                      l10n?.aboutAppSubtitle ?? 'Version 1.0.0',
+                      () => context.pushNamed(ProfileInfoWidget.aboutRouteName),
                     ),
                     const SizedBox(height: 12),
                     _sectionHeader('My Reports'),
@@ -428,19 +431,22 @@ class _UserProfileReportsWidgetState extends State<UserProfileReportsWidget> {
   }
 
   void _showLanguageSelector(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     showModalBottomSheet(
       context: context,
-      builder: (context) => Container(
+      builder: (sheetContext) => Container(
         padding: const EdgeInsets.all(24.0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Select Language / भाषा निवडा',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            Text(
+              l10n?.selectLanguage ?? 'Select Language',
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 16),
-            _buildLangItem(context, 'English', 'en'),
-            _buildLangItem(context, 'मराठी (Marathi)', 'mr'),
-            _buildLangItem(context, 'हिन्दी (Hindi)', 'hi'),
+            _buildLangItem(sheetContext, 'English', 'en'),
+            _buildLangItem(sheetContext, 'मराठी (Marathi)', 'mr'),
+            _buildLangItem(sheetContext, 'हिन्दी (Hindi)', 'hi'),
           ],
         ),
       ),

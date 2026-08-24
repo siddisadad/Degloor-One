@@ -1,4 +1,5 @@
 import 'package:degloor_one/core/degloor_theme.dart';
+import 'package:degloor_one/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -12,6 +13,7 @@ class MainScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       body: navigationShell,
       bottomNavigationBar: Container(
@@ -31,31 +33,31 @@ class MainScaffold extends StatelessWidget {
           backgroundColor: DegloorTheme.cardBackground,
           selectedItemColor: DegloorTheme.primary,
           unselectedItemColor: DegloorTheme.textSecondary,
-          items: const [
+          items: [
             BottomNavigationBarItem(
-              icon: Icon(Icons.home_outlined),
-              activeIcon: Icon(Icons.home_rounded),
-              label: 'Home',
+              icon: const Icon(Icons.home_outlined),
+              activeIcon: const Icon(Icons.home_rounded),
+              label: l10n?.home ?? 'Home',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.search_rounded),
-              activeIcon: Icon(Icons.search_rounded),
-              label: 'Explore',
+              icon: const Icon(Icons.search_rounded),
+              activeIcon: const Icon(Icons.search_rounded),
+              label: l10n?.explore ?? 'Explore',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.handyman_outlined),
-              activeIcon: Icon(Icons.handyman_rounded),
-              label: 'Services',
+              icon: const Icon(Icons.handyman_outlined),
+              activeIcon: const Icon(Icons.handyman_rounded),
+              label: l10n?.services ?? 'Services',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.shopping_cart_outlined),
-              activeIcon: Icon(Icons.shopping_cart_rounded),
-              label: 'Cart',
+              icon: const Icon(Icons.shopping_cart_outlined),
+              activeIcon: const Icon(Icons.shopping_cart_rounded),
+              label: l10n?.cart ?? 'Cart',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline_rounded),
-              activeIcon: Icon(Icons.person_rounded),
-              label: 'Profile',
+              icon: const Icon(Icons.person_outline_rounded),
+              activeIcon: const Icon(Icons.person_rounded),
+              label: l10n?.profile ?? 'Profile',
             ),
           ],
           selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),

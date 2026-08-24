@@ -378,7 +378,28 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           path: ManageJobsWidget.routePath,
           builder: (context, params) => const ManageJobsWidget(),
           requireAuth: true,
-        )
+        ),
+        FFRoute(
+          name: ProfileInfoWidget.helpRouteName,
+          path: ProfileInfoWidget.helpRoutePath,
+          builder: (context, params) => const ProfileInfoWidget(
+            kind: ProfileInfoKind.helpCenter,
+          ),
+        ),
+        FFRoute(
+          name: ProfileInfoWidget.termsRouteName,
+          path: ProfileInfoWidget.termsRoutePath,
+          builder: (context, params) => const ProfileInfoWidget(
+            kind: ProfileInfoKind.termsOfService,
+          ),
+        ),
+        FFRoute(
+          name: ProfileInfoWidget.aboutRouteName,
+          path: ProfileInfoWidget.aboutRoutePath,
+          builder: (context, params) => const ProfileInfoWidget(
+            kind: ProfileInfoKind.aboutApp,
+          ),
+        ),
       ].map<RouteBase>((r) => r is FFRoute ? r.toRoute(appStateNotifier) : r as RouteBase).toList(),
     );
 
