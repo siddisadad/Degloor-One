@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import 'database.dart';
 import 'package:degloor_one/core/error_handler.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
@@ -8,6 +10,21 @@ abstract class SupabaseTable<T extends SupabaseDataRow> {
   T createRow(Map<String, dynamic> data);
 
   PostgrestFilterBuilder _select() => SupaFlow.client.from(tableName).select();
+
+  /// Chrome PostgREST payloads are `JSArray` / `Map<dynamic, dynamic>`.
+  @visibleForTesting
+  List<T> rowsFromWire(dynamic raw) {
+    if (raw is! List) return const [];
+    return [
+      for (final row in raw)
+        if (row is Map) createRow(Map<String, dynamic>.from(row)),
+    ];
+  }
+
+  T? rowFromWire(dynamic raw) {
+    if (raw is Map) return createRow(Map<String, dynamic>.from(raw));
+    return null;
+  }
 
   Future<List<T>> queryRows({
     required dynamic Function(dynamic) queryFn,
@@ -30,7 +47,7 @@ abstract class SupabaseTable<T extends SupabaseDataRow> {
         query = query.limit(limit);
       }
       final rows = await query.select();
-      return rows.map(createRow).toList();
+      return rowsFromWire(rows);
     } catch (e) {
       AppLogger.error('Supabase queryRows error ($tableName)', e);
       rethrow;
@@ -47,7 +64,8 @@ abstract class SupabaseTable<T extends SupabaseDataRow> {
     }
     try {
       final r = await queryFn(_select()).limit(1).select().maybeSingle();
-      return [if (r != null) createRow(r)];
+      final row = rowFromWire(r);
+      return [if (row != null) row];
     } catch (e) {
       AppLogger.error('Supabase querySingleRow error ($tableName)', e);
       rethrow;
@@ -65,7 +83,7 @@ abstract class SupabaseTable<T extends SupabaseDataRow> {
           .select()
           .limit(1)
           .single()
-          .then(createRow);
+          .then((row) => rowFromWire(row)!);
     } catch (e) {
       AppLogger.error('Supabase insert error ($tableName)', e);
       rethrow;
@@ -90,8 +108,7 @@ abstract class SupabaseTable<T extends SupabaseDataRow> {
         await update;
         return [];
       }
-      final rows = await update.select().then((rows) => rows.map(createRow).toList());
-      return rows;
+      return rowsFromWire(await update.select());
     } catch (e) {
       AppLogger.error('Supabase update error ($tableName)', e);
       rethrow;
@@ -113,8 +130,7 @@ abstract class SupabaseTable<T extends SupabaseDataRow> {
         await delete;
         return [];
       }
-      final rows = await delete.select().then((rows) => rows.map(createRow).toList());
-      return rows;
+      return rowsFromWire(await delete.select());
     } catch (e) {
       AppLogger.error('Supabase delete error ($tableName)', e);
       rethrow;
@@ -158,7 +174,7 @@ abstract class SupabaseTable<T extends SupabaseDataRow> {
     }
     final builder = SupaFlow.client.from(tableName).stream(primaryKey: [primaryKey]);
     final stream = queryFn != null ? queryFn(builder) : builder;
-    return stream.map((rows) => rows.map(createRow).toList());
+    return stream.map(rowsFromWire);
   }
 }
 
