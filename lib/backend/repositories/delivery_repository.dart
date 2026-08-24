@@ -3,6 +3,7 @@ import 'package:degloor_one/shared/order_lifecycle.dart';
 import 'package:degloor_one/shared/page_query.dart';
 
 /// Data access for riders. Widgets should go through [DeliveryService].
+/// Table-backed implementation; Java leftover reads live on [DeliveryService].
 class DeliveryRepository {
   Future<DeliveryPartnersRow?> partnerForUser(String userId) async {
     if (userId.isEmpty) return null;

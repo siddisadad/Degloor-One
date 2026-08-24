@@ -25,4 +25,18 @@ class DeliveryAssignment {
       createdAt: row.createdAt,
     );
   }
+
+  factory DeliveryAssignment.fromJson(Map<String, dynamic> json) {
+    final created = json['createdAt'];
+    return DeliveryAssignment(
+      id: '${json['id'] ?? json['orderId'] ?? ''}',
+      orderId: '${json['orderId'] ?? json['id'] ?? ''}',
+      deliveryPartnerId:
+          '${json['partnerId'] ?? json['deliveryPartnerId'] ?? ''}',
+      status: '${json['status'] ?? 'assigned'}',
+      createdAt: created is String
+          ? DateTime.tryParse(created) ?? DateTime.fromMillisecondsSinceEpoch(0)
+          : DateTime.fromMillisecondsSinceEpoch(0),
+    );
+  }
 }

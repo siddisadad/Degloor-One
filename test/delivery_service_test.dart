@@ -32,7 +32,8 @@ void main() {
 
   test('partner location rejects invalid coordinates', () async {
     await expectLater(
-      DeliveryService.instance.updatePartnerLocation(latitude: 120, longitude: 77),
+      DeliveryService.instance
+          .updatePartnerLocation(latitude: 120, longitude: 77),
       throwsA(isA<Exception>()),
     );
   });
@@ -102,7 +103,8 @@ void main() {
     );
     expect(ready.items, everyElement(isA<PlacedOrder>()));
     expect(ready.items, isNot(anyElement(isA<OrdersRow>())));
-    expect(ready.items.map((row) => row.id), contains(ShowcaseCatalog.orderReady));
+    expect(
+        ready.items.map((row) => row.id), contains(ShowcaseCatalog.orderReady));
     expect(
       ready.items.every((row) => row.status == OrderLifecycle.ready),
       isTrue,
@@ -111,7 +113,8 @@ void main() {
 
   test('active assignment for the rider is the out-for-delivery job', () async {
     ShowcaseCatalog.reset();
-    final assignment = await DeliveryService.instance.activeForPartner('dp-amit');
+    final assignment =
+        await DeliveryService.instance.activeForPartner('dp-amit');
     expect(assignment, isA<DeliveryAssignment>());
     expect(assignment, isNot(isA<DeliveryAssignmentsRow>()));
     expect(assignment?.id, 'da-1');
@@ -136,7 +139,8 @@ void main() {
     );
   });
 
-  test('accept writes an assignment after the current job is finished', () async {
+  test('accept writes an assignment after the current job is finished',
+      () async {
     ShowcaseCatalog.reset();
     await expectLater(
       DeliveryService.instance.acceptOrder(ShowcaseCatalog.orderReady),
@@ -175,10 +179,12 @@ void main() {
     expect(partners.single.id, 'dp-amit');
   });
 
-  test('fetchMyDeliveryOtp returns the showcase code for an active order', () async {
+  test('fetchMyDeliveryOtp returns the showcase code for an active order',
+      () async {
     ShowcaseCatalog.reset();
     expect(
-      await DeliveryService.instance.fetchMyDeliveryOtp(ShowcaseCatalog.orderOut),
+      await DeliveryService.instance
+          .fetchMyDeliveryOtp(ShowcaseCatalog.orderOut),
       '4821',
     );
     expect(
@@ -189,5 +195,37 @@ void main() {
       await DeliveryService.instance.fetchMyDeliveryOtp('missing-order'),
       isNull,
     );
+  });
+
+  test('Java partner and assignment JSON map to domain types', () {
+    final partner = DeliveryPartner.fromJson({
+      'id': 'dp-amit',
+      'userId': 'rider-1',
+      'vehicleType': 'bike',
+      'vehicleNumber': 'MH26AB1234',
+      'available': true,
+      'verified': true,
+      'currentLatitude': 18.55,
+      'currentLongitude': 77.58,
+    });
+    expect(partner, isA<DeliveryPartner>());
+    expect(partner.id, 'dp-amit');
+    expect(partner.userId, 'rider-1');
+    expect(partner.isAvailable, isTrue);
+    expect(partner.isVerified, isTrue);
+    expect(partner.currentLatitude, 18.55);
+
+    final assignment = DeliveryAssignment.fromJson({
+      'id': 'da-1',
+      'orderId': 'order-out',
+      'partnerId': 'dp-amit',
+      'status': 'picked_up',
+      'createdAt': '2026-08-24T10:00:00Z',
+    });
+    expect(assignment, isA<DeliveryAssignment>());
+    expect(assignment.id, 'da-1');
+    expect(assignment.orderId, 'order-out');
+    expect(assignment.deliveryPartnerId, 'dp-amit');
+    expect(assignment.status, 'picked_up');
   });
 }
