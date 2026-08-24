@@ -20,13 +20,16 @@ void main() {
       () async {
     ShowcaseCatalog.reset();
     final users = await UsersTable().queryRows(queryFn: (q) => q);
-    expect(users, isNotEmpty);
+    expect(users.map((row) => row.fullName), contains('Guest Customer'));
     final businesses = await BusinessesTable().searchInRadius(
       latitude: 18.55,
       longitude: 77.58,
       radiusKm: 10,
     );
-    expect(businesses, isNotEmpty);
+    expect(
+      businesses.map((row) => row.name),
+      contains('Patil Kirana Store'),
+    );
     expect(businesses.first.distanceKm, isNotNull);
     final products = await ProductsTable().searchInRadius(
       latitude: 18.55,
