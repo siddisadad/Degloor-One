@@ -32,7 +32,7 @@ class SupaFlow {
   static SupabaseClient get client => instance._supabase;
 
   static Future initialize() {
-    final skip = kUsesDeadFlutterFlowHost;
+    final skip = kShouldBlockSupabaseTraffic;
     return Supabase.initialize(
       url: kSupabaseUrl,
       headers: {

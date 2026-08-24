@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import '../database.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
@@ -7,6 +9,56 @@ class BusinessesTable extends SupabaseTable<BusinessesRow> {
 
   @override
   BusinessesRow createRow(Map<String, dynamic> data) => BusinessesRow(data);
+
+  /// Live project signature: `user_lat`, `user_lng`, `radius_meters`,
+  /// optional `search_term` / `category_id`. Extra filters are applied here.
+  @visibleForTesting
+  static Map<String, dynamic> liveSearchParams({
+    required double latitude,
+    required double longitude,
+    required double radiusKm,
+    String? searchTerm,
+    String? categoryId,
+  }) {
+    return {
+      'user_lat': latitude,
+      'user_lng': longitude,
+      'radius_meters': radiusKm * 1000,
+      if (searchTerm != null && searchTerm.isNotEmpty) 'search_term': searchTerm,
+      if (categoryId != null && categoryId.isNotEmpty) 'category_id': categoryId,
+    };
+  }
+
+  @visibleForTesting
+  static List<BusinessesRow> applyLiveSearchFilters(
+    List<BusinessesRow> rows, {
+    bool openNow = false,
+    bool verifiedOnly = false,
+    double minRating = 0.0,
+    int limit = 20,
+    int offset = 0,
+  }) {
+    var filtered = rows;
+    if (openNow) {
+      filtered = filtered.where((row) => row.isOpen == true).toList();
+    }
+    if (verifiedOnly) {
+      filtered = filtered.where((row) => row.isVerified == true).toList();
+    }
+    if (minRating > 0) {
+      filtered =
+          filtered.where((row) => (row.rating ?? 0) >= minRating).toList();
+    }
+    if (offset > 0) {
+      filtered = offset >= filtered.length
+          ? <BusinessesRow>[]
+          : filtered.sublist(offset);
+    }
+    if (filtered.length > limit) {
+      filtered = filtered.take(limit).toList();
+    }
+    return filtered;
+  }
 
   Future<List<BusinessesRow>> searchInRadius({
     required double latitude,
@@ -36,20 +88,26 @@ class BusinessesTable extends SupabaseTable<BusinessesRow> {
     }
     final response = await SupaFlow.client.rpc(
       'search_businesses_in_radius',
-      params: {
-        'user_lat': latitude,
-        'user_lng': longitude,
-        'radius_meters': radiusKm * 1000,
-        if (searchTerm != null && searchTerm.isNotEmpty) 'search_term': searchTerm,
-        if (categoryId != null) 'category_id': categoryId,
-        'open_now': openNow,
-        'verified_only': verifiedOnly,
-        'min_rating': minRating,
-        'p_limit': limit,
-        'p_offset': offset,
-      },
+      params: liveSearchParams(
+        latitude: latitude,
+        longitude: longitude,
+        radiusKm: radiusKm,
+        searchTerm: searchTerm,
+        categoryId: categoryId,
+      ),
     );
-    return (response as List?)?.map((e) => createRow(e)).toList() ?? [];
+    final rows = (response as List?)
+            ?.map((row) => createRow(Map<String, dynamic>.from(row as Map)))
+            .toList() ??
+        <BusinessesRow>[];
+    return applyLiveSearchFilters(
+      rows,
+      openNow: openNow,
+      verifiedOnly: verifiedOnly,
+      minRating: minRating,
+      limit: limit,
+      offset: offset,
+    );
   }
 }
 

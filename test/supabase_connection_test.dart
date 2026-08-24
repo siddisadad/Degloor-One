@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/backend/supabase/supabase_connection.dart';
 import 'package:degloor_one/core/error_handler.dart';
@@ -9,10 +10,110 @@ void main() {
   test('default project url is the FlutterFlow host', () {
     expect(kSupabaseUrl, 'https://uhaibenopzyzzuqjawlb.supabase.co');
     expect(kUsesDeadFlutterFlowHost, isTrue);
+    expect(kShouldBlockSupabaseTraffic, isTrue);
     expect(SupabaseConnection.shouldSkipAuthRequest, isTrue);
     expect(
       Uri.parse(kSupabaseUrl).host,
       SupabaseConnection.deadFlutterFlowHost,
+    );
+  });
+
+  test('a live GoTrue health probe unblocks table reads on the FlutterFlow host',
+      () async {
+    AppEnvironment.debugReset();
+    addTearDown(() {
+      AppEnvironment.debugReset();
+      AppEnvironment.debugOverride(
+        flavor: AppFlavor.development,
+        bypassAuth: true,
+        useShowcaseData: true,
+      );
+    });
+
+    expect(kShouldBlockSupabaseTraffic, isTrue);
+    expect(kUseShowcaseData, isTrue);
+    expect(kBypassAuth, isTrue);
+
+    final client = MockClient((request) async {
+      expect(request.url.path, '/auth/v1/health');
+      return http.Response(
+        '{"version":"v2.195.0","name":"GoTrue","description":"GoTrue"}',
+        200,
+      );
+    });
+    await SupabaseConnection.discoverLiveHost(client: client);
+
+    expect(AppEnvironment.flutterFlowHostIsLive, isTrue);
+    expect(kShouldBlockSupabaseTraffic, isFalse);
+    expect(kUseShowcaseData, isFalse);
+    expect(kBypassAuth, isTrue);
+    expect(SupabaseConnection.shouldSkipAuthRequest, isFalse);
+  });
+
+  test('a failed health probe keeps the FlutterFlow host blocked', () async {
+    AppEnvironment.debugReset();
+    addTearDown(() {
+      AppEnvironment.debugReset();
+      AppEnvironment.debugOverride(
+        flavor: AppFlavor.development,
+        bypassAuth: true,
+        useShowcaseData: true,
+      );
+    });
+
+    final client = MockClient((request) async {
+      throw http.ClientException('Failed to fetch', request.url);
+    });
+    expect(await SupabaseConnection.probeLive(client: client), isFalse);
+    await SupabaseConnection.discoverLiveHost(client: client);
+    expect(AppEnvironment.flutterFlowHostIsLive, isFalse);
+    expect(kShouldBlockSupabaseTraffic, isTrue);
+    expect(kUseShowcaseData, isTrue);
+  });
+
+  test('live search RPCs match the restored project signature', () {
+    final shops = BusinessesTable.liveSearchParams(
+      latitude: 18.55,
+      longitude: 77.58,
+      radiusKm: 15,
+    );
+    expect(
+      shops.keys,
+      unorderedEquals(['user_lat', 'user_lng', 'radius_meters']),
+    );
+    expect(shops.containsKey('p_limit'), isFalse);
+    expect(shops.containsKey('open_now'), isFalse);
+
+    final products = ProductsTable.liveSearchParams(
+      latitude: 18.55,
+      longitude: 77.58,
+      radiusKm: 15,
+    );
+    expect(products.containsKey('p_limit'), isFalse);
+    expect(products.containsKey('p_offset'), isFalse);
+
+    final rows = [
+      BusinessesRow({
+        'id': 'open',
+        'name': 'Open Shop',
+        'is_open': true,
+        'is_verified': true,
+        'rating': 4.5,
+        'created_at': '2026-01-01T00:00:00.000Z',
+      }),
+      BusinessesRow({
+        'id': 'closed',
+        'name': 'Closed Shop',
+        'is_open': false,
+        'is_verified': true,
+        'rating': 4.5,
+        'created_at': '2026-01-01T00:00:00.000Z',
+      }),
+    ];
+    expect(
+      BusinessesTable.applyLiveSearchFilters(rows, openNow: true)
+          .map((row) => row.id),
+      ['open'],
     );
   });
 

@@ -39,6 +39,7 @@ class AppEnvironment {
   static AppFlavor? _flavorOverride;
   static bool? _bypassOverride;
   static bool? _showcaseOverride;
+  static bool _flutterFlowHostLive = false;
 
   /// Spring Boot API. Empty means Flutter keeps showcase/Supabase fallbacks.
   static String get javaApiBaseUrl => javaApiBaseUrlFlag.trim();
@@ -55,6 +56,14 @@ class AppEnvironment {
   static bool get usesDeadFlutterFlowHost {
     final host = Uri.tryParse(supabaseUrl)?.host ?? '';
     return host == deadFlutterFlowHost;
+  }
+
+  /// Set after a successful GoTrue health probe against [deadFlutterFlowHost].
+  /// Tests stay on the local catalog until this is marked.
+  static bool get flutterFlowHostIsLive => _flutterFlowHostLive;
+
+  static void markFlutterFlowHostLive() {
+    _flutterFlowHostLive = true;
   }
 
   static AppFlavor get flavor => _flavorOverride ?? parseFlavor(envFlag);
@@ -127,5 +136,6 @@ class AppEnvironment {
     _flavorOverride = null;
     _bypassOverride = null;
     _showcaseOverride = null;
+    _flutterFlowHostLive = false;
   }
 }
