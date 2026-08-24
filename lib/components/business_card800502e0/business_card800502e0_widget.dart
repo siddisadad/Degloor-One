@@ -423,11 +423,25 @@ class _BusinessCard800502e0WidgetState
                               ),
                               onPressed: () async {
                                 if (widget.whatsappNumber != null) {
-                                  await WhatsAppService.launchWhatsApp(
+                                  final opened =
+                                      await WhatsAppService.launchWhatsApp(
                                     phoneNumber: widget.whatsappNumber!,
-                                    message: 'Hello ${widget.name}, I found your shop on DEGLOOR ONE.',
+                                    message:
+                                        'Hello ${widget.name}, I found your shop on DEGLOOR ONE.',
                                   );
-                                  // Log WhatsApp Click
+                                  if (!opened) {
+                                    if (context.mounted) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            WhatsAppService.unableToOpenMessage,
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                    return;
+                                  }
                                   if (widget.id != null) {
                                     unawaited(
                                       ShopService.instance.trackEvent(

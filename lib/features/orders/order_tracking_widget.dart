@@ -443,12 +443,23 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
                                   Icons.chat_bubble_rounded,
                                   color: FlutterFlowTheme.of(context).success,
                                 ),
-                                onPressed: () =>
-                                    WhatsAppService.launchWhatsApp(
-                                  phoneNumber: user.phoneNumber!.trim(),
-                                  message:
-                                      'Hello, I am tracking my order #${orderId.substring(0, 8)}.',
-                                ),
+                                onPressed: () async {
+                                  final opened =
+                                      await WhatsAppService.launchWhatsApp(
+                                    phoneNumber: user.phoneNumber!.trim(),
+                                    message:
+                                        'Hello, I am tracking my order #${orderId.substring(0, 8)}.',
+                                  );
+                                  if (!opened && context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          WhatsAppService.unableToOpenMessage,
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                },
                               ),
                           ],
                         ),
@@ -573,12 +584,21 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
                         Icons.chat_bubble_rounded,
                         color: FlutterFlowTheme.of(context).success,
                       ),
-                      onPressed: () {
+                      onPressed: () async {
                         if (business.whatsappNumber != null && business.whatsappNumber!.isNotEmpty) {
-                          WhatsAppService.launchWhatsApp(
+                          final opened = await WhatsAppService.launchWhatsApp(
                             phoneNumber: business.whatsappNumber!,
                             message: 'Hello, I have a query regarding my order #${widget.orderId.substring(0, 8)}.',
                           );
+                          if (!opened && context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  WhatsAppService.unableToOpenMessage,
+                                ),
+                              ),
+                            );
+                          }
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(content: Text('WhatsApp not available')),

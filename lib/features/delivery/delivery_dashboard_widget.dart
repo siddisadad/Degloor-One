@@ -544,11 +544,20 @@ class _DeliveryDashboardWidgetState extends State<DeliveryDashboardWidget> {
           if (phone != null && phone.trim().isNotEmpty) ...[
             const SizedBox(height: 8),
             InkWell(
-              onTap: () => WhatsAppService.launchWhatsApp(
-                phoneNumber: phone,
-                message:
-                    'Hello, this is your delivery partner regarding order #${order.id.substring(0, 8)} on DEGLOOR ONE.',
-              ),
+              onTap: () async {
+                final opened = await WhatsAppService.launchWhatsApp(
+                  phoneNumber: phone,
+                  message:
+                      'Hello, this is your delivery partner regarding order #${order.id.substring(0, 8)} on DEGLOOR ONE.',
+                );
+                if (!opened && context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(WhatsAppService.unableToOpenMessage),
+                    ),
+                  );
+                }
+              },
               child: Row(
                 children: [
                   Icon(
