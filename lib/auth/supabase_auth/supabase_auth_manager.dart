@@ -4,9 +4,12 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:degloor_one/auth/auth_manager.dart';
 import 'package:degloor_one/auth/guest_auth_user.dart';
+import 'package:degloor_one/auth/java_auth_user.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/backend/supabase/supabase_connection.dart';
 import 'package:degloor_one/backend/user_service.dart';
+import 'package:degloor_one/core/api/api_client.dart';
+import 'package:degloor_one/core/api/auth_api.dart';
 import 'package:degloor_one/shared/user_profile_draft.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -21,10 +24,17 @@ export 'package:degloor_one/auth/base_auth_user_provider.dart';
 class SupabaseAuthManager extends AuthManager
     with EmailSignInManager, GoogleSignInManager, PhoneSignInManager {
   @override
-  Future signOut() {
+  Future signOut() async {
     if (kBypassAuth) {
       installGuestSession();
-      return Future.value();
+      return;
+    }
+    if (JavaApiConfig.enabled) {
+      await AuthApi.logout();
+      final signedOut = JavaAuthUser.signedOut();
+      currentUser = signedOut;
+      AppStateNotifier.instance.update(signedOut);
+      return;
     }
     return SupaFlow.client.auth.signOut();
   }
@@ -121,6 +131,12 @@ class SupabaseAuthManager extends AuthManager
     String email,
     String password,
   ) {
+    if (JavaApiConfig.enabled) {
+      return _signInWithJava(
+        context,
+        () => AuthApi.login(email: email, password: password),
+      );
+    }
     if (!SupabaseConnection.guard(context)) {
       return Future<BaseAuthUser?>.value();
     }
@@ -136,6 +152,12 @@ class SupabaseAuthManager extends AuthManager
     String email,
     String password,
   ) {
+    if (JavaApiConfig.enabled) {
+      return _signInWithJava(
+        context,
+        () => AuthApi.register(email: email, password: password),
+      );
+    }
     if (!SupabaseConnection.guard(context)) {
       return Future<BaseAuthUser?>.value();
     }
@@ -232,6 +254,36 @@ class SupabaseAuthManager extends AuthManager
         smsCode: smsCode,
       ),
     );
+  }
+
+  Future<BaseAuthUser?> _signInWithJava(
+    BuildContext context,
+    Future<Map<String, dynamic>> Function() signIn,
+  ) async {
+    try {
+      final user = JavaAuthUser.fromTokenResponse(await signIn());
+      if (user.uid == null || user.uid!.length <= 10) return null;
+      currentUser = user;
+      AppStateNotifier.instance.update(user);
+      return user;
+    } on JavaApiException catch (error) {
+      if (!context.mounted) return null;
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(_javaAuthMessage(error))),
+      );
+      return null;
+    }
+  }
+
+  static String _javaAuthMessage(JavaApiException error) {
+    if (error.code == 'EMAIL_IN_USE') {
+      return 'Error: The email is already in use by a different account';
+    }
+    if (error.message.trim().isNotEmpty) {
+      return 'Error: ${error.message}';
+    }
+    return 'Error: An unexpected error occurred. Please try again.';
   }
 
   /// Tries to sign in or create an account using Supabase Auth.
