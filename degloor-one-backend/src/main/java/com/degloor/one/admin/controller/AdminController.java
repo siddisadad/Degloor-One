@@ -2,6 +2,7 @@ package com.degloor.one.admin.controller;
 
 import com.degloor.one.admin.service.AdminService;
 import com.degloor.one.business.entity.Business;
+import com.degloor.one.business.entity.BusinessCategory;
 import com.degloor.one.common.response.ApiResponse;
 import com.degloor.one.common.response.PageResponse;
 import com.degloor.one.delivery.entity.DeliveryPartner;
@@ -84,6 +85,16 @@ public class AdminController {
     @GetMapping("/reports")
     public ApiResponse<Map<String, Object>> reports() {
         return ApiResponse.ok(admin.reports());
+    }
+
+    @GetMapping("/categories")
+    public ApiResponse<List<BusinessCategory>> categories() {
+        return ApiResponse.ok(admin.listCategories());
+    }
+
+    @PostMapping("/categories")
+    public ApiResponse<BusinessCategory> createCategory(@RequestBody Map<String, String> body) {
+        return ApiResponse.ok(admin.createCategory(body.getOrDefault("name", "")));
     }
 
     @PostMapping("/businesses/{id}/verify")

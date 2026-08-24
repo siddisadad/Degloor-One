@@ -2,7 +2,6 @@ import 'package:degloor_one/backend/native_service_bridge.dart';
 import 'package:degloor_one/backend/notification_service.dart';
 import 'package:degloor_one/backend/repositories/service_marketplace_repository.dart';
 import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
-import 'package:degloor_one/backend/supabase/database/tables/service_requests_table.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/core/api/api_client.dart';
 import 'package:degloor_one/core/api/marketplace_api.dart';

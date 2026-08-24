@@ -1,6 +1,8 @@
 package com.degloor.one.admin.service;
 
 import com.degloor.one.business.entity.Business;
+import com.degloor.one.business.entity.BusinessCategory;
+import com.degloor.one.business.repository.BusinessCategoryRepository;
 import com.degloor.one.business.repository.BusinessRepository;
 import com.degloor.one.common.exception.BusinessException;
 import com.degloor.one.common.response.PageResponse;
@@ -23,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AdminService {
     private final UserRepository users;
     private final BusinessRepository businesses;
+    private final BusinessCategoryRepository categories;
     private final ProductRepository products;
     private final ShopOrderRepository orders;
     private final DeliveryPartnerRepository partners;
@@ -31,6 +34,7 @@ public class AdminService {
     public AdminService(
             UserRepository users,
             BusinessRepository businesses,
+            BusinessCategoryRepository categories,
             ProductRepository products,
             ShopOrderRepository orders,
             DeliveryPartnerRepository partners,
@@ -38,6 +42,7 @@ public class AdminService {
     ) {
         this.users = users;
         this.businesses = businesses;
+        this.categories = categories;
         this.products = products;
         this.orders = orders;
         this.partners = partners;
@@ -115,5 +120,29 @@ public class AdminService {
                 "partners", partners.count(),
                 "openComplaints", complaints.countByStatusNot("resolved")
         );
+    }
+
+    public List<BusinessCategory> listCategories() {
+        return categories.findAllByOrderByDisplayOrderAsc();
+    }
+
+    @Transactional
+    public BusinessCategory createCategory(String name) {
+        String trimmed = name.trim();
+        if (trimmed.isEmpty()) {
+            throw BusinessException.badRequest("INVALID_NAME", "Category name cannot be empty");
+        }
+        if (categories.findByNameIgnoreCase(trimmed).isPresent()) {
+            throw BusinessException.conflict("CATEGORY_EXISTS", "Category already exists");
+        }
+        int maxOrder = categories.findAll().stream()
+                .mapToInt(BusinessCategory::getDisplayOrder)
+                .max()
+                .orElse(0);
+        BusinessCategory c = new BusinessCategory();
+        c.setName(trimmed);
+        c.setIconName("category_rounded");
+        c.setDisplayOrder(maxOrder + 1);
+        return categories.save(c);
     }
 }

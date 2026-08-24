@@ -148,7 +148,7 @@ class OrderService {
   Future<int> pendingCount(String businessId) async {
     if (businessId.isEmpty) return 0;
     if (JavaApiConfig.enabled) {
-      final data = await OrderApi.forShop(businessId, page: 0, size: 100);
+      final data = await OrderApi.forShop(businessId, size: 100);
       return _pageItems(data)
           .map(PlacedOrder.fromJson)
           .where((order) =>

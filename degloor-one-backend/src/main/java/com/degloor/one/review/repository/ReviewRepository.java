@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ReviewRepository extends JpaRepository<Review, UUID> {
     List<Review> findByBusinessIdOrderByCreatedAtDesc(UUID businessId);
+    long countByBusinessId(UUID businessId);
     boolean existsByUserIdAndBusinessId(UUID userId, UUID businessId);
     List<Review> findByUserIdAndBusinessId(UUID userId, UUID businessId);
 }

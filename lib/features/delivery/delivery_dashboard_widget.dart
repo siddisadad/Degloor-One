@@ -140,7 +140,7 @@ class _DeliveryDashboardWidgetState extends State<DeliveryDashboardWidget> {
       }
 
       final page = await DeliveryService.instance.readyOrders(
-        page: PageQuery(limit: _pageSize, offset: _offset),
+        page: PageQuery(offset: _offset),
       );
       final shopIds = {
         ...page.items.map((order) => order.businessId),
@@ -288,7 +288,7 @@ class _DeliveryDashboardWidgetState extends State<DeliveryDashboardWidget> {
     final verified = await showDialog<bool>(
       context: context,
       builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
+        builder: (dialogContext, setDialogState) => AlertDialog(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(theme.designToken.radius.lg),
           ),
@@ -330,7 +330,7 @@ class _DeliveryDashboardWidgetState extends State<DeliveryDashboardWidget> {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context, false),
+              onPressed: () => Navigator.pop(dialogContext, false),
               child: const Text('Cancel'),
             ),
             ElevatedButton(
@@ -344,7 +344,7 @@ class _DeliveryDashboardWidgetState extends State<DeliveryDashboardWidget> {
                     orderId: orderId,
                     otp: otpController.text.trim(),
                   );
-                  if (context.mounted) Navigator.pop(context, true);
+                  if (dialogContext.mounted) Navigator.pop(dialogContext, true);
                 } catch (e) {
                   setDialogState(
                     () => errorText = DeliveryService.messageFor(e),

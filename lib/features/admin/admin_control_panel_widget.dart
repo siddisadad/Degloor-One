@@ -243,7 +243,7 @@ class _AdminControlPanelWidgetState extends State<AdminControlPanelWidget> {
                                       safeSetState(() {});
                                     } catch (e) {
                                       AppLogger.error('Error verifying business', e);
-                                      if (!mounted) return;
+                                      if (!context.mounted) return;
                                       ScaffoldMessenger.of(context).showSnackBar(
                                         SnackBar(
                                           content: Text(

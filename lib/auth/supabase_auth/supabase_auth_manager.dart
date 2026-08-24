@@ -321,15 +321,16 @@ class SupabaseAuthManager extends AuthManager
       }
       return authUser;
     } on AuthException catch (e) {
-      SupabaseConnection.log(e, context: 'Auth error');
+      SupabaseConnection.log(e);
       if (!context.mounted) return null;
       SupabaseConnection.showSnackBar(context, e, authMessage: e.message);
       return null;
     } catch (e) {
       SupabaseConnection.log(e, context: 'Unexpected error during auth');
+      if (!context.mounted) return null;
       if (SupabaseConnection.looksUnreachable(e)) {
         SupabaseConnection.showSnackBar(context, e);
-      } else if (context.mounted) {
+      } else {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(

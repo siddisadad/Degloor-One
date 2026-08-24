@@ -80,7 +80,7 @@ class _JobsMarketplaceWidgetState extends State<JobsMarketplaceWidget> {
       final page = await JobService.instance.listActive(
         search: _model.searchBarController!.text,
         jobType: _model.jobTypeFilter,
-        page: PageQuery(limit: _pageSize, offset: _offset),
+        page: PageQuery(offset: _offset),
       );
       if (!mounted || token != _loadToken) return;
       setState(() {

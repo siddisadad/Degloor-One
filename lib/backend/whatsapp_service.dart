@@ -25,7 +25,7 @@ class WhatsAppService {
     if (url == null) return false;
     try {
       if (!await canLaunchUrl(url)) return false;
-      return launchUrl(url, mode: LaunchMode.externalApplication);
+      return await launchUrl(url, mode: LaunchMode.externalApplication);
     } catch (_) {
       return false;
     }

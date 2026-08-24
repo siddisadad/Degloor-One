@@ -64,7 +64,7 @@ class _ServicesWidgetState extends State<ServicesWidget> {
     try {
       final page = await ServiceMarketplaceService.instance.providers(
         categoryId: _model.selectedCategoryId,
-        page: PageQuery(limit: 20, offset: _model.providersOffset),
+        page: PageQuery(offset: _model.providersOffset),
       );
       if (!mounted || token != _providersToken) return;
       setState(() {

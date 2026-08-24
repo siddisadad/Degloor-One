@@ -225,7 +225,6 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
             slivers: [
               SliverAppBar(
                 floating: true,
-                pinned: false,
                 snap: true,
                 backgroundColor: DegloorTheme.background,
                 elevation: 0,

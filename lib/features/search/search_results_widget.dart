@@ -129,7 +129,6 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
           verifiedOnly: _onlyVerified,
           openNow: _onlyOpen,
           minRating: _minRating4 ? 4.0 : 0.0,
-          page: const PageQuery(limit: 20),
         ),
         scope: _scope,
       );

@@ -320,7 +320,7 @@ class _BusinessCatalogueWidgetState extends State<BusinessCatalogueWidget> with 
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(DegloorTheme.radiusMD),
                                 ),
-                                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+                                padding: const EdgeInsets.symmetric(horizontal: 20),
                                 minimumSize: const Size(0, 36),
                               ),
                               child: const Text('Add'),
