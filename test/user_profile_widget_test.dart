@@ -42,6 +42,34 @@ void main() {
     expect(find.text('Personal information'), findsNothing);
   });
 
+  testWidgets('profile report opens the seeded complaint details',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(390, 844));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: UserProfileReportsWidget(),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    await tester.scrollUntilVisible(
+      find.text('Missing sweet in thali'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.text('Missing sweet in thali'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('Yesterday’s thali did not include the advertised sweet.'),
+      findsOneWidget,
+    );
+    expect(find.text('View shop'), findsOneWidget);
+  });
+
   testWidgets('profile tab hides the back arrow', (tester) async {
     await tester.pumpWidget(
       const MaterialApp(
