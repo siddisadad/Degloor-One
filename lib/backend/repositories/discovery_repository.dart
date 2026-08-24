@@ -1,5 +1,6 @@
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/page_query.dart';
+import 'package:degloor_one/shared/shop.dart';
 
 class DiscoverySearch {
   const DiscoverySearch({
@@ -28,8 +29,32 @@ class DiscoverySearch {
 /// Radius search and catalogue lookups. Widgets should go through
 /// [DiscoveryService].
 class DiscoveryRepository {
-  Future<List<BusinessesRow>> search(DiscoverySearch query) {
-    return BusinessesTable().searchInRadius(
+  Shop _toShop(BusinessesRow row) {
+    return Shop(
+      id: row.id,
+      name: row.name,
+      createdAt: row.createdAt,
+      ownerId: row.ownerId,
+      ownerName: row.ownerName,
+      description: row.description,
+      categoryId: row.categoryId,
+      cityId: row.cityId,
+      addressText: row.addressText,
+      whatsappNumber: row.whatsappNumber,
+      phoneNumber: row.phoneNumber,
+      rating: row.rating,
+      isOpen: row.isOpen,
+      isVerified: row.isVerified,
+      imageUrl: row.imageUrl,
+      latitude: row.latitude,
+      longitude: row.longitude,
+      discoveryRadius: row.discoveryRadius,
+      distanceKm: row.distanceKm,
+    );
+  }
+
+  Future<List<Shop>> search(DiscoverySearch query) async {
+    final rows = await BusinessesTable().searchInRadius(
       latitude: query.latitude,
       longitude: query.longitude,
       radiusKm: query.radiusKm,
@@ -41,6 +66,7 @@ class DiscoveryRepository {
       limit: query.page.limit,
       offset: query.page.offset,
     );
+    return rows.map(_toShop).toList();
   }
 
   Future<List<ProductsRow>> searchProducts(DiscoverySearch query) {
@@ -67,18 +93,20 @@ class DiscoveryRepository {
     );
   }
 
-  Future<List<BusinessesRow>> businessesByIds(List<String> ids) {
-    if (ids.isEmpty) return Future.value(const []);
-    return BusinessesTable().queryRows(
+  Future<List<Shop>> businessesByIds(List<String> ids) async {
+    if (ids.isEmpty) return const [];
+    final rows = await BusinessesTable().queryRows(
       queryFn: (q) => q.inFilter('id', ids),
     );
+    return rows.map(_toShop).toList();
   }
 
-  Future<List<BusinessesRow>> ownedBy(String userId) {
-    if (userId.isEmpty) return Future.value(const []);
-    return BusinessesTable().queryRows(
+  Future<List<Shop>> ownedBy(String userId) async {
+    if (userId.isEmpty) return const [];
+    final rows = await BusinessesTable().queryRows(
       queryFn: (q) => q.eq('owner_id', userId),
     );
+    return rows.map(_toShop).toList();
   }
 
   Future<int> reviewCount(String businessId) async {

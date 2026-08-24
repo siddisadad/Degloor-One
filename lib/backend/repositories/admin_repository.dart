@@ -1,4 +1,5 @@
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/shop.dart';
 import 'package:degloor_one/shared/user_profile.dart';
 
 /// Data access for admin queues. Widgets should go through [AdminService].
@@ -22,11 +23,36 @@ class AdminRepository {
     );
   }
 
-  Future<List<BusinessesRow>> unverifiedBusinesses() {
-    return BusinessesTable().queryRows(
+  Shop _toShop(BusinessesRow row) {
+    return Shop(
+      id: row.id,
+      name: row.name,
+      createdAt: row.createdAt,
+      ownerId: row.ownerId,
+      ownerName: row.ownerName,
+      description: row.description,
+      categoryId: row.categoryId,
+      cityId: row.cityId,
+      addressText: row.addressText,
+      whatsappNumber: row.whatsappNumber,
+      phoneNumber: row.phoneNumber,
+      rating: row.rating,
+      isOpen: row.isOpen,
+      isVerified: row.isVerified,
+      imageUrl: row.imageUrl,
+      latitude: row.latitude,
+      longitude: row.longitude,
+      discoveryRadius: row.discoveryRadius,
+      distanceKm: row.distanceKm,
+    );
+  }
+
+  Future<List<Shop>> unverifiedBusinesses() async {
+    final rows = await BusinessesTable().queryRows(
       queryFn: (q) =>
           q.eq('is_verified', false).order('created_at', ascending: false),
     );
+    return rows.map(_toShop).toList();
   }
 
   Future<int> businessCount({required bool verified}) async {
@@ -36,13 +62,13 @@ class AdminRepository {
     return rows.length;
   }
 
-  Future<BusinessesRow?> businessById(String businessId) async {
+  Future<Shop?> businessById(String businessId) async {
     if (businessId.isEmpty) return null;
     final rows = await BusinessesTable().queryRows(
       queryFn: (q) => q.eq('id', businessId),
       limit: 1,
     );
-    return rows.isEmpty ? null : rows.first;
+    return rows.isEmpty ? null : _toShop(rows.first);
   }
 
   Future<void> verifyBusiness(String businessId) async {
