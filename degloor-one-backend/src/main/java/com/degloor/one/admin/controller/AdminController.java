@@ -46,9 +46,10 @@ public class AdminController {
     @GetMapping("/businesses")
     public ApiResponse<PageResponse<Business>> businesses(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) String status
     ) {
-        return ApiResponse.ok(admin.businesses(page, size));
+        return ApiResponse.ok(admin.businesses(page, size, status));
     }
 
     @GetMapping("/products")

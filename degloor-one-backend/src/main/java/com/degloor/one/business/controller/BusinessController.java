@@ -1,10 +1,12 @@
 package com.degloor.one.business.controller;
 
+import com.degloor.one.business.dto.BusinessDtos.BusinessQuery;
 import com.degloor.one.business.dto.BusinessDtos.BusinessResponse;
 import com.degloor.one.business.dto.BusinessDtos.CategoryResponse;
 import com.degloor.one.business.dto.BusinessDtos.UpsertBusinessRequest;
 import com.degloor.one.business.service.BusinessService;
 import com.degloor.one.common.response.ApiResponse;
+import com.degloor.one.common.response.PageResponse;
 import com.degloor.one.common.security.CurrentUser;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -36,15 +38,26 @@ public class BusinessController {
     }
 
     @GetMapping("/businesses")
-    public ApiResponse<List<BusinessResponse>> search(
-            @RequestParam(required = false) String q,
-            @RequestParam(required = false) UUID categoryId,
-            @RequestParam(required = false) Double lat,
-            @RequestParam(required = false) Double lng,
-            @RequestParam(required = false) Double radiusKm,
-            @RequestParam(required = false) Boolean verified
+    public ApiResponse<PageResponse<BusinessResponse>> list(BusinessQuery query) {
+        return ApiResponse.ok(businesses.search(query.resolved()));
+    }
+
+    @GetMapping("/businesses/search")
+    public ApiResponse<PageResponse<BusinessResponse>> search(BusinessQuery query) {
+        return ApiResponse.ok(businesses.search(query.resolved()));
+    }
+
+    @GetMapping("/businesses/nearby")
+    public ApiResponse<PageResponse<BusinessResponse>> nearby(BusinessQuery query) {
+        return ApiResponse.ok(businesses.search(query.nearbyOrThrow()));
+    }
+
+    @GetMapping("/businesses/category/{categoryId}")
+    public ApiResponse<PageResponse<BusinessResponse>> byCategory(
+            @PathVariable UUID categoryId,
+            BusinessQuery query
     ) {
-        return ApiResponse.ok(businesses.search(q, categoryId, lat, lng, radiusKm, verified));
+        return ApiResponse.ok(businesses.search(query.resolved().withCategory(categoryId)));
     }
 
     @GetMapping("/businesses/mine")
@@ -56,9 +69,11 @@ public class BusinessController {
     public ApiResponse<BusinessResponse> get(
             @PathVariable UUID id,
             @RequestParam(required = false) Double lat,
-            @RequestParam(required = false) Double lng
+            @RequestParam(required = false) Double lng,
+            @RequestParam(required = false) Double latitude,
+            @RequestParam(required = false) Double longitude
     ) {
-        return ApiResponse.ok(businesses.get(id, lat, lng));
+        return ApiResponse.ok(businesses.get(id, first(lat, latitude), first(lng, longitude)));
     }
 
     @PostMapping("/businesses")
@@ -75,5 +90,9 @@ public class BusinessController {
     public ApiResponse<Void> delete(@PathVariable UUID id) {
         businesses.delete(CurrentUser.require(), id);
         return ApiResponse.ok(null, "Deleted");
+    }
+
+    private static Double first(Double primary, Double alias) {
+        return primary != null ? primary : alias;
     }
 }

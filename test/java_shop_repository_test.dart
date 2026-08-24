@@ -23,6 +23,19 @@ void main() {
       'imageUrl': 'https://example.com/shop.png',
       'createdAt': '2026-08-24T10:00:00Z',
       'distanceKm': 1.2,
+      'subCategory': 'Kirana',
+      'discoveryRadius': 10,
+      'reviewCount': 3,
+      'currentlyOpen': true,
+      'verificationStatus': 'VERIFIED',
+      'hours': [
+        {
+          'dayOfWeek': 1,
+          'openTime': '09:00:00',
+          'closeTime': '21:00:00',
+          'closed': false,
+        },
+      ],
     });
     expect(row, isA<Shop>());
     expect(row.id, 'biz-patil');
@@ -33,6 +46,11 @@ void main() {
     expect(row.rating, 4.5);
     expect(row.distanceKm, 1.2);
     expect(row.createdAt.toUtc().year, 2026);
+    expect(row.subcategory, 'Kirana');
+    expect(row.discoveryRadius, 10);
+    expect(row.reviewCount, 3);
+    expect(row.hours, isNotEmpty);
+    expect(row.hours.single.dayOfWeek, 1);
   });
 
   test('Java shop JSON falls back when createdAt and flags are omitted', () {

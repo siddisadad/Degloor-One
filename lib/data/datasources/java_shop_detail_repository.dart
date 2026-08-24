@@ -60,14 +60,9 @@ class JavaShopDetailRepository implements ShopDetailRepository {
   ) async {
     final ids = businessIds.where((id) => id.isNotEmpty).toSet();
     if (ids.isEmpty) return {};
-    final data = await _client.get('/api/v1/businesses');
-    final rows = data is List ? data : const [];
-    final map = {for (final id in ids) id: <ShopHours>[]};
-    for (final row in rows.whereType<Map>()) {
-      final json = Map<String, dynamic>.from(row);
-      final id = '${json['id'] ?? ''}';
-      if (!ids.contains(id)) continue;
-      map[id] = JavaShopRepository.hoursFromJson(json);
+    final map = <String, List<ShopHours>>{};
+    for (final id in ids) {
+      map[id] = await hoursFor(id);
     }
     return map;
   }
