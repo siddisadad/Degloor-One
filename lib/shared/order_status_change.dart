@@ -26,4 +26,22 @@ class OrderStatusChange {
       notes: row.notes,
     );
   }
+
+  factory OrderStatusChange.fromJson(
+    Map<String, dynamic> json, {
+    required String orderId,
+    int index = 0,
+  }) {
+    final created = json['createdAt'];
+    final status = '${json['status'] ?? ''}';
+    return OrderStatusChange(
+      id: '${json['id'] ?? '$orderId-$status-$index'}',
+      orderId: json['orderId'] == null ? orderId : '${json['orderId']}',
+      status: status,
+      createdAt: created is String
+          ? DateTime.tryParse(created) ?? DateTime.fromMillisecondsSinceEpoch(0)
+          : DateTime.fromMillisecondsSinceEpoch(0),
+      notes: json['notes'] as String?,
+    );
+  }
 }

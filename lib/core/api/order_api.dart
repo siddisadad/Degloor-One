@@ -15,27 +15,44 @@ class OrderApi {
     }) as Map);
   }
 
-  static Future<Map<String, dynamic>> list({int page = 0, int size = 20}) async {
+  static Future<Map<String, dynamic>> list(
+      {int page = 0, int size = 20}) async {
     return Map<String, dynamic>.from(await _http.get('/api/v1/orders', query: {
       'page': '$page',
       'size': '$size',
     }) as Map);
   }
 
-  static Future<Map<String, dynamic>> byId(String id) async {
-    return Map<String, dynamic>.from(await _http.get('/api/v1/orders/$id') as Map);
+  static Future<Map<String, dynamic>> forShop(
+    String businessId, {
+    int page = 0,
+    int size = 20,
+  }) async {
+    return Map<String, dynamic>.from(
+      await _http.get('/api/v1/orders/shop/$businessId', query: {
+        'page': '$page',
+        'size': '$size',
+      }) as Map,
+    );
   }
 
-  static Future<Map<String, dynamic>> cancel(String id, {String? reason}) async {
+  static Future<Map<String, dynamic>> byId(String id) async {
+    return Map<String, dynamic>.from(
+        await _http.get('/api/v1/orders/$id') as Map);
+  }
+
+  static Future<Map<String, dynamic>> cancel(String id,
+      {String? reason}) async {
     return Map<String, dynamic>.from(await _http.post(
       '/api/v1/orders/$id/cancel',
       {if (reason != null) 'reason': reason},
     ) as Map);
   }
 
-  static Future<Map<String, dynamic>> ownerStatus(String id, String status) async {
-    return Map<String, dynamic>.from(
-        await _http.post('/api/v1/orders/$id/status', {'status': status}) as Map);
+  static Future<Map<String, dynamic>> ownerStatus(
+      String id, String status) async {
+    return Map<String, dynamic>.from(await _http
+        .post('/api/v1/orders/$id/status', {'status': status}) as Map);
   }
 
   static Future<String?> deliveryOtp(String id) async {

@@ -111,9 +111,9 @@ void main() {
     final delivered = Completer<void>();
     final sub = OrdersTable()
         .stream(
-          primaryKey: 'id',
-          queryFn: (q) => q.eq('id', ShowcaseCatalog.orderOut),
-        )
+      primaryKey: 'id',
+      queryFn: (q) => q.eq('id', ShowcaseCatalog.orderOut),
+    )
         .listen((rows) {
       if (rows.isEmpty) return;
       statuses.add(rows.first.status);
@@ -136,7 +136,8 @@ void main() {
     await sub.cancel();
   });
 
-  test('showcase checkout rejects a client-supplied price and uses catalog stock',
+  test(
+      'showcase checkout rejects a client-supplied price and uses catalog stock',
       () async {
     final rice = ShowcaseCatalog.query(
       'products',
@@ -323,7 +324,8 @@ void main() {
     expect(ready.canCounterDeliver, isTrue);
     expect(ready.canCancel, isTrue);
 
-    final shipping = OrderService.instance.ownerActions(OrderLifecycle.shipping);
+    final shipping =
+        OrderService.instance.ownerActions(OrderLifecycle.shipping);
     expect(shipping.canAccept, isFalse);
     expect(shipping.canCancel, isFalse);
     expect(shipping.isTerminal, isFalse);
@@ -385,5 +387,50 @@ void main() {
   test('historyFor is empty for unknown orders', () async {
     expect(await OrderService.instance.historyFor(''), isEmpty);
     expect(await OrderService.instance.historyFor('order-missing'), isEmpty);
+  });
+
+  test('Java order JSON maps to PlacedOrder, lines, and history', () {
+    final order = PlacedOrder.fromJson({
+      'id': 'ord-1',
+      'userId': 'user-1',
+      'businessId': 'biz-patil',
+      'subtotal': 120,
+      'deliveryFee': 25,
+      'totalAmount': 145,
+      'status': 'pending',
+      'paymentStatus': 'unpaid',
+      'paymentMethod': 'COD',
+      'deliveryAddressId': 'addr-home',
+      'createdAt': '2026-08-24T10:00:00Z',
+    });
+    expect(order, isA<PlacedOrder>());
+    expect(order.id, 'ord-1');
+    expect(order.userId, 'user-1');
+    expect(order.businessId, 'biz-patil');
+    expect(order.totalAmount, 145);
+    expect(order.deliveryFee, 25);
+    expect(order.status, 'pending');
+    expect(order.createdAt.toUtc().year, 2026);
+
+    final line = OrderLine.fromJson({
+      'productId': 'prod-rice',
+      'quantity': 2,
+      'priceAtPurchase': 120,
+    }, orderId: 'ord-1');
+    expect(line.orderId, 'ord-1');
+    expect(line.productId, 'prod-rice');
+    expect(line.quantity, 2);
+    expect(line.priceAtPurchase, 120);
+    expect(line.lineTotal, 240);
+
+    final history = OrderStatusChange.fromJson({
+      'status': 'accepted',
+      'notes': 'Order accepted by shop.',
+      'createdAt': '2026-08-24T11:00:00Z',
+    }, orderId: 'ord-1', index: 1);
+    expect(history, isA<OrderStatusChange>());
+    expect(history.orderId, 'ord-1');
+    expect(history.status, 'accepted');
+    expect(history.notes, 'Order accepted by shop.');
   });
 }

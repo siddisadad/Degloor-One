@@ -43,4 +43,24 @@ class PlacedOrder {
       createdAt: row.createdAt,
     );
   }
+
+  factory PlacedOrder.fromJson(Map<String, dynamic> json) {
+    final created = json['createdAt'];
+    return PlacedOrder(
+      id: '${json['id'] ?? ''}',
+      userId: '${json['userId'] ?? ''}',
+      businessId: '${json['businessId'] ?? ''}',
+      totalAmount: (json['totalAmount'] as num?)?.toDouble() ?? 0,
+      status: '${json['status'] ?? ''}',
+      paymentStatus: '${json['paymentStatus'] ?? ''}',
+      deliveryAddressId: json['deliveryAddressId'] == null
+          ? null
+          : '${json['deliveryAddressId']}',
+      deliveryFee: (json['deliveryFee'] as num?)?.toDouble(),
+      paymentMethod: json['paymentMethod'] as String?,
+      createdAt: created is String
+          ? DateTime.tryParse(created) ?? DateTime.fromMillisecondsSinceEpoch(0)
+          : DateTime.fromMillisecondsSinceEpoch(0),
+    );
+  }
 }
