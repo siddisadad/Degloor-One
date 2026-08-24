@@ -21,5 +21,6 @@ class NotificationApi {
   static Future<void> markRead(String id) =>
       _http.post('/api/v1/notifications/$id/read');
 
+  /// Java has no delete-all. Inbox clear uses this too.
   static Future<void> markAllRead() => _http.post('/api/v1/notifications/read-all');
 }

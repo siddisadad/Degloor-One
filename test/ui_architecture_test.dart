@@ -185,6 +185,19 @@ void main() {
     expect(offenders, isEmpty, reason: offenders.join('\n'));
   });
 
+  test('Java notification clear uses read-all, not table delete', () {
+    const path = 'lib/backend/notification_service.dart';
+    final source = File(path).readAsStringSync();
+    final start = source.indexOf('Future<void> clearAll');
+    expect(start, greaterThanOrEqualTo(0));
+    final stop = source.indexOf('Stream<List<AppNotification>> watchForUser');
+    expect(stop, greaterThan(start));
+    final body = source.substring(start, stop);
+    expect(body.contains('JavaApiConfig.enabled'), isTrue);
+    expect(body.contains('NotificationApi.markAllRead'), isTrue);
+    expect(body.contains('_repository.deleteAll'), isTrue);
+  });
+
   test('delivery leftover domain types stay off Supabase tables', () {
     const paths = [
       'lib/shared/delivery_assignment.dart',
