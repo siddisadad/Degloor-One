@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:degloor_one/core/api/api_client.dart';
 
 class AppLogger {
   static const _fallback = 'Something went wrong. Please try again.';
@@ -8,9 +9,19 @@ class AppLogger {
     'CART_INVALID_QTY': 'Please choose a valid quantity.',
     'CART_UNAVAILABLE': 'This product is no longer available.',
     'CART_STOCK': 'Not enough stock for this item.',
+    'CART_OUT_OF_STOCK': 'Not enough stock for this item.',
+    'CART_NEEDS_REPLACEMENT':
+        'Your cart has items from another shop. Clear it to add this item.',
+    'CART_EMPTY': 'Your cart is empty.',
     'CART_PRODUCT': 'This product could not be added to the cart.',
     'CART_NOT_FOUND': 'Your cart could not be found.',
     'ORDER_CREATE_FAILED': 'Unable to place the order. Please try again.',
+    'UNAUTHORIZED': 'Please sign in to continue.',
+    'INVALID_CREDENTIALS': 'Email or password is incorrect.',
+    'INVALID_REFRESH': 'Please sign in again.',
+    'FORBIDDEN': 'You do not have permission for this action.',
+    'BUSINESS_NOT_VERIFIED': 'This shop is not accepting orders yet.',
+    'PRODUCT_UNAVAILABLE': 'This product is no longer available.',
   };
 
   /// DNS / browser-fetch failures against a missing Supabase host.
@@ -42,7 +53,6 @@ class AppLogger {
       if (stackTrace != null) debugPrint(stackTrace.toString());
     } else {
       debugPrint('LOG: $message');
-      if (error != null) debugPrint('ERR: $error');
     }
   }
 
@@ -59,7 +69,7 @@ class AppLogger {
     final parts = <String>[
       code,
       ...?fields?.entries.map((entry) => '${entry.key}=${entry.value}'),
-      if (error != null) 'error=$error',
+      if (error != null && kDebugMode) 'error=$error',
       'timestamp=${DateTime.now().toUtc().toIso8601String()}',
     ];
     log(parts.join(' '));
@@ -71,6 +81,16 @@ class AppLogger {
     String fallback = _fallback,
   }) {
     if (error == null) return fallback;
+    if (error is JavaApiException) {
+      final mapped = _codes[error.code];
+      if (mapped != null) return mapped;
+      if (error.message.length <= 80 &&
+          !_looksInternal(error.message) &&
+          !error.message.contains('{')) {
+        return error.message;
+      }
+      return fallback;
+    }
     final raw = error.toString();
     for (final entry in _codes.entries) {
       if (raw.contains(entry.key)) return entry.value;

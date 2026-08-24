@@ -113,6 +113,33 @@ class CheckoutSecurityTest {
                 .andExpect(jsonPath("$.code").value("INVALID_CREDENTIALS"));
     }
 
+    @Test
+    void anonymousOwnerRoutesRequireSignIn() throws Exception {
+        mvc.perform(get("/api/v1/businesses/mine"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
+        mvc.perform(get("/api/v1/jobs/11111111-1111-4111-8111-111111111111/applications"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
+        mvc.perform(get("/api/v1/admin/users"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
+        mvc.perform(get("/api/v1/jobs")).andExpect(status().isOk());
+        mvc.perform(get("/api/v1/businesses")).andExpect(status().isOk());
+    }
+
+    @Test
+    void registerIgnoresClientSuppliedRole() throws Exception {
+        String body = mvc.perform(post("/api/v1/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"email":"role-%s@degloor.test","password":"password1","fullName":"Ravi","role":"admin"}
+                                """.formatted(id())))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        assertEquals("customer", mapper.readTree(body).path("data").path("user").path("role").asText());
+    }
+
     private String register(String email, String password, String name) throws Exception {
         return mvc.perform(post("/api/v1/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)

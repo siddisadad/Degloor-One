@@ -24,6 +24,7 @@ class JavaApiClient {
 
   String? accessToken;
   String? refreshToken;
+  bool _refreshing = false;
 
   static bool get enabled => AppEnvironment.usesJavaBackend;
 
@@ -44,11 +45,14 @@ class JavaApiClient {
   }
 
   Future<dynamic> post(String path, [Map<String, dynamic>? body]) {
-    return _send(() => http.post(
-          uri(path),
-          headers: _headers,
-          body: body == null ? null : jsonEncode(body),
-        ));
+    return _send(
+      () => http.post(
+        uri(path),
+        headers: _headers,
+        body: body == null ? null : jsonEncode(body),
+      ),
+      path: path,
+    );
   }
 
   Future<dynamic> put(String path, [Map<String, dynamic>? body]) {
@@ -67,19 +71,71 @@ class JavaApiClient {
         ));
   }
 
-  Future<dynamic> _send(Future<http.Response> Function() send) async {
+  Future<dynamic> _send(
+    Future<http.Response> Function() send, {
+    String? path,
+    bool allowRefresh = true,
+  }) async {
     final response = await send();
-    final decoded = response.body.isEmpty ? <String, dynamic>{} : jsonDecode(response.body);
+    final decoded = _decode(response.body);
+    if (response.statusCode >= 200 &&
+        response.statusCode < 300 &&
+        decoded['success'] == true) {
+      return decoded['data'];
+    }
+    final code = '${decoded['code'] ?? 'HTTP_${response.statusCode}'}';
+    if (allowRefresh &&
+        response.statusCode == 401 &&
+        path != '/api/v1/auth/refresh' &&
+        await _tryRefresh()) {
+      return _send(send, path: path, allowRefresh: false);
+    }
+    throw JavaApiException(
+      code,
+      '${decoded['message'] ?? 'Request failed'}',
+    );
+  }
+
+  Map<String, dynamic> _decode(String body) {
+    if (body.isEmpty) return <String, dynamic>{};
+    final decoded = jsonDecode(body);
     if (decoded is! Map<String, dynamic>) {
       throw JavaApiException('INVALID_RESPONSE', 'Unexpected server response');
     }
-    if (response.statusCode >= 200 && response.statusCode < 300 && decoded['success'] == true) {
-      return decoded['data'];
+    return decoded;
+  }
+
+  Future<bool> _tryRefresh() async {
+    final token = refreshToken;
+    if (_refreshing || token == null || token.isEmpty) return false;
+    _refreshing = true;
+    try {
+      final response = await http.post(
+        uri('/api/v1/auth/refresh'),
+        headers: const {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode({'refreshToken': token}),
+      );
+      final decoded = _decode(response.body);
+      if (response.statusCode >= 200 &&
+          response.statusCode < 300 &&
+          decoded['success'] == true &&
+          decoded['data'] is Map) {
+        final data = Map<String, dynamic>.from(decoded['data'] as Map);
+        accessToken = data['accessToken'] as String?;
+        refreshToken = data['refreshToken'] as String?;
+        return accessToken != null && accessToken!.isNotEmpty;
+      }
+      accessToken = null;
+      refreshToken = null;
+      return false;
+    } catch (_) {
+      return false;
+    } finally {
+      _refreshing = false;
     }
-    throw JavaApiException(
-      '${decoded['code'] ?? 'HTTP_${response.statusCode}'}',
-      '${decoded['message'] ?? 'Request failed'}',
-    );
   }
 }
 
