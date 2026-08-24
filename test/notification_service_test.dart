@@ -76,4 +76,31 @@ void main() {
     );
     expect(page.items, isEmpty);
   });
+
+  test('Java notification JSON maps to AppNotification', () {
+    final notice = AppNotification.fromJson({
+      'id': 'nt-1',
+      'title': 'Order Updated',
+      'message': 'Your order #order-ou is now out_for_delivery.',
+      'type': 'order_status',
+      'read': false,
+      'createdAt': '2026-08-24T10:00:00Z',
+    }, userId: GuestAuthUser.guestUid);
+    expect(notice, isA<AppNotification>());
+    expect(notice.id, 'nt-1');
+    expect(notice.userId, GuestAuthUser.guestUid);
+    expect(notice.title, 'Order Updated');
+    expect(notice.isRead, isFalse);
+    expect(notice.type, 'order_status');
+    expect(notice.createdAt.toUtc().year, 2026);
+
+    final read = AppNotification.fromJson({
+      'id': 'nt-2',
+      'title': 'Read',
+      'message': 'Already seen.',
+      'isRead': true,
+    }, userId: GuestAuthUser.guestUid);
+    expect(read.isRead, isTrue);
+    expect(read.createdAt.millisecondsSinceEpoch, 0);
+  });
 }
