@@ -13,6 +13,7 @@ import 'package:degloor_one/shared/shop.dart';
 import 'package:degloor_one/shared/shop_draft.dart';
 import 'package:degloor_one/shared/shop_hours.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
+import 'package:degloor_one/shared/user_role.dart';
 
 class ProfileCompleteness {
   const ProfileCompleteness({
@@ -127,7 +128,7 @@ class BusinessService {
     if (kUseShowcaseData) {
       ShowcaseCatalog.update(
         'users',
-        {'role': 'business_owner'},
+        UserRole.businessOwner.toUpdateJson(),
         ShowcaseQuery()..eq('id', userId),
       );
     }

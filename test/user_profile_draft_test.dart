@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:degloor_one/shared/user_profile_draft.dart';
+import 'package:degloor_one/shared/user_role.dart';
 
 void main() {
   test('sign-in drafts only serialize insert fields', () {
@@ -15,7 +16,7 @@ void main() {
       'phone_number': '+919890000021',
       'full_name': 'Asha Patil',
       'avatar_url': 'https://img',
-      'role': UserProfileDraft.customer,
+      'role': UserRole.customer.value,
     });
     expect(
       draft.toInsertJson(userId: 'user-1').keys,

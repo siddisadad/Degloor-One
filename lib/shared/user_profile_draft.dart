@@ -1,3 +1,5 @@
+import 'package:degloor_one/shared/user_role.dart';
+
 /// Fields submitted when creating or editing a user profile.
 /// CreatedAt stays off this type. Auth user id and the stored
 /// customer role are applied at insert only.
@@ -7,14 +9,14 @@ class UserProfileDraft {
     this.phoneNumber,
     this.fullName,
     this.avatarUrl,
+    this.role = UserRole.customer,
   });
-
-  static const customer = 'customer';
 
   final String? email;
   final String? phoneNumber;
   final String? fullName;
   final String? avatarUrl;
+  final UserRole role;
 
   /// Auth metadata on first sign-in. Role stays off the caller.
   factory UserProfileDraft.fromSignIn({
@@ -57,7 +59,7 @@ class UserProfileDraft {
       'phone_number': phoneNumber,
       'full_name': fullName,
       'avatar_url': avatarUrl,
-      'role': customer,
+      ...role.toUpdateJson(),
     };
   }
 
