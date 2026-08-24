@@ -8,9 +8,14 @@ import 'package:degloor_one/core/error_handler.dart';
 /// so callers must run the exception *and* `e.message` through this helper
 /// instead of showing `Error: ${e.message}` raw.
 class SupabaseConnection {
+  /// Customer copy when a live host cannot be reached.
   static const unreachableMessage =
-      'Cannot reach the Degloor One server. Restore the Supabase project '
-      'or set SUPABASE_URL / SUPABASE_ANON_KEY to a live project.';
+      'Cannot reach the Degloor One server. Please try again.';
+
+  /// Customer copy when the retired FlutterFlow host is compiled in.
+  /// Guest mode is the path; dart-defines stay off the screen and console.
+  static const guestUnreachableMessage =
+      'Sign in needs a live server. Continue as Guest to browse Degloor.';
 
   /// FlutterFlow project that currently NXDOMAINs. A live `--dart-define`
   /// URL will not match, so real Auth calls still run.
@@ -22,7 +27,6 @@ class SupabaseConnection {
   /// `net::ERR_NAME_NOT_RESOLVED` on `/auth/v1/token`).
   static bool guard(BuildContext context) {
     if (!shouldSkipAuthRequest) return true;
-    AppLogger.log('Skipped Auth request: FlutterFlow Supabase host is down');
     showSnackBar(context, Exception('failed to fetch'));
     return false;
   }
@@ -32,7 +36,7 @@ class SupabaseConnection {
   static String messageFor(Object error, {String? authMessage}) {
     if (looksUnreachable(error) ||
         (authMessage != null && looksUnreachable(authMessage))) {
-      return unreachableMessage;
+      return kBypassAuth ? guestUnreachableMessage : unreachableMessage;
     }
     if (authMessage != null &&
         authMessage.contains('User already registered')) {
@@ -46,9 +50,6 @@ class SupabaseConnection {
 
   static void log(Object error, {String context = 'Auth error'}) {
     if (looksUnreachable(error)) {
-      AppLogger.log(
-        '$context: Supabase host is unreachable (check SUPABASE_URL)',
-      );
       return;
     }
     AppLogger.error(context, error);
