@@ -1,6 +1,4 @@
-import 'package:degloor_one/backend/supabase/database/tables/products_table.dart';
-
-/// Shop catalogue listing. Screens use this instead of [ProductsRow].
+/// Shop catalogue listing. Screens use this instead of a table row.
 ///
 /// [price] is a display snapshot. Checkout ignores client-supplied prices.
 class CatalogProduct {
@@ -31,23 +29,6 @@ class CatalogProduct {
   final int? stockQuantity;
   final bool? trackInventory;
   final double? distanceKm;
-
-  factory CatalogProduct.fromRow(ProductsRow row) {
-    return CatalogProduct(
-      id: row.id,
-      businessId: row.businessId,
-      name: row.name,
-      createdAt: row.createdAt,
-      categoryId: row.categoryId,
-      description: row.description,
-      price: row.price,
-      imageUrl: row.imageUrl,
-      isAvailable: row.isAvailable,
-      stockQuantity: row.stockQuantity,
-      trackInventory: row.trackInventory,
-      distanceKm: row.distanceKm,
-    );
-  }
 
   factory CatalogProduct.fromJson(Map<String, dynamic> json) {
     final created = json['createdAt'];

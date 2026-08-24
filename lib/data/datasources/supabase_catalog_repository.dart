@@ -1,4 +1,5 @@
 import 'package:degloor_one/backend/repositories/business_repository.dart';
+import 'package:degloor_one/data/datasources/supabase_shop_maps.dart';
 import 'package:degloor_one/data/repositories/catalog_repository.dart';
 import 'package:degloor_one/shared/catalog_product.dart';
 import 'package:degloor_one/shared/catalog_product_draft.dart';
@@ -17,7 +18,7 @@ class SupabaseCatalogRepository implements CatalogRepository {
   @override
   Future<List<CatalogProduct>> productsFor(String businessId) async {
     final rows = await _inner.productsFor(businessId);
-    return rows.map(CatalogProduct.fromRow).toList();
+    return rows.map(catalogProductFromRow).toList();
   }
 
   @override
@@ -29,7 +30,7 @@ class SupabaseCatalogRepository implements CatalogRepository {
       businessId: businessId,
       productId: productId,
     );
-    return row == null ? null : CatalogProduct.fromRow(row);
+    return row == null ? null : catalogProductFromRow(row);
   }
 
   @override
@@ -85,7 +86,7 @@ class SupabaseCatalogRepository implements CatalogRepository {
   @override
   Future<List<ProductCategory>> productCategoriesFor(String businessId) async {
     final rows = await _inner.productCategoriesFor(businessId);
-    return rows.map(ProductCategory.fromRow).toList();
+    return rows.map(productCategoryFromRow).toList();
   }
 
   @override
@@ -96,7 +97,7 @@ class SupabaseCatalogRepository implements CatalogRepository {
   @override
   Future<List<ShopHours>> hoursFor(String businessId) async {
     final rows = await _inner.hoursFor(businessId);
-    return rows.map(ShopHours.fromRow).toList();
+    return rows.map(shopHoursFromRow).toList();
   }
 
   @override

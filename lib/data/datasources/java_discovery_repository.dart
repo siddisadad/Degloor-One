@@ -1,11 +1,12 @@
-import 'package:degloor_one/backend/shop_service.dart';
 import 'package:degloor_one/core/api/api_client.dart';
+import 'package:degloor_one/data/datasources/java_shop_insights.dart';
 import 'package:degloor_one/data/datasources/java_shop_repository.dart';
 import 'package:degloor_one/data/repositories/discovery_repository.dart';
 import 'package:degloor_one/shared/catalog_product.dart';
 import 'package:degloor_one/shared/shop.dart';
 import 'package:degloor_one/shared/shop_category.dart';
 import 'package:degloor_one/shared/shop_event.dart';
+import 'package:degloor_one/shared/shop_hours.dart';
 
 /// Discovery through the Java API. Table rows stay on the server.
 class JavaDiscoveryRepository implements DiscoveryRepository {
@@ -55,9 +56,8 @@ class JavaDiscoveryRepository implements DiscoveryRepository {
       }
       if (query.openNow) {
         final hours = JavaShopRepository.hoursFromJson(row);
-        final open = hours.isEmpty
-            ? shop.isOpen == true
-            : ShopService.isOpenFromHours(hours);
+        final open =
+            hours.isEmpty ? shop.isOpen == true : ShopHours.isOpenNow(hours);
         if (!open) continue;
       }
       shops.add(shop);
@@ -67,9 +67,8 @@ class JavaDiscoveryRepository implements DiscoveryRepository {
 
   @override
   Future<List<CatalogProduct>> searchProducts(DiscoverySearch query) async {
-    final page = query.page.limit <= 0
-        ? 0
-        : query.page.offset ~/ query.page.limit;
+    final page =
+        query.page.limit <= 0 ? 0 : query.page.offset ~/ query.page.limit;
     final data = await _client.get('/api/v1/products', query: {
       'page': '$page',
       'size': '${query.page.limit}',
@@ -122,7 +121,8 @@ class JavaDiscoveryRepository implements DiscoveryRepository {
     final rows = data is List ? data : const [];
     return rows
         .whereType<Map>()
-        .map((row) => JavaShopRepository.fromJson(Map<String, dynamic>.from(row)))
+        .map((row) =>
+            JavaShopRepository.fromJson(Map<String, dynamic>.from(row)))
         .where((shop) => shop.ownerId == userId)
         .toList();
   }
@@ -141,35 +141,12 @@ class JavaDiscoveryRepository implements DiscoveryRepository {
     try {
       final data = await _client.get('/api/v1/businesses/$businessId/insights');
       if (data is! Map) return const [];
-      return _eventsFromInsights(businessId, Map<String, dynamic>.from(data));
+      return shopEventsFromInsights(
+        businessId,
+        Map<String, dynamic>.from(data),
+      );
     } on JavaApiException {
       return const [];
     }
   }
-}
-
-List<ShopEvent> _eventsFromInsights(
-  String businessId,
-  Map<String, dynamic> insights,
-) {
-  final now = DateTime.now();
-  ShopEvent event(String type, int index) {
-    return ShopEvent(
-      id: '$businessId-$type-$index',
-      businessId: businessId,
-      eventType: type,
-      createdAt: now,
-    );
-  }
-
-  int count(String key) => (insights[key] as num?)?.toInt() ?? 0;
-  return [
-    for (var i = 0; i < count('profileViews'); i++)
-      event(ShopEvents.profileView, i),
-    for (var i = 0; i < count('calls'); i++) event(ShopEvents.callClick, i),
-    for (var i = 0; i < count('whatsapp'); i++)
-      event(ShopEvents.whatsappClick, i),
-    for (var i = 0; i < count('reviews'); i++)
-      event(ShopEvents.reviewSubmitted, i),
-  ];
 }

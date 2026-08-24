@@ -1,7 +1,9 @@
+import 'package:degloor_one/data/datasources/java_shop_insights.dart';
 import 'package:degloor_one/data/datasources/java_shop_repository.dart';
 import 'package:degloor_one/shared/catalog_product.dart';
 import 'package:degloor_one/shared/listing_complaint.dart';
 import 'package:degloor_one/shared/marketplace_joins.dart';
+import 'package:degloor_one/shared/shop_event.dart';
 import 'package:degloor_one/shared/shop_hours.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -79,5 +81,32 @@ void main() {
     expect(complaint.id, 'cmp-1');
     expect(complaint.subject, 'Missing item');
     expect(complaint.status, 'pending');
+  });
+
+  test('Java insights counts expand into shop events', () {
+    final events = shopEventsFromInsights('biz-patil', {
+      'profileViews': 2,
+      'calls': 1,
+      'whatsapp': 0,
+      'reviews': 1,
+    });
+    expect(events, hasLength(4));
+    expect(
+      events.where((row) => row.eventType == ShopEvents.profileView),
+      hasLength(2),
+    );
+    expect(
+      events.where((row) => row.eventType == ShopEvents.callClick),
+      hasLength(1),
+    );
+    expect(
+      events.where((row) => row.eventType == ShopEvents.whatsappClick),
+      isEmpty,
+    );
+    expect(
+      events.where((row) => row.eventType == ShopEvents.reviewSubmitted),
+      hasLength(1),
+    );
+    expect(events.every((row) => row.businessId == 'biz-patil'), isTrue);
   });
 }

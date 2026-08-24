@@ -1,5 +1,6 @@
 import 'package:degloor_one/backend/repositories/shop_detail_repository.dart'
     as tables;
+import 'package:degloor_one/data/datasources/supabase_shop_maps.dart';
 import 'package:degloor_one/data/repositories/shop_detail_repository.dart';
 import 'package:degloor_one/shared/catalog_product.dart';
 import 'package:degloor_one/shared/listing_complaint.dart';
@@ -22,13 +23,13 @@ class SupabaseShopDetailRepository implements ShopDetailRepository {
   @override
   Future<ShopCategory?> categoryById(String categoryId) async {
     final row = await _inner.categoryById(categoryId);
-    return row == null ? null : ShopCategory.fromRow(row);
+    return row == null ? null : shopCategoryFromRow(row);
   }
 
   @override
   Future<List<ShopHours>> hoursFor(String businessId) async {
     final rows = await _inner.hoursFor(businessId);
-    return rows.map(ShopHours.fromRow).toList();
+    return rows.map(shopHoursFromRow).toList();
   }
 
   @override
@@ -38,26 +39,26 @@ class SupabaseShopDetailRepository implements ShopDetailRepository {
     final rows = await _inner.hoursForMany(businessIds);
     return {
       for (final entry in rows.entries)
-        entry.key: entry.value.map(ShopHours.fromRow).toList(),
+        entry.key: entry.value.map(shopHoursFromRow).toList(),
     };
   }
 
   @override
   Future<List<CatalogProduct>> availableProducts(String businessId) async {
     final rows = await _inner.availableProducts(businessId);
-    return rows.map(CatalogProduct.fromRow).toList();
+    return rows.map(catalogProductFromRow).toList();
   }
 
   @override
   Future<CatalogProduct?> productById(String productId) async {
     final row = await _inner.productById(productId);
-    return row == null ? null : CatalogProduct.fromRow(row);
+    return row == null ? null : catalogProductFromRow(row);
   }
 
   @override
   Future<List<ProductCategory>> productCategories(String businessId) async {
     final rows = await _inner.productCategories(businessId);
-    return rows.map(ProductCategory.fromRow).toList();
+    return rows.map(productCategoryFromRow).toList();
   }
 
   @override
@@ -96,6 +97,6 @@ class SupabaseShopDetailRepository implements ShopDetailRepository {
   @override
   Future<List<ShopEvent>> analyticsFor(String businessId) async {
     final rows = await _inner.analyticsFor(businessId);
-    return rows.map(ShopEvent.fromRow).toList();
+    return rows.map(shopEventFromRow).toList();
   }
 }

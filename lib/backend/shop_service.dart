@@ -15,15 +15,7 @@ import 'package:degloor_one/shared/shop_event_draft.dart';
 import 'package:degloor_one/shared/shop_hours.dart';
 import 'package:degloor_one/shared/shop_review_draft.dart';
 
-class ShopEvents {
-  static const profileView = 'PROFILE_VIEW';
-  static const callClick = 'CALL_CLICK';
-  static const whatsappClick = 'WHATSAPP_CLICK';
-  static const directionsClick = 'DIRECTIONS_CLICK';
-  static const shareClick = 'SHARE_CLICK';
-  static const reviewSubmitted = 'REVIEW_SUBMITTED';
-  static const productView = 'PRODUCT_VIEW';
-}
+export 'package:degloor_one/shared/shop_event.dart' show ShopEvents;
 
 class ShopEventSummary {
   const ShopEventSummary({
@@ -139,23 +131,7 @@ class ShopService {
     List<ShopHours> hours, {
     DateTime? now,
   }) {
-    final at = now ?? DateTime.now();
-    final dayOfWeek = at.weekday % 7;
-    final currentMinutes = at.hour * 60 + at.minute;
-    for (final row in hours) {
-      if (row.dayOfWeek != dayOfWeek) continue;
-      if (row.isClosed) return false;
-      final open = row.openTime;
-      final close = row.closeTime;
-      if (open == null || close == null) return false;
-      final openMinutes = open.hour * 60 + open.minute;
-      final closeMinutes = close.hour * 60 + close.minute;
-      if (closeMinutes > openMinutes) {
-        return currentMinutes >= openMinutes && currentMinutes <= closeMinutes;
-      }
-      return currentMinutes >= openMinutes || currentMinutes <= closeMinutes;
-    }
-    return false;
+    return ShopHours.isOpenNow(hours, now: now);
   }
 
   Future<bool> isOpenNow(String businessId, {DateTime? now}) async {
@@ -335,9 +311,7 @@ class ShopService {
     final events = await _details.analyticsFor(businessId);
     if (days <= 0) return events;
     final start = DateTime.now().subtract(Duration(days: days));
-    return events
-        .where((event) => !event.createdAt.isBefore(start))
-        .toList();
+    return events.where((event) => !event.createdAt.isBefore(start)).toList();
   }
 
   static ShopEventSummary summarizeEvents(List<ShopEvent> events) {

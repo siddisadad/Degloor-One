@@ -1,6 +1,4 @@
-import 'package:degloor_one/backend/supabase/database/tables/business_categories_table.dart';
-
-/// Marketplace shop type. Screens use this instead of [BusinessCategoriesRow].
+/// Marketplace shop type. Screens use this instead of a table row.
 class ShopCategory {
   const ShopCategory({
     required this.id,
@@ -15,23 +13,6 @@ class ShopCategory {
   final String? iconName;
   final int? displayOrder;
   final DateTime? createdAt;
-
-  factory ShopCategory.fromRow(BusinessCategoriesRow row) {
-    final rawCreated = row.data['created_at'];
-    DateTime? createdAt;
-    if (rawCreated is DateTime) {
-      createdAt = rawCreated;
-    } else if (rawCreated != null) {
-      createdAt = DateTime.tryParse('$rawCreated');
-    }
-    return ShopCategory(
-      id: row.id,
-      name: row.name,
-      iconName: row.iconName,
-      displayOrder: row.displayOrder,
-      createdAt: createdAt,
-    );
-  }
 
   factory ShopCategory.fromJson(Map<String, dynamic> json) {
     final created = json['createdAt'];

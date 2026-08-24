@@ -1,7 +1,4 @@
-import 'package:degloor_one/backend/supabase/database/tables/business_analytics_table.dart';
-
-/// One shop analytics event. Screens use this instead of
-/// [BusinessAnalyticsRow].
+/// One shop analytics event. Screens use this instead of a table row.
 class ShopEvent {
   const ShopEvent({
     required this.id,
@@ -19,18 +16,6 @@ class ShopEvent {
   final String? userId;
   final Map<String, dynamic>? metadata;
 
-  factory ShopEvent.fromRow(BusinessAnalyticsRow row) {
-    final raw = row.metadata;
-    return ShopEvent(
-      id: row.id,
-      businessId: row.businessId,
-      eventType: row.eventType,
-      createdAt: row.createdAt,
-      userId: row.userId,
-      metadata: raw is Map<String, dynamic> ? raw : null,
-    );
-  }
-
   factory ShopEvent.fromJson(Map<String, dynamic> json) {
     final created = json['createdAt'];
     final raw = json['metadata'];
@@ -45,4 +30,14 @@ class ShopEvent {
       metadata: raw is Map<String, dynamic> ? raw : null,
     );
   }
+}
+
+class ShopEvents {
+  static const profileView = 'PROFILE_VIEW';
+  static const callClick = 'CALL_CLICK';
+  static const whatsappClick = 'WHATSAPP_CLICK';
+  static const directionsClick = 'DIRECTIONS_CLICK';
+  static const shareClick = 'SHARE_CLICK';
+  static const reviewSubmitted = 'REVIEW_SUBMITTED';
+  static const productView = 'PRODUCT_VIEW';
 }

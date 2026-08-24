@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:degloor_one/core/api/api_client.dart';
+import 'package:degloor_one/data/datasources/java_shop_insights.dart';
 import 'package:degloor_one/data/datasources/java_shop_repository.dart';
 import 'package:degloor_one/data/repositories/shop_detail_repository.dart';
 import 'package:degloor_one/shared/catalog_product.dart';
@@ -13,7 +14,6 @@ import 'package:degloor_one/shared/shop_event.dart';
 import 'package:degloor_one/shared/shop_event_draft.dart';
 import 'package:degloor_one/shared/shop_hours.dart';
 import 'package:degloor_one/shared/shop_review_draft.dart';
-import 'package:degloor_one/backend/shop_service.dart';
 
 /// Public shop hours, catalogue, reviews, and reports through the Java API.
 class JavaShopDetailRepository implements ShopDetailRepository {
@@ -195,7 +195,7 @@ class JavaShopDetailRepository implements ShopDetailRepository {
     try {
       final data = await _client.get('/api/v1/businesses/$businessId/insights');
       if (data is! Map) return const [];
-      return _eventsFromInsights(
+      return shopEventsFromInsights(
         businessId,
         Map<String, dynamic>.from(data),
       );
@@ -203,30 +203,4 @@ class JavaShopDetailRepository implements ShopDetailRepository {
       return const [];
     }
   }
-}
-
-List<ShopEvent> _eventsFromInsights(
-  String businessId,
-  Map<String, dynamic> insights,
-) {
-  final now = DateTime.now();
-  ShopEvent event(String type, int index) {
-    return ShopEvent(
-      id: '$businessId-$type-$index',
-      businessId: businessId,
-      eventType: type,
-      createdAt: now,
-    );
-  }
-
-  int count(String key) => (insights[key] as num?)?.toInt() ?? 0;
-  return [
-    for (var i = 0; i < count('profileViews'); i++)
-      event(ShopEvents.profileView, i),
-    for (var i = 0; i < count('calls'); i++) event(ShopEvents.callClick, i),
-    for (var i = 0; i < count('whatsapp'); i++)
-      event(ShopEvents.whatsappClick, i),
-    for (var i = 0; i < count('reviews'); i++)
-      event(ShopEvents.reviewSubmitted, i),
-  ];
 }

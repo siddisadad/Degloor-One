@@ -1,5 +1,7 @@
 import 'package:degloor_one/backend/notification_service.dart';
 import 'package:degloor_one/backend/repositories/admin_repository.dart';
+import 'package:degloor_one/backend/supabase/database/tables/business_categories_table.dart';
+import 'package:degloor_one/backend/supabase/database/tables/complaints_table.dart';
 import 'package:degloor_one/shared/listing_complaint.dart';
 import 'package:degloor_one/shared/shop.dart';
 import 'package:degloor_one/shared/shop_category.dart';
@@ -62,7 +64,8 @@ class AdminService {
     await NotificationService.adminNotify(
       userId: ownerId,
       title: 'Business Verified!',
-      message: 'Your business "${shop.name}" has been verified and is now live.',
+      message:
+          'Your business "${shop.name}" has been verified and is now live.',
       type: 'business_verified',
     );
   }
@@ -70,7 +73,7 @@ class AdminService {
   Future<List<ListingComplaint>> pendingComplaints(String adminUserId) async {
     await requireAdmin(adminUserId);
     final rows = await _repository.pendingComplaints();
-    return rows.map(ListingComplaint.fromRow).toList();
+    return rows.map(_complaintFromRow).toList();
   }
 
   Future<void> resolveComplaint({
@@ -95,7 +98,7 @@ class AdminService {
   Future<List<ShopCategory>> businessCategories(String adminUserId) async {
     await requireAdmin(adminUserId);
     final rows = await _repository.businessCategories();
-    return rows.map(ShopCategory.fromRow).toList();
+    return rows.map(_categoryFromRow).toList();
   }
 
   Future<ShopCategory> addCategory({
@@ -123,6 +126,29 @@ class AdminService {
       'icon_name': 'category_rounded',
       'display_order': nextOrder,
     });
-    return ShopCategory.fromRow(row);
+    return _categoryFromRow(row);
   }
+}
+
+ListingComplaint _complaintFromRow(ComplaintsRow row) {
+  return ListingComplaint(
+    id: row.id,
+    userId: row.userId,
+    subject: row.subject,
+    description: row.description,
+    status: row.status,
+    createdAt: row.createdAt,
+    orderId: row.orderId,
+    businessId: row.businessId,
+  );
+}
+
+ShopCategory _categoryFromRow(BusinessCategoriesRow row) {
+  return ShopCategory(
+    id: row.id,
+    name: row.name,
+    iconName: row.iconName,
+    displayOrder: row.displayOrder,
+    createdAt: row.createdAt,
+  );
 }
