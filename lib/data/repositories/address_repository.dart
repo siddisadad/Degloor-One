@@ -4,7 +4,7 @@ import 'package:degloor_one/shared/saved_address.dart';
 
 /// Data access for saved customer addresses. Profile screens go through
 /// AddressController; other features still use AddressService until they
-/// have a controller. Implementations live under `data/datasources`.
+/// have a controller. Concrete implementations map table rows.
 abstract class AddressRepository {
   Future<List<SavedAddress>> forUser(String userId);
 
