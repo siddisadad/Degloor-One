@@ -1131,37 +1131,30 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Text(
-                                      'Reviews',
-                                      style: FlutterFlowTheme.of(context).titleMedium.override(
-                                            font: GoogleFonts.inter(
+                                    Expanded(
+                                      child: Text(
+                                        'Reviews',
+                                        style: FlutterFlowTheme.of(context).titleMedium.override(
+                                              font: GoogleFonts.inter(
+                                                fontWeight: FontWeight.w600,
+                                              ),
                                               fontWeight: FontWeight.w600,
+                                              lineHeight: 1.4,
                                             ),
-                                            fontWeight: FontWeight.w600,
-                                            lineHeight: 1.4,
-                                          ),
+                                      ),
                                     ),
-                                    FFButtonWidget(
+                                    TextButton.icon(
                                       onPressed: () async {
                                         await _showWriteReviewDialog();
                                       },
-                                      text: AppLocalizations.of(context)!.writeReview,
-                                      options: FFButtonOptions(
-                                        width: 120,
-                                        height: 36,
-                                        padding: const EdgeInsetsDirectional.fromSTEB(0, 0, 0, 0),
-                                        iconPadding: const EdgeInsetsDirectional.fromSTEB(0, 0, 0, 0),
-                                        color: Colors.transparent,
-                                        textStyle: FlutterFlowTheme.of(context).labelLarge.override(
+                                      icon: Icon(Icons.edit_note_rounded, size: 20, color: FlutterFlowTheme.of(context).primary),
+                                      label: Text(
+                                        AppLocalizations.of(context)!.writeReview,
+                                        style: FlutterFlowTheme.of(context).labelLarge.override(
                                           font: GoogleFonts.inter(),
                                           color: FlutterFlowTheme.of(context).primary,
                                           fontWeight: FontWeight.w600,
                                         ),
-                                        elevation: 0,
-                                        borderSide: const BorderSide(
-                                          color: Colors.transparent,
-                                        ),
-                                        borderRadius: BorderRadius.circular(8),
                                       ),
                                     ),
                                   ],
@@ -1278,23 +1271,25 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                                   onTap: () async {
                                     await _showReportDialog();
                                   },
-                                  child: wrapWithModel(
-                                    model: _model.buttonModel2,
-                                    updateCallback: () => safeSetState(() {}),
-                                    child: ButtonWidget(
-                                      icon: Icon(
-                                        Icons.flag_rounded,
-                                        color: FlutterFlowTheme.of(context).primaryText,
-                                        size: 24.0,
-                                      ),
-                                      iconPresent: true,
-                                      iconEndPresent: false,
-                                      content: AppLocalizations.of(context)!.reportListing,
-                                      variant: 'outline',
-                                      size: 'small',
-                                      fullWidth: false,
-                                      loading: false,
-                                      disabled: false,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(color: FlutterFlowTheme.of(context).alternate),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(Icons.flag_outlined, size: 18, color: FlutterFlowTheme.of(context).secondaryText),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          'Report',
+                                          style: FlutterFlowTheme.of(context).labelSmall.override(
+                                            fontFamily: GoogleFonts.inter().fontFamily,
+                                            color: FlutterFlowTheme.of(context).secondaryText,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ),
