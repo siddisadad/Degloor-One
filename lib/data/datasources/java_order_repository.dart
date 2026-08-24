@@ -129,7 +129,7 @@ class JavaOrderRepository implements OrderRepository {
 
   @override
   Future<String?> deliveryOtp(String orderId) {
-    if (orderId.isEmpty) return Future.value(null);
+    if (orderId.isEmpty) return Future.value();
     return OrderApi.deliveryOtp(orderId);
   }
 

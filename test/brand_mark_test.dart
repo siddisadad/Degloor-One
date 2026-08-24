@@ -13,7 +13,7 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
-          body: Center(child: BrandMark(size: 72, showWordmark: true)),
+          body: Center(child: BrandMark(showWordmark: true)),
         ),
       ),
     );

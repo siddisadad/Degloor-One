@@ -43,7 +43,7 @@ public class JobService {
 
     public List<JobResponse> search(String q, String category) {
         return jobs.findAll(
-                        JobSpecifications.search(q, category),
+                        JobSpecifications.search(q, category, null),
                         Sort.by(Sort.Direction.DESC, "createdAt"))
                 .stream()
                 .map(JobResponse::from)

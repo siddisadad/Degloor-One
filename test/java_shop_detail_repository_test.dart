@@ -4,7 +4,6 @@ import 'package:degloor_one/shared/catalog_product.dart';
 import 'package:degloor_one/shared/listing_complaint.dart';
 import 'package:degloor_one/shared/marketplace_joins.dart';
 import 'package:degloor_one/shared/shop_event.dart';
-import 'package:degloor_one/shared/shop_hours.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

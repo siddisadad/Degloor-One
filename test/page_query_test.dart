@@ -5,7 +5,7 @@ import 'package:degloor_one/shared/showcase_catalog.dart';
 
 void main() {
   test('page query advances by limit', () {
-    const first = PageQuery(limit: 20);
+    const first = PageQuery();
     expect(first.from, 0);
     expect(first.to, 19);
     final next = first.next();

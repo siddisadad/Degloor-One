@@ -37,7 +37,7 @@ Shop _shop({
     isOpen: true,
     isVerified: true,
     rating: 0,
-    createdAt: DateTime.utc(2026, 1, 1),
+    createdAt: DateTime.utc(2026),
   );
 }
 

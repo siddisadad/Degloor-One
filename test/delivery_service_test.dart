@@ -6,10 +6,8 @@ import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/delivery_assignment.dart';
 import 'package:degloor_one/shared/delivery_partner.dart';
 import 'package:degloor_one/shared/order_lifecycle.dart';
-import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/shared/placed_order.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() {
   test('messageFor hides PostgrestException internals', () {
@@ -98,9 +96,7 @@ void main() {
       isNull,
     );
 
-    final ready = await DeliveryService.instance.readyOrders(
-      page: const PageQuery(limit: 20),
-    );
+    final ready = await DeliveryService.instance.readyOrders();
     expect(ready.items, everyElement(isA<PlacedOrder>()));
     expect(ready.items, isNot(anyElement(isA<OrdersRow>())));
     expect(

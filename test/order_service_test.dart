@@ -30,7 +30,7 @@ void main() {
       addressId: 'addr-home',
       totalAmount: 1,
       deliveryFee: 25,
-      items: [
+      items: const [
         CheckoutLineItem(
           productId: ShowcaseCatalog.prodRice,
           quantity: 1,
@@ -71,7 +71,7 @@ void main() {
         businessId: ShowcaseCatalog.bizPatil,
         cartId: '',
         addressId: 'addr-home',
-        items: [
+        items: const [
           CheckoutLineItem(
             productId: ShowcaseCatalog.prodRice,
             quantity: 1,
@@ -154,7 +154,7 @@ void main() {
       businessId: ShowcaseCatalog.bizPatil,
       addressId: 'addr-home',
       cartId: ShowcaseCatalog.cartGuest,
-      items: [
+      items: const [
         CheckoutLineItem(
           productId: ShowcaseCatalog.prodRice,
           quantity: 2,
@@ -209,7 +209,7 @@ void main() {
       businessId: ShowcaseCatalog.bizPatil,
       cartId: ShowcaseCatalog.cartGuest,
       addressId: 'addr-home',
-      items: [
+      items: const [
         CheckoutLineItem(
           productId: ShowcaseCatalog.prodRice,
           quantity: 1,

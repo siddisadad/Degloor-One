@@ -13,7 +13,7 @@ void main() {
 
   testWidgets('product detail shows Patil milk from ShopService', (tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: ProductDetailWidget(productId: ShowcaseCatalog.prodMilk),
       ),
     );

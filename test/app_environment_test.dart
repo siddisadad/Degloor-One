@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
-import 'package:degloor_one/core/app_environment.dart';
 
 void main() {
   test('test harness enables explicit development demo extras', () {

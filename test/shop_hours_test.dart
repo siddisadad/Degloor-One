@@ -9,7 +9,6 @@ void main() {
       dayOfWeek: 0,
       openTime: DateTime(1970, 1, 1, 9, 30),
       closeTime: DateTime(1970, 1, 1, 18),
-      isClosed: false,
     );
     expect(hours.toUpsertJson(businessId: 'biz-owned'), {
       'id': 'h-1',

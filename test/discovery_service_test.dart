@@ -2,7 +2,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/backend/discovery_service.dart';
-import 'package:degloor_one/backend/repositories/discovery_repository.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/catalog_product.dart';
 import 'package:degloor_one/shared/page_query.dart';
@@ -39,7 +38,7 @@ void main() {
     expect(kUseShowcaseData, isTrue);
     const firstPage = PageQuery(limit: 3);
     final first = await DiscoveryService.instance.search(
-      DiscoverySearch(
+      const DiscoverySearch(
         latitude: ShowcaseCatalog.degloorLat,
         longitude: ShowcaseCatalog.degloorLng,
         radiusKm: 15,
@@ -68,7 +67,7 @@ void main() {
 
   test('master search for milk returns the product and Patil shop', () async {
     final result = await DiscoveryService.instance.masterSearch(
-      query: DiscoverySearch(
+      query: const DiscoverySearch(
         latitude: ShowcaseCatalog.degloorLat,
         longitude: ShowcaseCatalog.degloorLng,
         radiusKm: 15,
@@ -82,7 +81,7 @@ void main() {
 
   test('master search scopes services and jobs', () async {
     final services = await DiscoveryService.instance.masterSearch(
-      query: DiscoverySearch(
+      query: const DiscoverySearch(
         latitude: ShowcaseCatalog.degloorLat,
         longitude: ShowcaseCatalog.degloorLng,
         radiusKm: 15,
@@ -98,7 +97,7 @@ void main() {
     );
 
     final jobs = await DiscoveryService.instance.masterSearch(
-      query: DiscoverySearch(
+      query: const DiscoverySearch(
         latitude: ShowcaseCatalog.degloorLat,
         longitude: ShowcaseCatalog.degloorLng,
         radiusKm: 15,
@@ -111,11 +110,11 @@ void main() {
 
   test('product search returns catalog products', () async {
     final page = await DiscoveryService.instance.searchProducts(
-      DiscoverySearch(
+      const DiscoverySearch(
         latitude: ShowcaseCatalog.degloorLat,
         longitude: ShowcaseCatalog.degloorLng,
         radiusKm: 15,
-        page: const PageQuery(limit: 5),
+        page: PageQuery(limit: 5),
       ),
     );
     expect(page.items, isNotEmpty);

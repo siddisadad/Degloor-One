@@ -55,7 +55,6 @@ void main() {
               builder: (context, setState) {
                 return DiscoveryRadiusBar(
                   selectedKm: selected,
-                  openNow: false,
                   onChanged: (radius) => setState(() => selected = radius),
                   onOpenNowToggle: () {},
                 );

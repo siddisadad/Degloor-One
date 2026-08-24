@@ -31,7 +31,7 @@ ShopHours _hours({
     openTime: _clock(open),
     closeTime: _clock(close),
     isClosed: closed,
-    createdAt: DateTime.utc(2026, 1, 1),
+    createdAt: DateTime.utc(2026),
   );
 }
 
@@ -266,9 +266,9 @@ void main() {
   });
 
   test('isOpenFromHours handles same-day, overnight, and closed rows', () {
-    final sundayMorning = DateTime(2026, 8, 23, 10, 0);
-    final sundayLate = DateTime(2026, 8, 23, 22, 0);
-    final sundayOvernight = DateTime(2026, 8, 23, 1, 0);
+    final sundayMorning = DateTime(2026, 8, 23, 10);
+    final sundayLate = DateTime(2026, 8, 23, 22);
+    final sundayOvernight = DateTime(2026, 8, 23, 1);
     final weekday = [
       _hours(day: 0, open: '09:00:00', close: '21:00:00'),
     ];
@@ -292,8 +292,8 @@ void main() {
   });
 
   test('isOpenNow and isOpenNowBatch use showcase hours', () async {
-    final morning = DateTime(2026, 8, 23, 10, 0);
-    final late = DateTime(2026, 8, 23, 22, 0);
+    final morning = DateTime(2026, 8, 23, 10);
+    final late = DateTime(2026, 8, 23, 22);
 
     expect(
       await ShopService.instance.isOpenNow(ShowcaseCatalog.bizPatil, now: morning),
