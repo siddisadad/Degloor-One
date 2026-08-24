@@ -193,6 +193,19 @@ void main() {
     expect(sweets.map((row) => row.name), ['Ganesh Sweet Mart']);
   });
 
+  test('live PostgREST JS arrays become typed table rows', () {
+    final rows = BusinessesTable().rowsFromWire(<dynamic>[
+      <dynamic, dynamic>{
+        'id': 'a3bb4c14-9fb4-42bf-b4d2-41713a6d80d1',
+        'name': 'Ganesh Sweet Mart',
+        'created_at': '2026-01-01T00:00:00.000Z',
+      },
+    ]);
+    expect(rows, hasLength(1));
+    expect(rows.single, isA<BusinessesRow>());
+    expect(rows.single.name, 'Ganesh Sweet Mart');
+  });
+
   test('table and search RPCs use local showcase data on the dead host',
       () async {
     ShowcaseCatalog.reset();
