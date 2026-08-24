@@ -1,5 +1,6 @@
 import 'package:degloor_one/auth/base_auth_user_provider.dart';
 import 'package:degloor_one/core/api/api_client.dart';
+import 'package:degloor_one/core/api/auth_api.dart';
 
 /// Signed-in customer from the Java auth API. Screens use [BaseAuthUser].
 class JavaAuthUser extends BaseAuthUser {
@@ -11,11 +12,11 @@ class JavaAuthUser extends BaseAuthUser {
     this.phone,
   });
 
-  final String id;
-  final String emailAddress;
-  final String userRole;
-  final String? fullName;
-  final String? phone;
+  String id;
+  String emailAddress;
+  String userRole;
+  String? fullName;
+  String? phone;
 
   factory JavaAuthUser.signedOut() => JavaAuthUser(
         id: '',
@@ -59,6 +60,30 @@ class JavaAuthUser extends BaseAuthUser {
         displayName: fullName,
         phoneNumber: phone,
       );
+
+  void apply(JavaAuthUser other) {
+    id = other.id;
+    emailAddress = other.emailAddress;
+    userRole = other.userRole;
+    fullName = other.fullName;
+    phone = other.phone;
+  }
+
+  @override
+  Future refreshUser() async {
+    if (id.isEmpty) return;
+    try {
+      await AuthApi.refresh();
+      apply(JavaAuthUser.fromJson(await AuthApi.me()));
+    } on JavaApiException catch (error) {
+      if (error.code == 'INVALID_REFRESH' ||
+          error.code == 'UNAUTHORIZED' ||
+          error.code == 'HTTP_401') {
+        return;
+      }
+      rethrow;
+    }
+  }
 
   @override
   Future? delete() async {}

@@ -25,6 +25,19 @@ void main() {
     expect(user.emailVerified, isTrue);
   });
 
+  test('Java me JSON refreshes the signed-in user', () {
+    final user = JavaAuthUser.signedOut();
+    user.apply(JavaAuthUser.fromJson({
+      'id': '11111111-1111-4111-8111-111111111111',
+      'email': 'ravi@degloor.local',
+      'fullName': 'Ravi Patil',
+      'role': 'shop_owner',
+    }));
+    expect(user.loggedIn, isTrue);
+    expect(user.displayName, 'Ravi Patil');
+    expect(user.role, 'shop_owner');
+  });
+
   test('Java signed-out user is not logged in', () {
     final user = JavaAuthUser.signedOut();
     expect(user.loggedIn, isFalse);

@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/auth/java_auth_user.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/backend/user_service.dart';
+import 'package:degloor_one/core/api/api_client.dart';
 import 'supabase_auth_manager.dart';
 
 export 'supabase_auth_manager.dart';
@@ -19,7 +22,12 @@ String get currentUserPhoto => currentUser?.photoUrl ?? '';
 
 String get currentPhoneNumber => currentUser?.phoneNumber ?? '';
 
-String get currentJwtToken => _currentJwtToken ?? '';
+String get currentJwtToken {
+  if (JavaApiConfig.enabled) {
+    return JavaApiClient.instance.accessToken ?? '';
+  }
+  return _currentJwtToken ?? '';
+}
 
 bool get currentUserEmailVerified => currentUser?.emailVerified ?? false;
 
@@ -32,8 +40,11 @@ Future<String?> getCurrentUserRole() async {
 
 /// Create a Stream that listens to the current user's JWT Token.
 String? _currentJwtToken;
-final jwtTokenStream = SupaFlow.client.auth.onAuthStateChange
-    .map(
-      (authState) => _currentJwtToken = authState.session?.accessToken,
-    )
-    .asBroadcastStream();
+final jwtTokenStream = JavaApiConfig.enabled
+    ? Stream<String?>.value(JavaApiClient.instance.accessToken)
+        .asBroadcastStream()
+    : SupaFlow.client.auth.onAuthStateChange
+        .map(
+          (authState) => _currentJwtToken = authState.session?.accessToken,
+        )
+        .asBroadcastStream();
