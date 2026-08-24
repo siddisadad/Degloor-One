@@ -287,12 +287,7 @@ class _UserProfileReportsWidgetState extends State<UserProfileReportsWidget> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: DegloorTheme.spacingMD),
                       child: ButtonWidget(
-                        onTap: () async {
-                          await authManager.signOut();
-                          if (context.mounted) {
-                            context.goNamed('Authentication');
-                          }
-                        },
+                        onTap: () => authManager.signOutToLogin(context),
                         content: 'Sign Out',
                         variant: 'outline',
                         size: 'large',
