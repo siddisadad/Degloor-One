@@ -30,7 +30,7 @@ class JoinedProduct {
     return JoinedProduct(
       id: id,
       name: map['name']?.toString(),
-      imageUrl: map['image_url']?.toString(),
+      imageUrl: (map['image_url'] ?? map['imageUrl'])?.toString(),
       price: (map['price'] as num?)?.toDouble(),
     );
   }
@@ -80,6 +80,7 @@ class CartLine {
           : JoinedProduct(
               id: productId,
               name: json['name'] as String?,
+              imageUrl: json['imageUrl'] as String?,
               price: (json['unitPrice'] as num?)?.toDouble(),
             ),
     );

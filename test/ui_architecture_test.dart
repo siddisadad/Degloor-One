@@ -129,6 +129,7 @@ void main() {
   test('cart leftover domain types stay off Supabase tables', () {
     const paths = [
       'lib/shared/shopping_cart.dart',
+      'lib/shared/join_rows.dart',
     ];
     final offenders = <String>[];
     for (final path in paths) {

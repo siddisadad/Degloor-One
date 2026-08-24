@@ -175,7 +175,8 @@ public class CartService {
                     item.getQuantity(),
                     line,
                     product.isAvailable(),
-                    product.isTrackInventory() ? product.getStockQuantity() : null
+                    product.isTrackInventory() ? product.getStockQuantity() : null,
+                    product.getImageUrl()
             ));
         }
         return new CartResponse(
