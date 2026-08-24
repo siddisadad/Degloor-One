@@ -200,8 +200,7 @@ void main() {
     expect(accepted.canAccept, isFalse);
     expect(accepted.canComplete, isTrue);
 
-    final done =
-        ServiceMarketplaceService.instance.requestActions('completed');
+    final done = ServiceMarketplaceService.instance.requestActions('completed');
     expect(done.canAccept, isFalse);
     expect(done.canComplete, isFalse);
   });
@@ -287,12 +286,15 @@ void main() {
       'status': 'pending',
       'fullName': 'Asha Patil',
       'phoneNumber': '9876543210',
+      'avatarUrl': 'https://example.com/asha.png',
     });
     expect(
       named.user?.displayName(fallback: 'Unknown Customer'),
       'Asha Patil',
     );
     expect(named.user?.phoneNumber, '9876543210');
+    expect(named.photoUrl, 'https://example.com/asha.png');
+    expect(request.photoUrl, isNull);
   });
 
   test('Java write JSON maps to provider profile and request', () {

@@ -4,6 +4,7 @@ import 'package:degloor_one/backend/service_marketplace_service.dart';
 import 'package:degloor_one/backend/whatsapp_service.dart';
 import 'package:degloor_one/shared/service_provider_profile.dart';
 import 'package:degloor_one/shared/service_request.dart';
+import 'package:degloor_one/components/cached_remote_image.dart';
 import 'package:degloor_one/components/degloor_app_bar.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
@@ -77,21 +78,26 @@ class _ManageServiceRequestsWidgetState
       final sortedRequests = requests.toList()
         ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
+      final joinedUserIds = <String>{};
       for (final request in sortedRequests) {
         final id = request.userId;
         if (id == null || id.isEmpty) continue;
-        final name = request.user?.fullName?.trim();
+        final joined = request.user;
+        if (joined == null) continue;
+        joinedUserIds.add(id);
+        final name = joined.fullName?.trim();
         if (name != null && name.isNotEmpty) {
           _customerNames[id] = name;
         }
-        final phone = request.user?.phoneNumber?.trim();
+        final phone = joined.phoneNumber?.trim();
         if (phone != null && phone.isNotEmpty) {
           _customerPhones[id] = phone;
         }
       }
 
-      // Fetch customer names for new users
-      final existingUserIds = _customerNames.keys.toSet();
+      // Showcase/table rows have no join. Java inbox already attached the
+      // customer, and `/users` by-id cannot read other people.
+      final existingUserIds = {..._customerNames.keys, ...joinedUserIds};
       final newUserIds = sortedRequests
           .map((r) => r.userId)
           .where((id) =>
@@ -133,7 +139,9 @@ class _ManageServiceRequestsWidgetState
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Request $newStatus'), backgroundColor: Colors.green),
+          SnackBar(
+              content: Text('Request $newStatus'),
+              backgroundColor: Colors.green),
         );
       }
     } catch (e) {
@@ -198,7 +206,8 @@ class _ManageServiceRequestsWidgetState
                 : ListView.separated(
                     padding: const EdgeInsets.all(16.0),
                     itemCount: _requests.length,
-                    separatorBuilder: (context, index) => const SizedBox(height: 12.0),
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(height: 12.0),
                     itemBuilder: (context, index) {
                       final req = _requests[index];
                       final customerName = req.user?.displayName(
@@ -222,14 +231,36 @@ class _ManageServiceRequestsWidgetState
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text(
-                                    customerName,
-                                    style: FlutterFlowTheme.of(context).titleSmall.override(
-                                          font: GoogleFonts.inter(),
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(16.0),
+                                    child: req.photoUrl == null
+                                        ? degloorImageFallback(
+                                            width: 32,
+                                            height: 32,
+                                            icon: Icons.person_rounded,
+                                          )
+                                        : CachedRemoteImage(
+                                            url: req.photoUrl!,
+                                            width: 32,
+                                            height: 32,
+                                            placeholderIcon:
+                                                Icons.person_rounded,
+                                          ),
+                                  ),
+                                  const SizedBox(width: 8.0),
+                                  Expanded(
+                                    child: Text(
+                                      customerName,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: FlutterFlowTheme.of(context)
+                                          .titleSmall
+                                          .override(
+                                            font: GoogleFonts.inter(),
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                    ),
                                   ),
                                   Row(
                                     children: [
@@ -237,7 +268,8 @@ class _ManageServiceRequestsWidgetState
                                               _customerPhones[req.userId]) !=
                                           null)
                                         Padding(
-                                          padding: const EdgeInsets.only(right: 8.0),
+                                          padding:
+                                              const EdgeInsets.only(right: 8.0),
                                           child: InkWell(
                                             onTap: () async {
                                               final opened =
@@ -247,7 +279,8 @@ class _ManageServiceRequestsWidgetState
                                                     req.user?.phoneNumber ??
                                                         _customerPhones[
                                                             req.userId]!,
-                                                message: 'Hello, I am responding to your service request on DEGLOOR ONE.',
+                                                message:
+                                                    'Hello, I am responding to your service request on DEGLOOR ONE.',
                                               );
                                               if (!opened && context.mounted) {
                                                 ScaffoldMessenger.of(context)
@@ -263,7 +296,9 @@ class _ManageServiceRequestsWidgetState
                                             },
                                             child: Icon(
                                               Icons.chat_bubble_outline_rounded,
-                                              color: FlutterFlowTheme.of(context).success,
+                                              color:
+                                                  FlutterFlowTheme.of(context)
+                                                      .success,
                                               size: 20,
                                             ),
                                           ),
@@ -292,9 +327,11 @@ class _ManageServiceRequestsWidgetState
                                   const SizedBox(width: 8),
                                   Text(
                                     req.scheduledAt != null
-                                        ? dateTimeFormat('MMM d, h:mm a', req.scheduledAt)
+                                        ? dateTimeFormat(
+                                            'MMM d, h:mm a', req.scheduledAt)
                                         : 'Not scheduled',
-                                    style: FlutterFlowTheme.of(context).bodySmall,
+                                    style:
+                                        FlutterFlowTheme.of(context).bodySmall,
                                   ),
                                 ],
                               ),
@@ -313,8 +350,11 @@ class _ManageServiceRequestsWidgetState
                                           options: FFButtonOptions(
                                             height: 36,
                                             color: Colors.green,
-                                            textStyle: const TextStyle(color: Colors.white, fontSize: 12),
-                                            borderRadius: BorderRadius.circular(8),
+                                            textStyle: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 12),
+                                            borderRadius:
+                                                BorderRadius.circular(8),
                                           ),
                                         ),
                                       ),
@@ -329,8 +369,11 @@ class _ManageServiceRequestsWidgetState
                                           options: FFButtonOptions(
                                             height: 36,
                                             color: Colors.red,
-                                            textStyle: const TextStyle(color: Colors.white, fontSize: 12),
-                                            borderRadius: BorderRadius.circular(8),
+                                            textStyle: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 12),
+                                            borderRadius:
+                                                BorderRadius.circular(8),
                                           ),
                                         ),
                                       ),
@@ -349,8 +392,10 @@ class _ManageServiceRequestsWidgetState
                                     options: FFButtonOptions(
                                       width: double.infinity,
                                       height: 36,
-                                      color: FlutterFlowTheme.of(context).primary,
-                                      textStyle: const TextStyle(color: Colors.white, fontSize: 12),
+                                      color:
+                                          FlutterFlowTheme.of(context).primary,
+                                      textStyle: const TextStyle(
+                                          color: Colors.white, fontSize: 12),
                                       borderRadius: BorderRadius.circular(8),
                                     ),
                                   ),

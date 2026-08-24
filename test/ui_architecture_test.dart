@@ -213,6 +213,22 @@ void main() {
     expect(offenders, isEmpty, reason: offenders.join('\n'));
   });
 
+  test('Java service-request inbox uses the joined customer photo', () {
+    const path = 'lib/features/services/manage_service_requests_widget.dart';
+    final source = File(path).readAsStringSync();
+    expect(source.contains('CachedRemoteImage'), isTrue);
+    expect(source.contains('photoUrl'), isTrue);
+    expect(source.contains('joinedUserIds'), isTrue);
+    expect(source.contains('usersByIds'), isTrue);
+    final start = source.indexOf('final joinedUserIds');
+    final stop = source.indexOf('DiscoveryService.instance.usersByIds');
+    expect(start, greaterThanOrEqualTo(0));
+    expect(stop, greaterThan(start));
+    final body = source.substring(start, stop);
+    expect(body.contains('joinedUserIds.add'), isTrue);
+    expect(body.contains('existingUserIds.contains'), isTrue);
+  });
+
   test('marketplace leftover domain types stay off Supabase tables', () {
     const paths = [
       'lib/shared/service_category.dart',
