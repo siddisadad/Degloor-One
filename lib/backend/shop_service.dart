@@ -1,8 +1,9 @@
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/business_service.dart';
 import 'package:degloor_one/backend/notification_service.dart';
-import 'package:degloor_one/backend/repositories/shop_repository.dart';
+import 'package:degloor_one/backend/repositories/shop_detail_repository.dart';
 import 'package:degloor_one/core/error_handler.dart';
+import 'package:degloor_one/data/repositories/shop_repository.dart';
 import 'package:degloor_one/shared/catalog_product.dart';
 import 'package:degloor_one/shared/listing_complaint.dart';
 import 'package:degloor_one/shared/listing_complaint_draft.dart';
@@ -90,27 +91,43 @@ class ShopReviews {
 }
 
 class ShopService {
-  ShopService({ShopRepository? repository})
-      : _repository = repository ?? ShopRepository();
+  ShopService({
+    required ShopRepository shops,
+    ShopDetailRepository? details,
+  })  : _shops = shops,
+        _details = details ?? ShopDetailRepository();
 
-  final ShopRepository _repository;
+  final ShopRepository _shops;
+  final ShopDetailRepository _details;
 
-  static final instance = ShopService();
+  static ShopService? _instance;
+
+  static ShopService get instance {
+    final bound = _instance;
+    if (bound == null) {
+      throw StateError('ShopService is not bound.');
+    }
+    return bound;
+  }
+
+  /// Called from the composition root with a concrete shop repository.
+  static void bind(ShopRepository shops) {
+    _instance = ShopService(shops: shops);
+  }
 
   Future<Shop?> byId(String businessId) async {
     if (businessId.isEmpty) return null;
-    final row = await _repository.byId(businessId);
-    return row == null ? null : Shop.fromRow(row);
+    return _shops.byId(businessId);
   }
 
   Future<String?> categoryName(String? categoryId) async {
     if (categoryId == null || categoryId.isEmpty) return null;
-    final row = await _repository.categoryById(categoryId);
+    final row = await _details.categoryById(categoryId);
     return row?.name;
   }
 
   Future<List<ShopHours>> hours(String businessId) async {
-    final rows = await _repository.hoursFor(businessId);
+    final rows = await _details.hoursFor(businessId);
     return rows.map(ShopHours.fromRow).toList();
   }
 
@@ -156,7 +173,7 @@ class ShopService {
     if (businessIds.isEmpty) return {};
     try {
       final at = now ?? DateTime.now();
-      final hoursById = await _repository.hoursForMany(businessIds);
+      final hoursById = await _details.hoursForMany(businessIds);
       return {
         for (final id in businessIds)
           id: isOpenFromHours(
@@ -172,10 +189,10 @@ class ShopService {
 
   Future<ShopCatalog> catalog(String businessId) async {
     if (businessId.isEmpty) return ShopCatalog.empty;
-    final products = (await _repository.availableProducts(businessId))
+    final products = (await _details.availableProducts(businessId))
         .map(CatalogProduct.fromRow)
         .toList();
-    final categories = (await _repository.productCategories(businessId))
+    final categories = (await _details.productCategories(businessId))
         .map(ProductCategory.fromRow)
         .toList();
     final grouped = <String, List<CatalogProduct>>{};
@@ -192,7 +209,7 @@ class ShopService {
 
   Future<CatalogProduct?> productById(String productId) async {
     if (productId.isEmpty) return null;
-    final row = await _repository.productById(productId);
+    final row = await _details.productById(productId);
     return row == null ? null : CatalogProduct.fromRow(row);
   }
 
@@ -205,7 +222,7 @@ class ShopService {
     if (businessId.isEmpty || eventType.isEmpty) return;
     final actor = userId ?? currentUserUid;
     try {
-      await _repository.insertAnalytics(
+      await _details.insertAnalytics(
         ShopEventDraft(
           businessId: businessId,
           eventType: eventType,
@@ -220,7 +237,7 @@ class ShopService {
 
   Future<ShopReviews> reviews(String businessId) async {
     if (businessId.isEmpty) return ShopReviews.empty;
-    final items = await _repository.reviewsWithUsers(businessId);
+    final items = await _details.reviewsWithUsers(businessId);
     final dist = {5: 0, 4: 0, 3: 0, 2: 0, 1: 0};
     for (final review in items) {
       if (dist.containsKey(review.rating)) {
@@ -245,18 +262,18 @@ class ShopService {
     if (rating < 1 || rating > 5) {
       throw Exception('Please choose a rating');
     }
-    final shop = await _repository.byId(businessId);
+    final shop = await _shops.byId(businessId);
     if (shop == null) {
       throw Exception('Shop not found');
     }
-    final existing = await _repository.reviewByUser(
+    final existing = await _details.reviewByUser(
       userId: userId,
       businessId: businessId,
     );
     if (existing != null) {
       throw Exception('You have already reviewed this shop');
     }
-    await _repository.insertReview(
+    await _details.insertReview(
       ShopReviewDraft(
         userId: userId,
         businessId: businessId,
@@ -293,11 +310,11 @@ class ShopService {
     if (trimmedSubject.isEmpty || trimmedDescription.isEmpty) {
       throw Exception('Please fill all fields');
     }
-    final shop = await _repository.byId(businessId);
+    final shop = await _shops.byId(businessId);
     if (shop == null) {
       throw Exception('Shop not found');
     }
-    return _repository.insertComplaint(
+    return _details.insertComplaint(
       ListingComplaintDraft(
         userId: userId,
         businessId: businessId,
@@ -309,7 +326,7 @@ class ShopService {
 
   Future<List<ListingComplaint>> complaintsForUser(String userId) {
     if (userId.isEmpty) return Future.value(const []);
-    return _repository.complaintsForUser(userId);
+    return _details.complaintsForUser(userId);
   }
 
   Future<List<ShopEvent>> eventsFor({
@@ -322,7 +339,7 @@ class ShopService {
       businessId: businessId,
     );
     final events =
-        (await _repository.analyticsFor(businessId)).map(ShopEvent.fromRow);
+        (await _details.analyticsFor(businessId)).map(ShopEvent.fromRow);
     if (days <= 0) return events.toList();
     final start = DateTime.now().subtract(Duration(days: days));
     return events

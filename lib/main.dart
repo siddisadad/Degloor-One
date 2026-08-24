@@ -14,6 +14,7 @@ import 'auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/notification_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/data/datasources/bind_address_service.dart';
+import 'package:degloor_one/data/datasources/bind_shop_service.dart';
 import 'package:degloor_one/data/datasources/bind_user_service.dart';
 import 'package:degloor_one/shared/app_notification.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
@@ -38,6 +39,7 @@ void main() async {
   await SupaFlow.initialize();
   bindAddressService();
   bindUserService();
+  bindShopService();
 
   await FlutterFlowTheme.initialize();
 

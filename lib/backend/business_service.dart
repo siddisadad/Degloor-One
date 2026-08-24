@@ -4,6 +4,7 @@ import 'package:degloor_one/backend/repositories/business_repository.dart';
 import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/core/error_handler.dart';
+import 'package:degloor_one/data/repositories/shop_repository.dart';
 import 'package:degloor_one/shared/catalog_product.dart';
 import 'package:degloor_one/shared/catalog_product_draft.dart';
 import 'package:degloor_one/shared/catalog_product_stock.dart';
@@ -30,12 +31,29 @@ class ProfileCompleteness {
 }
 
 class BusinessService {
-  BusinessService({BusinessRepository? repository})
-      : _repository = repository ?? BusinessRepository();
+  BusinessService({
+    required ShopRepository shops,
+    BusinessRepository? catalog,
+  })  : _shops = shops,
+        _catalog = catalog ?? BusinessRepository();
 
-  final BusinessRepository _repository;
+  final ShopRepository _shops;
+  final BusinessRepository _catalog;
 
-  static final instance = BusinessService();
+  static BusinessService? _instance;
+
+  static BusinessService get instance {
+    final bound = _instance;
+    if (bound == null) {
+      throw StateError('BusinessService is not bound.');
+    }
+    return bound;
+  }
+
+  /// Called from the composition root with a concrete shop repository.
+  static void bind(ShopRepository shops) {
+    _instance = BusinessService(shops: shops);
+  }
 
   static ProfileCompleteness completeness(Shop? shop) {
     if (shop == null) return ProfileCompleteness.empty;
@@ -66,19 +84,18 @@ class BusinessService {
 
   Future<List<Shop>> ownedBy(String userId) async {
     if (userId.isEmpty) return const [];
-    final rows = await _repository.ownedBy(userId);
-    return rows.map(Shop.fromRow).toList();
+    return _shops.ownedBy(userId);
   }
 
   Future<Shop> requireOwned(String userId) async {
     if (userId.isEmpty) {
       throw Exception(_signInMessage);
     }
-    final shops = await _repository.ownedBy(userId);
+    final shops = await _shops.ownedBy(userId);
     if (shops.isEmpty) {
       throw Exception(_missingShopMessage);
     }
-    return Shop.fromRow(shops.first);
+    return shops.first;
   }
 
   Future<Shop> requireOwnedBusiness({
@@ -88,11 +105,11 @@ class BusinessService {
     if (userId.isEmpty) {
       throw Exception(_signInMessage);
     }
-    final shop = await _repository.byId(businessId);
+    final shop = await _shops.byId(businessId);
     if (shop == null || shop.ownerId != userId) {
       throw Exception(_missingShopMessage);
     }
-    return Shop.fromRow(shop);
+    return shop;
   }
 
   Future<Shop> register({
@@ -118,7 +135,7 @@ class BusinessService {
       discoveryRadius: draft.discoveryRadius ?? 5,
     );
 
-    final row = await _repository.insertBusiness(
+    final shop = await _shops.insert(
       normalized,
       ownerId: userId,
     );
@@ -132,7 +149,7 @@ class BusinessService {
         ShowcaseQuery()..eq('id', userId),
       );
     }
-    return Shop.fromRow(row);
+    return shop;
   }
 
   Future<void> updateProfile({
@@ -151,7 +168,7 @@ class BusinessService {
       discoveryRadius: draft.discoveryRadius,
       imageUrl: draft.imageUrl,
     );
-    await _repository.updateBusiness(
+    await _shops.update(
       businessId: businessId,
       ownerId: userId,
       draft: normalized,
@@ -160,13 +177,13 @@ class BusinessService {
 
   Future<List<CatalogProduct>> products(String userId) async {
     final shop = await requireOwned(userId);
-    final rows = await _repository.productsFor(shop.id);
+    final rows = await _catalog.productsFor(shop.id);
     return rows.map(CatalogProduct.fromRow).toList();
   }
 
   Future<List<ProductCategory>> productCategories(String userId) async {
     final shop = await requireOwned(userId);
-    final rows = await _repository.productCategoriesFor(shop.id);
+    final rows = await _catalog.productCategoriesFor(shop.id);
     return rows.map(ProductCategory.fromRow).toList();
   }
 
@@ -189,7 +206,7 @@ class BusinessService {
     String? categoryId;
     final trimmedCategory = draft.categoryName.trim();
     if (trimmedCategory.isNotEmpty) {
-      final existing = await _repository.productCategoriesFor(shop.id);
+      final existing = await _catalog.productCategoriesFor(shop.id);
       for (final category in existing) {
         if (category.name.toLowerCase() == trimmedCategory.toLowerCase()) {
           categoryId = category.id;
@@ -197,7 +214,7 @@ class BusinessService {
         }
       }
       if (categoryId == null) {
-        final created = await _repository.insertProductCategory(
+        final created = await _catalog.insertProductCategory(
           ProductCategoryDraft(
             businessId: shop.id,
             name: trimmedCategory,
@@ -207,7 +224,7 @@ class BusinessService {
       }
     }
 
-    return _repository.insertProduct(
+    return _catalog.insertProduct(
       draft: draft,
       businessId: shop.id,
       categoryId: categoryId,
@@ -220,7 +237,7 @@ class BusinessService {
     required CatalogProductDraft draft,
   }) async {
     final shop = await requireOwned(userId);
-    final existing = await _repository.productForBusiness(
+    final existing = await _catalog.productForBusiness(
       businessId: shop.id,
       productId: productId,
     );
@@ -233,7 +250,7 @@ class BusinessService {
     if (draft.price < 0) {
       throw Exception('Please enter a valid price');
     }
-    await _repository.updateProduct(
+    await _catalog.updateProduct(
       productId: productId,
       businessId: shop.id,
       draft: draft,
@@ -249,14 +266,14 @@ class BusinessService {
       throw Exception('Please enter a valid stock quantity');
     }
     final shop = await requireOwned(userId);
-    final existing = await _repository.productForBusiness(
+    final existing = await _catalog.productForBusiness(
       businessId: shop.id,
       productId: productId,
     );
     if (existing == null) {
       throw Exception(_missingProductMessage);
     }
-    await _repository.updateStock(
+    await _catalog.updateStock(
       productId: productId,
       businessId: shop.id,
       stock: stock,
@@ -268,14 +285,14 @@ class BusinessService {
     required String productId,
   }) async {
     final shop = await requireOwned(userId);
-    final existing = await _repository.productForBusiness(
+    final existing = await _catalog.productForBusiness(
       businessId: shop.id,
       productId: productId,
     );
     if (existing == null) {
       throw Exception(_missingProductMessage);
     }
-    await _repository.deleteProduct(
+    await _catalog.deleteProduct(
       productId: productId,
       businessId: shop.id,
     );
@@ -283,7 +300,7 @@ class BusinessService {
 
   Future<List<ShopHours>> hours(String userId) async {
     final shop = await requireOwned(userId);
-    final hours = (await _repository.hoursFor(shop.id))
+    final hours = (await _catalog.hoursFor(shop.id))
         .map(ShopHours.fromRow)
         .toList();
     final existingDays = hours.map((row) => row.dayOfWeek).toSet();
@@ -308,7 +325,7 @@ class BusinessService {
     required List<ShopHours> hours,
   }) async {
     final shop = await requireOwned(userId);
-    await _repository.upsertHours(hours, businessId: shop.id);
+    await _catalog.upsertHours(hours, businessId: shop.id);
   }
 
   Future<String> uploadPublicImage({
