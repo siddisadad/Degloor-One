@@ -1,23 +1,31 @@
 import 'package:degloor_one/backend/business_service.dart';
-import 'package:degloor_one/backend/repositories/job_repository.dart';
-import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
-import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/data/repositories/job_repository.dart';
 import 'package:degloor_one/shared/job_application.dart';
 import 'package:degloor_one/shared/job_application_draft.dart';
 import 'package:degloor_one/shared/job_posting.dart';
 import 'package:degloor_one/shared/job_posting_draft.dart';
 import 'package:degloor_one/shared/marketplace_joins.dart';
 import 'package:degloor_one/shared/page_query.dart';
-import 'package:degloor_one/shared/rpc_row.dart';
-import 'package:degloor_one/shared/showcase_catalog.dart';
 
 class JobService {
-  JobService({JobRepository? repository})
-      : _repository = repository ?? JobRepository();
+  JobService({required JobRepository repository}) : _repository = repository;
 
   final JobRepository _repository;
 
-  static final instance = JobService();
+  static JobService? _instance;
+
+  static JobService get instance {
+    final bound = _instance;
+    if (bound == null) {
+      throw StateError('JobService is not bound.');
+    }
+    return bound;
+  }
+
+  /// Called from the composition root with a concrete repository.
+  static void bind(JobRepository repository) {
+    _instance = JobService(repository: repository);
+  }
 
   Future<PageResult<JobListing>> listActive({
     String? search,
@@ -37,10 +45,7 @@ class JobService {
     PageQuery page = const PageQuery(),
   }) async {
     final rows = await _repository.forBusiness(businessId, page: page);
-    return PageResult(
-      items: rows.map(JobPosting.fromRow).toList(),
-      hasMore: rows.length >= page.limit,
-    );
+    return PageResult(items: rows, hasMore: rows.length >= page.limit);
   }
 
   Future<JobPosting> post({
@@ -59,12 +64,11 @@ class JobService {
       userId: posterId,
       businessId: businessId,
     );
-    final row = await _repository.insert(
+    return _repository.insert(
       normalized,
       businessId: businessId,
       posterId: posterId,
     );
-    return JobPosting.fromRow(row);
   }
 
   Future<JobApplication> apply(JobApplicationDraft draft) async {
@@ -76,33 +80,7 @@ class JobService {
       applicantId: draft.applicantId,
       experienceSummary: draft.experienceSummary,
     );
-
-    if (kUseShowcaseData) {
-      final existing = ShowcaseCatalog.query(
-        'job_applications',
-        ShowcaseQuery()
-          ..eq('job_id', normalized.jobId)
-          ..eq('applicant_id', normalized.applicantId),
-      );
-      if (existing.isNotEmpty) {
-        throw Exception('You have already applied for this job');
-      }
-      final row = await _repository.insertApplication(normalized);
-      return JobApplication.fromRow(row);
-    }
-
-    final response = await SupaFlow.client.rpc(
-      'apply_to_job',
-      params: {
-        'p_job_id': normalized.jobId,
-        'p_experience': normalized.experienceSummary,
-      },
-    );
-    final row = asRpcRow(response);
-    if (row == null) {
-      throw Exception('Failed to apply for this job');
-    }
-    return JobApplication.fromRow(JobApplicationsRow(row));
+    return _repository.apply(normalized);
   }
 
   Future<List<JobApplicant>> applicants(String jobId) =>

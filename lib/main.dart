@@ -15,6 +15,7 @@ import 'package:degloor_one/backend/notification_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/data/datasources/bind_address_service.dart';
 import 'package:degloor_one/data/datasources/bind_discovery_service.dart';
+import 'package:degloor_one/data/datasources/bind_job_service.dart';
 import 'package:degloor_one/data/datasources/bind_shop_service.dart';
 import 'package:degloor_one/data/datasources/bind_user_service.dart';
 import 'package:degloor_one/shared/app_notification.dart';
@@ -42,6 +43,7 @@ void main() async {
   bindUserService();
   bindShopService();
   bindDiscoveryService();
+  bindJobService();
 
   await FlutterFlowTheme.initialize();
 
@@ -76,6 +78,7 @@ class MyApp extends StatefulWidget {
 
 class MyAppState extends State<MyApp> {
   final scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
+
   /// The current theme mode of the application.
   ThemeMode _themeMode = FlutterFlowTheme.themeMode;
 
@@ -115,12 +118,14 @@ class MyAppState extends State<MyApp> {
       if (notifications.isEmpty) return;
 
       // Get the latest notification
-      final latest = notifications.toList()..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      final latest = notifications.toList()
+        ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
       final notification = latest.first;
 
       // Only show if it's brand new (e.g. created in the last 10 seconds)
       final now = DateTime.now();
-      if (now.difference(notification.createdAt).inSeconds < 10 && !notification.isRead) {
+      if (now.difference(notification.createdAt).inSeconds < 10 &&
+          !notification.isRead) {
         _showGlobalNotification(notification);
       }
     });
@@ -133,7 +138,8 @@ class MyAppState extends State<MyApp> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(notification.title, style: const TextStyle(fontWeight: FontWeight.bold)),
+            Text(notification.title,
+                style: const TextStyle(fontWeight: FontWeight.bold)),
             Text(notification.message),
           ],
         ),
@@ -170,7 +176,8 @@ class MyAppState extends State<MyApp> {
       }
     });
     _jwtSubscription = jwtTokenStream.listen((_) {});
-    _authSubscription = SupaFlow.client.auth.onAuthStateChange.listen((authState) {
+    _authSubscription =
+        SupaFlow.client.auth.onAuthStateChange.listen((authState) {
       if (authState.event == AuthChangeEvent.passwordRecovery && mounted) {
         PasswordRecovery.pending.value = true;
         _router.goNamed('ResetPassword');

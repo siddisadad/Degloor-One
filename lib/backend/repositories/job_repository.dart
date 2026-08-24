@@ -7,7 +7,8 @@ import 'package:degloor_one/shared/rpc_row.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
 /// Data access for jobs and applications. Widgets should go through
-/// [JobService].
+/// [JobService]. Table-backed implementation; Java lives under
+/// `lib/data/datasources`.
 class JobRepository {
   Future<List<JobListing>> listActive({
     String? search,
@@ -36,8 +37,9 @@ class JobRepository {
       query = query.eq('job_type', jobType);
     }
 
-    final response =
-        await query.order('created_at', ascending: false).range(page.from, page.to);
+    final response = await query
+        .order('created_at', ascending: false)
+        .range(page.from, page.to);
     return List<Map<String, dynamic>>.from(response)
         .map(JobListing.fromJoin)
         .toList();

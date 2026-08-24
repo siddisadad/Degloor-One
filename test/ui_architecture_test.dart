@@ -102,6 +102,30 @@ void main() {
     expect(source.contains(_table), isFalse);
   });
 
+  test('job service and repository interface stay off Supabase', () {
+    const paths = [
+      'lib/backend/job_service.dart',
+      'lib/data/repositories/job_repository.dart',
+    ];
+    final offenders = <String>[];
+    for (final path in paths) {
+      final source = File(path).readAsStringSync();
+      if (source.contains(_barrel) ||
+          source.contains(_table) ||
+          source.contains('data/datasources')) {
+        offenders.add(path);
+      }
+    }
+    expect(offenders, isEmpty, reason: offenders.join('\n'));
+  });
+
+  test('Java job repository stays off Supabase tables', () {
+    const path = 'lib/data/datasources/java_job_repository.dart';
+    final source = File(path).readAsStringSync();
+    expect(source.contains(_barrel), isFalse);
+    expect(source.contains(_table), isFalse);
+  });
+
   test('shop leftover domain types stay off Supabase tables', () {
     const paths = [
       'lib/shared/shop_hours.dart',
