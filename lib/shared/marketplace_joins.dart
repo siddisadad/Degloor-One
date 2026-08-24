@@ -218,7 +218,8 @@ class ServiceProviderCard {
       categoryId: _text(json['categoryId'] ?? json['category_id']),
       bio: _text(json['bio']),
       hourlyRate: _double(json['hourlyRate'] ?? json['hourly_rate']),
-      experienceYears: _int(json['experienceYears'] ?? json['experience_years']),
+      experienceYears:
+          _int(json['experienceYears'] ?? json['experience_years']),
       isVerified: json['verified'] == true || json['isVerified'] == true,
       user: JoinedUser.fromJoin(json['user'] ?? json['users']) ??
           JoinedUser.fromJoin(json),
@@ -226,8 +227,8 @@ class ServiceProviderCard {
     );
   }
 
-  String get displayName => user?.displayName(fallback: 'Unknown Provider') ??
-      'Unknown Provider';
+  String get displayName =>
+      user?.displayName(fallback: 'Unknown Provider') ?? 'Unknown Provider';
 
   String get categoryName => category?.displayName ?? 'General';
 
