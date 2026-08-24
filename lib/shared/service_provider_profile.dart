@@ -36,4 +36,19 @@ class ServiceProviderProfile {
       experienceYears: row.experienceYears,
     );
   }
+
+  /// Java `ProviderResponse`.
+  factory ServiceProviderProfile.fromJson(Map<String, dynamic> json) {
+    return ServiceProviderProfile(
+      id: '${json['id'] ?? ''}',
+      isVerified:
+          json['verified'] as bool? ?? json['isVerified'] as bool? ?? false,
+      createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+      userId: json['userId'] == null ? null : '${json['userId']}',
+      categoryId: json['categoryId'] == null ? null : '${json['categoryId']}',
+      bio: json['bio'] as String?,
+      hourlyRate: (json['hourlyRate'] as num?)?.toDouble(),
+      experienceYears: (json['experienceYears'] as num?)?.toInt(),
+    );
+  }
 }

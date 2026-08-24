@@ -32,4 +32,23 @@ class ServiceRequest {
       scheduledAt: row.scheduledAt,
     );
   }
+
+  /// Java `RequestResponse`.
+  factory ServiceRequest.fromJson(Map<String, dynamic> json) {
+    DateTime? parse(dynamic value) {
+      if (value is String) return DateTime.tryParse(value);
+      return null;
+    }
+
+    return ServiceRequest(
+      id: '${json['id'] ?? ''}',
+      createdAt:
+          parse(json['createdAt']) ?? DateTime.fromMillisecondsSinceEpoch(0),
+      userId: json['userId'] == null ? null : '${json['userId']}',
+      providerId: json['providerId'] == null ? null : '${json['providerId']}',
+      description: json['description'] as String?,
+      status: json['status'] as String?,
+      scheduledAt: parse(json['scheduledAt']),
+    );
+  }
 }

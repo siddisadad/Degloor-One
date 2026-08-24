@@ -29,4 +29,13 @@ class ServiceCategory {
       createdAt: createdAt,
     );
   }
+
+  /// Java `CategoryResponse`.
+  factory ServiceCategory.fromJson(Map<String, dynamic> json) {
+    return ServiceCategory(
+      id: '${json['id'] ?? ''}',
+      name: '${json['name'] ?? ''}',
+      iconName: json['iconName'] as String?,
+    );
+  }
 }
