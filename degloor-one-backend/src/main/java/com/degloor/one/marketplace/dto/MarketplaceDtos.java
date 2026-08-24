@@ -3,6 +3,7 @@ package com.degloor.one.marketplace.dto;
 import com.degloor.one.marketplace.entity.ServiceCategory;
 import com.degloor.one.marketplace.entity.ServiceProvider;
 import com.degloor.one.marketplace.entity.ServiceRequest;
+import com.degloor.one.user.entity.UserAccount;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.Instant;
@@ -24,9 +25,12 @@ public final class MarketplaceDtos {
             String bio,
             Double hourlyRate,
             Integer experienceYears,
-            boolean verified
+            boolean verified,
+            String fullName,
+            String phoneNumber,
+            String avatarUrl
     ) {
-        public static ProviderResponse from(ServiceProvider p) {
+        public static ProviderResponse from(ServiceProvider p, UserAccount user) {
             return new ProviderResponse(
                     p.getId().toString(),
                     p.getUserId().toString(),
@@ -34,7 +38,10 @@ public final class MarketplaceDtos {
                     p.getBio(),
                     p.getHourlyRate(),
                     p.getExperienceYears(),
-                    p.isVerified()
+                    p.isVerified(),
+                    user == null ? null : user.getFullName(),
+                    user == null ? null : user.getPhoneNumber(),
+                    user == null ? null : user.getAvatarUrl()
             );
         }
     }

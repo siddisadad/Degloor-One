@@ -4,6 +4,7 @@ import 'package:degloor_one/app_state.dart';
 import 'package:degloor_one/backend/discovery_service.dart';
 import 'package:degloor_one/backend/location_service.dart';
 import 'package:degloor_one/components/business_card/business_card_widget.dart';
+import 'package:degloor_one/components/cached_remote_image.dart';
 import 'package:degloor_one/components/degloor_app_bar.dart';
 import 'package:degloor_one/components/degloor_filter_chip.dart';
 import 'package:degloor_one/components/discovery_radius_bar.dart';
@@ -515,6 +516,7 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
           icon: Icons.handyman_rounded,
           title: provider.displayName,
           subtitle: provider.categoryName,
+          imageUrl: provider.photoUrl,
           onTap: () => context.pushNamed(
             'ServiceProviderProfile',
             queryParameters: {'providerId': provider.id},
@@ -567,6 +569,7 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
     required String title,
     required String subtitle,
     required VoidCallback onTap,
+    String? imageUrl,
   }) {
     return Material(
       color: DegloorTheme.cardBackground,
@@ -583,14 +586,23 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
           padding: const EdgeInsets.all(DegloorTheme.spacingMD),
           child: Row(
             children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: DegloorTheme.accent,
-                  borderRadius: BorderRadius.circular(DegloorTheme.radiusSM),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(DegloorTheme.radiusSM),
+                child: SizedBox(
+                  width: 44,
+                  height: 44,
+                  child: imageUrl == null || imageUrl.isEmpty
+                      ? ColoredBox(
+                          color: DegloorTheme.accent,
+                          child: Icon(icon, color: DegloorTheme.primary),
+                        )
+                      : CachedRemoteImage(
+                          url: imageUrl,
+                          width: 44,
+                          height: 44,
+                          placeholderIcon: icon,
+                        ),
                 ),
-                child: Icon(icon, color: DegloorTheme.primary),
               ),
               const SizedBox(width: 12),
               Expanded(

@@ -16,8 +16,11 @@ import com.degloor.one.notification.service.NotificationService;
 import com.degloor.one.user.entity.UserAccount;
 import com.degloor.one.user.repository.UserRepository;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,17 +56,24 @@ public class MarketplaceService {
         List<ServiceProvider> rows = categoryId == null
                 ? providers.findAllByOrderByIdAsc()
                 : providers.findByCategoryIdOrderByIdAsc(categoryId);
-        return rows.stream().map(ProviderResponse::from).toList();
+        Map<UUID, UserAccount> accounts = users
+                .findAllById(rows.stream().map(ServiceProvider::getUserId).toList())
+                .stream()
+                .collect(Collectors.toMap(UserAccount::getId, Function.identity()));
+        return rows.stream()
+                .map(p -> ProviderResponse.from(p, accounts.get(p.getUserId())))
+                .toList();
     }
 
     public ProviderResponse provider(UUID id) {
-        return ProviderResponse.from(providers.findById(id)
-                .orElseThrow(() -> BusinessException.notFound("PROVIDER_NOT_FOUND", "Service provider not found")));
+        ServiceProvider p = providers.findById(id)
+                .orElseThrow(() -> BusinessException.notFound("PROVIDER_NOT_FOUND", "Service provider not found"));
+        return ProviderResponse.from(p, users.findById(p.getUserId()).orElse(null));
     }
 
     @Transactional
     public ProviderResponse register(UserAccount user, RegisterProviderRequest req) {
-        return providers.findByUserId(user.getId()).map(ProviderResponse::from).orElseGet(() -> {
+        return providers.findByUserId(user.getId()).map(p -> ProviderResponse.from(p, user)).orElseGet(() -> {
             ServiceProvider p = new ServiceProvider();
             p.setUserId(user.getId());
             p.setCategoryId(req.categoryId());
@@ -75,7 +85,7 @@ public class MarketplaceService {
                 user.setRole(Roles.SERVICE_PROVIDER);
                 users.save(user);
             }
-            return ProviderResponse.from(providers.save(p));
+            return ProviderResponse.from(providers.save(p), user);
         });
     }
 
