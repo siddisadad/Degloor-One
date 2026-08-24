@@ -31,7 +31,7 @@ class AdminService {
     if (user == null || user.role != 'admin') {
       throw Exception(_adminMessage);
     }
-    return UserProfile.fromRow(user);
+    return user;
   }
 
   Future<AdminCounts> counts(String adminUserId) async {

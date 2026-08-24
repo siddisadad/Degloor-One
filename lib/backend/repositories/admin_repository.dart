@@ -1,14 +1,25 @@
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/user_profile.dart';
 
 /// Data access for admin queues. Widgets should go through [AdminService].
 class AdminRepository {
-  Future<UsersRow?> userById(String userId) async {
+  Future<UserProfile?> userById(String userId) async {
     if (userId.isEmpty) return null;
     final rows = await UsersTable().queryRows(
       queryFn: (q) => q.eq('id', userId),
       limit: 1,
     );
-    return rows.isEmpty ? null : rows.first;
+    if (rows.isEmpty) return null;
+    final row = rows.first;
+    return UserProfile(
+      id: row.id,
+      email: row.email,
+      fullName: row.fullName,
+      avatarUrl: row.avatarUrl,
+      role: row.role,
+      phoneNumber: row.phoneNumber,
+      createdAt: row.createdAt,
+    );
   }
 
   Future<List<BusinessesRow>> unverifiedBusinesses() {

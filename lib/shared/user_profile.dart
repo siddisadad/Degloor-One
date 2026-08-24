@@ -1,6 +1,4 @@
-import 'package:degloor_one/backend/supabase/database/tables/users_table.dart';
-
-/// App user profile. Screens use this instead of [UsersRow].
+/// App user profile. Screens use this instead of a table row.
 class UserProfile {
   const UserProfile({
     required this.id,
@@ -19,16 +17,4 @@ class UserProfile {
   final String? role;
   final String? phoneNumber;
   final DateTime? createdAt;
-
-  factory UserProfile.fromRow(UsersRow row) {
-    return UserProfile(
-      id: row.id,
-      email: row.email,
-      fullName: row.fullName,
-      avatarUrl: row.avatarUrl,
-      role: row.role,
-      phoneNumber: row.phoneNumber,
-      createdAt: row.createdAt,
-    );
-  }
 }
