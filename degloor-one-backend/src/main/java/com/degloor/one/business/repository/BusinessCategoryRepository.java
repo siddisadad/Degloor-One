@@ -7,4 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface BusinessCategoryRepository extends JpaRepository<BusinessCategory, UUID> {
     List<BusinessCategory> findAllByOrderByDisplayOrderAsc();
+    java.util.Optional<BusinessCategory> findByNameIgnoreCase(String name);
 }

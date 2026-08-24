@@ -38,4 +38,6 @@ public class BusinessEvent {
     public void setEventType(String eventType) { this.eventType = eventType; }
     public String getMetadata() { return metadata; }
     public void setMetadata(String metadata) { this.metadata = metadata; }
+    public Instant getCreatedAt() { return createdAt; }
+    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
 }
