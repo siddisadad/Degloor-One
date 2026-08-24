@@ -1,6 +1,4 @@
-import 'package:degloor_one/backend/supabase/database/tables/product_categories_table.dart';
-
-/// Per-shop product category. Screens use this instead of [ProductCategoriesRow].
+/// Per-shop product category. Screens use this instead of a table row.
 class ProductCategory {
   const ProductCategory({
     required this.id,
@@ -14,12 +12,15 @@ class ProductCategory {
   final String name;
   final DateTime createdAt;
 
-  factory ProductCategory.fromRow(ProductCategoriesRow row) {
+  factory ProductCategory.fromJson(Map<String, dynamic> json) {
+    final created = json['createdAt'];
     return ProductCategory(
-      id: row.id,
-      businessId: row.businessId,
-      name: row.name,
-      createdAt: row.createdAt,
+      id: '${json['id'] ?? ''}',
+      businessId: '${json['businessId'] ?? ''}',
+      name: '${json['name'] ?? ''}',
+      createdAt: created is String
+          ? DateTime.tryParse(created) ?? DateTime.fromMillisecondsSinceEpoch(0)
+          : DateTime.fromMillisecondsSinceEpoch(0),
     );
   }
 }

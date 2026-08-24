@@ -1,4 +1,5 @@
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/data/datasources/supabase_shop_maps.dart';
 import 'package:degloor_one/shared/listing_complaint.dart';
 import 'package:degloor_one/shared/listing_complaint_draft.dart';
 import 'package:degloor_one/shared/marketplace_joins.dart';
@@ -32,8 +33,7 @@ class ShopDetailRepository {
     final ids = businessIds.where((id) => id.isNotEmpty).toSet().toList();
     if (ids.isEmpty) return {};
     final rows = await BusinessHoursTable().queryRows(
-      queryFn: (q) =>
-          q.inFilter('business_id', ids).order('day_of_week'),
+      queryFn: (q) => q.inFilter('business_id', ids).order('day_of_week'),
     );
     final map = {for (final id in ids) id: <BusinessHoursRow>[]};
     for (final row in rows) {
@@ -47,8 +47,7 @@ class ShopDetailRepository {
   Future<List<ProductsRow>> availableProducts(String businessId) {
     if (businessId.isEmpty) return Future.value(const []);
     return ProductsTable().queryRows(
-      queryFn: (q) =>
-          q.eq('business_id', businessId).eq('is_available', true),
+      queryFn: (q) => q.eq('business_id', businessId).eq('is_available', true),
     );
   }
 
@@ -63,7 +62,7 @@ class ShopDetailRepository {
 
   Future<ShopEvent> insertAnalytics(ShopEventDraft draft) async {
     final row = await BusinessAnalyticsTable().insert(draft.toInsertJson());
-    return ShopEvent.fromRow(row);
+    return shopEventFromRow(row);
   }
 
   Future<List<ProductCategoriesRow>> productCategories(String businessId) {
@@ -111,7 +110,7 @@ class ShopDetailRepository {
 
   Future<ListingComplaint> insertComplaint(ListingComplaintDraft draft) async {
     final row = await ComplaintsTable().insert(draft.toInsertJson());
-    return ListingComplaint.fromRow(row);
+    return listingComplaintFromRow(row);
   }
 
   Future<List<ListingComplaint>> complaintsForUser(String userId) async {
@@ -120,7 +119,7 @@ class ShopDetailRepository {
       queryFn: (q) =>
           q.eq('user_id', userId).order('created_at', ascending: false),
     );
-    return rows.map(ListingComplaint.fromRow).toList();
+    return rows.map(listingComplaintFromRow).toList();
   }
 
   Future<List<BusinessAnalyticsRow>> analyticsFor(String businessId) {

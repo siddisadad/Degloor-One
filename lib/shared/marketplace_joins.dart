@@ -245,6 +245,17 @@ class ShopReview {
     );
   }
 
+  factory ShopReview.fromJson(Map<String, dynamic> json) {
+    return ShopReview(
+      id: '${json['id'] ?? ''}',
+      userId: '${json['userId'] ?? json['user_id'] ?? ''}',
+      rating: (json['rating'] as num?)?.toInt() ?? 0,
+      comment: _text(json['comment']),
+      createdAt: _date(json['createdAt'] ?? json['created_at']),
+      user: JoinedUser.fromJoin(json['users'] ?? json['user']),
+    );
+  }
+
   String get authorName => user?.displayName(fallback: 'Anonymous') ?? 'Anonymous';
 
   String get initials {

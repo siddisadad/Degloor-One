@@ -1,6 +1,4 @@
-import 'package:degloor_one/backend/supabase/database/tables/products_table.dart';
-
-/// Shop catalogue listing. Screens use this instead of [ProductsRow].
+/// Shop catalogue listing. Screens use this instead of a table row.
 ///
 /// [price] is a display snapshot. Checkout ignores client-supplied prices.
 class CatalogProduct {
@@ -32,20 +30,23 @@ class CatalogProduct {
   final bool? trackInventory;
   final double? distanceKm;
 
-  factory CatalogProduct.fromRow(ProductsRow row) {
+  factory CatalogProduct.fromJson(Map<String, dynamic> json) {
+    final created = json['createdAt'];
     return CatalogProduct(
-      id: row.id,
-      businessId: row.businessId,
-      name: row.name,
-      createdAt: row.createdAt,
-      categoryId: row.categoryId,
-      description: row.description,
-      price: row.price,
-      imageUrl: row.imageUrl,
-      isAvailable: row.isAvailable,
-      stockQuantity: row.stockQuantity,
-      trackInventory: row.trackInventory,
-      distanceKm: row.distanceKm,
+      id: '${json['id'] ?? ''}',
+      businessId: '${json['businessId'] ?? ''}',
+      name: '${json['name'] ?? ''}',
+      createdAt: created is String
+          ? DateTime.tryParse(created) ?? DateTime.fromMillisecondsSinceEpoch(0)
+          : DateTime.fromMillisecondsSinceEpoch(0),
+      categoryId: json['categoryId'] == null ? null : '${json['categoryId']}',
+      description: json['description'] as String?,
+      price: (json['price'] as num?)?.toDouble(),
+      imageUrl: json['imageUrl'] as String?,
+      isAvailable: json['available'] as bool? ?? json['isAvailable'] as bool?,
+      stockQuantity: (json['stockQuantity'] as num?)?.toInt(),
+      trackInventory: json['trackInventory'] as bool?,
+      distanceKm: (json['distanceKm'] as num?)?.toDouble(),
     );
   }
 }

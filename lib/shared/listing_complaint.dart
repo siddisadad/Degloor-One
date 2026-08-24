@@ -1,7 +1,4 @@
-import 'package:degloor_one/backend/supabase/database/tables/complaints_table.dart';
-
-/// Customer report about a listing. Screens use this instead of
-/// [ComplaintsRow].
+/// Customer report about a listing. Screens use this instead of a table row.
 class ListingComplaint {
   const ListingComplaint({
     required this.id,
@@ -23,16 +20,19 @@ class ListingComplaint {
   final String? orderId;
   final String? businessId;
 
-  factory ListingComplaint.fromRow(ComplaintsRow row) {
+  factory ListingComplaint.fromJson(Map<String, dynamic> json) {
+    final created = json['createdAt'];
     return ListingComplaint(
-      id: row.id,
-      userId: row.userId,
-      subject: row.subject,
-      description: row.description,
-      status: row.status,
-      createdAt: row.createdAt,
-      orderId: row.orderId,
-      businessId: row.businessId,
+      id: '${json['id'] ?? ''}',
+      userId: '${json['userId'] ?? ''}',
+      subject: '${json['subject'] ?? ''}',
+      description: '${json['description'] ?? ''}',
+      status: '${json['status'] ?? ''}',
+      createdAt: created is String
+          ? DateTime.tryParse(created) ?? DateTime.fromMillisecondsSinceEpoch(0)
+          : DateTime.fromMillisecondsSinceEpoch(0),
+      orderId: json['orderId'] == null ? null : '${json['orderId']}',
+      businessId: json['businessId'] == null ? null : '${json['businessId']}',
     );
   }
 }

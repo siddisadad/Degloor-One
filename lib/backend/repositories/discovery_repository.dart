@@ -1,33 +1,14 @@
 import 'package:degloor_one/backend/supabase/supabase.dart';
-import 'package:degloor_one/shared/page_query.dart';
+import 'package:degloor_one/data/repositories/discovery_repository.dart'
+    show DiscoverySearch;
 import 'package:degloor_one/shared/shop.dart';
 
-class DiscoverySearch {
-  const DiscoverySearch({
-    required this.latitude,
-    required this.longitude,
-    required this.radiusKm,
-    this.searchTerm,
-    this.categoryId,
-    this.openNow = false,
-    this.verifiedOnly = false,
-    this.minRating = 0.0,
-    this.page = const PageQuery(),
-  });
-
-  final double latitude;
-  final double longitude;
-  final double radiusKm;
-  final String? searchTerm;
-  final String? categoryId;
-  final bool openNow;
-  final bool verifiedOnly;
-  final double minRating;
-  final PageQuery page;
-}
+export 'package:degloor_one/data/repositories/discovery_repository.dart'
+    show DiscoverySearch;
 
 /// Radius search and catalogue lookups. Widgets should go through
-/// [DiscoveryService].
+/// [DiscoveryService]. Table-backed implementation; Java lives under
+/// `lib/data/datasources`.
 class DiscoveryRepository {
   Shop _toShop(BusinessesRow row) {
     return Shop(

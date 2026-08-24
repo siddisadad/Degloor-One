@@ -1,30 +1,41 @@
 import 'package:degloor_one/backend/job_service.dart';
 import 'package:degloor_one/backend/native_service_bridge.dart';
-import 'package:degloor_one/backend/repositories/discovery_repository.dart';
 import 'package:degloor_one/backend/service_marketplace_service.dart';
 import 'package:degloor_one/backend/shop_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/backend/user_service.dart';
+import 'package:degloor_one/data/repositories/discovery_repository.dart';
 import 'package:degloor_one/shared/catalog_product.dart';
 import 'package:degloor_one/shared/marketplace_joins.dart';
 import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/shared/search_query.dart';
 import 'package:degloor_one/shared/shop.dart';
 import 'package:degloor_one/shared/shop_category.dart';
-import 'package:degloor_one/shared/shop_event.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 import 'package:degloor_one/shared/user_profile.dart';
 
-export 'package:degloor_one/backend/repositories/discovery_repository.dart'
+export 'package:degloor_one/data/repositories/discovery_repository.dart'
     show DiscoverySearch;
 
 class DiscoveryService {
-  DiscoveryService({DiscoveryRepository? repository})
-      : _repository = repository ?? DiscoveryRepository();
+  DiscoveryService({required DiscoveryRepository repository})
+      : _repository = repository;
 
   final DiscoveryRepository _repository;
 
-  static final instance = DiscoveryService();
+  static DiscoveryService? _instance;
+
+  static DiscoveryService get instance {
+    final bound = _instance;
+    if (bound == null) {
+      throw StateError('DiscoveryService is not bound.');
+    }
+    return bound;
+  }
+
+  static void bind(DiscoveryRepository repository) {
+    _instance = DiscoveryService(repository: repository);
+  }
 
   Future<PageResult<Shop>> search(DiscoverySearch query) async {
     final rows = await _repository.search(query);
@@ -39,7 +50,7 @@ class DiscoveryService {
   ) async {
     final rows = await _repository.searchProducts(query);
     return PageResult(
-      items: rows.map(CatalogProduct.fromRow).toList(),
+      items: rows,
       hasMore: rows.length >= query.page.limit,
     );
   }
@@ -148,7 +159,7 @@ class DiscoveryService {
       if (native.isNotEmpty) return native;
     }
     final rows = await _repository.categories();
-    return rows.map(ShopCategory.fromRow).toList();
+    return rows;
   }
 
   Future<List<UserProfile>> profile(String userId) =>
@@ -169,9 +180,7 @@ class DiscoveryService {
     if (businessId.isEmpty) return ShopInsights.empty;
     final reviews = await _repository.reviewCount(businessId);
     final events = await _repository.analyticsFor(businessId);
-    final summary = ShopService.summarizeEvents(
-      events.map(ShopEvent.fromRow).toList(),
-    );
+    final summary = ShopService.summarizeEvents(events);
     return ShopInsights(
       reviewCount: reviews,
       profileViews: summary.profileViews,

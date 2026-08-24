@@ -21,7 +21,14 @@ void main() {
     });
     expect(
       hours.toUpsertJson(businessId: 'biz-owned').keys,
-      ['id', 'business_id', 'day_of_week', 'open_time', 'close_time', 'is_closed'],
+      [
+        'id',
+        'business_id',
+        'day_of_week',
+        'open_time',
+        'close_time',
+        'is_closed'
+      ],
     );
   });
 
@@ -30,6 +37,69 @@ void main() {
     expect(
       ShopHours(dayOfWeek: 1).toUpsertJson(businessId: 'biz-1')['open_time'],
       '09:00:00',
+    );
+  });
+
+  test('isOpenNow handles same-day, overnight, and closed windows', () {
+    ShopHours window({
+      required int day,
+      required int openHour,
+      required int closeHour,
+      bool closed = false,
+    }) {
+      return ShopHours(
+        dayOfWeek: day,
+        openTime: DateTime(1970, 1, 1, openHour),
+        closeTime: DateTime(1970, 1, 1, closeHour),
+        isClosed: closed,
+      );
+    }
+
+    final sundayMorning = DateTime(2026, 8, 23, 10);
+    final sundayLate = DateTime(2026, 8, 23, 22);
+    final sundayOvernight = DateTime(2026, 8, 23, 1);
+    expect(
+      ShopHours.isOpenNow(
+        [window(day: 0, openHour: 9, closeHour: 18)],
+        now: sundayMorning,
+      ),
+      isTrue,
+    );
+    expect(
+      ShopHours.isOpenNow(
+        [window(day: 0, openHour: 9, closeHour: 18)],
+        now: sundayLate,
+      ),
+      isFalse,
+    );
+    expect(ShopHours.isOpenNow(const [], now: sundayMorning), isFalse);
+    expect(
+      ShopHours.isOpenNow(
+        [window(day: 0, openHour: 9, closeHour: 18, closed: true)],
+        now: sundayMorning,
+      ),
+      isFalse,
+    );
+    expect(
+      ShopHours.isOpenNow(
+        [window(day: 0, openHour: 22, closeHour: 2)],
+        now: sundayLate,
+      ),
+      isTrue,
+    );
+    expect(
+      ShopHours.isOpenNow(
+        [window(day: 0, openHour: 22, closeHour: 2)],
+        now: sundayOvernight,
+      ),
+      isTrue,
+    );
+    expect(
+      ShopHours.isOpenNow(
+        [window(day: 0, openHour: 22, closeHour: 2)],
+        now: sundayMorning,
+      ),
+      isFalse,
     );
   });
 }
