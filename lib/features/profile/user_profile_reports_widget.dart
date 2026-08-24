@@ -397,7 +397,7 @@ class _UserProfileReportsWidgetState extends State<UserProfileReportsWidget> {
                 const SizedBox(height: 24),
                 ButtonWidget(
                   content: 'View shop',
-                  onTap: () {
+                  onTap: () async {
                     Navigator.pop(sheetContext);
                     context.pushNamed(
                       'BusinessProfile',

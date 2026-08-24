@@ -44,6 +44,9 @@ void main() {
 
   testWidgets('profile report opens the seeded complaint details',
       (tester) async {
+    await tester.binding.setSurfaceSize(const Size(390, 844));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
     await tester.pumpWidget(
       const MaterialApp(
         home: UserProfileReportsWidget(),
@@ -52,7 +55,11 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
 
-    expect(find.text('Missing sweet in thali'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Missing sweet in thali'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.tap(find.text('Missing sweet in thali'));
     await tester.pumpAndSettle();
 
