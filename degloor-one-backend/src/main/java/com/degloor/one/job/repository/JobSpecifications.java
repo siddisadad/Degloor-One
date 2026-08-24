@@ -9,6 +9,10 @@ import org.springframework.data.jpa.domain.Specification;
 public final class JobSpecifications {
     private JobSpecifications() {}
 
+    public static Specification<JobPosting> search(String q, String category) {
+        return search(q, category, null);
+    }
+
     public static Specification<JobPosting> search(String q, String category, String jobType) {
         return (root, query, cb) -> {
             Predicate pred = cb.isTrue(root.get("active"));

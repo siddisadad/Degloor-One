@@ -10,7 +10,6 @@ import 'package:degloor_one/components/request_service_sheet/request_service_she
 import 'package:degloor_one/components/load_more_control.dart';
 import 'package:degloor_one/core/degloor_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:degloor_one/components/cached_remote_image.dart';
 import 'package:flutter/material.dart';
 import 'services_model.dart';
@@ -289,27 +288,12 @@ class _ServicesWidgetState extends State<ServicesWidget> {
                                             height: 60,
                                             icon: Icons.person_rounded,
                                           )
-                                        : CachedNetworkImage(
-                                            imageUrl: provider.photoUrl!,
-                                            width: 60.0,
-                                            height: 60.0,
-                                            fit: BoxFit.cover,
-                                            memCacheWidth:
-                                                memCachePx(context, 60),
-                                            memCacheHeight:
-                                                memCachePx(context, 60),
-                                            placeholder: (_, __) =>
-                                                degloorImageFallback(
-                                              width: 60,
-                                              height: 60,
-                                              icon: Icons.person_rounded,
-                                            ),
-                                            errorWidget: (_, __, ___) =>
-                                                degloorImageFallback(
-                                              width: 60,
-                                              height: 60,
-                                              icon: Icons.person_rounded,
-                                            ),
+                                        : CachedRemoteImage(
+                                            url: provider.photoUrl!,
+                                            width: 60,
+                                            height: 60,
+                                            placeholderIcon:
+                                                Icons.person_rounded,
                                           ),
                                   ),
                                   const SizedBox(width: 12.0),

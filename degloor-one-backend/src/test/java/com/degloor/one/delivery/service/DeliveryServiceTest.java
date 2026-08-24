@@ -9,8 +9,6 @@ import com.degloor.one.delivery.repository.DeliveryPartnerRepository;
 import com.degloor.one.notification.service.NotificationService;
 import com.degloor.one.order.OrderStatus;
 import com.degloor.one.order.entity.ShopOrder;
-import com.degloor.one.order.repository.OrderItemRepository;
-import com.degloor.one.order.repository.OrderStatusHistoryRepository;
 import com.degloor.one.order.repository.ShopOrderRepository;
 import com.degloor.one.order.service.OrderService;
 import com.degloor.one.user.entity.UserAccount;
@@ -32,8 +30,6 @@ class DeliveryServiceTest {
     @Mock DeliveryPartnerRepository partners;
     @Mock DeliveryAssignmentRepository assignments;
     @Mock ShopOrderRepository orders;
-    @Mock OrderItemRepository orderItems;
-    @Mock OrderStatusHistoryRepository history;
     @Mock OrderService orderService;
     @Mock OtpService otpService;
     @Mock NotificationService notifications;
@@ -48,7 +44,7 @@ class DeliveryServiceTest {
     @BeforeEach
     void setUp() {
         service = new DeliveryService(
-                partners, assignments, orders, orderItems, history, orderService, otpService, notifications, users, businesses);
+                partners, assignments, orders, orderService, otpService, notifications, users, businesses);
         rider = new UserAccount();
         rider.setId(UUID.randomUUID());
         rider.setRole("delivery_partner");

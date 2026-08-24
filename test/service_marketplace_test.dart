@@ -238,13 +238,16 @@ void main() {
       'hourlyRate': 200,
       'experienceYears': 5,
       'verified': true,
+      'fullName': 'Ravi',
+      'avatarUrl': 'https://example.com/a.png',
     }, category: const JoinedCategory(name: 'Electrician'));
     expect(card.id, 'sp-ravi');
     expect(card.userId, 'user-electrician');
     expect(card.hourlyRate, 200);
     expect(card.isVerified, isTrue);
     expect(card.categoryName, 'Electrician');
-    expect(card.displayName, 'Unknown Provider');
+    expect(card.displayName, 'Ravi');
+    expect(card.photoUrl, 'https://example.com/a.png');
 
     final profile = ServiceProviderProfile.fromJson({
       'id': 'sp-ravi',
@@ -274,6 +277,22 @@ void main() {
     expect(request.providerId, 'sp-ravi');
     expect(request.status, 'pending');
     expect(request.createdAt.toUtc().year, 2026);
+    expect(request.user, isNull);
+
+    final named = ServiceRequest.fromJson({
+      'id': 'sr-2',
+      'userId': GuestAuthUser.guestUid,
+      'providerId': 'sp-ravi',
+      'description': 'Fix the tube light.',
+      'status': 'pending',
+      'fullName': 'Asha Patil',
+      'phoneNumber': '9876543210',
+    });
+    expect(
+      named.user?.displayName(fallback: 'Unknown Customer'),
+      'Asha Patil',
+    );
+    expect(named.user?.phoneNumber, '9876543210');
   });
 
   test('Java write JSON maps to provider profile and request', () {

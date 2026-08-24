@@ -637,10 +637,35 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
             final items = snapshot.data ?? [];
             return Column(
               children: items.map((item) {
+                final imageUrl = item.product?.imageUrl;
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 4.0),
                   child: Row(
                     children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: SizedBox(
+                          width: 40,
+                          height: 40,
+                          child: imageUrl == null || imageUrl.isEmpty
+                              ? ColoredBox(
+                                  color: FlutterFlowTheme.of(context)
+                                      .primary
+                                      .withValues(alpha: 0.08),
+                                  child: Icon(
+                                    Icons.shopping_bag_outlined,
+                                    size: 20,
+                                    color: FlutterFlowTheme.of(context).primary,
+                                  ),
+                                )
+                              : CachedRemoteImage(
+                                  url: imageUrl,
+                                  width: 40,
+                                  height: 40,
+                                ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
                       Expanded(
                         child: Text(
                           '${item.quantity}× ${item.product?.name ?? 'Item'}',

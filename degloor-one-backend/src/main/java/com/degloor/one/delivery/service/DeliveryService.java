@@ -16,8 +16,6 @@ import com.degloor.one.order.OrderStateMachine;
 import com.degloor.one.order.OrderStatus;
 import com.degloor.one.order.dto.OrderDtos.OrderResponse;
 import com.degloor.one.order.entity.ShopOrder;
-import com.degloor.one.order.repository.OrderItemRepository;
-import com.degloor.one.order.repository.OrderStatusHistoryRepository;
 import com.degloor.one.order.repository.ShopOrderRepository;
 import com.degloor.one.order.service.OrderService;
 import com.degloor.one.user.entity.UserAccount;
@@ -33,8 +31,6 @@ public class DeliveryService {
     private final DeliveryPartnerRepository partners;
     private final DeliveryAssignmentRepository assignments;
     private final ShopOrderRepository orders;
-    private final OrderItemRepository orderItems;
-    private final OrderStatusHistoryRepository history;
     private final OrderService orderService;
     private final OtpService otpService;
     private final NotificationService notifications;
@@ -45,8 +41,6 @@ public class DeliveryService {
             DeliveryPartnerRepository partners,
             DeliveryAssignmentRepository assignments,
             ShopOrderRepository orders,
-            OrderItemRepository orderItems,
-            OrderStatusHistoryRepository history,
             OrderService orderService,
             OtpService otpService,
             NotificationService notifications,
@@ -56,8 +50,6 @@ public class DeliveryService {
         this.partners = partners;
         this.assignments = assignments;
         this.orders = orders;
-        this.orderItems = orderItems;
-        this.history = history;
         this.orderService = orderService;
         this.otpService = otpService;
         this.notifications = notifications;
@@ -217,10 +209,6 @@ public class DeliveryService {
     }
 
     private OrderResponse toOrder(ShopOrder order) {
-        return OrderResponse.from(
-                order,
-                orderItems.findByOrderId(order.getId()),
-                history.findByOrderIdOrderByCreatedAtAsc(order.getId())
-        );
+        return orderService.toResponse(order);
     }
 }
