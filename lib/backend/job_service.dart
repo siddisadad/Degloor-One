@@ -3,6 +3,7 @@ import 'package:degloor_one/backend/repositories/job_repository.dart';
 import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/job_application.dart';
+import 'package:degloor_one/shared/job_application_draft.dart';
 import 'package:degloor_one/shared/job_posting.dart';
 import 'package:degloor_one/shared/job_posting_draft.dart';
 import 'package:degloor_one/shared/marketplace_joins.dart';
@@ -66,43 +67,35 @@ class JobService {
     return JobPosting.fromRow(row);
   }
 
-  Future<JobApplication> apply({
-    required String jobId,
-    required String applicantId,
-    required String experienceSummary,
-  }) async {
-    if (applicantId.isEmpty) {
+  Future<JobApplication> apply(JobApplicationDraft draft) async {
+    if (draft.applicantId.isEmpty) {
       throw Exception('Please sign in to apply');
     }
-    final summary = experienceSummary.trim();
-    if (summary.isEmpty) {
-      throw Exception('Please enter your experience summary');
-    }
+    final normalized = JobApplicationDraft.fromForm(
+      jobId: draft.jobId,
+      applicantId: draft.applicantId,
+      experienceSummary: draft.experienceSummary,
+    );
 
     if (kUseShowcaseData) {
       final existing = ShowcaseCatalog.query(
         'job_applications',
         ShowcaseQuery()
-          ..eq('job_id', jobId)
-          ..eq('applicant_id', applicantId),
+          ..eq('job_id', normalized.jobId)
+          ..eq('applicant_id', normalized.applicantId),
       );
       if (existing.isNotEmpty) {
         throw Exception('You have already applied for this job');
       }
-      final row = await _repository.insertApplication({
-        'job_id': jobId,
-        'applicant_id': applicantId,
-        'experience_summary': summary,
-        'status': 'applied',
-      });
+      final row = await _repository.insertApplication(normalized);
       return JobApplication.fromRow(row);
     }
 
     final response = await SupaFlow.client.rpc(
       'apply_to_job',
       params: {
-        'p_job_id': jobId,
-        'p_experience': summary,
+        'p_job_id': normalized.jobId,
+        'p_experience': normalized.experienceSummary,
       },
     );
     final row = asRpcRow(response);
