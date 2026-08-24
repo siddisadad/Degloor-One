@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/backend/business_service.dart';
+import 'package:degloor_one/backend/user_service.dart';
 import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/catalog_product.dart';
@@ -11,6 +12,7 @@ import 'package:degloor_one/shared/shop.dart';
 import 'package:degloor_one/shared/shop_draft.dart';
 import 'package:degloor_one/shared/shop_hours.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
+import 'package:degloor_one/shared/user_role.dart';
 
 Shop _shop({
   String name = 'Shop',
@@ -201,6 +203,10 @@ void main() {
     );
     expect(shop.ownerId, ShowcaseCatalog.customer2);
     expect(shop.isVerified, isFalse);
+    expect(
+      await UserService.instance.roleFor(ShowcaseCatalog.customer2),
+      UserRole.businessOwner.value,
+    );
 
     final owned =
         await BusinessService.instance.ownedBy(ShowcaseCatalog.customer2);
