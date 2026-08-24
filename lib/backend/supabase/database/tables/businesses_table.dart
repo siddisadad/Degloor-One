@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import '../database.dart';
 import 'package:degloor_one/flutter_flow/lat_lng.dart';
+import 'package:degloor_one/shared/search_query.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
 class BusinessesTable extends SupabaseTable<BusinessesRow> {
@@ -77,6 +78,82 @@ class BusinessesTable extends SupabaseTable<BusinessesRow> {
     return filtered;
   }
 
+  /// Nearby rows from `public.businesses` when the restored project is live.
+  @visibleForTesting
+  static List<BusinessesRow> filterLiveTableRows(
+    List<BusinessesRow> rows, {
+    required double latitude,
+    required double longitude,
+    required double radiusKm,
+    String? searchTerm,
+    String? categoryId,
+    bool openNow = false,
+    bool verifiedOnly = false,
+    double minRating = 0.0,
+    int limit = 20,
+    int offset = 0,
+  }) {
+    final query = SearchQuery.parse(searchTerm);
+    final matches = <BusinessesRow>[];
+    for (final row in rows) {
+      final lat = row.latitude;
+      final lng = row.longitude;
+      if (lat == null || lng == null) continue;
+      final distance = LatLng.distanceKm(latitude, longitude, lat, lng);
+      if (distance > radiusKm) continue;
+      if (categoryId != null &&
+          categoryId.isNotEmpty &&
+          row.categoryId != categoryId) {
+        continue;
+      }
+      if (!query.matches([row.name, row.description, row.addressText])) {
+        continue;
+      }
+      if (row.distanceKm == null) {
+        row.distanceKm = double.parse(distance.toStringAsFixed(2));
+      }
+      matches.add(row);
+    }
+    return applyLiveSearchFilters(
+      matches,
+      originLat: latitude,
+      originLng: longitude,
+      openNow: openNow,
+      verifiedOnly: verifiedOnly,
+      minRating: minRating,
+      limit: limit,
+      offset: offset,
+    );
+  }
+
+  Future<List<BusinessesRow>> _searchLiveTable({
+    required double latitude,
+    required double longitude,
+    required double radiusKm,
+    String? searchTerm,
+    String? categoryId,
+    bool openNow = false,
+    bool verifiedOnly = false,
+    double minRating = 0.0,
+    int limit = 20,
+    int offset = 0,
+  }) async {
+    final all = await queryRows(queryFn: (q) => q);
+    return filterLiveTableRows(
+      all,
+      latitude: latitude,
+      longitude: longitude,
+      radiusKm: radiusKm,
+      searchTerm: searchTerm,
+      categoryId: categoryId,
+      openNow: openNow,
+      verifiedOnly: verifiedOnly,
+      minRating: minRating,
+      limit: limit,
+      offset: offset,
+    );
+  }
+
   Future<List<BusinessesRow>> searchInRadius({
     required double latitude,
     required double longitude,
@@ -103,30 +180,59 @@ class BusinessesTable extends SupabaseTable<BusinessesRow> {
         offset: offset,
       ).map(createRow).toList();
     }
-    final response = await SupaFlow.client.rpc(
-      'search_businesses_in_radius',
-      params: liveSearchParams(
+    if (AppEnvironment.flutterFlowHostIsLive) {
+      return _searchLiveTable(
         latitude: latitude,
         longitude: longitude,
         radiusKm: radiusKm,
         searchTerm: searchTerm,
         categoryId: categoryId,
-      ),
-    );
-    final rows = (response as List?)
-            ?.map((row) => createRow(Map<String, dynamic>.from(row as Map)))
-            .toList() ??
-        <BusinessesRow>[];
-    return applyLiveSearchFilters(
-      rows,
-      originLat: latitude,
-      originLng: longitude,
-      openNow: openNow,
-      verifiedOnly: verifiedOnly,
-      minRating: minRating,
-      limit: limit,
-      offset: offset,
-    );
+        openNow: openNow,
+        verifiedOnly: verifiedOnly,
+        minRating: minRating,
+        limit: limit,
+        offset: offset,
+      );
+    }
+    try {
+      final response = await SupaFlow.client.rpc(
+        'search_businesses_in_radius',
+        params: liveSearchParams(
+          latitude: latitude,
+          longitude: longitude,
+          radiusKm: radiusKm,
+          searchTerm: searchTerm,
+          categoryId: categoryId,
+        ),
+      );
+      final rows = (response as List?)
+              ?.map((row) => createRow(Map<String, dynamic>.from(row as Map)))
+              .toList() ??
+          <BusinessesRow>[];
+      return applyLiveSearchFilters(
+        rows,
+        originLat: latitude,
+        originLng: longitude,
+        openNow: openNow,
+        verifiedOnly: verifiedOnly,
+        minRating: minRating,
+        limit: limit,
+        offset: offset,
+      );
+    } catch (_) {
+      return _searchLiveTable(
+        latitude: latitude,
+        longitude: longitude,
+        radiusKm: radiusKm,
+        searchTerm: searchTerm,
+        categoryId: categoryId,
+        openNow: openNow,
+        verifiedOnly: verifiedOnly,
+        minRating: minRating,
+        limit: limit,
+        offset: offset,
+      );
+    }
   }
 }
 
