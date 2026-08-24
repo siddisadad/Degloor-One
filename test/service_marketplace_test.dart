@@ -275,4 +275,37 @@ void main() {
     expect(request.status, 'pending');
     expect(request.createdAt.toUtc().year, 2026);
   });
+
+  test('Java write JSON maps to provider profile and request', () {
+    final profile = ServiceProviderProfile.fromJson({
+      'id': 'sp-ravi',
+      'userId': GuestAuthUser.guestUid,
+      'categoryId': 'scat-electric',
+      'bio': 'Fan and wiring repair in Degloor.',
+      'hourlyRate': 200,
+      'experienceYears': 5,
+      'verified': false,
+    });
+    expect(profile, isA<ServiceProviderProfile>());
+    expect(profile.userId, GuestAuthUser.guestUid);
+    expect(profile.categoryId, 'scat-electric');
+    expect(profile.hourlyRate, 200);
+    expect(profile.experienceYears, 5);
+    expect(profile.isVerified, isFalse);
+
+    final request = ServiceRequest.fromJson({
+      'id': 'sr-1',
+      'userId': GuestAuthUser.guestUid,
+      'providerId': 'sp-ravi',
+      'description': 'Fix the kitchen tube light.',
+      'status': 'pending',
+      'scheduledAt': '2026-08-25T10:00:00Z',
+      'createdAt': '2026-08-24T10:00:00Z',
+    });
+    expect(request, isA<ServiceRequest>());
+    expect(request.id, 'sr-1');
+    expect(request.providerId, 'sp-ravi');
+    expect(request.status, 'pending');
+    expect(request.createdAt.toUtc().year, 2026);
+  });
 }

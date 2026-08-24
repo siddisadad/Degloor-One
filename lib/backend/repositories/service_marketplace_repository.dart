@@ -9,7 +9,7 @@ import 'package:degloor_one/shared/showcase_catalog.dart';
 
 /// Data access for the service marketplace. Widgets should go through
 /// [ServiceMarketplaceService].
-/// Table-backed implementation; Java leftover reads live on
+/// Table-backed implementation; Java leftover reads and writes live on
 /// [ServiceMarketplaceService].
 class ServiceMarketplaceRepository {
   Future<List<ServiceCategory>> categories() async {
