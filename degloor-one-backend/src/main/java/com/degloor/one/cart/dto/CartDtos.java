@@ -25,7 +25,8 @@ public final class CartDtos {
             int quantity,
             double lineTotal,
             boolean available,
-            Integer stockQuantity
+            Integer stockQuantity,
+            String imageUrl
     ) {}
 
     public record CartResponse(

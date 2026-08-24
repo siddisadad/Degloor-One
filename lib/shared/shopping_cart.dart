@@ -1,6 +1,4 @@
-import 'package:degloor_one/backend/supabase/database/tables/carts_table.dart';
-
-/// One shop basket. Screens use this instead of [CartsRow].
+/// One shop basket. Screens use this instead of a table row.
 /// Line items stay on [CartLine]. Checkout ignores client prices.
 class ShoppingCart {
   const ShoppingCart({
@@ -14,15 +12,6 @@ class ShoppingCart {
   final String userId;
   final String businessId;
   final DateTime createdAt;
-
-  factory ShoppingCart.fromRow(CartsRow row) {
-    return ShoppingCart(
-      id: row.id,
-      userId: row.userId,
-      businessId: row.businessId,
-      createdAt: row.createdAt,
-    );
-  }
 
   /// Java `CartResponse`. Empty carts omit [id].
   factory ShoppingCart.fromJson(

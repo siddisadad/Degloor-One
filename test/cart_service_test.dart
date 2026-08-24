@@ -179,6 +179,7 @@ void main() {
       'id': 'ci-rice',
       'productId': 'prod-rice',
       'name': 'Rice (1kg)',
+      'imageUrl': 'https://example.com/rice.png',
       'unitPrice': 120,
       'quantity': 2,
       'lineTotal': 240,
@@ -189,6 +190,7 @@ void main() {
     expect(line.productId, 'prod-rice');
     expect(line.quantity, 2);
     expect(line.product?.name, 'Rice (1kg)');
+    expect(line.product?.imageUrl, 'https://example.com/rice.png');
     expect(line.product?.price, 120);
     expect(line.toCheckoutItem().toRpcJson(), {
       'product_id': 'prod-rice',

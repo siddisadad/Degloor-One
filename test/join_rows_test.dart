@@ -17,6 +17,7 @@ void main() {
     expect(line.productId, 'prod-x');
     expect(line.product?.name, 'Rice');
     expect(line.product?.price, 1.0);
+    expect(line.product?.imageUrl, 'https://example.com/rice.png');
     final checkout = line.toCheckoutItem();
     expect(checkout.productId, 'prod-x');
     expect(checkout.quantity, 2);
