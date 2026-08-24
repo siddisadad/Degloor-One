@@ -81,7 +81,8 @@ void main() {
     );
   });
 
-  test('updateQuantity changes an owned line and rejects another user', () async {
+  test('updateQuantity changes an owned line and rejects another user',
+      () async {
     await CartService.updateQuantity(
       itemId: 'ci-rice',
       quantity: 3,
@@ -157,5 +158,41 @@ void main() {
     );
     expect(result.added, isFalse);
     expect(result.message, 'Please choose a valid quantity.');
+  });
+
+  test('Java cart JSON maps to ShoppingCart and CartLine', () {
+    final cart = ShoppingCart.fromJson({
+      'id': 'cart-1',
+      'businessId': 'biz-patil',
+      'businessName': 'Patil Kirana',
+      'subtotal': 240,
+    }, userId: GuestAuthUser.guestUid);
+    expect(cart, isA<ShoppingCart>());
+    expect(cart.id, 'cart-1');
+    expect(cart.userId, GuestAuthUser.guestUid);
+    expect(cart.businessId, 'biz-patil');
+
+    final empty = ShoppingCart.fromJson({}, userId: GuestAuthUser.guestUid);
+    expect(empty.id, isEmpty);
+
+    final line = CartLine.fromJson({
+      'id': 'ci-rice',
+      'productId': 'prod-rice',
+      'name': 'Rice (1kg)',
+      'unitPrice': 120,
+      'quantity': 2,
+      'lineTotal': 240,
+      'available': true,
+    }, cartId: 'cart-1');
+    expect(line.id, 'ci-rice');
+    expect(line.cartId, 'cart-1');
+    expect(line.productId, 'prod-rice');
+    expect(line.quantity, 2);
+    expect(line.product?.name, 'Rice (1kg)');
+    expect(line.product?.price, 120);
+    expect(line.toCheckoutItem().toRpcJson(), {
+      'product_id': 'prod-rice',
+      'quantity': 2,
+    });
   });
 }

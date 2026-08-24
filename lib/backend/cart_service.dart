@@ -346,7 +346,21 @@ class CartService {
     await SupaFlow.client.rpc('clear_cart');
   }
 
+  static Future<Map<String, dynamic>?> _javaCartJson() async {
+    final data = await CartApi.get();
+    if ('${data['id'] ?? ''}'.isEmpty) return null;
+    return data;
+  }
+
   static Future<List<ShoppingCart>> cartsForUser(String userId) async {
+    if (JavaApiConfig.enabled) {
+      if (userId.isEmpty) return const [];
+      final json = await _javaCartJson();
+      if (json == null) return const [];
+      final cart = ShoppingCart.fromJson(json, userId: userId);
+      if (cart.id.isEmpty) return const [];
+      return [cart];
+    }
     final rows = await CartsTable().queryRows(
       queryFn: (q) =>
           q.eq('user_id', userId).order('created_at', ascending: false),
@@ -355,6 +369,17 @@ class CartService {
   }
 
   static Future<List<CartLine>> itemsForCart(String cartId) async {
+    if (JavaApiConfig.enabled) {
+      if (cartId.isEmpty) return const [];
+      final json = await _javaCartJson();
+      if (json == null || '${json['id']}' != cartId) return const [];
+      final items = json['items'];
+      final rows = items is List ? items : const [];
+      return [
+        for (final row in rows.whereType<Map>())
+          CartLine.fromJson(Map<String, dynamic>.from(row), cartId: cartId),
+      ];
+    }
     if (kUseShowcaseData) {
       return ShowcaseCatalog.cartItemsWithProducts(cartId)
           .map(CartLine.fromJoin)
@@ -364,7 +389,9 @@ class CartService {
         .from('cart_items')
         .select('*, products(*)')
         .eq('cart_id', cartId);
-    return List<Map<String, dynamic>>.from(items).map(CartLine.fromJoin).toList();
+    return List<Map<String, dynamic>>.from(items)
+        .map(CartLine.fromJoin)
+        .toList();
   }
 
   /// Display-only basket total. Checkout ignores these prices.
@@ -384,6 +411,17 @@ class CartService {
   static Future<int> getCartItemCount() async {
     final userId = currentUserUid;
     if (userId == '') return 0;
+    if (JavaApiConfig.enabled) {
+      final json = await _javaCartJson();
+      if (json == null) return 0;
+      final items = json['items'];
+      final rows = items is List ? items : const [];
+      var total = 0;
+      for (final row in rows.whereType<Map>()) {
+        total += (row['quantity'] as num?)?.toInt() ?? 0;
+      }
+      return total;
+    }
 
     final carts = await cartsForUser(userId);
     if (carts.isEmpty) return 0;
