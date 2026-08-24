@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import '../database.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
@@ -7,6 +9,41 @@ class ProductsTable extends SupabaseTable<ProductsRow> {
 
   @override
   ProductsRow createRow(Map<String, dynamic> data) => ProductsRow(data);
+
+  /// Live project signature: `user_lat`, `user_lng`, `radius_meters`,
+  /// optional `search_term`. Limit/offset are applied here.
+  @visibleForTesting
+  static Map<String, dynamic> liveSearchParams({
+    required double latitude,
+    required double longitude,
+    required double radiusKm,
+    String? searchTerm,
+  }) {
+    return {
+      'user_lat': latitude,
+      'user_lng': longitude,
+      'radius_meters': radiusKm * 1000,
+      if (searchTerm != null && searchTerm.isNotEmpty) 'search_term': searchTerm,
+    };
+  }
+
+  @visibleForTesting
+  static List<ProductsRow> applyLiveSearchFilters(
+    List<ProductsRow> rows, {
+    int limit = 20,
+    int offset = 0,
+  }) {
+    var filtered = rows;
+    if (offset > 0) {
+      filtered = offset >= filtered.length
+          ? <ProductsRow>[]
+          : filtered.sublist(offset);
+    }
+    if (filtered.length > limit) {
+      filtered = filtered.take(limit).toList();
+    }
+    return filtered;
+  }
 
   Future<List<ProductsRow>> searchInRadius({
     required double latitude,
@@ -28,16 +65,18 @@ class ProductsTable extends SupabaseTable<ProductsRow> {
     }
     final response = await SupaFlow.client.rpc(
       'search_products_in_radius',
-      params: {
-        'user_lat': latitude,
-        'user_lng': longitude,
-        'radius_meters': radiusKm * 1000,
-        if (searchTerm != null && searchTerm.isNotEmpty) 'search_term': searchTerm,
-        'p_limit': limit,
-        'p_offset': offset,
-      },
+      params: liveSearchParams(
+        latitude: latitude,
+        longitude: longitude,
+        radiusKm: radiusKm,
+        searchTerm: searchTerm,
+      ),
     );
-    return (response as List?)?.map((e) => createRow(e)).toList() ?? [];
+    final rows = (response as List?)
+            ?.map((row) => createRow(Map<String, dynamic>.from(row as Map)))
+            .toList() ??
+        <ProductsRow>[];
+    return applyLiveSearchFilters(rows, limit: limit, offset: offset);
   }
 }
 

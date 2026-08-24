@@ -13,6 +13,7 @@ import 'auth/supabase_auth/auth_util.dart';
 
 import 'package:degloor_one/backend/notification_service.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/backend/supabase/supabase_connection.dart';
 import 'package:degloor_one/data/datasources/bind_address_service.dart';
 import 'package:degloor_one/data/datasources/bind_cart_service.dart';
 import 'package:degloor_one/data/datasources/bind_delivery_service.dart';
@@ -40,6 +41,7 @@ void main() async {
   GoRouter.optionURLReflectsImperativeAPIs = true;
   usePathUrlStrategy();
 
+  await SupabaseConnection.discoverLiveHost();
   await SupaFlow.initialize();
   bindAddressService();
   bindUserService();
@@ -57,7 +59,7 @@ void main() async {
   if (kBypassAuth) {
     installGuestSession();
   }
-  if (kUseShowcaseData && appState.userLocation == null) {
+  if (appState.userLocation == null) {
     appState.userLocation = ShowcaseCatalog.degloor;
   }
 

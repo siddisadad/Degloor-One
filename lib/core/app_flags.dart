@@ -8,12 +8,18 @@ export 'package:degloor_one/core/app_environment.dart'
 bool get kBypassAuth =>
     AppEnvironment.bypassAuth || AppEnvironment.usesDeadFlutterFlowHost;
 
-/// Local Degloor catalog. Defaults to false; enable in dev with --dart-define=SHOWCASE_DATA=true
-/// Automatically enabled when pointing to the retired FlutterFlow host.
-bool get kUseShowcaseData =>
-    AppEnvironment.useShowcaseData || AppEnvironment.usesDeadFlutterFlowHost;
+/// Block sockets and use the local catalog only while the FlutterFlow host
+/// still fails DNS. A live health probe turns this off so table reads hit
+/// the project.
+bool get kShouldBlockSupabaseTraffic =>
+    kUsesDeadFlutterFlowHost && !AppEnvironment.flutterFlowHostIsLive;
 
-/// True when the compiled URL still points at the deleted FlutterFlow project.
+/// Local Degloor catalog. Defaults to false; enable in dev with --dart-define=SHOWCASE_DATA=true
+/// Automatically enabled while the FlutterFlow host is unreachable.
+bool get kUseShowcaseData =>
+    AppEnvironment.useShowcaseData || kShouldBlockSupabaseTraffic;
+
+/// True when the compiled URL still points at the FlutterFlow project.
 bool get kUsesDeadFlutterFlowHost => AppEnvironment.usesDeadFlutterFlowHost;
 
 AppFlavor get kAppFlavor => AppEnvironment.flavor;
