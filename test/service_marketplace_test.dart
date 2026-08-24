@@ -277,6 +277,22 @@ void main() {
     expect(request.providerId, 'sp-ravi');
     expect(request.status, 'pending');
     expect(request.createdAt.toUtc().year, 2026);
+    expect(request.user, isNull);
+
+    final named = ServiceRequest.fromJson({
+      'id': 'sr-2',
+      'userId': GuestAuthUser.guestUid,
+      'providerId': 'sp-ravi',
+      'description': 'Fix the tube light.',
+      'status': 'pending',
+      'fullName': 'Asha Patil',
+      'phoneNumber': '9876543210',
+    });
+    expect(
+      named.user?.displayName(fallback: 'Unknown Customer'),
+      'Asha Patil',
+    );
+    expect(named.user?.phoneNumber, '9876543210');
   });
 
   test('Java write JSON maps to provider profile and request', () {

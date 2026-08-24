@@ -57,9 +57,12 @@ public final class MarketplaceDtos {
             String description,
             String status,
             Instant scheduledAt,
-            Instant createdAt
+            Instant createdAt,
+            String fullName,
+            String phoneNumber,
+            String avatarUrl
     ) {
-        public static RequestResponse from(ServiceRequest r) {
+        public static RequestResponse from(ServiceRequest r, UserAccount customer) {
             return new RequestResponse(
                     r.getId().toString(),
                     r.getUserId().toString(),
@@ -67,7 +70,10 @@ public final class MarketplaceDtos {
                     r.getDescription(),
                     r.getStatus(),
                     r.getScheduledAt(),
-                    r.getCreatedAt()
+                    r.getCreatedAt(),
+                    customer == null ? null : customer.getFullName(),
+                    customer == null ? null : customer.getPhoneNumber(),
+                    customer == null ? null : customer.getAvatarUrl()
             );
         }
     }

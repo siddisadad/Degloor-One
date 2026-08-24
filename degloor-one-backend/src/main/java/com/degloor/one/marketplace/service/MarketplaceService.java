@@ -101,17 +101,26 @@ public class MarketplaceService {
         row.setStatus("pending");
         requests.save(row);
         notifications.notifyQuietly(provider.getUserId(), "New service request", "A customer requested your service.", "service");
-        return RequestResponse.from(row);
+        return RequestResponse.from(row, user);
     }
 
     public List<RequestResponse> mine(UserAccount user) {
-        return requests.findByUserIdOrderByCreatedAtDesc(user.getId()).stream().map(RequestResponse::from).toList();
+        return requests.findByUserIdOrderByCreatedAtDesc(user.getId()).stream()
+                .map(row -> RequestResponse.from(row, user))
+                .toList();
     }
 
     public List<RequestResponse> forProvider(UserAccount user) {
         ServiceProvider provider = providers.findByUserId(user.getId())
                 .orElseThrow(() -> BusinessException.notFound("PROVIDER_NOT_FOUND", "Service provider not found"));
-        return requests.findByProviderIdOrderByCreatedAtDesc(provider.getId()).stream().map(RequestResponse::from).toList();
+        List<ServiceRequest> rows = requests.findByProviderIdOrderByCreatedAtDesc(provider.getId());
+        Map<UUID, UserAccount> customers = users
+                .findAllById(rows.stream().map(ServiceRequest::getUserId).toList())
+                .stream()
+                .collect(Collectors.toMap(UserAccount::getId, Function.identity()));
+        return rows.stream()
+                .map(row -> RequestResponse.from(row, customers.get(row.getUserId())))
+                .toList();
     }
 
     @Transactional
@@ -130,7 +139,7 @@ public class MarketplaceService {
                 throw BusinessException.conflict("INVALID_REQUEST_TRANSITION", "Only pending requests can be cancelled");
             }
             row.setStatus("declined");
-            return RequestResponse.from(requests.save(row));
+            return RequestResponse.from(requests.save(row), user);
         }
         if (!providerActor) {
             throw BusinessException.forbidden("FORBIDDEN", "Only the assigned provider can update this request");
@@ -150,6 +159,6 @@ public class MarketplaceService {
         }
         requests.save(row);
         notifications.notifyQuietly(row.getUserId(), "Service update", "Your service request is now " + row.getStatus() + ".", "service");
-        return RequestResponse.from(row);
+        return RequestResponse.from(row, users.findById(row.getUserId()).orElse(null));
     }
 }

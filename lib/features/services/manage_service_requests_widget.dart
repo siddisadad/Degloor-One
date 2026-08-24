@@ -77,6 +77,19 @@ class _ManageServiceRequestsWidgetState
       final sortedRequests = requests.toList()
         ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
+      for (final request in sortedRequests) {
+        final id = request.userId;
+        if (id == null || id.isEmpty) continue;
+        final name = request.user?.fullName?.trim();
+        if (name != null && name.isNotEmpty) {
+          _customerNames[id] = name;
+        }
+        final phone = request.user?.phoneNumber?.trim();
+        if (phone != null && phone.isNotEmpty) {
+          _customerPhones[id] = phone;
+        }
+      }
+
       // Fetch customer names for new users
       final existingUserIds = _customerNames.keys.toSet();
       final newUserIds = sortedRequests
@@ -188,7 +201,11 @@ class _ManageServiceRequestsWidgetState
                     separatorBuilder: (context, index) => const SizedBox(height: 12.0),
                     itemBuilder: (context, index) {
                       final req = _requests[index];
-                      final customerName = _customerNames[req.userId] ?? 'Loading...';
+                      final customerName = req.user?.displayName(
+                            fallback: 'Unknown Customer',
+                          ) ??
+                          _customerNames[req.userId] ??
+                          'Loading...';
                       final actions = ServiceMarketplaceService.instance
                           .requestActions(req.status);
 
@@ -216,7 +233,9 @@ class _ManageServiceRequestsWidgetState
                                   ),
                                   Row(
                                     children: [
-                                      if (_customerPhones[req.userId] != null)
+                                      if ((req.user?.phoneNumber ??
+                                              _customerPhones[req.userId]) !=
+                                          null)
                                         Padding(
                                           padding: const EdgeInsets.only(right: 8.0),
                                           child: InkWell(
@@ -225,7 +244,9 @@ class _ManageServiceRequestsWidgetState
                                                   await WhatsAppService
                                                       .launchWhatsApp(
                                                 phoneNumber:
-                                                    _customerPhones[req.userId]!,
+                                                    req.user?.phoneNumber ??
+                                                        _customerPhones[
+                                                            req.userId]!,
                                                 message: 'Hello, I am responding to your service request on DEGLOOR ONE.',
                                               );
                                               if (!opened && context.mounted) {
