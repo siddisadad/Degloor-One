@@ -23,6 +23,5 @@ void main() {
 
     expect(acked, 8);
     ui.channelBuffers.clearListener(kLifecycleChannel);
-    expect(releaseHeldBrowserLifecycle, returnsNormally);
   });
 }

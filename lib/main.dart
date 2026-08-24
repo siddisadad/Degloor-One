@@ -37,7 +37,6 @@ import 'package:provider/provider.dart';
 void main() async {
   acceptEarlyLifecycleMessages();
   WidgetsFlutterBinding.ensureInitialized();
-  releaseHeldBrowserLifecycle();
   GoRouter.optionURLReflectsImperativeAPIs = true;
   usePathUrlStrategy();
 
