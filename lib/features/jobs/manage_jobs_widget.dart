@@ -2,6 +2,7 @@ import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/business_service.dart';
 import 'package:degloor_one/backend/job_service.dart';
 import 'package:degloor_one/shared/job_posting.dart';
+import 'package:degloor_one/shared/job_posting_draft.dart';
 import 'package:degloor_one/shared/marketplace_joins.dart';
 import 'package:degloor_one/components/degloor_app_bar.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
@@ -142,10 +143,12 @@ class _ManageJobsWidgetState extends State<ManageJobsWidget> {
                     await JobService.instance.post(
                       businessId: _model.businessId!,
                       posterId: currentUserUid,
-                      title: titleController.text,
-                      description: descriptionController.text,
-                      salaryRange: salaryController.text,
-                      jobType: jobType,
+                      draft: JobPostingDraft.fromForm(
+                        title: titleController.text,
+                        description: descriptionController.text,
+                        salaryRange: salaryController.text,
+                        jobType: jobType,
+                      ),
                     );
                   } catch (e) {
                     if (context.mounted) {

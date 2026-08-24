@@ -1,4 +1,5 @@
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/shared/job_posting_draft.dart';
 import 'package:degloor_one/shared/marketplace_joins.dart';
 import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/shared/rpc_row.dart';
@@ -53,8 +54,14 @@ class JobRepository {
     );
   }
 
-  Future<JobsRow> insert(Map<String, dynamic> data) {
-    return JobsTable().insert(data);
+  Future<JobsRow> insert(
+    JobPostingDraft draft, {
+    required String businessId,
+    required String posterId,
+  }) {
+    return JobsTable().insert(
+      draft.toInsertJson(businessId: businessId, posterId: posterId),
+    );
   }
 
   Future<JobApplicationsRow> insertApplication(Map<String, dynamic> data) {
