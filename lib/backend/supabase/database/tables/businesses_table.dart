@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../database.dart';
+import 'package:degloor_one/flutter_flow/lat_lng.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
 class BusinessesTable extends SupabaseTable<BusinessesRow> {
@@ -32,6 +33,8 @@ class BusinessesTable extends SupabaseTable<BusinessesRow> {
   @visibleForTesting
   static List<BusinessesRow> applyLiveSearchFilters(
     List<BusinessesRow> rows, {
+    double? originLat,
+    double? originLng,
     bool openNow = false,
     bool verifiedOnly = false,
     double minRating = 0.0,
@@ -39,6 +42,20 @@ class BusinessesTable extends SupabaseTable<BusinessesRow> {
     int offset = 0,
   }) {
     var filtered = rows;
+    if (originLat != null && originLng != null) {
+      for (final row in filtered) {
+        if (row.distanceKm != null) continue;
+        final lat = row.latitude;
+        final lng = row.longitude;
+        if (lat == null || lng == null) continue;
+        row.distanceKm = double.parse(
+          LatLng.distanceKm(originLat, originLng, lat, lng).toStringAsFixed(2),
+        );
+      }
+      filtered = [...filtered]..sort(
+          (a, b) => (a.distanceKm ?? 1e9).compareTo(b.distanceKm ?? 1e9),
+        );
+    }
     if (openNow) {
       filtered = filtered.where((row) => row.isOpen == true).toList();
     }
@@ -102,6 +119,8 @@ class BusinessesTable extends SupabaseTable<BusinessesRow> {
         <BusinessesRow>[];
     return applyLiveSearchFilters(
       rows,
+      originLat: latitude,
+      originLng: longitude,
       openNow: openNow,
       verifiedOnly: verifiedOnly,
       minRating: minRating,
