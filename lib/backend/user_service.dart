@@ -1,5 +1,6 @@
 import 'package:degloor_one/backend/repositories/user_repository.dart';
 import 'package:degloor_one/shared/user_profile.dart';
+import 'package:degloor_one/shared/user_profile_draft.dart';
 
 class UserService {
   UserService({UserRepository? repository})
@@ -35,31 +36,20 @@ class UserService {
 
   Future<UserProfile> ensureOnSignIn({
     required String userId,
-    String? email,
-    String? phone,
-    String? fullName,
-    String? avatarUrl,
+    required UserProfileDraft draft,
   }) async {
     if (userId.isEmpty) {
       throw Exception('Please sign in to continue');
     }
     final existing = await _repository.byId(userId);
     if (existing != null) return UserProfile.fromRow(existing);
-    final created = await _repository.insert({
-      'id': userId,
-      'email': email,
-      'phone_number': phone,
-      'full_name': fullName,
-      'avatar_url': avatarUrl,
-      'role': 'customer',
-    });
+    final created = await _repository.insert(draft, userId: userId);
     return UserProfile.fromRow(created);
   }
 
   Future<UserProfile> updateProfile({
     required String userId,
-    String? fullName,
-    String? phoneNumber,
+    required UserProfileDraft draft,
   }) async {
     if (userId.isEmpty) {
       throw Exception('Please sign in to update your profile');
@@ -68,15 +58,11 @@ class UserService {
     if (existing == null) {
       throw Exception('Profile not found');
     }
-    final name = fullName?.trim();
-    final phone = phoneNumber?.trim();
-    if ((name == null || name.isEmpty) && phone == null) {
-      throw Exception('Please fill your name or phone');
-    }
-    final updated = await _repository.update(userId, {
-      if (name != null && name.isNotEmpty) 'full_name': name,
-      if (phone != null) 'phone_number': phone,
-    });
+    final normalized = UserProfileDraft.fromProfile(
+      fullName: draft.fullName,
+      phoneNumber: draft.phoneNumber,
+    );
+    final updated = await _repository.update(userId, normalized);
     if (updated == null) {
       throw Exception('Unable to update your profile. Please try again.');
     }

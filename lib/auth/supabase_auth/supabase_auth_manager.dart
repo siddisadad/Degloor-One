@@ -7,6 +7,7 @@ import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/backend/supabase/supabase_connection.dart';
 import 'package:degloor_one/backend/user_service.dart';
+import 'package:degloor_one/shared/user_profile_draft.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:degloor_one/core/error_handler.dart';
@@ -246,10 +247,12 @@ class SupabaseAuthManager extends AuthManager
       final profile = await UserService.instance
           .ensureOnSignIn(
             userId: user.id,
-            email: user.email,
-            phone: user.phone,
-            fullName: user.userMetadata?['full_name'] as String?,
-            avatarUrl: user.userMetadata?['avatar_url'] as String?,
+            draft: UserProfileDraft.fromSignIn(
+              email: user.email,
+              phone: user.phone,
+              fullName: user.userMetadata?['full_name'] as String?,
+              avatarUrl: user.userMetadata?['avatar_url'] as String?,
+            ),
           )
           .timeout(const Duration(seconds: 10));
       final actualRole = profile.role;
