@@ -5,6 +5,7 @@ import com.degloor.one.business.entity.BusinessCategory;
 import com.degloor.one.business.entity.BusinessHours;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import java.time.Instant;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
@@ -43,6 +44,7 @@ public final class BusinessDtos {
             boolean open,
             boolean verified,
             String imageUrl,
+            Instant createdAt,
             Double distanceKm,
             List<HoursResponse> hours
     ) {
@@ -64,6 +66,7 @@ public final class BusinessDtos {
                     b.isOpen(),
                     b.isVerified(),
                     b.getImageUrl(),
+                    b.getCreatedAt(),
                     distanceKm,
                     hours
             );

@@ -77,6 +77,30 @@ void main() {
     expect(source.contains(_table), isFalse);
   });
 
+  test('shop repository interface stays off Supabase', () {
+    const paths = [
+      'lib/backend/shop_service.dart',
+      'lib/data/repositories/shop_repository.dart',
+    ];
+    final offenders = <String>[];
+    for (final path in paths) {
+      final source = File(path).readAsStringSync();
+      if (source.contains(_barrel) ||
+          source.contains(_table) ||
+          source.contains('data/datasources')) {
+        offenders.add(path);
+      }
+    }
+    expect(offenders, isEmpty, reason: offenders.join('\n'));
+  });
+
+  test('Java shop repository stays off Supabase tables', () {
+    const path = 'lib/data/datasources/java_shop_repository.dart';
+    final source = File(path).readAsStringSync();
+    expect(source.contains(_barrel), isFalse);
+    expect(source.contains(_table), isFalse);
+  });
+
   test('profile address screens talk to the controller, not the service', () {
     const paths = [
       'lib/features/profile/add_address_widget.dart',

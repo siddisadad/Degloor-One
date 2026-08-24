@@ -81,4 +81,5 @@ public class Business {
     public void setVerified(boolean verified) { this.verified = verified; }
     public String getImageUrl() { return imageUrl; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+    public Instant getCreatedAt() { return createdAt; }
 }

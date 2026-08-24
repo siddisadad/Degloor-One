@@ -5,47 +5,12 @@ import 'package:degloor_one/shared/catalog_product_draft.dart';
 import 'package:degloor_one/shared/catalog_product_stock.dart';
 import 'package:degloor_one/shared/product_category.dart';
 import 'package:degloor_one/shared/product_category_draft.dart';
-import 'package:degloor_one/shared/shop_draft.dart';
 import 'package:degloor_one/shared/shop_hours.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
-/// Data access for owner shop, catalogue, and hours. Widgets should go
-/// through [BusinessService].
+/// Data access for owner catalogue and hours. Shop entity reads and writes
+/// go through [ShopRepository]. Widgets should go through [BusinessService].
 class BusinessRepository {
-  Future<List<BusinessesRow>> ownedBy(String userId) {
-    if (userId.isEmpty) return Future.value(const []);
-    return BusinessesTable().queryRows(
-      queryFn: (q) => q.eq('owner_id', userId),
-    );
-  }
-
-  Future<BusinessesRow?> byId(String businessId) async {
-    if (businessId.isEmpty) return null;
-    final rows = await BusinessesTable().queryRows(
-      queryFn: (q) => q.eq('id', businessId),
-      limit: 1,
-    );
-    return rows.isEmpty ? null : rows.first;
-  }
-
-  Future<BusinessesRow> insertBusiness(
-    ShopDraft draft, {
-    required String ownerId,
-  }) {
-    return BusinessesTable().insert(draft.toInsertJson(ownerId: ownerId));
-  }
-
-  Future<void> updateBusiness({
-    required String businessId,
-    required String ownerId,
-    required ShopDraft draft,
-  }) async {
-    await BusinessesTable().update(
-      data: draft.toUpdateJson(),
-      matchingRows: (q) => q.eq('id', businessId).eq('owner_id', ownerId),
-    );
-  }
-
   Future<List<ProductsRow>> productsFor(String businessId) {
     if (businessId.isEmpty) return Future.value(const []);
     return ProductsTable().queryRows(

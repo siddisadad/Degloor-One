@@ -7,18 +7,9 @@ import 'package:degloor_one/shared/shop_event_draft.dart';
 import 'package:degloor_one/shared/shop_review_draft.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
-/// Public shop reads and customer review/report writes. Widgets should go
-/// through [ShopService].
-class ShopRepository {
-  Future<BusinessesRow?> byId(String businessId) async {
-    if (businessId.isEmpty) return null;
-    final rows = await BusinessesTable().queryRows(
-      queryFn: (q) => q.eq('id', businessId),
-      limit: 1,
-    );
-    return rows.isEmpty ? null : rows.first;
-  }
-
+/// Public shop hours, catalogue, reviews, and reports. Widgets should go
+/// through [ShopService]. Shop entity reads go through [ShopRepository].
+class ShopDetailRepository {
   Future<BusinessCategoriesRow?> categoryById(String categoryId) async {
     if (categoryId.isEmpty) return null;
     final rows = await BusinessCategoriesTable().queryRows(
