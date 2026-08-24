@@ -155,6 +155,44 @@ void main() {
     expect(ranked.last.distanceKm, 9.9);
   });
 
+  test('live table rows keep Degloor shops inside the radius', () {
+    final ganesh = BusinessesRow({
+      'id': 'a3bb4c14-9fb4-42bf-b4d2-41713a6d80d1',
+      'name': 'Ganesh Sweet Mart',
+      'description': 'Famous for Degloor Pedha and fresh sweets.',
+      'address_text': 'Subhash Chowk, Degloor',
+      'latitude': 18.5528,
+      'longitude': 77.5848,
+      'is_open': true,
+      'is_verified': true,
+      'created_at': '2026-01-01T00:00:00.000Z',
+    });
+    final outside = BusinessesRow({
+      'id': 'far-away',
+      'name': 'Other City Shop',
+      'latitude': 19.07,
+      'longitude': 72.87,
+      'created_at': '2026-01-01T00:00:00.000Z',
+    });
+    final nearby = BusinessesTable.filterLiveTableRows(
+      [ganesh, outside],
+      latitude: 18.5522,
+      longitude: 77.5844,
+      radiusKm: 10,
+    );
+    expect(nearby.map((row) => row.name), ['Ganesh Sweet Mart']);
+    expect(nearby.single.distanceKm, lessThan(1));
+
+    final sweets = BusinessesTable.filterLiveTableRows(
+      [ganesh, outside],
+      latitude: 18.5522,
+      longitude: 77.5844,
+      radiusKm: 10,
+      searchTerm: 'pedha',
+    );
+    expect(sweets.map((row) => row.name), ['Ganesh Sweet Mart']);
+  });
+
   test('table and search RPCs use local showcase data on the dead host',
       () async {
     ShowcaseCatalog.reset();
