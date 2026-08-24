@@ -341,6 +341,7 @@ void main() {
 
   test('shop leftover domain types stay off Supabase tables', () {
     const paths = [
+      'lib/shared/shop.dart',
       'lib/shared/shop_hours.dart',
       'lib/shared/catalog_product.dart',
       'lib/shared/shop_category.dart',
@@ -427,6 +428,9 @@ void main() {
     expect(source.contains('/api/v1/jobs/**'), isFalse);
     expect(source.contains('/api/v1/businesses/**'), isFalse);
     expect(source.contains('/api/v1/businesses/mine'), isTrue);
+    expect(source.contains('/api/v1/businesses/search'), isTrue);
+    expect(source.contains('/api/v1/businesses/nearby'), isTrue);
+    expect(source.contains('/api/v1/businesses/category/*'), isTrue);
     expect(source.contains('authenticationEntryPoint'), isTrue);
   });
 

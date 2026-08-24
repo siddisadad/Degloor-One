@@ -188,6 +188,8 @@ class JavaCatalogRepository implements CatalogRepository {
       if (shop['phoneNumber'] != null) 'phoneNumber': shop['phoneNumber'],
       if (shop['latitude'] != null) 'latitude': shop['latitude'],
       if (shop['longitude'] != null) 'longitude': shop['longitude'],
+      if (shop['discoveryRadius'] != null)
+        'discoveryRadius': shop['discoveryRadius'],
       if (shop['open'] != null) 'open': shop['open'],
       if (shop['imageUrl'] != null) 'imageUrl': shop['imageUrl'],
       'hours': [for (final hour in hours) hour.toHoursRequestJson()],
