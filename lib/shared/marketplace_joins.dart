@@ -194,17 +194,7 @@ class ServiceProviderCard {
   final JoinedCategory? category;
 
   factory ServiceProviderCard.fromJoin(Map<String, dynamic> data) {
-    return ServiceProviderCard(
-      id: _id(data['id']),
-      userId: _text(data['user_id']),
-      categoryId: _text(data['category_id']),
-      bio: _text(data['bio']),
-      hourlyRate: _double(data['hourly_rate']),
-      experienceYears: _int(data['experience_years']),
-      isVerified: data['is_verified'] == true,
-      user: JoinedUser.fromJoin(data['users']),
-      category: JoinedCategory.fromJoin(data['service_categories']),
-    );
+    return ServiceProviderCard.fromJson(data);
   }
 
   /// Java `ProviderResponse`. Profile fields map onto [JoinedUser].
@@ -220,10 +210,15 @@ class ServiceProviderCard {
       hourlyRate: _double(json['hourlyRate'] ?? json['hourly_rate']),
       experienceYears:
           _int(json['experienceYears'] ?? json['experience_years']),
-      isVerified: json['verified'] == true || json['isVerified'] == true,
+      isVerified: json['verified'] == true ||
+          json['isVerified'] == true ||
+          json['is_verified'] == true,
       user: JoinedUser.fromJoin(json['user'] ?? json['users']) ??
           JoinedUser.fromJoin(json),
-      category: category,
+      category: category ??
+          JoinedCategory.fromJoin(
+            json['service_categories'] ?? json['category'],
+          ),
     );
   }
 

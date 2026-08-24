@@ -1,3 +1,4 @@
+import 'package:degloor_one/components/cached_remote_image.dart';
 import 'package:degloor_one/core/degloor_theme.dart';
 import 'package:degloor_one/components/modern/hero_banner.dart';
 import 'package:degloor_one/components/modern/modern_category_item.dart';
@@ -609,10 +610,27 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Icon(
-                            Icons.handyman_rounded,
-                            color: DegloorTheme.primary,
-                            size: 22,
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: SizedBox(
+                              width: 40,
+                              height: 40,
+                              child: provider.photoUrl == null
+                                  ? const ColoredBox(
+                                      color: DegloorTheme.accent,
+                                      child: Icon(
+                                        Icons.person_rounded,
+                                        color: DegloorTheme.primary,
+                                        size: 22,
+                                      ),
+                                    )
+                                  : CachedRemoteImage(
+                                      url: provider.photoUrl!,
+                                      width: 40,
+                                      height: 40,
+                                      placeholderIcon: Icons.person_rounded,
+                                    ),
+                            ),
                           ),
                           const SizedBox(height: 10),
                           Text(

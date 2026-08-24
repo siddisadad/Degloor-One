@@ -88,6 +88,15 @@ void main() {
       ServiceProviderCard.fromJson({'id': 'sp-anon'}).displayName,
       'Unknown Provider',
     );
+    final joined = ServiceProviderCard.fromJoin({
+      'id': 'sp-java',
+      'fullName': 'Asha',
+      'is_verified': true,
+      'service_categories': {'name': 'Plumber'},
+    });
+    expect(joined.displayName, 'Asha');
+    expect(joined.categoryName, 'Plumber');
+    expect(joined.isVerified, isTrue);
   });
 
   test('JobApplicant maps Java applicant JSON onto the user join', () {
