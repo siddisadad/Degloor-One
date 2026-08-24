@@ -96,6 +96,19 @@ class OrderService {
     if (userId.isEmpty) {
       return const PageResult(items: [], hasMore: false);
     }
+    if (JavaApiConfig.enabled) {
+      final data = await OrderApi.list(
+        page: _javaPage(page),
+        size: page.limit,
+      );
+      final items = [
+        for (final row in _pageItems(data)) PlacedOrder.fromJson(row),
+      ].where((order) => order.userId == userId).toList();
+      return PageResult(
+        items: items,
+        hasMore: data['hasMore'] == true,
+      );
+    }
     final rows = await _repository.forUser(userId, page: page);
     return PageResult(
       items: rows.map(PlacedOrder.fromRow).toList(),
@@ -110,6 +123,20 @@ class OrderService {
     if (businessId.isEmpty) {
       return const PageResult(items: [], hasMore: false);
     }
+    if (JavaApiConfig.enabled) {
+      final data = await OrderApi.forShop(
+        businessId,
+        page: _javaPage(page),
+        size: page.limit,
+      );
+      final items = [
+        for (final row in _pageItems(data)) PlacedOrder.fromJson(row),
+      ].where((order) => order.businessId == businessId).toList();
+      return PageResult(
+        items: items,
+        hasMore: data['hasMore'] == true,
+      );
+    }
     final rows = await _repository.forBusiness(businessId, page: page);
     return PageResult(
       items: rows.map(PlacedOrder.fromRow).toList(),
@@ -117,8 +144,18 @@ class OrderService {
     );
   }
 
-  Future<int> pendingCount(String businessId) {
-    if (businessId.isEmpty) return Future.value(0);
+  Future<int> pendingCount(String businessId) async {
+    if (businessId.isEmpty) return 0;
+    if (JavaApiConfig.enabled) {
+      final data = await OrderApi.forShop(businessId, page: 0, size: 100);
+      return _pageItems(data)
+          .map(PlacedOrder.fromJson)
+          .where((order) =>
+              order.businessId == businessId &&
+              OrderLifecycle.normalizeStatus(order.status) ==
+                  OrderLifecycle.pending)
+          .length;
+    }
     return _repository.countForBusiness(
       businessId,
       status: OrderLifecycle.pending,
@@ -126,6 +163,11 @@ class OrderService {
   }
 
   Future<PlacedOrder?> findById(String orderId) async {
+    if (orderId.isEmpty) return null;
+    if (JavaApiConfig.enabled) {
+      final json = await _orderJson(orderId);
+      return json == null ? null : PlacedOrder.fromJson(json);
+    }
     final row = await _repository.byId(orderId);
     return row == null ? null : PlacedOrder.fromRow(row);
   }
@@ -134,32 +176,70 @@ class OrderService {
     required String orderId,
     required String userId,
   }) async {
+    if (orderId.isEmpty || userId.isEmpty) return null;
+    if (JavaApiConfig.enabled) {
+      final order = await findById(orderId);
+      if (order == null || order.userId != userId) return null;
+      return order;
+    }
     final row = await _repository.forCustomer(orderId: orderId, userId: userId);
     return row == null ? null : PlacedOrder.fromRow(row);
   }
 
   Future<List<OrderStatusChange>> historyFor(String orderId) async {
     if (orderId.isEmpty) return const [];
+    if (JavaApiConfig.enabled) {
+      final json = await _orderJson(orderId);
+      if (json == null) return const [];
+      final rows = _maps(json['history']);
+      return [
+        for (var i = 0; i < rows.length; i++)
+          OrderStatusChange.fromJson(rows[i], orderId: orderId, index: i),
+      ];
+    }
     final rows = await _repository.historyFor(orderId);
     return rows.map(OrderStatusChange.fromRow).toList();
   }
 
-  Future<List<OrderLine>> itemsWithProducts(String orderId) {
+  Future<List<OrderLine>> itemsWithProducts(String orderId) async {
+    if (orderId.isEmpty) return const [];
+    if (JavaApiConfig.enabled) {
+      final json = await _orderJson(orderId);
+      if (json == null) return const [];
+      return [
+        for (final row in _maps(json['items']))
+          OrderLine.fromJson(row, orderId: orderId),
+      ];
+    }
     return _repository.itemsWithProducts(orderId);
   }
 
-  Stream<List<PlacedOrder>> watchBusiness(String businessId) =>
-      _repository.watchBusiness(businessId).map(
-            (rows) => rows.map(PlacedOrder.fromRow).toList(),
-          );
+  Stream<List<PlacedOrder>> watchBusiness(String businessId) {
+    if (JavaApiConfig.enabled) {
+      return Stream.fromFuture(
+        listForBusiness(businessId).then((page) => page.items),
+      );
+    }
+    return _repository.watchBusiness(businessId).map(
+          (rows) => rows.map(PlacedOrder.fromRow).toList(),
+        );
+  }
 
   Stream<List<PlacedOrder>> watchUserOrder({
     required String orderId,
     required String userId,
-  }) =>
-      _repository.watchUserOrder(orderId: orderId, userId: userId).map(
-            (rows) => rows.map(PlacedOrder.fromRow).toList(),
-          );
+  }) {
+    if (JavaApiConfig.enabled) {
+      return Stream.fromFuture(
+        forCustomer(orderId: orderId, userId: userId).then(
+          (order) => order == null ? const <PlacedOrder>[] : [order],
+        ),
+      );
+    }
+    return _repository.watchUserOrder(orderId: orderId, userId: userId).map(
+          (rows) => rows.map(PlacedOrder.fromRow).toList(),
+        );
+  }
 
   /// Checkout. Live path ignores client prices; showcase does the same.
   Future<String> placeOrder({
@@ -464,7 +544,8 @@ class OrderService {
     required String ownerId,
   }) {
     if (nextStatus == OrderLifecycle.cancelled) {
-      _cancelShowcase(orderId: orderId, actorUserId: ownerId, reason: 'Cancelled by shop');
+      _cancelShowcase(
+          orderId: orderId, actorUserId: ownerId, reason: 'Cancelled by shop');
       return;
     }
     if (nextStatus == OrderLifecycle.delivered) {
@@ -503,5 +584,32 @@ class OrderService {
       orderId: orderId,
       status: nextStatus,
     );
+  }
+}
+
+int _javaPage(PageQuery page) {
+  if (page.limit <= 0) return 0;
+  return page.offset ~/ page.limit;
+}
+
+List<Map<String, dynamic>> _pageItems(Map<String, dynamic> data) {
+  return _maps(data['items']);
+}
+
+List<Map<String, dynamic>> _maps(dynamic raw) {
+  final rows = raw is List ? raw : const [];
+  return [
+    for (final row in rows.whereType<Map>()) Map<String, dynamic>.from(row),
+  ];
+}
+
+Future<Map<String, dynamic>?> _orderJson(String orderId) async {
+  try {
+    return await OrderApi.byId(orderId);
+  } on JavaApiException catch (error) {
+    if (error.code == 'ORDER_NOT_FOUND' || error.code.contains('404')) {
+      return null;
+    }
+    rethrow;
   }
 }

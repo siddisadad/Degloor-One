@@ -104,5 +104,21 @@ class OrderLine {
     );
   }
 
+  /// Java `OrderItemResponse`. [priceAtPurchase] is the stored snapshot.
+  factory OrderLine.fromJson(
+    Map<String, dynamic> json, {
+    required String orderId,
+  }) {
+    final productId = '${json['productId'] ?? ''}'.trim();
+    return OrderLine(
+      id: '${json['id'] ?? '$orderId-$productId'}',
+      orderId: orderId,
+      productId: productId,
+      quantity: (json['quantity'] as num?)?.toInt() ?? 0,
+      priceAtPurchase: (json['priceAtPurchase'] as num?)?.toDouble() ?? 0,
+      product: productId.isEmpty ? null : JoinedProduct(id: productId),
+    );
+  }
+
   double get lineTotal => priceAtPurchase * quantity;
 }
