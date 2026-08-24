@@ -73,6 +73,23 @@ void main() {
     expect(ShopReview.fromJoin({'id': 'rv-2', 'rating': 4}).authorName, 'Anonymous');
   });
 
+  test('ServiceProviderCard maps Java provider JSON onto the user join', () {
+    final card = ServiceProviderCard.fromJson({
+      'id': 'sp-ravi',
+      'userId': 'user-electrician',
+      'fullName': 'Ravi',
+      'phoneNumber': '9876543210',
+      'avatarUrl': 'https://example.com/a.png',
+    });
+    expect(card.displayName, 'Ravi');
+    expect(card.user?.phoneNumber, '9876543210');
+    expect(card.photoUrl, 'https://example.com/a.png');
+    expect(
+      ServiceProviderCard.fromJson({'id': 'sp-anon'}).displayName,
+      'Unknown Provider',
+    );
+  });
+
   test('JobApplicant maps Java applicant JSON onto the user join', () {
     final applicant = JobApplicant.fromJson({
       'id': 'app-1',

@@ -207,7 +207,7 @@ class ServiceProviderCard {
     );
   }
 
-  /// Java `ProviderResponse`. User name joins stay on the table path.
+  /// Java `ProviderResponse`. Profile fields map onto [JoinedUser].
   factory ServiceProviderCard.fromJson(
     Map<String, dynamic> json, {
     JoinedCategory? category,
@@ -220,6 +220,8 @@ class ServiceProviderCard {
       hourlyRate: _double(json['hourlyRate'] ?? json['hourly_rate']),
       experienceYears: _int(json['experienceYears'] ?? json['experience_years']),
       isVerified: json['verified'] == true || json['isVerified'] == true,
+      user: JoinedUser.fromJoin(json['user'] ?? json['users']) ??
+          JoinedUser.fromJoin(json),
       category: category,
     );
   }
