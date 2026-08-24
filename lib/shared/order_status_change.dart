@@ -1,7 +1,4 @@
-import 'package:degloor_one/backend/supabase/database/tables/order_status_history_table.dart';
-
-/// One status change on an order. Screens use this instead of
-/// [OrderStatusHistoryRow].
+/// One status change on an order. Screens use this instead of a table row.
 class OrderStatusChange {
   const OrderStatusChange({
     required this.id,
@@ -16,16 +13,6 @@ class OrderStatusChange {
   final String status;
   final DateTime createdAt;
   final String? notes;
-
-  factory OrderStatusChange.fromRow(OrderStatusHistoryRow row) {
-    return OrderStatusChange(
-      id: row.id,
-      orderId: row.orderId,
-      status: row.status,
-      createdAt: row.createdAt,
-      notes: row.notes,
-    );
-  }
 
   factory OrderStatusChange.fromJson(
     Map<String, dynamic> json, {

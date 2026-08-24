@@ -1,6 +1,4 @@
-import 'package:degloor_one/backend/supabase/database/tables/orders_table.dart';
-
-/// Customer or shop order. Screens use this instead of [OrdersRow].
+/// Customer or shop order. Screens use this instead of a table row.
 class PlacedOrder {
   const PlacedOrder({
     required this.id,
@@ -27,22 +25,6 @@ class PlacedOrder {
   final String? paymentMethod;
   final String? deliveryOtp;
   final DateTime createdAt;
-
-  factory PlacedOrder.fromRow(OrdersRow row) {
-    return PlacedOrder(
-      id: row.id,
-      userId: row.userId,
-      businessId: row.businessId,
-      totalAmount: row.totalAmount,
-      status: row.status,
-      paymentStatus: row.paymentStatus,
-      deliveryAddressId: row.deliveryAddressId,
-      deliveryFee: row.deliveryFee,
-      paymentMethod: row.paymentMethod,
-      deliveryOtp: row.deliveryOtp,
-      createdAt: row.createdAt,
-    );
-  }
 
   factory PlacedOrder.fromJson(Map<String, dynamic> json) {
     final created = json['createdAt'];

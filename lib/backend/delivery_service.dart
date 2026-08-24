@@ -5,6 +5,7 @@ import 'package:degloor_one/core/api/api_client.dart';
 import 'package:degloor_one/core/api/delivery_api.dart';
 import 'package:degloor_one/core/api/order_api.dart';
 import 'package:degloor_one/core/error_handler.dart';
+import 'package:degloor_one/data/datasources/supabase_order_maps.dart';
 import 'package:degloor_one/shared/delivery_assignment.dart';
 import 'package:degloor_one/shared/delivery_partner.dart';
 import 'package:degloor_one/shared/order_lifecycle.dart';
@@ -116,7 +117,7 @@ class DeliveryService {
     }
     final rows = await _repository.readyOrders(page: page);
     return PageResult(
-      items: rows.map(PlacedOrder.fromRow).toList(),
+      items: rows.map(placedOrderFromRow).toList(),
       hasMore: rows.length >= page.limit,
     );
   }

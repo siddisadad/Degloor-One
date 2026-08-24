@@ -5,6 +5,7 @@ import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/core/api/api_client.dart';
 import 'package:degloor_one/core/api/order_api.dart';
+import 'package:degloor_one/data/datasources/supabase_order_maps.dart';
 import 'package:degloor_one/shared/checkout_line_item.dart';
 import 'package:degloor_one/shared/join_rows.dart';
 import 'package:degloor_one/shared/order_lifecycle.dart';
@@ -111,7 +112,7 @@ class OrderService {
     }
     final rows = await _repository.forUser(userId, page: page);
     return PageResult(
-      items: rows.map(PlacedOrder.fromRow).toList(),
+      items: rows.map(placedOrderFromRow).toList(),
       hasMore: rows.length >= page.limit,
     );
   }
@@ -139,7 +140,7 @@ class OrderService {
     }
     final rows = await _repository.forBusiness(businessId, page: page);
     return PageResult(
-      items: rows.map(PlacedOrder.fromRow).toList(),
+      items: rows.map(placedOrderFromRow).toList(),
       hasMore: rows.length >= page.limit,
     );
   }
@@ -169,7 +170,7 @@ class OrderService {
       return json == null ? null : PlacedOrder.fromJson(json);
     }
     final row = await _repository.byId(orderId);
-    return row == null ? null : PlacedOrder.fromRow(row);
+    return row == null ? null : placedOrderFromRow(row);
   }
 
   Future<PlacedOrder?> forCustomer({
@@ -183,7 +184,7 @@ class OrderService {
       return order;
     }
     final row = await _repository.forCustomer(orderId: orderId, userId: userId);
-    return row == null ? null : PlacedOrder.fromRow(row);
+    return row == null ? null : placedOrderFromRow(row);
   }
 
   Future<List<OrderStatusChange>> historyFor(String orderId) async {
@@ -198,7 +199,7 @@ class OrderService {
       ];
     }
     final rows = await _repository.historyFor(orderId);
-    return rows.map(OrderStatusChange.fromRow).toList();
+    return rows.map(orderStatusChangeFromRow).toList();
   }
 
   Future<List<OrderLine>> itemsWithProducts(String orderId) async {
@@ -221,7 +222,7 @@ class OrderService {
       );
     }
     return _repository.watchBusiness(businessId).map(
-          (rows) => rows.map(PlacedOrder.fromRow).toList(),
+          (rows) => rows.map(placedOrderFromRow).toList(),
         );
   }
 
@@ -237,7 +238,7 @@ class OrderService {
       );
     }
     return _repository.watchUserOrder(orderId: orderId, userId: userId).map(
-          (rows) => rows.map(PlacedOrder.fromRow).toList(),
+          (rows) => rows.map(placedOrderFromRow).toList(),
         );
   }
 
