@@ -117,6 +117,44 @@ void main() {
     );
   });
 
+  test('live search fills distance_km from the query origin', () {
+    expect(
+      LatLng.distanceKm(18.5522, 77.5844, 18.5522, 77.5844),
+      0,
+    );
+    final farther = BusinessesRow({
+      'id': 'far',
+      'name': 'Far Shop',
+      'latitude': 18.56,
+      'longitude': 77.59,
+      'created_at': '2026-01-01T00:00:00.000Z',
+    });
+    final nearer = BusinessesRow({
+      'id': 'near',
+      'name': 'Near Shop',
+      'latitude': 18.5528,
+      'longitude': 77.5848,
+      'created_at': '2026-01-01T00:00:00.000Z',
+    });
+    final kept = BusinessesRow({
+      'id': 'kept',
+      'name': 'Kept Distance',
+      'latitude': 18.56,
+      'longitude': 77.59,
+      'distance_km': 9.9,
+      'created_at': '2026-01-01T00:00:00.000Z',
+    });
+    final ranked = BusinessesTable.applyLiveSearchFilters(
+      [farther, nearer, kept],
+      originLat: 18.5522,
+      originLng: 77.5844,
+    );
+    expect(ranked.map((row) => row.id), ['near', 'far', 'kept']);
+    expect(ranked.first.distanceKm, closeTo(0.08, 0.05));
+    expect(ranked[1].distanceKm, greaterThan(ranked.first.distanceKm!));
+    expect(ranked.last.distanceKm, 9.9);
+  });
+
   test('table and search RPCs use local showcase data on the dead host',
       () async {
     ShowcaseCatalog.reset();
