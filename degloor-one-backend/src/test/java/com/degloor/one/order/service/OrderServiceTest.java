@@ -31,6 +31,7 @@ class OrderServiceTest {
     @Mock BusinessRepository businesses;
     @Mock com.degloor.one.cart.service.CartService carts;
     @Mock com.degloor.one.user.service.UserService users;
+    @Mock com.degloor.one.user.repository.UserRepository accounts;
     @Mock com.degloor.one.delivery.service.OtpService otp;
     @Mock com.degloor.one.notification.service.NotificationService notifications;
     @Mock DeliveryAssignmentRepository assignments;
@@ -43,7 +44,7 @@ class OrderServiceTest {
     @BeforeEach
     void setUp() {
         service = new OrderService(
-                orders, orderItems, history, products, businesses, carts, users, otp, notifications, assignments);
+                orders, orderItems, history, products, businesses, carts, users, accounts, otp, notifications, assignments);
         customer = new UserAccount();
         customer.setId(UUID.randomUUID());
         customer.setRole("customer");

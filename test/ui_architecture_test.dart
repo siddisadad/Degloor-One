@@ -171,6 +171,18 @@ void main() {
     expect(offenders, isEmpty, reason: offenders.join('\n'));
   });
 
+  test('Java shop orders map the customer onto JoinedUser', () {
+    const path = 'lib/shared/placed_order.dart';
+    final source = File(path).readAsStringSync();
+    expect(source.contains('JoinedUser.fromJoin'), isTrue);
+    expect(
+      File('lib/features/orders/manage_orders_widget.dart')
+          .readAsStringSync()
+          .contains('order.user?'),
+      isTrue,
+    );
+  });
+
   test('notification leftover domain types stay off Supabase tables', () {
     const paths = [
       'lib/shared/app_notification.dart',

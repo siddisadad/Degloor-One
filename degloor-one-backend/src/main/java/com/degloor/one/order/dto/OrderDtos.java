@@ -4,6 +4,7 @@ import com.degloor.one.order.entity.OrderItem;
 import com.degloor.one.order.entity.OrderStatusHistory;
 import com.degloor.one.order.entity.ShopOrder;
 import com.degloor.one.product.entity.Product;
+import com.degloor.one.user.entity.UserAccount;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.Instant;
@@ -61,10 +62,13 @@ public final class OrderDtos {
             String deliveryAddressId,
             Instant createdAt,
             List<OrderItemResponse> items,
-            List<HistoryResponse> history
+            List<HistoryResponse> history,
+            String fullName,
+            String phoneNumber,
+            String avatarUrl
     ) {
         public static OrderResponse from(ShopOrder o, List<OrderItem> items, List<OrderStatusHistory> history) {
-            return from(o, items, history, Map.of());
+            return from(o, items, history, Map.of(), null);
         }
 
         public static OrderResponse from(
@@ -72,6 +76,16 @@ public final class OrderDtos {
                 List<OrderItem> items,
                 List<OrderStatusHistory> history,
                 Map<UUID, Product> catalog
+        ) {
+            return from(o, items, history, catalog, null);
+        }
+
+        public static OrderResponse from(
+                ShopOrder o,
+                List<OrderItem> items,
+                List<OrderStatusHistory> history,
+                Map<UUID, Product> catalog,
+                UserAccount customer
         ) {
             Map<UUID, Product> products = catalog == null ? Map.of() : catalog;
             return new OrderResponse(
@@ -87,7 +101,10 @@ public final class OrderDtos {
                     o.getDeliveryAddressId() == null ? null : o.getDeliveryAddressId().toString(),
                     o.getCreatedAt(),
                     items.stream().map(i -> OrderItemResponse.from(i, products.get(i.getProductId()))).toList(),
-                    history.stream().map(HistoryResponse::from).toList()
+                    history.stream().map(HistoryResponse::from).toList(),
+                    customer == null ? null : customer.getFullName(),
+                    customer == null ? null : customer.getPhoneNumber(),
+                    customer == null ? null : customer.getAvatarUrl()
             );
         }
     }
