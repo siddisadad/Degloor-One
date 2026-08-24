@@ -36,4 +36,28 @@ class AdminApi {
       for (final row in list.whereType<Map>()) Map<String, dynamic>.from(row),
     ];
   }
+
+  static Future<Map<String, dynamic>> verifyBusiness(
+    String businessId, {
+    bool verified = true,
+  }) async {
+    return Map<String, dynamic>.from(
+      await _http.post(
+        '/api/v1/admin/businesses/$businessId/verify',
+        {'verified': verified},
+      ) as Map,
+    );
+  }
+
+  static Future<Map<String, dynamic>> resolveComplaint(
+    String complaintId, {
+    String status = 'resolved',
+  }) async {
+    return Map<String, dynamic>.from(
+      await _http.post(
+        '/api/v1/admin/complaints/$complaintId/status',
+        {'status': status},
+      ) as Map,
+    );
+  }
 }

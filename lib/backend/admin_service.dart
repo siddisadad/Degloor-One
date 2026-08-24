@@ -96,6 +96,20 @@ class AdminService {
     required String businessId,
   }) async {
     await requireAdmin(adminUserId);
+    if (JavaApiConfig.enabled) {
+      if (businessId.isEmpty) {
+        throw Exception('Business not found');
+      }
+      try {
+        await AdminApi.verifyBusiness(businessId);
+        return;
+      } on JavaApiException catch (error) {
+        if (error.code == 'BUSINESS_NOT_FOUND' || error.code.contains('404')) {
+          throw Exception('Business not found');
+        }
+        rethrow;
+      }
+    }
     final shop = await _repository.businessById(businessId);
     if (shop == null) {
       throw Exception('Business not found');
@@ -132,6 +146,20 @@ class AdminService {
     required String complaintId,
   }) async {
     await requireAdmin(adminUserId);
+    if (JavaApiConfig.enabled) {
+      if (complaintId.isEmpty) {
+        throw Exception('Complaint not found');
+      }
+      try {
+        await AdminApi.resolveComplaint(complaintId);
+        return;
+      } on JavaApiException catch (error) {
+        if (error.code == 'COMPLAINT_NOT_FOUND' || error.code.contains('404')) {
+          throw Exception('Complaint not found');
+        }
+        rethrow;
+      }
+    }
     final complaint = await _repository.complaintById(complaintId);
     if (complaint == null) {
       throw Exception('Complaint not found');
