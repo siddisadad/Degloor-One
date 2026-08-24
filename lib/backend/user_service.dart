@@ -1,26 +1,37 @@
-import 'package:degloor_one/backend/repositories/user_repository.dart';
+import 'package:degloor_one/data/repositories/user_repository.dart';
 import 'package:degloor_one/shared/user_profile.dart';
 import 'package:degloor_one/shared/user_profile_draft.dart';
 
 class UserService {
-  UserService({UserRepository? repository})
-      : _repository = repository ?? UserRepository();
+  UserService({required UserRepository repository})
+      : _repository = repository;
 
   final UserRepository _repository;
 
-  static final instance = UserService();
+  static UserService? _instance;
+
+  static UserService get instance {
+    final bound = _instance;
+    if (bound == null) {
+      throw StateError('UserService is not bound.');
+    }
+    return bound;
+  }
+
+  /// Called from the composition root with a concrete repository.
+  static void bind(UserRepository repository) {
+    _instance = UserService(repository: repository);
+  }
 
   Future<UserProfile?> byId(String userId) async {
     if (userId.isEmpty) return null;
-    final row = await _repository.byId(userId);
-    return row == null ? null : UserProfile.fromRow(row);
+    return _repository.byId(userId);
   }
 
   Future<List<UserProfile>> byIds(List<String> ids) async {
     final unique = ids.where((id) => id.isNotEmpty).toSet().toList();
     if (unique.isEmpty) return const [];
-    final rows = await _repository.byIds(unique);
-    return rows.map(UserProfile.fromRow).toList();
+    return _repository.byIds(unique);
   }
 
   Future<List<UserProfile>> profile(String userId) async {
@@ -42,9 +53,8 @@ class UserService {
       throw Exception('Please sign in to continue');
     }
     final existing = await _repository.byId(userId);
-    if (existing != null) return UserProfile.fromRow(existing);
-    final created = await _repository.insert(draft, userId: userId);
-    return UserProfile.fromRow(created);
+    if (existing != null) return existing;
+    return _repository.insert(draft, userId: userId);
   }
 
   Future<UserProfile> updateProfile({
@@ -66,7 +76,7 @@ class UserService {
     if (updated == null) {
       throw Exception('Unable to update your profile. Please try again.');
     }
-    return UserProfile.fromRow(updated);
+    return updated;
   }
 
   Future<void> probeReachable({
