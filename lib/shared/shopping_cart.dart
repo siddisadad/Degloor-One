@@ -23,4 +23,17 @@ class ShoppingCart {
       createdAt: row.createdAt,
     );
   }
+
+  /// Java `CartResponse`. Empty carts omit [id].
+  factory ShoppingCart.fromJson(
+    Map<String, dynamic> json, {
+    required String userId,
+  }) {
+    return ShoppingCart(
+      id: '${json['id'] ?? ''}',
+      userId: userId,
+      businessId: '${json['businessId'] ?? ''}',
+      createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+    );
+  }
 }

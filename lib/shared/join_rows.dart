@@ -64,6 +64,27 @@ class CartLine {
     );
   }
 
+  /// Java `CartItemResponse`. Display [unitPrice] is not a payable amount.
+  factory CartLine.fromJson(
+    Map<String, dynamic> json, {
+    required String cartId,
+  }) {
+    final productId = '${json['productId'] ?? ''}'.trim();
+    return CartLine(
+      id: '${json['id'] ?? productId}',
+      cartId: cartId,
+      productId: productId,
+      quantity: (json['quantity'] as num?)?.toInt() ?? 0,
+      product: productId.isEmpty
+          ? null
+          : JoinedProduct(
+              id: productId,
+              name: json['name'] as String?,
+              price: (json['unitPrice'] as num?)?.toDouble(),
+            ),
+    );
+  }
+
   /// Checkout payload. Price stays off the wire.
   CheckoutLineItem toCheckoutItem() {
     return CheckoutLineItem(
