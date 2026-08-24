@@ -40,6 +40,13 @@ Widget _profileApp() {
           kind: ProfileInfoKind.aboutApp,
         ),
       ),
+      GoRoute(
+        path: '/businessRegistration',
+        name: 'BusinessRegistration',
+        builder: (_, __) => const Scaffold(
+          body: Text('Register Business'),
+        ),
+      ),
     ],
   );
   return ChangeNotifierProvider<FFAppState>.value(
@@ -208,5 +215,18 @@ void main() {
 
     await _openProfileTile(tester, 'सेवा अटी');
     expect(find.text('स्थानिक मार्केटप्लेस'), findsOneWidget);
+  });
+
+  testWidgets('customer profile opens business registration', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(390, 844));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(_profileApp());
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    expect(find.text('Register your business'), findsOneWidget);
+    await _openProfileTile(tester, 'Register your business');
+    expect(find.text('Register Business'), findsOneWidget);
   });
 }

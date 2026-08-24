@@ -105,6 +105,41 @@ class CheckoutSecurityTest {
     }
 
     @Test
+    void customerCanOpenAShopAndBecomeOwner() throws Exception {
+        String email = "shop-" + id() + "@degloor.test";
+        String token = token(register(email, "password1", "Priya Kale"));
+        assertEquals("customer", users.findByEmailIgnoreCase(email).orElseThrow().getRole());
+
+        String businessId = dataId(postAuth(token, "/api/v1/businesses", Map.of(
+                "name", "Kale Kirana",
+                "ownerName", "Priya Kale",
+                "addressText", "Lane 2, Degloor",
+                "latitude", 18.5522,
+                "longitude", 77.5844,
+                "open", true
+        )));
+
+        assertEquals("business_owner", users.findByEmailIgnoreCase(email).orElseThrow().getRole());
+        mvc.perform(get("/api/v1/auth/me").header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.role").value("business_owner"));
+        mvc.perform(get("/api/v1/businesses/mine").header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].id").value(businessId));
+
+        String riderEmail = "rider-" + id() + "@degloor.test";
+        String riderToken = token(register(riderEmail, "password1", "Rider"));
+        promote(riderEmail, "delivery_partner");
+        postAuth(riderToken, "/api/v1/businesses", Map.of(
+                "name", "Rider Mart",
+                "addressText", "Stand, Degloor",
+                "latitude", 18.5522,
+                "longitude", 77.5844
+        )).andExpect(status().isForbidden());
+        assertEquals("delivery_partner", users.findByEmailIgnoreCase(riderEmail).orElseThrow().getRole());
+    }
+
+    @Test
     void invalidLoginFails() throws Exception {
         mvc.perform(post("/api/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)

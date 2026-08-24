@@ -6,7 +6,8 @@ class UserRole {
   /// Stored sign-in default. Not a client-invented role.
   static const customer = UserRole('customer');
 
-  /// Showcase shop registration. Live RLS still blocks client role changes.
+  /// Shop registration. Java promotes a customer on shop create; showcase
+  /// writes this locally so the dashboard route works.
   static const businessOwner = UserRole('business_owner');
 
   final String value;

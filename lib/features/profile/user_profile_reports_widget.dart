@@ -207,6 +207,13 @@ class _UserProfileReportsWidgetState extends State<UserProfileReportsWidget> {
                       'Home, Work, Other',
                       () => context.pushNamed('AddressList'),
                     ),
+                    if (currentUser?.role == 'customer')
+                      _settingsTile(
+                        Icons.storefront_outlined,
+                        'Register your business',
+                        'List your shop on DEGLOOR ONE',
+                        () => context.pushNamed('BusinessRegistration'),
+                      ),
                     _settingsTile(
                       Icons.language_rounded,
                       l10n?.language ?? 'Language',

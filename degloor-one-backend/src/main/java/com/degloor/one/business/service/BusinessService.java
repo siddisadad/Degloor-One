@@ -21,6 +21,7 @@ import com.degloor.one.common.security.Roles;
 import com.degloor.one.common.util.Geo;
 import com.degloor.one.review.repository.ReviewRepository;
 import com.degloor.one.user.entity.UserAccount;
+import com.degloor.one.user.repository.UserRepository;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -39,19 +40,22 @@ public class BusinessService {
     private final BusinessHoursRepository hours;
     private final CityRepository cities;
     private final ReviewRepository reviews;
+    private final UserRepository users;
 
     public BusinessService(
             BusinessRepository businesses,
             BusinessCategoryRepository categories,
             BusinessHoursRepository hours,
             CityRepository cities,
-            ReviewRepository reviews
+            ReviewRepository reviews,
+            UserRepository users
     ) {
         this.businesses = businesses;
         this.categories = categories;
         this.hours = hours;
         this.cities = cities;
         this.reviews = reviews;
+        this.users = users;
     }
 
     public List<CategoryResponse> categories() {
@@ -124,6 +128,7 @@ public class BusinessService {
 
     @Transactional
     public BusinessResponse create(UserAccount user, UpsertBusinessRequest req) {
+        promoteCustomerToOwner(user);
         Roles.requireBusinessOwner(user);
         if (req.latitude() != null || req.longitude() != null) {
             Geo.requireCoordinates(req.latitude(), req.longitude());
@@ -178,6 +183,14 @@ public class BusinessService {
                 cityName(b.getCityId()),
                 reviews.countByBusinessId(b.getId())
         );
+    }
+
+    private void promoteCustomerToOwner(UserAccount user) {
+        if (!Roles.CUSTOMER.equals(user.getRole())) {
+            return;
+        }
+        user.setRole(Roles.BUSINESS_OWNER);
+        users.save(user);
     }
 
     private void apply(Business b, UpsertBusinessRequest req, UserAccount user) {

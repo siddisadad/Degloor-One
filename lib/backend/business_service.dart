@@ -143,8 +143,8 @@ class BusinessService {
       ownerId: userId,
     );
 
-    // Live RLS blocks client role changes. Showcase still needs the owner role
-    // so the dashboard route works after local registration.
+    // Java promotes customer → business_owner on POST /api/v1/businesses.
+    // Showcase still writes the owner role so the dashboard route works locally.
     if (kUseShowcaseData) {
       ShowcaseCatalog.update(
         'users',
