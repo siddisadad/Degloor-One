@@ -296,4 +296,11 @@ void main() {
     }
     expect(offenders, isEmpty, reason: offenders.join('\n'));
   });
+
+  test('Java admin API stays off Supabase tables', () {
+    const path = 'lib/core/api/admin_api.dart';
+    final source = File(path).readAsStringSync();
+    expect(source.contains(_barrel), isFalse);
+    expect(source.contains(_table), isFalse);
+  });
 }

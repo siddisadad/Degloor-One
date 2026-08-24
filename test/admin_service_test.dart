@@ -3,6 +3,7 @@ import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/backend/admin_service.dart';
 import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/data/datasources/java_shop_repository.dart';
 import 'package:degloor_one/shared/listing_complaint.dart';
 import 'package:degloor_one/shared/shop.dart';
 import 'package:degloor_one/shared/shop_category.dart';
@@ -25,8 +26,7 @@ void main() {
   });
 
   test('admin can verify the pending cafe', () async {
-    final counts =
-        await AdminService.instance.counts(ShowcaseCatalog.adminId);
+    final counts = await AdminService.instance.counts(ShowcaseCatalog.adminId);
     expect(counts.pending, 1);
     expect(counts.verified, greaterThanOrEqualTo(7));
 
@@ -55,8 +55,8 @@ void main() {
   });
 
   test('admin can resolve a pending complaint', () async {
-    final pending = await AdminService.instance
-        .pendingComplaints(ShowcaseCatalog.adminId);
+    final pending =
+        await AdminService.instance.pendingComplaints(ShowcaseCatalog.adminId);
     expect(pending, everyElement(isA<ListingComplaint>()));
     expect(pending, isNot(anyElement(isA<ComplaintsRow>())));
     expect(pending.map((row) => row.id), contains('cmp-1'));
@@ -94,5 +94,44 @@ void main() {
         ),
       ),
     );
+  });
+
+  test('Java admin JSON maps shops, complaints, and categories', () {
+    final shop = JavaShopRepository.fromJson({
+      'id': 'biz-pending',
+      'ownerId': 'owner-1',
+      'name': 'Pending Cafe',
+      'open': true,
+      'verified': false,
+      'createdAt': '2026-08-24T10:00:00Z',
+    });
+    expect(shop, isA<Shop>());
+    expect(shop.id, 'biz-pending');
+    expect(shop.isVerified, isFalse);
+    expect(shop.isOpen, isTrue);
+
+    final complaint = ListingComplaint.fromJson({
+      'id': 'cmp-1',
+      'userId': 'user-1',
+      'subject': 'Wrong item',
+      'description': 'Received tea instead of coffee.',
+      'status': 'pending',
+      'businessId': 'biz-pending',
+      'createdAt': '2026-08-24T11:00:00Z',
+    });
+    expect(complaint, isA<ListingComplaint>());
+    expect(complaint.id, 'cmp-1');
+    expect(complaint.status, 'pending');
+    expect(complaint.businessId, 'biz-pending');
+
+    final category = ShopCategory.fromJson({
+      'id': 'cat-grocery',
+      'name': 'Grocery',
+      'iconName': 'local_grocery_store',
+      'displayOrder': 1,
+    });
+    expect(category, isA<ShopCategory>());
+    expect(category.id, 'cat-grocery');
+    expect(category.displayOrder, 1);
   });
 }
