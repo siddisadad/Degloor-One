@@ -1,9 +1,12 @@
 package com.degloor.one.user.service;
 
+import com.degloor.one.business.entity.Business;
+import com.degloor.one.business.repository.BusinessRepository;
 import com.degloor.one.common.exception.BusinessException;
 import com.degloor.one.common.util.Geo;
 import com.degloor.one.user.dto.UserDtos.AddressRequest;
 import com.degloor.one.user.dto.UserDtos.AddressResponse;
+import com.degloor.one.user.dto.UserDtos.DeliveryFeeResponse;
 import com.degloor.one.user.dto.UserDtos.ProfileResponse;
 import com.degloor.one.user.dto.UserDtos.UpdateProfileRequest;
 import com.degloor.one.user.entity.Address;
@@ -19,10 +22,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
     private final UserRepository users;
     private final AddressRepository addresses;
+    private final BusinessRepository businesses;
 
-    public UserService(UserRepository users, AddressRepository addresses) {
+    public UserService(
+            UserRepository users, AddressRepository addresses, BusinessRepository businesses) {
         this.users = users;
         this.addresses = addresses;
+        this.businesses = businesses;
     }
 
     public ProfileResponse me(UUID userId) {
@@ -77,6 +83,21 @@ public class UserService {
     @Transactional
     public void deleteAddress(UUID userId, UUID addressId) {
         addresses.delete(ownedAddress(userId, addressId));
+    }
+
+    public DeliveryFeeResponse deliveryFee(UUID userId, UUID addressId, UUID businessId) {
+        Address address = ownedAddress(userId, addressId);
+        Business shop = businesses.findById(businessId)
+                .orElseThrow(() -> BusinessException.notFound("BUSINESS_NOT_FOUND", "Shop not found"));
+        if (shop.getLatitude() == null || shop.getLongitude() == null) {
+            return new DeliveryFeeResponse(Geo.deliveryFee(0));
+        }
+        double km = Geo.haversineKm(
+                address.getLatitude(),
+                address.getLongitude(),
+                shop.getLatitude(),
+                shop.getLongitude());
+        return new DeliveryFeeResponse(Geo.deliveryFee(km));
     }
 
     public UserAccount requireUser(UUID userId) {

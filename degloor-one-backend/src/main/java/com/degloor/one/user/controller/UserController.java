@@ -4,6 +4,7 @@ import com.degloor.one.common.response.ApiResponse;
 import com.degloor.one.common.security.CurrentUser;
 import com.degloor.one.user.dto.UserDtos.AddressRequest;
 import com.degloor.one.user.dto.UserDtos.AddressResponse;
+import com.degloor.one.user.dto.UserDtos.DeliveryFeeResponse;
 import com.degloor.one.user.dto.UserDtos.ProfileResponse;
 import com.degloor.one.user.dto.UserDtos.UpdateProfileRequest;
 import com.degloor.one.user.service.UserService;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -62,5 +64,11 @@ public class UserController {
     public ApiResponse<Void> deleteAddress(@PathVariable UUID id) {
         users.deleteAddress(CurrentUser.id(), id);
         return ApiResponse.ok(null, "Deleted");
+    }
+
+    @GetMapping("/me/addresses/{id}/delivery-fee")
+    public ApiResponse<DeliveryFeeResponse> deliveryFee(
+            @PathVariable UUID id, @RequestParam UUID businessId) {
+        return ApiResponse.ok(users.deliveryFee(CurrentUser.id(), id, businessId));
     }
 }

@@ -45,6 +45,13 @@ void main() {
     expect(offenders, isEmpty, reason: offenders.join('\n'));
   });
 
+  test('Java address repository stays off Supabase tables', () {
+    const path = 'lib/data/datasources/java_address_repository.dart';
+    final source = File(path).readAsStringSync();
+    expect(source.contains(_barrel), isFalse);
+    expect(source.contains(_table), isFalse);
+  });
+
   test('profile address screens talk to the controller, not the service', () {
     const paths = [
       'lib/features/profile/add_address_widget.dart',

@@ -4,6 +4,7 @@ import com.degloor.one.user.entity.Address;
 import com.degloor.one.user.entity.UserAccount;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import java.time.Instant;
 import java.util.List;
 
 public final class UserDtos {
@@ -45,20 +46,24 @@ public final class UserDtos {
 
     public record AddressResponse(
             String id,
+            String userId,
             String title,
             String addressText,
             double latitude,
             double longitude,
-            boolean isDefault
+            boolean isDefault,
+            Instant createdAt
     ) {
         public static AddressResponse from(Address a) {
             return new AddressResponse(
                     a.getId().toString(),
+                    a.getUserId().toString(),
                     a.getTitle(),
                     a.getAddressText(),
                     a.getLatitude(),
                     a.getLongitude(),
-                    a.isDefault()
+                    a.isDefault(),
+                    a.getCreatedAt()
             );
         }
 
@@ -66,4 +71,6 @@ public final class UserDtos {
             return rows.stream().map(AddressResponse::from).toList();
         }
     }
+
+    public record DeliveryFeeResponse(double fee) {}
 }
