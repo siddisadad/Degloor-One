@@ -2,8 +2,9 @@ import 'package:degloor_one/shared/address_default_flag.dart';
 import 'package:degloor_one/shared/address_draft.dart';
 import 'package:degloor_one/shared/saved_address.dart';
 
-/// Data access for saved customer addresses. Widgets should go through
-/// [AddressService]. Implementations live under `data/datasources`.
+/// Data access for saved customer addresses. Profile screens go through
+/// AddressController; other features still use AddressService until they
+/// have a controller. Implementations live under `data/datasources`.
 abstract class AddressRepository {
   Future<List<SavedAddress>> forUser(String userId);
 

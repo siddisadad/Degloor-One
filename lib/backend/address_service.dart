@@ -1,16 +1,28 @@
-import 'package:degloor_one/data/datasources/supabase_address_repository.dart';
 import 'package:degloor_one/data/repositories/address_repository.dart';
 import 'package:degloor_one/shared/address_default_flag.dart';
 import 'package:degloor_one/shared/address_draft.dart';
 import 'package:degloor_one/shared/saved_address.dart';
 
 class AddressService {
-  AddressService({AddressRepository? repository})
-      : _repository = repository ?? SupabaseAddressRepository();
+  AddressService({required AddressRepository repository})
+      : _repository = repository;
 
   final AddressRepository _repository;
 
-  static final instance = AddressService();
+  static AddressService? _instance;
+
+  static AddressService get instance {
+    final bound = _instance;
+    if (bound == null) {
+      throw StateError('AddressService is not bound.');
+    }
+    return bound;
+  }
+
+  /// Called from the composition root with a concrete repository.
+  static void bind(AddressRepository repository) {
+    _instance = AddressService(repository: repository);
+  }
 
   static const _signInMessage = 'Please sign in to manage addresses';
   static const _missingMessage = 'Address not found';

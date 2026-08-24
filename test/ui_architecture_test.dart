@@ -30,12 +30,33 @@ void main() {
     const paths = [
       'lib/backend/address_service.dart',
       'lib/data/repositories/address_repository.dart',
+      'lib/features/profile/address_controller.dart',
       'lib/shared/saved_address.dart',
     ];
     final offenders = <String>[];
     for (final path in paths) {
       final source = File(path).readAsStringSync();
-      if (source.contains(_barrel) || source.contains(_table)) {
+      if (source.contains(_barrel) ||
+          source.contains(_table) ||
+          source.contains('data/datasources')) {
+        offenders.add(path);
+      }
+    }
+    expect(offenders, isEmpty, reason: offenders.join('\n'));
+  });
+
+  test('profile address screens talk to the controller, not the service', () {
+    const paths = [
+      'lib/features/profile/add_address_widget.dart',
+      'lib/features/profile/address_list_widget.dart',
+    ];
+    final offenders = <String>[];
+    for (final path in paths) {
+      final source = File(path).readAsStringSync();
+      if (source.contains('backend/address_service.dart') ||
+          source.contains(_barrel) ||
+          source.contains(_table) ||
+          source.contains('data/datasources')) {
         offenders.add(path);
       }
     }
