@@ -3,6 +3,7 @@ import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/core/api/api_client.dart';
 import 'package:degloor_one/core/api/notification_api.dart';
 import 'package:degloor_one/core/error_handler.dart';
+import 'package:degloor_one/data/datasources/supabase_notification_maps.dart';
 import 'package:degloor_one/shared/app_notification.dart';
 import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
@@ -38,7 +39,7 @@ class NotificationService {
     }
     final rows = await _repository.forUser(userId, page: page);
     return PageResult(
-      items: rows.map(AppNotification.fromRow).toList(),
+      items: rows.map(appNotificationFromRow).toList(),
       hasMore: rows.length >= page.limit,
     );
   }
@@ -79,7 +80,7 @@ class NotificationService {
     }
     return _repository
         .watchForUser(userId)
-        .map((rows) => rows.map(AppNotification.fromRow).toList());
+        .map((rows) => rows.map(appNotificationFromRow).toList());
   }
 
   static Future<void> sendNotification({
