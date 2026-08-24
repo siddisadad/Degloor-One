@@ -257,7 +257,7 @@ class _UserProfileReportsWidgetState extends State<UserProfileReportsWidget> {
                                   Icons.flag_outlined,
                                   complaint.subject,
                                   '${complaint.status} · ${dateTimeFormat('MMM d, yyyy', complaint.createdAt)}',
-                                  () {},
+                                  () => _openReport(complaint),
                                 ),
                               )
                               .toList(),
@@ -370,6 +370,47 @@ class _UserProfileReportsWidgetState extends State<UserProfileReportsWidget> {
       _reloadProfile();
       setState(() {});
     }
+  }
+
+  Future<void> _openReport(ListingComplaint complaint) {
+    final businessId = complaint.businessId;
+    return showModalBottomSheet<void>(
+      context: context,
+      builder: (sheetContext) {
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(complaint.subject, style: DegloorTheme.headingMedium),
+              const SizedBox(height: 8),
+              Text(
+                '${complaint.status} · ${dateTimeFormat('MMM d, yyyy', complaint.createdAt)}',
+                style: DegloorTheme.bodySmall,
+              ),
+              if (complaint.description.trim().isNotEmpty) ...[
+                const SizedBox(height: 16),
+                Text(complaint.description, style: DegloorTheme.bodyMedium),
+              ],
+              if (businessId != null && businessId.isNotEmpty) ...[
+                const SizedBox(height: 24),
+                ButtonWidget(
+                  content: 'View shop',
+                  onTap: () {
+                    Navigator.pop(sheetContext);
+                    context.pushNamed(
+                      'BusinessProfile',
+                      queryParameters: {'businessId': businessId},
+                    );
+                  },
+                ),
+              ],
+            ],
+          ),
+        );
+      },
+    );
   }
 
   void _showLanguageSelector(BuildContext context) {
