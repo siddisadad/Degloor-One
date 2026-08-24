@@ -1,25 +1,29 @@
 import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/data/datasources/supabase_delivery_maps.dart';
+import 'package:degloor_one/shared/delivery_assignment.dart';
+import 'package:degloor_one/shared/delivery_partner.dart';
 import 'package:degloor_one/shared/order_lifecycle.dart';
 import 'package:degloor_one/shared/page_query.dart';
 
 /// Data access for riders. Widgets should go through [DeliveryService].
 /// Table-backed implementation; Java leftover reads live on [DeliveryService].
 class DeliveryRepository {
-  Future<DeliveryPartnersRow?> partnerForUser(String userId) async {
+  Future<DeliveryPartner?> partnerForUser(String userId) async {
     if (userId.isEmpty) return null;
     final rows = await DeliveryPartnersTable().queryRows(
       queryFn: (q) => q.eq('user_id', userId),
       limit: 1,
     );
-    return rows.isEmpty ? null : rows.first;
+    return rows.isEmpty ? null : deliveryPartnerFromRow(rows.first);
   }
 
-  Future<DeliveryPartnersRow> registerPartner(String userId) {
-    return DeliveryPartnersTable().insert({
+  Future<DeliveryPartner> registerPartner(String userId) async {
+    final row = await DeliveryPartnersTable().insert({
       'user_id': userId,
       'is_available': false,
       'is_verified': false,
     });
+    return deliveryPartnerFromRow(row);
   }
 
   Future<void> setAvailability({
@@ -33,14 +37,14 @@ class DeliveryRepository {
     );
   }
 
-  Future<DeliveryAssignmentsRow?> activeForPartner(String partnerId) async {
+  Future<DeliveryAssignment?> activeForPartner(String partnerId) async {
     if (partnerId.isEmpty) return null;
     final rows = await DeliveryAssignmentsTable().queryRows(
       queryFn: (q) =>
           q.eq('delivery_partner_id', partnerId).neq('status', 'delivered'),
       limit: 1,
     );
-    return rows.isEmpty ? null : rows.first;
+    return rows.isEmpty ? null : deliveryAssignmentFromRow(rows.first);
   }
 
   Future<List<OrdersRow>> readyOrders({
@@ -55,20 +59,22 @@ class DeliveryRepository {
     );
   }
 
-  Future<DeliveryAssignmentsRow?> activeAssignment(String orderId) async {
+  Future<DeliveryAssignment?> activeAssignment(String orderId) async {
     if (orderId.isEmpty) return null;
     final rows = await DeliveryAssignmentsTable().queryRows(
       queryFn: (q) => q.eq('order_id', orderId).neq('status', 'delivered'),
       limit: 1,
     );
-    return rows.isEmpty ? null : rows.first;
+    return rows.isEmpty ? null : deliveryAssignmentFromRow(rows.first);
   }
 
-  Stream<List<DeliveryPartnersRow>> watchPartner(String partnerId) {
-    return DeliveryPartnersTable().stream(
-      primaryKey: 'id',
-      queryFn: (q) => q.eq('id', partnerId),
-    );
+  Stream<List<DeliveryPartner>> watchPartner(String partnerId) {
+    return DeliveryPartnersTable()
+        .stream(
+          primaryKey: 'id',
+          queryFn: (q) => q.eq('id', partnerId),
+        )
+        .map((rows) => rows.map(deliveryPartnerFromRow).toList());
   }
 
   Future<void> updateLocation({

@@ -34,8 +34,7 @@ class DeliveryService {
         rethrow;
       }
     }
-    final row = await _repository.partnerForUser(userId);
-    return row == null ? null : DeliveryPartner.fromRow(row);
+    return _repository.partnerForUser(userId);
   }
 
   Future<DeliveryPartner> registerPartner(String userId) async {
@@ -45,8 +44,7 @@ class DeliveryService {
     if (JavaApiConfig.enabled) {
       return DeliveryPartner.fromJson(await DeliveryApi.register());
     }
-    final row = await _repository.registerPartner(userId);
-    return DeliveryPartner.fromRow(row);
+    return _repository.registerPartner(userId);
   }
 
   Future<void> setAvailability({
@@ -92,8 +90,7 @@ class DeliveryService {
         rethrow;
       }
     }
-    final row = await _repository.activeForPartner(partnerId);
-    return row == null ? null : DeliveryAssignment.fromRow(row);
+    return _repository.activeForPartner(partnerId);
   }
 
   Future<PageResult<PlacedOrder>> readyOrders({
@@ -103,7 +100,7 @@ class DeliveryService {
       try {
         final data = await DeliveryApi.myOrders();
         final orders = [
-          for (final row in _maps(data['ready'])) _placedOrderFromJson(row),
+          for (final row in _maps(data['ready'])) PlacedOrder.fromJson(row),
         ];
         final items = orders.skip(page.offset).take(page.limit).toList();
         return PageResult(
@@ -125,14 +122,11 @@ class DeliveryService {
   }
 
   Future<DeliveryAssignment?> activeAssignment(String orderId) async {
-    final row = await _repository.activeAssignment(orderId);
-    return row == null ? null : DeliveryAssignment.fromRow(row);
+    return _repository.activeAssignment(orderId);
   }
 
   Stream<List<DeliveryPartner>> watchPartner(String partnerId) {
-    return _repository
-        .watchPartner(partnerId)
-        .map((rows) => rows.map(DeliveryPartner.fromRow).toList());
+    return _repository.watchPartner(partnerId);
   }
 
   Future<void> acceptOrder(String orderId) {
@@ -372,26 +366,6 @@ DeliveryAssignment _assignmentFromOrder(
     orderId: orderId,
     deliveryPartnerId: partnerId,
     status: status == OrderLifecycle.outForDelivery ? 'picked_up' : 'assigned',
-    createdAt: created is String
-        ? DateTime.tryParse(created) ?? DateTime.fromMillisecondsSinceEpoch(0)
-        : DateTime.fromMillisecondsSinceEpoch(0),
-  );
-}
-
-PlacedOrder _placedOrderFromJson(Map<String, dynamic> json) {
-  final created = json['createdAt'];
-  return PlacedOrder(
-    id: '${json['id'] ?? ''}',
-    userId: '${json['userId'] ?? ''}',
-    businessId: '${json['businessId'] ?? ''}',
-    totalAmount: (json['totalAmount'] as num?)?.toDouble() ?? 0,
-    status: '${json['status'] ?? ''}',
-    paymentStatus: '${json['paymentStatus'] ?? ''}',
-    deliveryAddressId: json['deliveryAddressId'] == null
-        ? null
-        : '${json['deliveryAddressId']}',
-    deliveryFee: (json['deliveryFee'] as num?)?.toDouble(),
-    paymentMethod: json['paymentMethod'] as String?,
     createdAt: created is String
         ? DateTime.tryParse(created) ?? DateTime.fromMillisecondsSinceEpoch(0)
         : DateTime.fromMillisecondsSinceEpoch(0),
