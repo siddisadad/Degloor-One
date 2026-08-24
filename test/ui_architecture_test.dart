@@ -81,6 +81,7 @@ void main() {
     const paths = [
       'lib/backend/shop_service.dart',
       'lib/data/repositories/shop_repository.dart',
+      'lib/shared/shop.dart',
     ];
     final offenders = <String>[];
     for (final path in paths) {

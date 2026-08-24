@@ -43,8 +43,7 @@ class AdminService {
 
   Future<List<Shop>> verificationQueue(String adminUserId) async {
     await requireAdmin(adminUserId);
-    final rows = await _repository.unverifiedBusinesses();
-    return rows.map(Shop.fromRow).toList();
+    return _repository.unverifiedBusinesses();
   }
 
   Future<void> verifyBusiness({

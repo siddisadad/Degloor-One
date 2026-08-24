@@ -29,7 +29,7 @@ class DiscoveryService {
   Future<PageResult<Shop>> search(DiscoverySearch query) async {
     final rows = await _repository.search(query);
     return PageResult(
-      items: rows.map(Shop.fromRow).toList(),
+      items: rows,
       hasMore: rows.length >= query.page.limit,
     );
   }
@@ -157,14 +157,12 @@ class DiscoveryService {
   Future<List<UserProfile>> usersByIds(List<String> ids) =>
       UserService.instance.byIds(ids);
 
-  Future<List<Shop>> businessesByIds(List<String> ids) async {
-    final rows = await _repository.businessesByIds(ids);
-    return rows.map(Shop.fromRow).toList();
+  Future<List<Shop>> businessesByIds(List<String> ids) {
+    return _repository.businessesByIds(ids);
   }
 
-  Future<List<Shop>> ownedBy(String userId) async {
-    final rows = await _repository.ownedBy(userId);
-    return rows.map(Shop.fromRow).toList();
+  Future<List<Shop>> ownedBy(String userId) {
+    return _repository.ownedBy(userId);
   }
 
   Future<ShopInsights> insightsFor(String businessId) async {
