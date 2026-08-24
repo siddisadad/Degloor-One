@@ -273,11 +273,17 @@ public class OrderService {
         history.save(row);
     }
 
-    private OrderResponse toResponse(ShopOrder order) {
+    public OrderResponse toResponse(ShopOrder order) {
+        List<OrderItem> items = orderItems.findByOrderId(order.getId());
+        Map<UUID, Product> catalog = products.findAllById(
+                        items.stream().map(OrderItem::getProductId).toList())
+                .stream()
+                .collect(Collectors.toMap(Product::getId, Function.identity(), (a, b) -> a));
         return OrderResponse.from(
                 order,
-                orderItems.findByOrderId(order.getId()),
-                history.findByOrderIdOrderByCreatedAtAsc(order.getId())
+                items,
+                history.findByOrderIdOrderByCreatedAtAsc(order.getId()),
+                catalog
         );
     }
 }
