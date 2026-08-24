@@ -5,6 +5,7 @@ import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/job_application.dart';
 import 'package:degloor_one/shared/job_posting.dart';
+import 'package:degloor_one/shared/job_posting_draft.dart';
 import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
@@ -44,10 +45,12 @@ void main() {
     final posted = await JobService.instance.post(
       businessId: ShowcaseCatalog.bizPatil,
       posterId: GuestAuthUser.guestUid,
-      title: 'Night stocker',
-      description: 'Restock shelves after closing.',
-      jobType: 'Part-time',
-      salaryRange: '₹400/night',
+      draft: JobPostingDraft.fromForm(
+        title: 'Night stocker',
+        description: 'Restock shelves after closing.',
+        jobType: 'Part-time',
+        salaryRange: '₹400/night',
+      ),
     );
     expect(posted, isA<JobPosting>());
     expect(posted, isNot(isA<JobsRow>()));
@@ -95,9 +98,11 @@ void main() {
       JobService.instance.post(
         businessId: ShowcaseCatalog.bizPatil,
         posterId: ShowcaseCatalog.customer2,
-        title: 'Night stocker',
-        description: 'Should not write',
-        jobType: 'Part-time',
+        draft: JobPostingDraft.fromForm(
+          title: 'Night stocker',
+          description: 'Should not write',
+          jobType: 'Part-time',
+        ),
       ),
       throwsA(
         isA<Exception>().having(

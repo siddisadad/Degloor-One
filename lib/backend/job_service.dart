@@ -4,6 +4,7 @@ import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/job_application.dart';
 import 'package:degloor_one/shared/job_posting.dart';
+import 'package:degloor_one/shared/job_posting_draft.dart';
 import 'package:degloor_one/shared/marketplace_joins.dart';
 import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/shared/rpc_row.dart';
@@ -44,30 +45,24 @@ class JobService {
   Future<JobPosting> post({
     required String businessId,
     required String posterId,
-    required String title,
-    required String description,
-    required String jobType,
-    String? salaryRange,
-    String? locationText,
+    required JobPostingDraft draft,
   }) async {
-    final trimmed = title.trim();
-    if (trimmed.isEmpty) {
-      throw Exception('Job title is required');
-    }
+    final normalized = JobPostingDraft.fromForm(
+      title: draft.title,
+      description: draft.description,
+      jobType: draft.jobType,
+      salaryRange: draft.salaryRange,
+      locationText: draft.locationText,
+    );
     await BusinessService.instance.requireOwnedBusiness(
       userId: posterId,
       businessId: businessId,
     );
-    final row = await _repository.insert({
-      'business_id': businessId,
-      'poster_id': posterId,
-      'title': trimmed,
-      'description': description.trim(),
-      'salary_range': salaryRange?.trim(),
-      'job_type': jobType,
-      'location_text': locationText,
-      'is_active': true,
-    });
+    final row = await _repository.insert(
+      normalized,
+      businessId: businessId,
+      posterId: posterId,
+    );
     return JobPosting.fromRow(row);
   }
 
