@@ -6,7 +6,6 @@ import 'package:degloor_one/shared/catalog_product.dart';
 import 'package:degloor_one/shared/shop.dart';
 import 'package:degloor_one/shared/shop_category.dart';
 import 'package:degloor_one/shared/shop_event.dart';
-import 'package:degloor_one/shared/shop_hours.dart';
 
 /// Discovery through the Java API. Table rows stay on the server.
 class JavaDiscoveryRepository implements DiscoveryRepository {
@@ -22,6 +21,10 @@ class JavaDiscoveryRepository implements DiscoveryRepository {
     double? lng,
     double? radiusKm,
     bool? verified,
+    bool? openNow,
+    double? minRating,
+    int page = 0,
+    int size = 20,
   }) async {
     final data = await _client.get('/api/v1/businesses', query: {
       if (q != null && q.isNotEmpty) 'q': q,
@@ -30,16 +33,18 @@ class JavaDiscoveryRepository implements DiscoveryRepository {
       if (lng != null) 'lng': '$lng',
       if (radiusKm != null) 'radiusKm': '$radiusKm',
       if (verified != null) 'verified': '$verified',
+      if (openNow != null) 'openNow': '$openNow',
+      if (minRating != null && minRating > 0) 'minRating': '$minRating',
+      'page': '$page',
+      'size': '$size',
     });
-    final rows = data is List ? data : const [];
-    return rows
-        .whereType<Map>()
-        .map((row) => Map<String, dynamic>.from(row))
-        .toList();
+    return JavaShopRepository.pageItems(data);
   }
 
   @override
   Future<List<Shop>> search(DiscoverySearch query) async {
+    final page =
+        query.page.limit <= 0 ? 0 : query.page.offset ~/ query.page.limit;
     final rows = await _businessRows(
       q: query.searchTerm,
       categoryId: query.categoryId,
@@ -47,22 +52,12 @@ class JavaDiscoveryRepository implements DiscoveryRepository {
       lng: query.longitude,
       radiusKm: query.radiusKm,
       verified: query.verifiedOnly ? true : null,
+      openNow: query.openNow ? true : null,
+      minRating: query.minRating > 0 ? query.minRating : null,
+      page: page,
+      size: query.page.limit,
     );
-    final shops = <Shop>[];
-    for (final row in rows) {
-      final shop = JavaShopRepository.fromJson(row);
-      if (query.minRating > 0 && (shop.rating ?? 0) < query.minRating) {
-        continue;
-      }
-      if (query.openNow) {
-        final hours = JavaShopRepository.hoursFromJson(row);
-        final open =
-            hours.isEmpty ? shop.isOpen == true : ShopHours.isOpenNow(hours);
-        if (!open) continue;
-      }
-      shops.add(shop);
-    }
-    return shops.skip(query.page.offset).take(query.page.limit).toList();
+    return [for (final row in rows) JavaShopRepository.fromJson(row)];
   }
 
   @override

@@ -4,6 +4,7 @@ import com.degloor.one.business.entity.Business;
 import com.degloor.one.business.entity.BusinessCategory;
 import com.degloor.one.business.repository.BusinessCategoryRepository;
 import com.degloor.one.business.repository.BusinessRepository;
+import com.degloor.one.business.repository.BusinessSpecifications;
 import com.degloor.one.common.exception.BusinessException;
 import com.degloor.one.common.response.PageResponse;
 import com.degloor.one.common.security.CurrentUser;
@@ -62,9 +63,22 @@ public class AdminService {
                 .map(ProfileResponse::from));
     }
 
-    public PageResponse<Business> businesses(int page, int size) {
+    public PageResponse<Business> businesses(int page, int size, String status) {
         requireAdmin();
-        return PageResponse.from(businesses.findAll(PageRequest.of(Math.max(page, 0), Math.min(Math.max(size, 1), 50))));
+        var request = PageRequest.of(Math.max(page, 0), Math.min(Math.max(size, 1), 50));
+        if (status == null || status.isBlank() || status.equalsIgnoreCase("all")) {
+            return PageResponse.from(businesses.findAll(request));
+        }
+        boolean verified = status.equalsIgnoreCase("verified");
+        if (!verified && !status.equalsIgnoreCase("pending")) {
+            throw BusinessException.badRequest(
+                    "INVALID_STATUS",
+                    "Business status must be all, pending, or verified");
+        }
+        return PageResponse.from(businesses.findAll(
+                BusinessSpecifications.search(null, null, verified),
+                request
+        ));
     }
 
     public PageResponse<Product> products(int page, int size) {

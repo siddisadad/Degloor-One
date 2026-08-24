@@ -1,19 +1,25 @@
 package com.degloor.one.business.service;
 
+import com.degloor.one.business.dto.BusinessDtos.BusinessQuery;
 import com.degloor.one.business.dto.BusinessDtos.BusinessResponse;
 import com.degloor.one.business.dto.BusinessDtos.CategoryResponse;
 import com.degloor.one.business.dto.BusinessDtos.HoursRequest;
 import com.degloor.one.business.dto.BusinessDtos.HoursResponse;
 import com.degloor.one.business.dto.BusinessDtos.UpsertBusinessRequest;
 import com.degloor.one.business.entity.Business;
+import com.degloor.one.business.entity.BusinessCategory;
 import com.degloor.one.business.entity.BusinessHours;
+import com.degloor.one.business.entity.City;
 import com.degloor.one.business.repository.BusinessCategoryRepository;
 import com.degloor.one.business.repository.BusinessHoursRepository;
 import com.degloor.one.business.repository.BusinessRepository;
 import com.degloor.one.business.repository.BusinessSpecifications;
+import com.degloor.one.business.repository.CityRepository;
 import com.degloor.one.common.exception.BusinessException;
+import com.degloor.one.common.response.PageResponse;
 import com.degloor.one.common.security.Roles;
 import com.degloor.one.common.util.Geo;
+import com.degloor.one.review.repository.ReviewRepository;
 import com.degloor.one.user.entity.UserAccount;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,39 +37,74 @@ public class BusinessService {
     private final BusinessRepository businesses;
     private final BusinessCategoryRepository categories;
     private final BusinessHoursRepository hours;
+    private final CityRepository cities;
+    private final ReviewRepository reviews;
 
     public BusinessService(
             BusinessRepository businesses,
             BusinessCategoryRepository categories,
-            BusinessHoursRepository hours
+            BusinessHoursRepository hours,
+            CityRepository cities,
+            ReviewRepository reviews
     ) {
         this.businesses = businesses;
         this.categories = categories;
         this.hours = hours;
+        this.cities = cities;
+        this.reviews = reviews;
     }
 
     public List<CategoryResponse> categories() {
         return categories.findAllByOrderByDisplayOrderAsc().stream().map(CategoryResponse::from).toList();
     }
 
-    public List<BusinessResponse> search(String q, UUID categoryId, Double lat, Double lng, Double radiusKm, Boolean verifiedOnly) {
-        Specification<Business> spec = BusinessSpecifications.search(q, categoryId, verifiedOnly);
-        if (lat != null && lng != null && radiusKm != null) {
-            spec = spec.and(BusinessSpecifications.withinBoundingBox(lat, lng, radiusKm));
+    public PageResponse<BusinessResponse> search(BusinessQuery query) {
+        int page = query.page() == null ? 0 : Math.max(query.page(), 0);
+        int size = Math.min(Math.max(
+                query.size() == null || query.size() <= 0 ? BusinessQuery.DEFAULT_SIZE : query.size(),
+                1), 50);
+        Specification<Business> spec = BusinessSpecifications.search(query.q(), query.categoryId(), query.verified());
+        spec = spec.and(BusinessSpecifications.inCity(query.city()));
+        if (query.lat() != null && query.lng() != null && query.radiusKm() != null) {
+            spec = spec.and(BusinessSpecifications.withinBoundingBox(query.lat(), query.lng(), query.radiusKm()));
         }
         List<Business> rows = businesses.findAll(spec);
-        Map<UUID, List<HoursResponse>> hoursByShop = hoursByBusiness(rows.stream().map(Business::getId).toList());
-        return rows.stream()
-                .map(b -> {
-                    Double distance = null;
-                    if (lat != null && lng != null && b.getLatitude() != null && b.getLongitude() != null) {
-                        distance = Geo.haversineKm(lat, lng, b.getLatitude(), b.getLongitude());
-                    }
-                    return BusinessResponse.from(b, hoursByShop.getOrDefault(b.getId(), List.of()), distance);
-                })
-                .filter(b -> radiusKm == null || b.distanceKm() == null || b.distanceKm() <= radiusKm)
-                .sorted(Comparator.comparing(BusinessResponse::distanceKm, Comparator.nullsLast(Double::compareTo)))
-                .toList();
+        Map<UUID, List<HoursResponse>> hoursByShop =
+                hoursByBusiness(rows.stream().map(Business::getId).toList());
+        Map<UUID, String> categoryNames = categoryNames();
+        Map<UUID, String> cityNames = cityNames();
+        Map<UUID, Long> reviewCounts = reviewCounts(rows.stream().map(Business::getId).toList());
+        List<BusinessResponse> mapped = new ArrayList<>();
+        for (Business b : rows) {
+            Double distance = null;
+            if (query.lat() != null && query.lng() != null && b.getLatitude() != null && b.getLongitude() != null) {
+                distance = Geo.haversineKm(query.lat(), query.lng(), b.getLatitude(), b.getLongitude());
+            }
+            if (query.radiusKm() != null && distance != null && distance > query.radiusKm()) {
+                continue;
+            }
+            BusinessResponse row = BusinessResponse.from(
+                    b,
+                    hoursByShop.getOrDefault(b.getId(), List.of()),
+                    distance,
+                    b.getCategoryId() == null ? null : categoryNames.get(b.getCategoryId()),
+                    b.getCityId() == null ? null : cityNames.get(b.getCityId()),
+                    reviewCounts.getOrDefault(b.getId(), 0L)
+            );
+            if (query.openNow() != null && query.openNow() && !row.currentlyOpen()) {
+                continue;
+            }
+            if (query.minRating() != null && query.minRating() > 0 && row.rating() < query.minRating()) {
+                continue;
+            }
+            mapped.add(row);
+        }
+        mapped.sort(Comparator.comparing(BusinessResponse::distanceKm, Comparator.nullsLast(Double::compareTo)));
+        int from = page * size;
+        if (from >= mapped.size()) {
+            return PageResponse.of(List.of(), page, size, mapped.size());
+        }
+        return PageResponse.of(mapped.subList(from, Math.min(from + size, mapped.size())), page, size, mapped.size());
     }
 
     public BusinessResponse get(UUID id, Double lat, Double lng) {
@@ -72,12 +113,12 @@ public class BusinessService {
         if (lat != null && lng != null && b.getLatitude() != null && b.getLongitude() != null) {
             distance = Geo.haversineKm(lat, lng, b.getLatitude(), b.getLongitude());
         }
-        return BusinessResponse.from(b, hoursFor(id), distance);
+        return toResponse(b, hoursFor(id), distance);
     }
 
     public List<BusinessResponse> mine(UserAccount user) {
         return businesses.findByOwnerId(user.getId()).stream()
-                .map(b -> BusinessResponse.from(b, hoursFor(b.getId()), null))
+                .map(b -> toResponse(b, hoursFor(b.getId()), null))
                 .toList();
     }
 
@@ -92,10 +133,11 @@ public class BusinessService {
         }
         Business b = new Business();
         b.setOwnerId(user.getId());
+        b.setSource("owner");
         apply(b, req, user);
         businesses.save(b);
         replaceHours(b.getId(), req.hours());
-        return BusinessResponse.from(b, hoursFor(b.getId()), null);
+        return toResponse(b, hoursFor(b.getId()), null);
     }
 
     @Transactional
@@ -106,7 +148,7 @@ public class BusinessService {
         if (req.hours() != null) {
             replaceHours(id, req.hours());
         }
-        return BusinessResponse.from(b, hoursFor(id), null);
+        return toResponse(b, hoursFor(id), null);
     }
 
     @Transactional
@@ -127,21 +169,82 @@ public class BusinessService {
         return b;
     }
 
+    private BusinessResponse toResponse(Business b, List<HoursResponse> hours, Double distanceKm) {
+        return BusinessResponse.from(
+                b,
+                hours,
+                distanceKm,
+                categoryName(b.getCategoryId()),
+                cityName(b.getCityId()),
+                reviews.countByBusinessId(b.getId())
+        );
+    }
+
     private void apply(Business b, UpsertBusinessRequest req, UserAccount user) {
         b.setName(req.name().trim());
         b.setOwnerName(req.ownerName() == null || req.ownerName().isBlank() ? user.getFullName() : req.ownerName());
         b.setDescription(req.description());
         b.setCategoryId(req.categoryId());
+        if (req.subCategory() != null) {
+            String sub = req.subCategory().trim();
+            b.setSubCategory(sub.isEmpty() ? null : sub);
+        }
         b.setCityId(req.cityId());
         b.setAddressText(req.addressText());
         b.setWhatsappNumber(req.whatsappNumber());
         b.setPhoneNumber(req.phoneNumber());
         b.setLatitude(req.latitude());
         b.setLongitude(req.longitude());
+        if (req.discoveryRadius() != null) {
+            if (req.discoveryRadius() <= 0) {
+                throw BusinessException.badRequest("INVALID_RADIUS", "Discovery radius must be greater than 0");
+            }
+            b.setDiscoveryRadius(req.discoveryRadius());
+        }
         if (req.open() != null) {
             b.setOpen(req.open());
         }
         b.setImageUrl(req.imageUrl());
+        if (req.photos() != null) {
+            b.setPhotos(req.photos());
+        }
+    }
+
+    private String categoryName(UUID categoryId) {
+        if (categoryId == null) return null;
+        return categories.findById(categoryId).map(BusinessCategory::getName).orElse(null);
+    }
+
+    private String cityName(UUID cityId) {
+        if (cityId == null) return null;
+        return cities.findById(cityId).map(City::getName).orElse(null);
+    }
+
+    private Map<UUID, String> categoryNames() {
+        Map<UUID, String> map = new HashMap<>();
+        for (BusinessCategory row : categories.findAll()) {
+            map.put(row.getId(), row.getName());
+        }
+        return map;
+    }
+
+    private Map<UUID, String> cityNames() {
+        Map<UUID, String> map = new HashMap<>();
+        for (City row : cities.findAll()) {
+            map.put(row.getId(), row.getName());
+        }
+        return map;
+    }
+
+    private Map<UUID, Long> reviewCounts(Collection<UUID> businessIds) {
+        if (businessIds.isEmpty()) {
+            return Map.of();
+        }
+        Map<UUID, Long> map = new HashMap<>();
+        for (Object[] row : reviews.countGroupedByBusinessId(businessIds)) {
+            map.put((UUID) row[0], (Long) row[1]);
+        }
+        return map;
     }
 
     private List<HoursResponse> hoursFor(UUID businessId) {

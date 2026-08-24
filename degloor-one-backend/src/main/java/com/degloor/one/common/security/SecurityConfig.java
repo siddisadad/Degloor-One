@@ -61,6 +61,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/businesses/mine").authenticated()
                         .requestMatchers(HttpMethod.GET,
                                 "/api/v1/businesses",
+                                "/api/v1/businesses/search",
+                                "/api/v1/businesses/nearby",
+                                "/api/v1/businesses/category/*",
                                 "/api/v1/businesses/*",
                                 "/api/v1/businesses/*/products",
                                 "/api/v1/businesses/*/product-categories",
