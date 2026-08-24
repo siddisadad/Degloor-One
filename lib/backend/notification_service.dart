@@ -70,7 +70,13 @@ class NotificationService {
     return _repository.markAllRead(userId);
   }
 
-  Future<void> clearAll(String userId) => _repository.deleteAll(userId);
+  Future<void> clearAll(String userId) {
+    if (JavaApiConfig.enabled) {
+      // Java has no delete-all. Clear marks every notice read.
+      return NotificationApi.markAllRead();
+    }
+    return _repository.deleteAll(userId);
+  }
 
   Stream<List<AppNotification>> watchForUser(String userId) {
     if (JavaApiConfig.enabled) {
