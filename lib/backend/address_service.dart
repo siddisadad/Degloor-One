@@ -1,13 +1,12 @@
-import 'package:degloor_one/backend/repositories/address_repository.dart';
-import 'package:degloor_one/backend/supabase/supabase.dart';
-import 'package:degloor_one/core/error_handler.dart';
+import 'package:degloor_one/data/datasources/supabase_address_repository.dart';
+import 'package:degloor_one/data/repositories/address_repository.dart';
 import 'package:degloor_one/shared/address_default_flag.dart';
 import 'package:degloor_one/shared/address_draft.dart';
 import 'package:degloor_one/shared/saved_address.dart';
 
 class AddressService {
   AddressService({AddressRepository? repository})
-      : _repository = repository ?? AddressRepository();
+      : _repository = repository ?? SupabaseAddressRepository();
 
   final AddressRepository _repository;
 
@@ -18,8 +17,7 @@ class AddressService {
 
   Future<List<SavedAddress>> listForUser(String userId) async {
     if (userId.isEmpty) return const [];
-    final rows = await _repository.forUser(userId);
-    return rows.map(SavedAddress.fromRow).toList();
+    return _repository.forUser(userId);
   }
 
   /// Default first; otherwise the newest saved row.
@@ -46,7 +44,7 @@ class AddressService {
     if (row == null) {
       throw Exception(_missingMessage);
     }
-    return SavedAddress.fromRow(row);
+    return row;
   }
 
   Future<SavedAddress> add(AddressDraft draft) async {
@@ -65,7 +63,7 @@ class AddressService {
     final existing = await _repository.forUser(normalized.userId);
     final makeDefault = normalized.isDefault || existing.isEmpty;
 
-    final row = await _repository.insert(
+    final saved = await _repository.insert(
       normalized,
       defaultFlag: AddressDefaultFlag(makeDefault),
     );
@@ -73,10 +71,10 @@ class AddressService {
     if (makeDefault) {
       await _repository.clearDefaultsExcept(
         userId: normalized.userId,
-        exceptId: row.id,
+        exceptId: saved.id,
       );
     }
-    return SavedAddress.fromRow(row);
+    return saved;
   }
 
   Future<void> delete({
@@ -109,19 +107,9 @@ class AddressService {
       return 0;
     }
     await requireForUser(userId: userId, id: addressId);
-    if (kUseShowcaseData) return 25;
-    try {
-      final response = await SupaFlow.client.rpc(
-        'calculate_delivery_fee',
-        params: {
-          'business_id': businessId,
-          'address_id': addressId,
-        },
-      );
-      return (response as num?)?.toDouble() ?? 0.0;
-    } catch (e) {
-      AppLogger.error('Error calculating delivery fee', e);
-      return 0.0;
-    }
+    return _repository.deliveryFee(
+      businessId: businessId,
+      addressId: addressId,
+    );
   }
 }

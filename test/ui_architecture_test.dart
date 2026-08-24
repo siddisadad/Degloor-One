@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 const _barrel = "package:degloor_one/backend/supabase/supabase.dart";
+const _table = 'backend/supabase/database/tables/';
 
 void main() {
   test('screens and router do not import the Supabase table barrel', () {
@@ -20,6 +21,22 @@ void main() {
         if (source.contains(_barrel)) {
           offenders.add(entity.path);
         }
+      }
+    }
+    expect(offenders, isEmpty, reason: offenders.join('\n'));
+  });
+
+  test('address service and repository interface stay off Supabase', () {
+    const paths = [
+      'lib/backend/address_service.dart',
+      'lib/data/repositories/address_repository.dart',
+      'lib/shared/saved_address.dart',
+    ];
+    final offenders = <String>[];
+    for (final path in paths) {
+      final source = File(path).readAsStringSync();
+      if (source.contains(_barrel) || source.contains(_table)) {
+        offenders.add(path);
       }
     }
     expect(offenders, isEmpty, reason: offenders.join('\n'));
