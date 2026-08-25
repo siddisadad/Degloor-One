@@ -59,6 +59,10 @@ void main() {
             .readAsStringSync();
     expect(source.contains('image_picker'), isFalse);
     expect(source.contains('uploadPublicImage'), isFalse);
+    expect(source.contains('CachedNetworkImage'), isFalse);
+    expect(source.contains('CachedRemoteImage'), isTrue);
+    expect(source.contains('Product photo'), isTrue);
+    expect(source.contains('catalogue-product-photo'), isTrue);
     expect(source.contains('_pickImage'), isTrue);
     expect(source.contains('_addProduct'), isTrue);
     expect(source.contains('BusinessService'), isTrue);

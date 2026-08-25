@@ -1,12 +1,19 @@
 import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
+import 'package:degloor_one/components/cached_remote_image.dart';
 import 'package:degloor_one/features/catalogue/manage_catalogue_model.dart';
+import 'package:degloor_one/features/catalogue/manage_catalogue_widget.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_model.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 void main() {
+  setUpAll(() {
+    GoogleFonts.config.allowRuntimeFetching = false;
+  });
+
   setUp(() {
     ShowcaseCatalog.reset();
     currentUser = null;
@@ -80,6 +87,24 @@ void main() {
         'message',
         contains('Please choose a shop'),
       )),
+    );
+  });
+
+  testWidgets('catalogue photo tile uses the shared remote image chrome',
+      (tester) async {
+    installGuestSession();
+    await tester.pumpWidget(
+      const MaterialApp(home: ManageCatalogueWidget()),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    expect(find.byKey(const ValueKey('catalogue-product-photo')), findsOneWidget);
+    expect(find.byIcon(Icons.add_a_photo_rounded), findsOneWidget);
+    expect(find.byType(CachedRemoteImage), findsNothing);
+    expect(
+      tester.getSemantics(find.byKey(const ValueKey('catalogue-product-photo'))),
+      matchesSemantics(isButton: true, label: 'Product photo', hasTapAction: true),
     );
   });
 }
