@@ -133,7 +133,7 @@ class BusinessRegistrationModel
     try {
       final url = await BusinessService.instance.uploadPublicImage(
         folder: 'businesses',
-        businessId: userId,
+        businessId: '$userId/${slot.name}',
         bytes: bytes,
       );
       attachPhoto(slot: slot, url: url);
