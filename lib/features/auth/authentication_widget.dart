@@ -120,6 +120,8 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
+                          _roleTabs(),
+                          const SizedBox(height: 20),
                           Text(
                             'Welcome back',
                             style: FlutterFlowTheme.of(context)
@@ -131,7 +133,9 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Sign in to shop local in Degloor.',
+                            _model.isBusinessOwner
+                                ? 'Sign in to manage your Degloor shop.'
+                                : 'Sign in to shop local in Degloor.',
                             style: FlutterFlowTheme.of(context)
                                 .bodySmall
                                 .override(
@@ -219,7 +223,11 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
                                 onPressed: () {
                                   installGuestSession();
                                   updateAuthUser(currentUser!);
-                                  context.goNamed('CustomerHome');
+                                  if (_model.isBusinessOwner) {
+                                    context.pushNamed(_model.guestRouteName);
+                                  } else {
+                                    context.goNamed(_model.guestRouteName);
+                                  }
                                 },
                                 options: FFButtonOptions(
                                   width: double.infinity,
@@ -250,7 +258,7 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
                                       .signInWithGoogle(context);
                                   if (!context.mounted) return;
                                   if (user != null) {
-                                    context.goNamed('_initialize');
+                                    await _continueAfterAuth();
                                   }
                                 } finally {
                                   if (mounted) {
@@ -274,7 +282,12 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
                         alignment: WrapAlignment.center,
                         crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
-                          Text('Don\'t have an account? ', style: FlutterFlowTheme.of(context).bodyMedium),
+                          Text(
+                            _model.isBusinessOwner
+                                ? 'Don\'t have a shop yet? '
+                                : 'Don\'t have an account? ',
+                            style: FlutterFlowTheme.of(context).bodyMedium,
+                          ),
                           InkWell(
                             onTap: _isLoading ? null : _handleCreateAccount,
                             child: Text(
@@ -315,6 +328,80 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
                 ),
               ],
             ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _roleTabs() {
+    final theme = FlutterFlowTheme.of(context);
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.primaryBackground,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      padding: const EdgeInsets.all(4),
+      child: Row(
+        children: [
+          _roleTab(
+            key: const ValueKey('login-tab-customer'),
+            label: 'Customer',
+            selected: !_model.isBusinessOwner,
+            onTap: () => setState(() => _model.isBusinessOwner = false),
+          ),
+          _roleTab(
+            key: const ValueKey('login-tab-business'),
+            label: 'Business',
+            selected: _model.isBusinessOwner,
+            onTap: () => setState(() => _model.isBusinessOwner = true),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _roleTab({
+    required Key key,
+    required String label,
+    required bool selected,
+    required VoidCallback onTap,
+  }) {
+    final theme = FlutterFlowTheme.of(context);
+    return Expanded(
+      child: Semantics(
+        button: true,
+        selected: selected,
+        label: label,
+        child: InkWell(
+          key: key,
+          borderRadius: BorderRadius.circular(12),
+          onTap: onTap,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            decoration: BoxDecoration(
+              color: selected ? theme.secondaryBackground : Colors.transparent,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: selected
+                  ? [
+                      BoxShadow(
+                        blurRadius: 8,
+                        color: Colors.black.withValues(alpha: 0.06),
+                        offset: const Offset(0, 2),
+                      ),
+                    ]
+                  : null,
+            ),
+            child: Text(
+              label,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: selected ? theme.primary : theme.secondaryText,
+                fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                fontSize: 14,
+              ),
             ),
           ),
         ),
@@ -370,7 +457,7 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
       final user = await authManager.signInWithEmail(context, email, password);
       if (!mounted) return;
       if (user != null) {
-        context.goNamed('_initialize');
+        await _continueAfterAuth();
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -390,10 +477,16 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
           context, email, password);
       if (!mounted) return;
       if (user != null) {
-        context.goNamed('_initialize');
+        await _continueAfterAuth();
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
+  }
+
+  Future<void> _continueAfterAuth() async {
+    final route = await _model.routeAfterAuth(bypassAuth: kBypassAuth);
+    if (!mounted) return;
+    context.goNamed(route);
   }
 }

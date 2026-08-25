@@ -454,6 +454,14 @@ extension NavigationExtensions on BuildContext {
       go('/');
     }
   }
+
+  void popOrGoNamed(String name) {
+    if (canPop()) {
+      pop();
+    } else {
+      goNamed(name);
+    }
+  }
 }
 
 extension GoRouterExtensions on GoRouter {
