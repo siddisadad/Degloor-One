@@ -13,7 +13,6 @@ import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/form_field_controller.dart';
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
-import 'package:degloor_one/backend/discovery_service.dart';
 import 'package:degloor_one/features/home/customer_home_widget.dart';
 import 'package:degloor_one/index.dart';
 import 'package:flutter/material.dart';
@@ -21,7 +20,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:degloor_one/core/error_handler.dart';
 import 'package:degloor_one/core/google_maps_js.dart';
 import 'package:degloor_one/shared/discovery_radius.dart';
-import 'package:degloor_one/shared/shop_category.dart';
 import 'business_registration_model.dart';
 export 'business_registration_model.dart';
 
@@ -41,8 +39,6 @@ class _BusinessRegistrationWidgetState
   late BusinessRegistrationModel _model;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
-
-  List<ShopCategory> _categories = [];
   bool _isSubmitting = false;
 
   @override
@@ -56,17 +52,25 @@ class _BusinessRegistrationWidgetState
 
   Future<void> _loadCategories() async {
     try {
-      final rows = await DiscoveryService.instance.categories();
-      if (mounted) {
-        setState(() {
-          _categories = rows;
-          if (_categories.isNotEmpty) {
-            _model.dropdownValue = _categories.first.id;
-          }
-        });
-      }
+      await _model.loadCategories(
+        onBusyChanged: () {
+          if (mounted) setState(() {});
+        },
+      );
     } catch (e) {
       AppLogger.error('Error loading categories', e);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            AppLogger.userFacingMessage(
+              e,
+              fallback: 'Unable to load categories. Please try again.',
+            ),
+          ),
+          backgroundColor: FlutterFlowTheme.of(context).error,
+        ),
+      );
     }
   }
 
@@ -224,16 +228,11 @@ class _BusinessRegistrationWidgetState
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        FocusScope.of(context).unfocus();
-        FocusManager.instance.primaryFocus?.unfocus();
-      },
-      child: Scaffold(
-        key: scaffoldKey,
-        resizeToAvoidBottomInset: false,
-        backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-        body: SingleChildScrollView(
+    return Scaffold(
+      key: scaffoldKey,
+      resizeToAvoidBottomInset: false,
+      backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+      body: SingleChildScrollView(
           primary: false,
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -368,10 +367,24 @@ class _BusinessRegistrationWidgetState
                             error: false,
                           ),
                         ),
-                        if (_categories.isEmpty)
+                        if (_model.categoriesLoading)
                           const Padding(
                             padding: EdgeInsets.symmetric(vertical: 8),
                             child: LinearProgressIndicator(),
+                          )
+                        else if (_model.categories.isEmpty)
+                          TextButton(
+                            onPressed: _isSubmitting ? null : _loadCategories,
+                            child: Text(
+                              'Unable to load categories. Tap to retry.',
+                              style: FlutterFlowTheme.of(context)
+                                  .bodySmall
+                                  .override(
+                                    font: GoogleFonts.inter(),
+                                    color: FlutterFlowTheme.of(context).error,
+                                    letterSpacing: 0.0,
+                                  ),
+                            ),
                           )
                         else
                           FlutterFlowDropDown<String>(
@@ -379,9 +392,10 @@ class _BusinessRegistrationWidgetState
                                 FormFieldController<String>(
                               _model.dropdownValue,
                             ),
-                            options: _categories.map((c) => c.id).toList(),
+                            options:
+                                _model.categories.map((c) => c.id).toList(),
                             optionLabels:
-                                _categories.map((c) => c.name).toList(),
+                                _model.categories.map((c) => c.name).toList(),
                             onChanged: (val) => safeSetState(
                                 () => _model.dropdownValue = val),
                             width: double.infinity,
@@ -963,7 +977,6 @@ class _BusinessRegistrationWidgetState
             ],
           ),
         ),
-      ),
     );
   }
 }

@@ -46,11 +46,20 @@ void main() {
             'lib/features/businesses/business_registration_widget.dart')
         .readAsStringSync();
     expect(source.contains('BusinessService'), isFalse);
+    expect(source.contains('DiscoveryService'), isFalse);
     expect(source.contains('data/datasources'), isFalse);
     expect(source.contains('image_picker'), isFalse);
+    expect(source.contains('FocusManager.instance.primaryFocus?.unfocus()'),
+        isFalse);
     expect(source.contains('onTap: _isSubmitting ? null : _submitRegistration'),
         isTrue);
     expect(source.contains('_pickPhoto'), isTrue);
+    expect(source.contains('_loadCategories'), isTrue);
+    final model = File(
+            'lib/features/businesses/business_registration_model.dart')
+        .readAsStringSync();
+    expect(model.contains('loadCategories'), isTrue);
+    expect(model.contains('DiscoveryService'), isTrue);
   });
 
   test('catalogue photo talks to the model, not the picker', () {
