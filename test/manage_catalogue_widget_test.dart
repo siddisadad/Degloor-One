@@ -1,3 +1,4 @@
+import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/features/catalogue/manage_catalogue_model.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_model.dart';
