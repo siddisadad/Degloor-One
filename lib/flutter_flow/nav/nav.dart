@@ -95,6 +95,13 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           builder: (context, params) => const AuthenticationWidget(),
         ),
         FFRoute(
+          name: SignUpWidget.routeName,
+          path: SignUpWidget.routePath,
+          builder: (context, params) => SignUpWidget(
+            role: params.getParam<String>('role', ParamType.string),
+          ),
+        ),
+        FFRoute(
           name: PhoneAuthWidget.routeName,
           path: PhoneAuthWidget.routePath,
           builder: (context, params) => const PhoneAuthWidget(),
