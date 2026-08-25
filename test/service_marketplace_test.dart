@@ -2,6 +2,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/backend/service_marketplace_service.dart';
+import 'package:degloor_one/backend/user_service.dart';
 import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/page_query.dart';
@@ -132,6 +133,10 @@ void main() {
     expect(profile.experienceYears, 5);
     expect(profile.hourlyRate, 200);
     expect(profile.isVerified, isFalse);
+    expect(
+      await UserService.instance.roleFor(GuestAuthUser.guestUid),
+      'service_provider',
+    );
 
     await expectLater(
       ServiceMarketplaceService.instance.register(
@@ -400,5 +405,39 @@ void main() {
     expect(request.providerId, 'sp-ravi');
     expect(request.status, 'pending');
     expect(request.createdAt.toUtc().year, 2026);
+  });
+
+  test('live join as provider promotes the guest off Customer', () async {
+    AppEnvironment.debugReset();
+    AppEnvironment.debugOverride(
+      flavor: AppFlavor.development,
+      bypassAuth: true,
+      useShowcaseData: false,
+    );
+    AppEnvironment.markFlutterFlowHostLive();
+    addTearDown(() {
+      AppEnvironment.debugReset();
+      AppEnvironment.debugOverride(
+        flavor: AppFlavor.development,
+        bypassAuth: true,
+        useShowcaseData: true,
+      );
+    });
+    installGuestSession();
+    expect(kUseShowcaseData, isFalse);
+    expect(currentUser?.role, 'customer');
+
+    await ServiceMarketplaceService.instance.register(
+      userId: GuestAuthUser.guestUid,
+      categoryId: 'scat-electric',
+      experienceYears: '5',
+      hourlyRate: '200',
+      bio: 'Fan and wiring repair in Degloor.',
+    );
+    expect(currentUser?.role, 'service_provider');
+    expect(
+      await UserService.instance.roleFor(GuestAuthUser.guestUid),
+      'service_provider',
+    );
   });
 }

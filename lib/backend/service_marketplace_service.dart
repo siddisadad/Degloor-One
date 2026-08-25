@@ -1,3 +1,4 @@
+import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/backend/native_service_bridge.dart';
 import 'package:degloor_one/backend/notification_service.dart';
 import 'package:degloor_one/backend/repositories/service_marketplace_repository.dart';
@@ -13,6 +14,7 @@ import 'package:degloor_one/shared/service_provider_profile.dart';
 import 'package:degloor_one/shared/service_request.dart';
 import 'package:degloor_one/shared/rpc_row.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
+import 'package:degloor_one/shared/user_role.dart';
 
 class ServiceRequestStatus {
   static const pending = 'pending';
@@ -204,13 +206,28 @@ class ServiceMarketplaceService {
       'bio': trimmedBio,
       'is_verified': false,
     };
+    late final ServiceProviderProfile created;
     if (kUseShowcaseData) {
-      return _repository.insertProvider(data);
+      created = await _repository.insertProvider(data);
+    } else {
+      try {
+        created = await _repository.insertProvider(data);
+      } catch (_) {
+        created = _insertShowcaseProvider(data);
+      }
     }
-    try {
-      return await _repository.insertProvider(data);
-    } catch (_) {
-      return _insertShowcaseProvider(data);
+    _promoteServiceProvider(userId);
+    return created;
+  }
+
+  static void _promoteServiceProvider(String userId) {
+    ShowcaseCatalog.update(
+      'users',
+      UserRole.serviceProvider.toUpdateJson(),
+      ShowcaseQuery()..eq('id', userId),
+    );
+    if (userId == GuestAuthUser.guestUid) {
+      promoteGuestRole(UserRole.serviceProvider);
     }
   }
 

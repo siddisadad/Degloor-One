@@ -1,11 +1,14 @@
 import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/backend/user_service.dart';
+import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/database/tables/users_table.dart';
+import 'package:degloor_one/core/app_environment.dart';
 import 'package:degloor_one/data/datasources/bind_user_service.dart';
 import 'package:degloor_one/data/repositories/user_repository.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 import 'package:degloor_one/shared/user_profile.dart';
 import 'package:degloor_one/shared/user_profile_draft.dart';
+import 'package:degloor_one/shared/user_role.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class _EmptyUserRepository implements UserRepository {
@@ -81,6 +84,7 @@ void main() {
     expect(profile.single.fullName, 'Guest Customer');
     expect(profile.single.email, 'guest@local');
     expect(profile.single.phoneNumber, '+919890000001');
+    expect(profile.single.role, 'customer');
 
     expect(
       await UserService.instance.roleFor(ShowcaseCatalog.adminId),
@@ -158,6 +162,37 @@ void main() {
 
   test('probeReachable succeeds against the showcase catalog', () async {
     await UserService.instance.probeReachable();
+  });
+
+  test('roleFor reads the catalog when live users is empty', () async {
+    AppEnvironment.debugReset();
+    AppEnvironment.debugOverride(
+      flavor: AppFlavor.development,
+      bypassAuth: true,
+      useShowcaseData: false,
+    );
+    AppEnvironment.markFlutterFlowHostLive();
+    addTearDown(() {
+      AppEnvironment.debugReset();
+      AppEnvironment.debugOverride(
+        flavor: AppFlavor.development,
+        bypassAuth: true,
+        useShowcaseData: true,
+      );
+    });
+
+    expect(await UserService.instance.roleFor(GuestAuthUser.guestUid),
+        'customer');
+
+    ShowcaseCatalog.update(
+      'users',
+      UserRole.serviceProvider.toUpdateJson(),
+      ShowcaseQuery()..eq('id', GuestAuthUser.guestUid),
+    );
+    expect(
+      await UserService.instance.roleFor(GuestAuthUser.guestUid),
+      'service_provider',
+    );
   });
 
   test('guest uid falls back when the repository has no users row', () async {

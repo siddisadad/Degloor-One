@@ -33,7 +33,7 @@ String get currentJwtToken {
 bool get currentUserEmailVerified => currentUser?.emailVerified ?? false;
 
 Future<String?> getCurrentUserRole() async {
-  if (currentUser is GuestAuthUser) return 'customer';
+  if (currentUser is GuestAuthUser) return currentUser?.role;
   if (currentUser is JavaAuthUser) return currentUser?.role;
   if (!loggedIn || currentUserUid.length < 10) return null;
   return UserService.instance.roleFor(currentUserUid);

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:degloor_one/components/degloor_app_bar.dart';
 import 'package:degloor_one/core/degloor_theme.dart';
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
@@ -6,6 +8,7 @@ import 'package:degloor_one/backend/user_service.dart';
 import 'package:degloor_one/shared/listing_complaint.dart';
 import 'package:degloor_one/shared/user_profile.dart';
 import 'package:degloor_one/shared/user_profile_draft.dart';
+import 'package:degloor_one/shared/user_role.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/app_state.dart';
 import 'package:degloor_one/components/button/button_widget.dart';
@@ -39,11 +42,21 @@ class UserProfileReportsWidget extends StatefulWidget {
 class _UserProfileReportsWidgetState extends State<UserProfileReportsWidget> {
   late UserProfileReportsModel _model;
   final scaffoldKey = GlobalKey<ScaffoldState>();
+  StreamSubscription<BaseAuthUser>? _authSub;
+  String? _profileRole;
+
+  UserRole get _account => UserRole.resolve(
+        profile: _profileRole,
+        session: currentUser?.role,
+      );
 
   @override
   void initState() {
     super.initState();
     _model = createModel(context, () => UserProfileReportsModel());
+    _authSub = authUserStream.listen((_) {
+      if (mounted) setState(() {});
+    });
     if (loggedIn && currentUserUid.length > 10) {
       _reloadProfile();
       _model.complaintsFuture =
@@ -53,10 +66,22 @@ class _UserProfileReportsWidgetState extends State<UserProfileReportsWidget> {
 
   void _reloadProfile() {
     _model.userProfileFuture = UserService.instance.profile(currentUserUid);
+    _model.userProfileFuture?.then((rows) {
+      if (!mounted) return;
+      setState(() => _profileRole = rows.firstOrNull?.role);
+    });
+  }
+
+  Future<void> _openBusinessRegistration() async {
+    await context.pushNamed('BusinessRegistration');
+    if (!mounted) return;
+    _reloadProfile();
+    setState(() {});
   }
 
   @override
   void dispose() {
+    _authSub?.cancel();
     _model.dispose();
     super.dispose();
   }
@@ -64,6 +89,7 @@ class _UserProfileReportsWidgetState extends State<UserProfileReportsWidget> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final account = _account;
     return GestureDetector(
       onTap: () {
         FocusScope.of(context).unfocus();
@@ -94,6 +120,10 @@ class _UserProfileReportsWidgetState extends State<UserProfileReportsWidget> {
                         builder: (context, snapshot) {
                           final user = snapshot.data?.firstOrNull;
                           final name = user?.fullName ?? 'Guest Customer';
+                          final account = UserRole.resolve(
+                            profile: user?.role,
+                            session: currentUser?.role,
+                          );
                           final initials =
                               name.isNotEmpty ? name[0].toUpperCase() : 'U';
 
@@ -123,6 +153,12 @@ class _UserProfileReportsWidgetState extends State<UserProfileReportsWidget> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(name, style: DegloorTheme.headingMedium),
+                                    Text(
+                                      account.label,
+                                      style: DegloorTheme.labelSmall.copyWith(
+                                        color: DegloorTheme.primary,
+                                      ),
+                                    ),
                                     Text(
                                       user?.email ?? 'guest@local',
                                       style: DegloorTheme.bodySmall,
@@ -207,12 +243,26 @@ class _UserProfileReportsWidgetState extends State<UserProfileReportsWidget> {
                       'Home, Work, Other',
                       () => context.pushNamed('AddressList'),
                     ),
-                    if (currentUser?.role == 'customer')
+                    if (account.isCustomer)
                       _settingsTile(
                         Icons.storefront_outlined,
                         'Register your business',
                         'List your shop on DEGLOOR ONE',
-                        () => context.pushNamed('BusinessRegistration'),
+                        () => _openBusinessRegistration(),
+                      )
+                    else if (account.isBusinessOwner)
+                      _settingsTile(
+                        Icons.storefront_outlined,
+                        'My shop',
+                        'Orders, catalogue, and Degloor hours',
+                        () => context.pushNamed('BusinessDashboard'),
+                      )
+                    else if (account.isServiceProvider)
+                      _settingsTile(
+                        Icons.handyman_outlined,
+                        'My services',
+                        'Requests for your service profile',
+                        () => context.pushNamed('ManageServiceRequests'),
                       ),
                     _settingsTile(
                       Icons.language_rounded,
