@@ -73,6 +73,17 @@ void main() {
     );
   });
 
+  test('home does not pick new shops itself', () {
+    final source =
+        File('lib/features/home/customer_home_widget.dart').readAsStringSync();
+    expect(source.contains('if (recent.isNotEmpty)'), isFalse);
+    expect(source.contains('newestShops'), isTrue);
+    expect(source.contains(_barrel), isFalse);
+    final modelFile =
+        File('lib/features/home/customer_home_model.dart').readAsStringSync();
+    expect(modelFile.contains('List<Shop> newestShops'), isTrue);
+  });
+
   test('business registration does not insert shops itself', () {
     final source = File(
             'lib/features/businesses/business_registration_widget.dart')

@@ -168,16 +168,7 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
               page: const PageQuery(limit: 15),
             ),
           )
-          .then((page) {
-        final now = DateTime.now();
-        if (recent.isNotEmpty) {
-          recent.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-          return recent;
-        }
-        final sorted = [...page.items]
-          ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-        return sorted.take(5).toList();
-      });
+          .then((page) => _model.newestShops(page.items));
 
       _model.recommendedProductsFuture = DiscoveryService.instance
           .searchProducts(
