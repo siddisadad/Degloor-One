@@ -14,7 +14,6 @@ import 'package:degloor_one/shared/discovery_radius.dart';
 import 'package:degloor_one/shared/shop.dart';
 import 'package:degloor_one/shared/shop_draft.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'edit_business_profile_model.dart';
 export 'edit_business_profile_model.dart';
 
@@ -38,15 +37,13 @@ class _EditBusinessProfileWidgetState extends State<EditBusinessProfileWidget> {
   late EditBusinessProfileModel _model;
   final scaffoldKey = GlobalKey<ScaffoldState>();
   bool _isSaving = false;
-  String? _uploadedImageUrl;
-  bool _isUploading = false;
 
   @override
   void initState() {
     super.initState();
     _model = createModel(context, () => EditBusinessProfileModel());
 
-    _uploadedImageUrl = widget.business.imageUrl;
+    _model.imageUrl = widget.business.imageUrl;
     final radius =
         widget.business.discoveryRadius ?? kDefaultDiscoveryRadiusKm;
     _model.sliderModel.sliderValue = sliderPercentFromRadius(radius);
@@ -55,37 +52,26 @@ class _EditBusinessProfileWidgetState extends State<EditBusinessProfileWidget> {
   }
 
   Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    final XFile? image = await picker.pickImage(source: ImageSource.gallery, imageQuality: 70);
-    if (image == null) return;
-
-    setState(() => _isUploading = true);
     try {
-      final bytes = await image.readAsBytes();
-      final url = await BusinessService.instance.uploadPublicImage(
-        folder: 'businesses',
+      await _model.pickPhoto(
+        userId: currentUserUid,
         businessId: widget.business.id,
-        bytes: bytes,
+        onBusyChanged: () {
+          if (mounted) setState(() {});
+        },
       );
-
-      setState(() {
-        _uploadedImageUrl = url;
-        _isUploading = false;
-      });
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              AppLogger.userFacingMessage(
-                e,
-                fallback: 'Unable to upload the image. Please try again.',
-              ),
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            AppLogger.userFacingMessage(
+              e,
+              fallback: 'Unable to upload the image. Please try again.',
             ),
           ),
-        );
-      }
-      setState(() => _isUploading = false);
+        ),
+      );
     }
   }
 
@@ -117,7 +103,7 @@ class _EditBusinessProfileWidgetState extends State<EditBusinessProfileWidget> {
               : _model.textFieldModel5.inputTextController?.text,
           addressText: _model.textFieldModel6.inputTextController?.text,
           discoveryRadius: radiusKm,
-          imageUrl: _uploadedImageUrl,
+          imageUrl: _model.imageUrl,
         ),
       );
 
@@ -187,11 +173,11 @@ class _EditBusinessProfileWidgetState extends State<EditBusinessProfileWidget> {
                           ),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(16),
-                            child: _isUploading
+                            child: _model.isUploading
                                 ? const Center(child: CircularProgressIndicator())
-                                : (_uploadedImageUrl != null && _uploadedImageUrl!.isNotEmpty)
+                                : (_model.imageUrl != null && _model.imageUrl!.isNotEmpty)
                                     ? CachedRemoteImage(
-                                        url: _uploadedImageUrl!,
+                                        url: _model.imageUrl!,
                                         width: 120,
                                         height: 120,
                                       )

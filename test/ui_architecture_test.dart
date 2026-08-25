@@ -53,6 +53,20 @@ void main() {
     expect(source.contains('_pickPhoto'), isTrue);
   });
 
+  test('edit business profile does not pick images itself', () {
+    final source = File(
+            'lib/features/businesses/edit_business_profile_widget.dart')
+        .readAsStringSync();
+    expect(source.contains('image_picker'), isFalse);
+    expect(source.contains('data/datasources'), isFalse);
+    expect(source.contains('_pickImage'), isTrue);
+    final model = File(
+            'lib/features/businesses/edit_business_profile_model.dart')
+        .readAsStringSync();
+    expect(model.contains('uploadPhotoBytes'), isTrue);
+    expect(model.contains('image_picker'), isTrue);
+  });
+
   test('shop image upload stays local for guest and the FlutterFlow host', () {
     final source = File('lib/backend/business_service.dart').readAsStringSync();
     expect(source.contains('uploadPublicImage'), isTrue);
