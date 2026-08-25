@@ -4,5 +4,6 @@
     "--web-browser-flag=--disable-renderer-backgrounding",
     "--web-browser-flag=--disable-backgrounding-occluded-windows",
     "--web-browser-flag=--disable-features=BackForwardCache,Prerender2"
-  ]
+  ],
+  "debug.javascript.autoAttachFilter": "disabled"
 }

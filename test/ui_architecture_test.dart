@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -60,9 +61,26 @@ void main() {
     expect(launch.contains('BackForwardCache,Prerender2'), isTrue);
     final settings = File('.vscode/settings.json').readAsStringSync();
     expect(settings.contains('--disable-renderer-backgrounding'), isTrue);
+    expect(settings.contains('"debug.javascript.autoAttachFilter": "disabled"'),
+        isTrue);
     final run = File('tool/run_chrome.sh').readAsStringSync();
     expect(run.contains('--disable-renderer-backgrounding'), isTrue);
     expect(run.contains('dartDevEmbedder.debugger.extensionNames'), isTrue);
+  });
+
+  test('default web debug does not attach Chrome AppInspector', () {
+    final launch = jsonDecode(File('.vscode/launch.json').readAsStringSync())
+        as Map<String, dynamic>;
+    final configs = (launch['configurations'] as List).cast<Map>();
+    expect(configs.first['deviceId'], 'web-server');
+    final chrome = configs.firstWhere((row) => row['deviceId'] == 'chrome');
+    final chromeArgs = (chrome['toolArgs'] as List).join(' ');
+    expect(chromeArgs, contains('--web-port'));
+    expect(chromeArgs, contains('8090'));
+    expect(chromeArgs, isNot(contains('8080')));
+    final web = File('tool/run_web.sh').readAsStringSync();
+    expect(web.contains('-d web-server'), isTrue);
+    expect(web.contains('dartDevEmbedder.debugger.extensionNames'), isTrue);
   });
 
   test('web bootstrap does not stop Chrome focus events', () {

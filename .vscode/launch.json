@@ -2,23 +2,6 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "DEGLOOR ONE (Chrome)",
-      "request": "launch",
-      "type": "dart",
-      "program": "lib/main.dart",
-      "deviceId": "chrome",
-      "toolArgs": [
-        "--web-hostname",
-        "127.0.0.1",
-        "--no-web-resources-cdn",
-        "--web-browser-flag=--remote-allow-origins=*",
-        "--web-browser-flag=--disable-dev-shm-usage",
-        "--web-browser-flag=--disable-renderer-backgrounding",
-        "--web-browser-flag=--disable-backgrounding-occluded-windows",
-        "--web-browser-flag=--disable-features=BackForwardCache,Prerender2"
-      ]
-    },
-    {
       "name": "DEGLOOR ONE (web-server)",
       "request": "launch",
       "type": "dart",
@@ -28,7 +11,27 @@
         "--web-hostname",
         "127.0.0.1",
         "--web-port",
-        "8080"
+        "8080",
+        "--no-web-resources-cdn"
+      ]
+    },
+    {
+      "name": "DEGLOOR ONE (Chrome)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "deviceId": "chrome",
+      "toolArgs": [
+        "--web-hostname",
+        "127.0.0.1",
+        "--web-port",
+        "8090",
+        "--no-web-resources-cdn",
+        "--web-browser-flag=--remote-allow-origins=*",
+        "--web-browser-flag=--disable-dev-shm-usage",
+        "--web-browser-flag=--disable-renderer-backgrounding",
+        "--web-browser-flag=--disable-backgrounding-occluded-windows",
+        "--web-browser-flag=--disable-features=BackForwardCache,Prerender2"
       ]
     }
   ]
