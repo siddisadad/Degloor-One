@@ -73,175 +73,173 @@ class _SignUpWidgetState extends State<SignUpWidget> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                  AuthPageHeader(
-                    title: 'Sign up',
-                    subtitle: _model.isBusinessOwner
-                        ? 'Create an account to list your Degloor shop.'
-                        : 'Create an account to shop local in Degloor.',
+                AuthPageHeader(
+                  title: 'Sign up',
+                  subtitle: _model.isBusinessOwner
+                      ? 'Create an account to list your Degloor shop.'
+                      : 'Create an account to shop local in Degloor.',
+                ),
+                const SizedBox(height: 24),
+                _roleTabs(),
+                const SizedBox(height: 20),
+                const SupabaseUnreachableBanner(),
+                wrapWithModel(
+                  model: _model.emailModel,
+                  updateCallback: () => setState(() {}),
+                  child: const TextFieldWidget(
+                    label: 'Email',
+                    labelPresent: true,
+                    hint: 'you@example.com',
+                    leadingIcon: Icon(Icons.mail_outline_rounded),
+                    leadingIconPresent: true,
+                    variant: 'outlined',
                   ),
-                  const SizedBox(height: 24),
-                  _roleTabs(),
-                  const SizedBox(height: 20),
-                  const SupabaseUnreachableBanner(),
-                  wrapWithModel(
-                    model: _model.emailModel,
-                    updateCallback: () => setState(() {}),
-                    child: const TextFieldWidget(
-                      label: 'Email',
-                      labelPresent: true,
-                      hint: 'you@example.com',
-                      leadingIcon: Icon(Icons.mail_outline_rounded),
-                      leadingIconPresent: true,
-                      variant: 'outlined',
+                ),
+                const SizedBox(height: 16),
+                wrapWithModel(
+                  model: _model.passwordModel,
+                  updateCallback: () => setState(() {}),
+                  child: const TextFieldWidget(
+                    label: 'Password',
+                    labelPresent: true,
+                    hint: 'At least 6 characters',
+                    leadingIcon: Icon(Icons.lock_outline_rounded),
+                    leadingIconPresent: true,
+                    trailingIconPresent: true,
+                    variant: 'outlined',
+                    obscureText: true,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                wrapWithModel(
+                  model: _model.confirmModel,
+                  updateCallback: () => setState(() {}),
+                  child: const TextFieldWidget(
+                    label: 'Confirm password',
+                    labelPresent: true,
+                    hint: 'Re-enter your password',
+                    leadingIcon: Icon(Icons.lock_outline_rounded),
+                    leadingIconPresent: true,
+                    trailingIconPresent: true,
+                    variant: 'outlined',
+                    obscureText: true,
+                  ),
+                ),
+                const SizedBox(height: 32),
+                FFButtonWidget(
+                  text: _isLoading ? 'Signing up...' : 'Sign up',
+                  onPressed: _isLoading ? null : _handleSignUp,
+                  options: FFButtonOptions(
+                    width: double.infinity,
+                    height: 54,
+                    color: FlutterFlowTheme.of(context).primary,
+                    elevation: 2,
+                    textStyle: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
                     ),
+                    borderRadius: BorderRadius.circular(14),
                   ),
-                  const SizedBox(height: 16),
-                  wrapWithModel(
-                    model: _model.passwordModel,
-                    updateCallback: () => setState(() {}),
-                    child: const TextFieldWidget(
-                      label: 'Password',
-                      labelPresent: true,
-                      hint: 'At least 6 characters',
-                      leadingIcon: Icon(Icons.lock_outline_rounded),
-                      leadingIconPresent: true,
-                      trailingIconPresent: true,
-                      variant: 'outlined',
-                      obscureText: true,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  wrapWithModel(
-                    model: _model.confirmModel,
-                    updateCallback: () => setState(() {}),
-                    child: const TextFieldWidget(
-                      label: 'Confirm password',
-                      labelPresent: true,
-                      hint: 'Re-enter your password',
-                      leadingIcon: Icon(Icons.lock_outline_rounded),
-                      leadingIconPresent: true,
-                      trailingIconPresent: true,
-                      variant: 'outlined',
-                      obscureText: true,
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-                  FFButtonWidget(
-                    text: _isLoading ? 'Signing up...' : 'Sign up',
-                    onPressed: _isLoading ? null : _handleSignUp,
-                    options: FFButtonOptions(
-                      width: double.infinity,
-                      height: 54,
+                ),
+                const SizedBox(height: 16),
+                FFButtonWidget(
+                  text: 'Continue with Phone',
+                  onPressed:
+                      _isLoading ? null : () => context.pushNamed('PhoneAuth'),
+                  options: FFButtonOptions(
+                    width: double.infinity,
+                    height: 54,
+                    color: Colors.transparent,
+                    textStyle: TextStyle(
                       color: FlutterFlowTheme.of(context).primary,
-                      elevation: 2,
-                      textStyle: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    borderSide: BorderSide(
+                      color: FlutterFlowTheme.of(context).primary,
+                      width: 2,
+                    ),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Divider(
+                        color: FlutterFlowTheme.of(context).alternate,
                       ),
-                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        'OR',
+                        style: FlutterFlowTheme.of(context).labelSmall,
+                      ),
+                    ),
+                    Expanded(
+                      child: Divider(
+                        color: FlutterFlowTheme.of(context).alternate,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                wrapWithModel(
+                  model: _model.socialButtonModel,
+                  updateCallback: () => setState(() {}),
+                  child: SocialButtonWidget(
+                    icon: const FaIcon(
+                      FontAwesomeIcons.google,
+                      size: 18,
+                    ),
+                    label: 'Continue with Google',
+                    onTap: () => _continueWithProvider(
+                      () => authManager.signInWithGoogle(context),
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  FFButtonWidget(
-                    text: 'Continue with Phone',
-                    onPressed: _isLoading
-                        ? null
-                        : () => context.pushNamed('PhoneAuth'),
-                    options: FFButtonOptions(
-                      width: double.infinity,
-                      height: 54,
-                      color: Colors.transparent,
-                      textStyle: TextStyle(
-                        color: FlutterFlowTheme.of(context).primary,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      borderSide: BorderSide(
-                        color: FlutterFlowTheme.of(context).primary,
-                        width: 2,
-                      ),
-                      borderRadius: BorderRadius.circular(14),
+                ),
+                const SizedBox(height: 12),
+                wrapWithModel(
+                  model: _model.appleButtonModel,
+                  updateCallback: () => setState(() {}),
+                  child: SocialButtonWidget(
+                    icon: const FaIcon(
+                      FontAwesomeIcons.apple,
+                      size: 20,
+                    ),
+                    label: 'Continue with Apple',
+                    onTap: () => _continueWithProvider(
+                      () => authManager.signInWithApple(context),
                     ),
                   ),
-                  const SizedBox(height: 24),
-                  Row(
+                ),
+                const SizedBox(height: 32),
+                Center(
+                  child: Wrap(
+                    alignment: WrapAlignment.center,
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
-                      Expanded(
-                        child: Divider(
-                          color: FlutterFlowTheme.of(context).alternate,
-                        ),
+                      Text(
+                        'Already have an account? ',
+                        style: FlutterFlowTheme.of(context).bodyMedium,
                       ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                      InkWell(
+                        onTap: () => context.goNamed('Authentication'),
                         child: Text(
-                          'OR',
-                          style: FlutterFlowTheme.of(context).labelSmall,
-                        ),
-                      ),
-                      Expanded(
-                        child: Divider(
-                          color: FlutterFlowTheme.of(context).alternate,
+                          'Sign in',
+                          style: TextStyle(
+                            color: FlutterFlowTheme.of(context).primary,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 24),
-                  wrapWithModel(
-                    model: _model.socialButtonModel,
-                    updateCallback: () => setState(() {}),
-                    child: SocialButtonWidget(
-                      icon: const FaIcon(
-                        FontAwesomeIcons.google,
-                        size: 18,
-                      ),
-                      label: 'Continue with Google',
-                      onTap: () => _continueWithProvider(
-                        () => authManager.signInWithGoogle(context),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  wrapWithModel(
-                    model: _model.appleButtonModel,
-                    updateCallback: () => setState(() {}),
-                    child: SocialButtonWidget(
-                      icon: const FaIcon(
-                        FontAwesomeIcons.apple,
-                        size: 20,
-                      ),
-                      label: 'Continue with Apple',
-                      onTap: () => _continueWithProvider(
-                        () => authManager.signInWithApple(context),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-                  Center(
-                    child: Wrap(
-                      alignment: WrapAlignment.center,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        Text(
-                          'Already have an account? ',
-                          style: FlutterFlowTheme.of(context).bodyMedium,
-                        ),
-                        InkWell(
-                          onTap: () => context.goNamed('Authentication'),
-                          child: Text(
-                            'Sign in',
-                            style: TextStyle(
-                              color: FlutterFlowTheme.of(context).primary,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                ],
-              ),
+                ),
+                const SizedBox(height: 24),
+              ],
             ),
           ),
         ),
@@ -326,7 +324,8 @@ class _SignUpWidgetState extends State<SignUpWidget> {
   Future<void> _handleSignUp() async {
     final error = _model.validate();
     if (error != null) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error)));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(error)));
       return;
     }
     setState(() => _isLoading = true);
