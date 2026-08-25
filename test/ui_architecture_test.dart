@@ -68,7 +68,10 @@ void main() {
   test('web bootstrap does not stop Chrome focus events', () {
     final bootstrap = File('web/flutter_bootstrap.js').readAsStringSync();
     expect(bootstrap.contains('stopImmediatePropagation('), isFalse);
-    expect(bootstrap.contains('__degloorReleaseLifecycle'), isTrue);
+    expect(bootstrap.contains('addEventListener ='), isFalse);
+    expect(bootstrap.contains('_flutter.loader.load();'), isTrue);
+    final launch = File('.vscode/launch.json').readAsStringSync();
+    expect(launch.contains('--no-web-resources-cdn'), isTrue);
     final main = File('lib/main.dart').readAsStringSync();
     final accept = main.indexOf('acceptEarlyLifecycleMessages();');
     final bind = main.indexOf('WidgetsFlutterBinding.ensureInitialized();');

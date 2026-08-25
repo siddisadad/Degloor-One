@@ -10,6 +10,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 exec flutter run -d chrome \
   --web-hostname 127.0.0.1 \
+  --no-web-resources-cdn \
   --web-browser-flag=--remote-allow-origins=* \
   --web-browser-flag=--disable-dev-shm-usage \
   --web-browser-flag=--disable-renderer-backgrounding \
