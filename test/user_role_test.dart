@@ -35,5 +35,13 @@ void main() {
     expect(UserRole.parse('business_owner').label, 'Business owner');
     expect(UserRole.parse('service_provider').label, 'Service provider');
     expect(UserRole.parse('admin').label, 'Admin');
+    expect(
+      UserRole.resolve(profile: 'customer', session: 'service_provider').label,
+      'Service provider',
+    );
+    expect(
+      UserRole.resolve(profile: 'business_owner', session: 'customer').label,
+      'Business owner',
+    );
   });
 }

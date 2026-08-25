@@ -334,4 +334,38 @@ void main() {
     expect(request.status, 'pending');
     expect(request.createdAt.toUtc().year, 2026);
   });
+
+  test('live join as provider promotes the guest off Customer', () async {
+    AppEnvironment.debugReset();
+    AppEnvironment.debugOverride(
+      flavor: AppFlavor.development,
+      bypassAuth: true,
+      useShowcaseData: false,
+    );
+    AppEnvironment.markFlutterFlowHostLive();
+    addTearDown(() {
+      AppEnvironment.debugReset();
+      AppEnvironment.debugOverride(
+        flavor: AppFlavor.development,
+        bypassAuth: true,
+        useShowcaseData: true,
+      );
+    });
+    installGuestSession();
+    expect(kUseShowcaseData, isFalse);
+    expect(currentUser?.role, 'customer');
+
+    await ServiceMarketplaceService.instance.register(
+      userId: GuestAuthUser.guestUid,
+      categoryId: 'scat-electric',
+      experienceYears: '5',
+      hourlyRate: '200',
+      bio: 'Fan and wiring repair in Degloor.',
+    );
+    expect(currentUser?.role, 'service_provider');
+    expect(
+      await UserService.instance.roleFor(GuestAuthUser.guestUid),
+      'service_provider',
+    );
+  });
 }

@@ -42,6 +42,16 @@ class UserRole {
     }
   }
 
+  /// Catalog row and guest session can disagree after a local promote.
+  /// A shop or service role wins so Profile does not stay on Customer.
+  static UserRole resolve({String? profile, String? session}) {
+    final roles = [parse(profile), parse(session)];
+    if (roles.any((role) => role.isBusinessOwner)) return businessOwner;
+    if (roles.any((role) => role.isServiceProvider)) return serviceProvider;
+    if (roles.any((role) => role.value == admin.value)) return admin;
+    return customer;
+  }
+
   /// Table update only. Never includes id, email, or created_at.
   Map<String, dynamic> toUpdateJson() {
     return {'role': value};

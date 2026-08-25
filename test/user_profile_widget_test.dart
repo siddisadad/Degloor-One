@@ -265,6 +265,21 @@ void main() {
     expect(find.text('My services'), findsOneWidget);
   });
 
+  testWidgets('session service role wins over a catalog customer row',
+      (tester) async {
+    promoteGuestRole(UserRole.serviceProvider);
+    await tester.binding.setSurfaceSize(const Size(390, 844));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(_profileApp());
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    expect(find.text('Service provider'), findsOneWidget);
+    expect(find.text('Register your business'), findsNothing);
+    expect(find.text('My services'), findsOneWidget);
+  });
+
   testWidgets('customer profile opens business registration', (tester) async {
     await tester.binding.setSurfaceSize(const Size(390, 844));
     addTearDown(() => tester.binding.setSurfaceSize(null));

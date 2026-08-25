@@ -69,6 +69,11 @@ class ServiceMarketplaceService {
     if (!kUseShowcaseData) {
       final native = await NativeServiceBridge.getCategories();
       if (native.isNotEmpty) return native;
+      try {
+        final live = await _repository.categories();
+        if (live.isNotEmpty) return live;
+      } catch (_) {}
+      return _showcaseCategories();
     }
     return _repository.categories();
   }
@@ -117,7 +122,14 @@ class ServiceMarketplaceService {
       }
       return null;
     }
-    return _repository.forUser(userId);
+    if (kUseShowcaseData) {
+      return _repository.forUser(userId);
+    }
+    try {
+      final live = await _repository.forUser(userId);
+      if (live != null) return live;
+    } catch (_) {}
+    return _showcaseProfileForUser(userId);
   }
 
   Future<ServiceProviderProfile> register({
@@ -163,22 +175,32 @@ class ServiceMarketplaceService {
         ),
       );
     }
-    final categories = await _repository.categories();
+    final categories = await this.categories();
     if (!categories.any((row) => row.id == categoryId)) {
       throw Exception('Please select a service category');
     }
-    final existing = await _repository.forUser(userId);
+    final existing = await forUser(userId);
     if (existing != null) {
       throw Exception('You already have a service profile');
     }
-    final created = await _repository.insertProvider({
+    final data = {
       'user_id': userId,
       'category_id': categoryId,
       'experience_years': years,
       'hourly_rate': rate,
       'bio': trimmedBio,
       'is_verified': false,
-    });
+    };
+    late final ServiceProviderProfile created;
+    if (kUseShowcaseData) {
+      created = await _repository.insertProvider(data);
+    } else {
+      try {
+        created = await _repository.insertProvider(data);
+      } catch (_) {
+        created = _insertShowcaseProvider(data);
+      }
+    }
     _promoteServiceProvider(userId);
     return created;
   }
@@ -192,6 +214,37 @@ class ServiceMarketplaceService {
     if (userId == GuestAuthUser.guestUid) {
       promoteGuestRole(UserRole.serviceProvider);
     }
+  }
+
+  static List<ServiceCategory> _showcaseCategories() {
+    return [
+      for (final row
+          in ShowcaseCatalog.query('service_categories', ShowcaseQuery()))
+        serviceCategoryFromRow(ServiceCategoriesRow(row)),
+    ];
+  }
+
+  static ServiceProviderProfile _insertShowcaseProvider(
+    Map<String, dynamic> data,
+  ) {
+    return _profileFromShowcase(
+      ShowcaseCatalog.insert('service_providers', data),
+    );
+  }
+
+  static ServiceProviderProfile? _showcaseProfileForUser(String userId) {
+    final rows = ShowcaseCatalog.query(
+      'service_providers',
+      ShowcaseQuery()..eq('user_id', userId),
+    );
+    if (rows.isEmpty) return null;
+    return _profileFromShowcase(rows.first);
+  }
+
+  static ServiceProviderProfile _profileFromShowcase(
+    Map<String, dynamic> row,
+  ) {
+    return serviceProviderProfileFromRow(ServiceProvidersRow(row));
   }
 
   Future<ServiceProviderCard?> providerById(String id) async {
