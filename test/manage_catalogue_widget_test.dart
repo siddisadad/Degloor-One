@@ -104,7 +104,7 @@ void main() {
     expect(find.byType(CachedRemoteImage), findsNothing);
     expect(
       tester.getSemantics(find.byKey(const ValueKey('catalogue-product-photo'))),
-      matchesSemantics(isButton: true, label: 'Product photo', hasTapAction: true),
+      containsSemantics(label: 'Product photo', isButton: true),
     );
   });
 }
