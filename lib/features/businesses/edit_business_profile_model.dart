@@ -4,6 +4,8 @@ import 'package:degloor_one/components/slider/slider_widget.dart';
 import 'package:degloor_one/components/switch_component/switch_component_widget.dart';
 import 'package:degloor_one/components/text_field/text_field_widget.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
+import 'package:degloor_one/shared/discovery_radius.dart';
+import 'package:degloor_one/shared/shop_draft.dart';
 import 'edit_business_profile_widget.dart' show EditBusinessProfileWidget;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -90,6 +92,39 @@ class EditBusinessProfileModel extends FlutterFlowModel<EditBusinessProfileWidge
     textFieldModel6 = createModel(context, () => TextFieldModel());
     sliderModel = createModel(context, () => SliderModel());
     buttonModel = createModel(context, () => ButtonModel());
+  }
+
+  /// The widget only collects the form; the owner-scoped write stays here.
+  Future<void> save({
+    required String userId,
+    required String businessId,
+  }) async {
+    if (userId.isEmpty) {
+      throw Exception('Please login to update the shop');
+    }
+    if (businessId.isEmpty) {
+      throw Exception('Please choose a shop');
+    }
+    final phone = textFieldModel4.inputTextController?.text;
+    final sameWhatsapp = switchModel.switchValue ?? true;
+    final sliderVal = sliderModel.sliderValue ??
+        sliderPercentFromRadius(kDefaultDiscoveryRadiusKm);
+    await BusinessService.instance.updateProfile(
+      userId: userId,
+      businessId: businessId,
+      draft: ShopDraft.fromProfile(
+        name: textFieldModel1.inputTextController?.text ?? '',
+        ownerName: textFieldModel2.inputTextController?.text,
+        description: textFieldModel3.inputTextController?.text,
+        phoneNumber: phone,
+        whatsappNumber: sameWhatsapp
+            ? phone
+            : textFieldModel5.inputTextController?.text,
+        addressText: textFieldModel6.inputTextController?.text,
+        discoveryRadius: radiusFromSliderPercent(sliderVal),
+        imageUrl: imageUrl,
+      ),
+    );
   }
 
   @override
