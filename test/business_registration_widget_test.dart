@@ -58,6 +58,7 @@ void main() {
         contains(ShowcaseCatalog.catGrocery));
     expect(model.dropdownValue, model.categories.first.id);
     expect(model.categoriesLoading, isFalse);
+    expect(model.dropdownValueController?.value, model.dropdownValue);
   });
 
   testWidgets('registration photos upload before submit', (tester) async {

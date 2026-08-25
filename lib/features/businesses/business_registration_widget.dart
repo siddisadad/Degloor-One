@@ -388,6 +388,9 @@ class _BusinessRegistrationWidgetState
                           )
                         else
                           FlutterFlowDropDown<String>(
+                            key: ValueKey(
+                              'registration-category-${_model.categories.length}',
+                            ),
                             controller: _model.dropdownValueController ??=
                                 FormFieldController<String>(
                               _model.dropdownValue,

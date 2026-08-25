@@ -113,6 +113,11 @@ class BusinessRegistrationModel
           (dropdownValue == null || dropdownValue!.isEmpty)) {
         dropdownValue = categories.first.id;
       }
+      final selected = dropdownValue;
+      dropdownValueController ??= FormFieldController<String>(selected);
+      if (selected != null) {
+        dropdownValueController?.value = selected;
+      }
     } finally {
       categoriesLoading = false;
       onBusyChanged?.call();
