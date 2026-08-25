@@ -193,6 +193,53 @@ void main() {
     expect(sweets.map((row) => row.name), ['Ganesh Sweet Mart']);
   });
 
+  test('live product rows use the shop coordinates for distance', () {
+    final ganesh = BusinessesRow({
+      'id': 'shop-ganesh',
+      'name': 'Ganesh Sweet Mart',
+      'latitude': 18.5528,
+      'longitude': 77.5848,
+      'created_at': '2026-01-01T00:00:00.000Z',
+    });
+    final pedha = ProductsRow({
+      'id': 'prod-pedha',
+      'business_id': 'shop-ganesh',
+      'name': 'Degloor Pedha',
+      'description': 'Famous sweet from Degloor.',
+      'price': 40,
+      'created_at': '2026-01-01T00:00:00.000Z',
+    });
+    final orphan = ProductsRow({
+      'id': 'prod-orphan',
+      'business_id': 'missing-shop',
+      'name': 'Orphan Item',
+      'created_at': '2026-01-01T00:00:00.000Z',
+    });
+    final farShop = BusinessesRow({
+      'id': 'shop-far',
+      'name': 'Other City Shop',
+      'latitude': 19.07,
+      'longitude': 72.87,
+      'created_at': '2026-01-01T00:00:00.000Z',
+    });
+    final far = ProductsRow({
+      'id': 'prod-far',
+      'business_id': 'shop-far',
+      'name': 'Far Item',
+      'created_at': '2026-01-01T00:00:00.000Z',
+    });
+    final nearby = ProductsTable.filterLiveTableRows(
+      [pedha, orphan, far],
+      [ganesh, farShop],
+      latitude: 18.5522,
+      longitude: 77.5844,
+      radiusKm: 10,
+      searchTerm: 'pedha',
+    );
+    expect(nearby.map((row) => row.id), ['prod-pedha']);
+    expect(nearby.single.distanceKm, lessThan(1));
+  });
+
   test('live PostgREST JS arrays become typed table rows', () {
     final rows = BusinessesTable().rowsFromWire(<dynamic>[
       <dynamic, dynamic>{
@@ -217,6 +264,18 @@ void main() {
     );
     expect(users, isA<List<UsersRow>>());
     expect(users.single.fullName, 'Guest Customer');
+
+    final products = ProductsTable().rowsFromWire(<dynamic>[
+      <dynamic, dynamic>{
+        'id': 'prod-pedha',
+        'business_id': 'shop-ganesh',
+        'name': 'Degloor Pedha',
+        'created_at': '2026-01-01T00:00:00.000Z',
+      },
+    ]);
+    expect(products, hasLength(1));
+    expect(products.single, isA<ProductsRow>());
+    expect(products.single.name, 'Degloor Pedha');
   });
 
   test('table and search RPCs use local showcase data on the dead host',

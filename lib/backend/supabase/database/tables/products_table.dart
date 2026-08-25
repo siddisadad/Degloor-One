@@ -1,6 +1,9 @@
 import 'package:flutter/foundation.dart';
 
 import '../database.dart';
+import 'package:degloor_one/backend/supabase/database/tables/businesses_table.dart';
+import 'package:degloor_one/flutter_flow/lat_lng.dart';
+import 'package:degloor_one/shared/search_query.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
 class ProductsTable extends SupabaseTable<ProductsRow> {
@@ -45,6 +48,70 @@ class ProductsTable extends SupabaseTable<ProductsRow> {
     return filtered;
   }
 
+  /// Nearby rows from `public.products` using each shop's coordinates.
+  /// Live search RPCs omit `distance_km` and Chrome yields `JSArray`.
+  @visibleForTesting
+  static List<ProductsRow> filterLiveTableRows(
+    List<ProductsRow> products,
+    List<BusinessesRow> shops, {
+    required double latitude,
+    required double longitude,
+    required double radiusKm,
+    String? searchTerm,
+    int limit = 20,
+    int offset = 0,
+  }) {
+    final shopsById = {for (final shop in shops) shop.id: shop};
+    final query = SearchQuery.parse(searchTerm);
+    final matches = <ProductsRow>[];
+    for (final product in products) {
+      final shop = shopsById[product.businessId];
+      if (shop == null) continue;
+      final lat = shop.latitude;
+      final lng = shop.longitude;
+      if (lat == null || lng == null) continue;
+      final distance = LatLng.distanceKm(latitude, longitude, lat, lng);
+      if (distance > radiusKm) continue;
+      if (!query.matches([product.name, product.description, shop.name])) {
+        continue;
+      }
+      if (product.distanceKm == null) {
+        product.distanceKm = double.parse(distance.toStringAsFixed(2));
+      }
+      matches.add(product);
+    }
+    matches.sort(
+      (a, b) => (a.distanceKm ?? 1e9).compareTo(b.distanceKm ?? 1e9),
+    );
+    return applyLiveSearchFilters(matches, limit: limit, offset: offset);
+  }
+
+  Future<List<ProductsRow>> _searchLiveTable({
+    required double latitude,
+    required double longitude,
+    required double radiusKm,
+    String? searchTerm,
+    int limit = 20,
+    int offset = 0,
+  }) async {
+    try {
+      final products = await queryRows(queryFn: (q) => q);
+      final shops = await BusinessesTable().queryRows(queryFn: (q) => q);
+      return filterLiveTableRows(
+        products,
+        shops,
+        latitude: latitude,
+        longitude: longitude,
+        radiusKm: radiusKm,
+        searchTerm: searchTerm,
+        limit: limit,
+        offset: offset,
+      );
+    } catch (_) {
+      return const [];
+    }
+  }
+
   Future<List<ProductsRow>> searchInRadius({
     required double latitude,
     required double longitude,
@@ -63,20 +130,41 @@ class ProductsTable extends SupabaseTable<ProductsRow> {
         offset: offset,
       ).map(createRow).toList();
     }
-    final response = await SupaFlow.client.rpc(
-      'search_products_in_radius',
-      params: liveSearchParams(
+    if (AppEnvironment.flutterFlowHostIsLive) {
+      return _searchLiveTable(
         latitude: latitude,
         longitude: longitude,
         radiusKm: radiusKm,
         searchTerm: searchTerm,
-      ),
-    );
-    final rows = (response as List?)
-            ?.map((row) => createRow(Map<String, dynamic>.from(row as Map)))
-            .toList() ??
-        <ProductsRow>[];
-    return applyLiveSearchFilters(rows, limit: limit, offset: offset);
+        limit: limit,
+        offset: offset,
+      );
+    }
+    try {
+      final dynamic raw = await SupaFlow.client.rpc(
+        'search_products_in_radius',
+        params: liveSearchParams(
+          latitude: latitude,
+          longitude: longitude,
+          radiusKm: radiusKm,
+          searchTerm: searchTerm,
+        ),
+      );
+      return applyLiveSearchFilters(
+        rowsFromWire(raw),
+        limit: limit,
+        offset: offset,
+      );
+    } catch (_) {
+      return _searchLiveTable(
+        latitude: latitude,
+        longitude: longitude,
+        radiusKm: radiusKm,
+        searchTerm: searchTerm,
+        limit: limit,
+        offset: offset,
+      );
+    }
   }
 }
 
