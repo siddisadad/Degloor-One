@@ -41,6 +41,26 @@ void main() {
     expect(shops.map((shop) => shop.name), contains('Siddi Kirana'));
   });
 
+  testWidgets('registration loads shop categories on the model',
+      (tester) async {
+    installGuestSession();
+    late BusinessRegistrationModel model;
+    await tester.pumpWidget(MaterialApp(
+      home: Builder(builder: (context) {
+        model = createModel(context, () => BusinessRegistrationModel());
+        return const SizedBox.shrink();
+      }),
+    ));
+
+    await model.loadCategories();
+    expect(model.categories, isNotEmpty);
+    expect(model.categories.map((row) => row.id),
+        contains(ShowcaseCatalog.catGrocery));
+    expect(model.dropdownValue, model.categories.first.id);
+    expect(model.categoriesLoading, isFalse);
+    expect(model.dropdownValueController?.value, model.dropdownValue);
+  });
+
   testWidgets('registration photos upload before submit', (tester) async {
     installGuestSession();
     late BusinessRegistrationModel model;
