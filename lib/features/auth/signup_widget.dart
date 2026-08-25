@@ -48,36 +48,31 @@ class _SignUpWidgetState extends State<SignUpWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        FocusScope.of(context).unfocus();
-        FocusManager.instance.primaryFocus?.unfocus();
-      },
-      child: Scaffold(
-        key: scaffoldKey,
-        backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          leading: FlutterFlowIconButton(
-            borderColor: Colors.transparent,
-            borderRadius: 30,
-            buttonSize: 60,
-            icon: Icon(
-              Icons.arrow_back_rounded,
-              color: FlutterFlowTheme.of(context).primaryText,
-              size: 30,
-            ),
-            onPressed: () => context.safePop(),
+    return Scaffold(
+      key: scaffoldKey,
+      backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: FlutterFlowIconButton(
+          borderColor: Colors.transparent,
+          borderRadius: 30,
+          buttonSize: 60,
+          icon: Icon(
+            Icons.arrow_back_rounded,
+            color: FlutterFlowTheme.of(context).primaryText,
+            size: 30,
           ),
+          onPressed: () => context.safePop(),
         ),
-        body: SafeArea(
-          child: AuthPageScaffold(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+      ),
+      body: SafeArea(
+        child: AuthPageScaffold(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
                   AuthPageHeader(
                     title: 'Sign up',
                     subtitle: _model.isBusinessOwner
@@ -147,6 +142,50 @@ class _SignUpWidgetState extends State<SignUpWidget> {
                       borderRadius: BorderRadius.circular(14),
                     ),
                   ),
+                  const SizedBox(height: 16),
+                  FFButtonWidget(
+                    text: 'Continue with Phone',
+                    onPressed: _isLoading
+                        ? null
+                        : () => context.pushNamed('PhoneAuth'),
+                    options: FFButtonOptions(
+                      width: double.infinity,
+                      height: 54,
+                      color: Colors.transparent,
+                      textStyle: TextStyle(
+                        color: FlutterFlowTheme.of(context).primary,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      borderSide: BorderSide(
+                        color: FlutterFlowTheme.of(context).primary,
+                        width: 2,
+                      ),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Divider(
+                          color: FlutterFlowTheme.of(context).alternate,
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(
+                          'OR',
+                          style: FlutterFlowTheme.of(context).labelSmall,
+                        ),
+                      ),
+                      Expanded(
+                        child: Divider(
+                          color: FlutterFlowTheme.of(context).alternate,
+                        ),
+                      ),
+                    ],
+                  ),
                   const SizedBox(height: 24),
                   wrapWithModel(
                     model: _model.socialButtonModel,
@@ -157,22 +196,24 @@ class _SignUpWidgetState extends State<SignUpWidget> {
                         size: 18,
                       ),
                       label: 'Continue with Google',
-                      onTap: () async {
-                        if (_isLoading) return;
-                        setState(() => _isLoading = true);
-                        try {
-                          final user =
-                              await authManager.signInWithGoogle(context);
-                          if (!context.mounted) return;
-                          if (user != null) {
-                            await _continueAfterAuth();
-                          }
-                        } finally {
-                          if (mounted) {
-                            setState(() => _isLoading = false);
-                          }
-                        }
-                      },
+                      onTap: () => _continueWithProvider(
+                        () => authManager.signInWithGoogle(context),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  wrapWithModel(
+                    model: _model.appleButtonModel,
+                    updateCallback: () => setState(() {}),
+                    child: SocialButtonWidget(
+                      icon: const FaIcon(
+                        FontAwesomeIcons.apple,
+                        size: 20,
+                      ),
+                      label: 'Continue with Apple',
+                      onTap: () => _continueWithProvider(
+                        () => authManager.signInWithApple(context),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 32),
@@ -295,6 +336,22 @@ class _SignUpWidgetState extends State<SignUpWidget> {
         _model.email,
         _model.password,
       );
+      if (!mounted) return;
+      if (user != null) {
+        await _continueAfterAuth();
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _continueWithProvider(
+    Future<Object?> Function() signIn,
+  ) async {
+    if (_isLoading) return;
+    setState(() => _isLoading = true);
+    try {
+      final user = await signIn();
       if (!mounted) return;
       if (user != null) {
         await _continueAfterAuth();

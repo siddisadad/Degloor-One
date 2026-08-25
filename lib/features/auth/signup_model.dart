@@ -13,6 +13,7 @@ class SignUpModel extends FlutterFlowModel<SignUpWidget> {
   late TextFieldModel passwordModel;
   late TextFieldModel confirmModel;
   late SocialButtonModel socialButtonModel;
+  late SocialButtonModel appleButtonModel;
 
   @override
   void initState(BuildContext context) {
@@ -20,6 +21,7 @@ class SignUpModel extends FlutterFlowModel<SignUpWidget> {
     passwordModel = createModel(context, () => TextFieldModel());
     confirmModel = createModel(context, () => TextFieldModel());
     socialButtonModel = createModel(context, () => SocialButtonModel());
+    appleButtonModel = createModel(context, () => SocialButtonModel());
   }
 
   String get email => emailModel.inputTextController?.text.trim() ?? '';
@@ -50,5 +52,6 @@ class SignUpModel extends FlutterFlowModel<SignUpWidget> {
     passwordModel.dispose();
     confirmModel.dispose();
     socialButtonModel.dispose();
+    appleButtonModel.dispose();
   }
 }
