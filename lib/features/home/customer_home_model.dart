@@ -15,6 +15,13 @@ class CustomerHomeModel extends FlutterFlowModel<CustomerHomeWidget> {
   String locationName = 'Degloor, Maharashtra';
   bool openNow = false;
 
+  /// Newest nearby shops for the New in Degloor strip.
+  List<Shop> newestShops(List<Shop> shops, {int limit = 5}) {
+    final recent = [...shops]
+      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    return recent.take(limit).toList();
+  }
+
   @override
   void initState(BuildContext context) {}
 
