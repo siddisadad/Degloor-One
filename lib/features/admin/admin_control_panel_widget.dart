@@ -1,11 +1,9 @@
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
-import 'package:degloor_one/backend/admin_service.dart';
 import 'package:degloor_one/components/degloor_app_bar.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/core/error_handler.dart';
 import 'package:degloor_one/shared/listing_complaint.dart';
 import 'package:degloor_one/shared/shop.dart';
-import 'package:degloor_one/shared/shop_category.dart';
 import 'package:degloor_one/components/action_item/action_item_widget.dart';
 import 'package:degloor_one/components/button/button_widget.dart';
 import 'package:degloor_one/components/category_chip/category_chip_widget.dart';
@@ -34,21 +32,56 @@ class _AdminControlPanelWidgetState extends State<AdminControlPanelWidget> {
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
-  Future<List<Shop>> fetchVerificationQueue() {
-    return AdminService.instance.verificationQueue(currentUserUid);
+  @override
+  void initState() {
+    super.initState();
+    _model = createModel(context, () => AdminControlPanelModel());
+    _loadDesk();
   }
 
-  Future<List<ListingComplaint>> fetchPendingComplaints() {
-    return AdminService.instance.pendingComplaints(currentUserUid);
+  Future<void> _loadDesk() async {
+    await _model.load(
+      userId: currentUserUid,
+      onBusyChanged: () {
+        if (mounted) safeSetState(() {});
+      },
+    );
+  }
+
+  Future<void> _verifyBusiness(Shop business) async {
+    try {
+      await _model.verifyBusiness(
+        userId: currentUserUid,
+        businessId: business.id,
+        onBusyChanged: () {
+          if (mounted) safeSetState(() {});
+        },
+      );
+    } catch (e) {
+      AppLogger.error('Error verifying business', e);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            AppLogger.userFacingMessage(
+              e,
+              fallback: 'Unable to verify the shop. Please try again.',
+            ),
+          ),
+        ),
+      );
+    }
   }
 
   Future<void> _resolveComplaint(ListingComplaint complaint) async {
     try {
-      await AdminService.instance.resolveComplaint(
-        adminUserId: currentUserUid,
+      await _model.resolveComplaint(
+        userId: currentUserUid,
         complaintId: complaint.id,
+        onBusyChanged: () {
+          if (mounted) safeSetState(() {});
+        },
       );
-      safeSetState(() {});
     } catch (e) {
       AppLogger.error('Error resolving complaint', e);
       if (!mounted) return;
@@ -65,18 +98,51 @@ class _AdminControlPanelWidgetState extends State<AdminControlPanelWidget> {
     }
   }
 
-  Future<List<ShopCategory>> fetchCategories() {
-    return AdminService.instance.businessCategories(currentUserUid);
-  }
-
-  Future<AdminCounts> fetchCounts() {
-    return AdminService.instance.counts(currentUserUid);
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _model = createModel(context, () => AdminControlPanelModel());
+  Future<void> _addCategory() async {
+    String? newCategoryName;
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Add New Category'),
+        content: TextField(onChanged: (val) => newCategoryName = val),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              try {
+                await _model.addCategory(
+                  userId: currentUserUid,
+                  name: newCategoryName ?? '',
+                  onBusyChanged: () {
+                    if (mounted) safeSetState(() {});
+                  },
+                );
+                if (dialogContext.mounted) {
+                  Navigator.pop(dialogContext);
+                }
+              } catch (e) {
+                if (!dialogContext.mounted) return;
+                ScaffoldMessenger.of(dialogContext).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      AppLogger.userFacingMessage(
+                        e,
+                        fallback:
+                            'Unable to add the category. Please try again.',
+                      ),
+                    ),
+                  ),
+                );
+              }
+            },
+            child: const Text('Add'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -86,20 +152,51 @@ class _AdminControlPanelWidgetState extends State<AdminControlPanelWidget> {
     super.dispose();
   }
 
+  Widget _gate({
+    required IconData icon,
+    required String title,
+    required String description,
+  }) {
+    return Scaffold(
+      backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+      body: EmptyStateView(
+        icon: icon,
+        title: title,
+        description: description,
+        buttonText: 'Go home',
+        onTap: () => context.goNamed('CustomerHome'),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    if (currentUser?.role == null) {
+    if (_model.isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
-    if (currentUser?.role != 'admin') {
+    if (_model.isSignedOut) {
+      return _gate(
+        icon: Icons.lock_outline_rounded,
+        title: 'Please sign in',
+        description: 'Sign in with an administrator account to open this desk.',
+      );
+    }
+    if (_model.isAccessDenied) {
+      return _gate(
+        icon: Icons.lock_outline_rounded,
+        title: 'Admin only',
+        description: 'This desk is for Degloor One administrators.',
+      );
+    }
+    if (_model.hasError) {
       return Scaffold(
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         body: EmptyStateView(
-          icon: Icons.lock_outline_rounded,
-          title: 'Admin only',
-          description: 'This desk is for Degloor One administrators.',
-          buttonText: 'Go home',
-          onTap: () => context.goNamed('CustomerHome'),
+          icon: Icons.error_outline_rounded,
+          title: 'Unable to load the desk',
+          description: 'The verification queues could not be loaded.',
+          buttonText: 'Retry',
+          onTap: _loadDesk,
         ),
       );
     }
@@ -173,95 +270,60 @@ class _AdminControlPanelWidgetState extends State<AdminControlPanelWidget> {
                 padding: const EdgeInsets.all(24.0),
                 child: Column(
                   children: [
-                    FutureBuilder<AdminCounts>(
-                      future: fetchCounts(),
-                      builder: (context, snapshot) {
-                        final pendingCount = snapshot.data?.pending ?? 0;
-                        final verifiedCount = snapshot.data?.verified ?? 0;
-                        return Row(
-                          children: [
-                            Expanded(
-                              child: wrapWithModel(
-                                model: _model.statCardModel1,
-                                updateCallback: () => safeSetState(() {}),
-                                child: StatCard2Widget(
-                                  label: 'Pending',
-                                  trend: '',
-                                  value: pendingCount.toString(),
-                                  isPositive: false,
-                                ),
-                              ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: wrapWithModel(
+                            model: _model.statCardModel1,
+                            updateCallback: () => safeSetState(() {}),
+                            child: StatCard2Widget(
+                              label: 'Pending',
+                              trend: '',
+                              value: _model.counts.pending.toString(),
+                              isPositive: false,
                             ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: wrapWithModel(
-                                model: _model.statCardModel2,
-                                updateCallback: () => safeSetState(() {}),
-                                child: StatCard2Widget(
-                                  label: 'Verified',
-                                  trend: '',
-                                  value: verifiedCount.toString(),
-                                  isPositive: true,
-                                ),
-                              ),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: wrapWithModel(
+                            model: _model.statCardModel2,
+                            updateCallback: () => safeSetState(() {}),
+                            child: StatCard2Widget(
+                              label: 'Verified',
+                              trend: '',
+                              value: _model.counts.verified.toString(),
+                              isPositive: true,
                             ),
-                          ],
-                        );
-                      },
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 24),
-                    FutureBuilder<List<Shop>>(
-                      future: fetchVerificationQueue(),
-                      builder: (context, snapshot) {
-                        final businesses = snapshot.data ?? [];
-                        if (businesses.isEmpty) {
-                          return const EmptyStateView(
-                            icon: Icons.verified_user_outlined,
-                            title: 'Queue is clear',
-                            description:
-                                'New Degloor shops will show up here for verification.',
-                          );
-                        }
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Business Queue', style: FlutterFlowTheme.of(context).titleMedium),
-                            const SizedBox(height: 12),
-                            ...businesses.map((business) => ActionItemWidget(
-                                  icon: Icon(Icons.store_rounded, color: FlutterFlowTheme.of(context).primary),
-                                  statusBg: const Color(0xFFFFF3E0),
-                                  statusLabel: 'BUSINESS',
-                                  statusText: const Color(0xFFE65100),
-                                  subtitle: 'Owner: ${business.ownerName ?? 'Unknown'}',
-                                  title: business.name,
-                                  onApprove: () async {
-                                    try {
-                                      await AdminService.instance.verifyBusiness(
-                                        adminUserId: currentUserUid,
-                                        businessId: business.id,
-                                      );
-                                      safeSetState(() {});
-                                    } catch (e) {
-                                      AppLogger.error('Error verifying business', e);
-                                      if (!context.mounted) return;
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(
-                                          content: Text(
-                                            AppLogger.userFacingMessage(
-                                              e,
-                                              fallback:
-                                                  'Unable to verify the shop. Please try again.',
-                                            ),
-                                          ),
-                                        ),
-                                      );
-                                    }
-                                  },
-                                )),
-                          ].divide(const SizedBox(height: 12)),
-                        );
-                      },
-                    ),
+                    if (_model.verificationQueue.isEmpty)
+                      const EmptyStateView(
+                        icon: Icons.verified_user_outlined,
+                        title: 'Queue is clear',
+                        description:
+                            'New Degloor shops will show up here for verification.',
+                      )
+                    else
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Business Queue', style: FlutterFlowTheme.of(context).titleMedium),
+                          const SizedBox(height: 12),
+                          ..._model.verificationQueue.map((business) => ActionItemWidget(
+                                icon: Icon(Icons.store_rounded, color: FlutterFlowTheme.of(context).primary),
+                                statusBg: const Color(0xFFFFF3E0),
+                                statusLabel: 'BUSINESS',
+                                statusText: const Color(0xFFE65100),
+                                subtitle: 'Owner: ${business.ownerName ?? 'Unknown'}',
+                                title: business.name,
+                                onApprove: () => _verifyBusiness(business),
+                              )),
+                        ].divide(const SizedBox(height: 12)),
+                      ),
                     const SizedBox(height: 24),
                     /* Removed Provider Queue UI */
                   ],
@@ -270,34 +332,27 @@ class _AdminControlPanelWidgetState extends State<AdminControlPanelWidget> {
               // Complaints Tab
               SingleChildScrollView(
                 padding: const EdgeInsets.all(24.0),
-                child: FutureBuilder<List<ListingComplaint>>(
-                  future: fetchPendingComplaints(),
-                  builder: (context, snapshot) {
-                    final complaints = snapshot.data ?? [];
-                    if (complaints.isEmpty) {
-                      return const EmptyStateView(
+                child: _model.pendingComplaints.isEmpty
+                    ? const EmptyStateView(
                         icon: Icons.report_problem_outlined,
                         title: 'No pending complaints',
                         description:
                             'Customer reports from Degloor shops will land here.',
-                      );
-                    }
-                    return Column(
-                      children: complaints
-                          .map((complaint) => ActionItemWidget(
-                                icon: Icon(Icons.report_problem_rounded, color: FlutterFlowTheme.of(context).error),
-                                statusBg: const Color(0xFFFFEBEE),
-                                statusLabel: 'PENDING',
-                                statusText: FlutterFlowTheme.of(context).error,
-                                subtitle: complaint.description,
-                                title: complaint.subject,
-                                onApprove: () => _resolveComplaint(complaint),
-                              ))
-                          .toList()
-                          .divide(const SizedBox(height: 16)),
-                    );
-                  },
-                ),
+                      )
+                    : Column(
+                        children: _model.pendingComplaints
+                            .map((complaint) => ActionItemWidget(
+                                  icon: Icon(Icons.report_problem_rounded, color: FlutterFlowTheme.of(context).error),
+                                  statusBg: const Color(0xFFFFEBEE),
+                                  statusLabel: 'PENDING',
+                                  statusText: FlutterFlowTheme.of(context).error,
+                                  subtitle: complaint.description,
+                                  title: complaint.subject,
+                                  onApprove: () => _resolveComplaint(complaint),
+                                ))
+                            .toList()
+                            .divide(const SizedBox(height: 16)),
+                      ),
               ),
               // System Tab
               SingleChildScrollView(
@@ -317,69 +372,21 @@ class _AdminControlPanelWidgetState extends State<AdminControlPanelWidget> {
                             content: 'Add',
                             variant: 'secondary',
                             size: 'small',
-                            onTap: () async {
-                              String? newCategoryName;
-                              await showDialog(
-                                context: context,
-                                builder: (context) => AlertDialog(
-                                  title: const Text('Add New Category'),
-                                  content: TextField(onChanged: (val) => newCategoryName = val),
-                                  actions: [
-                                    TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
-                                    TextButton(
-                                      onPressed: () async {
-                                        if (newCategoryName?.isNotEmpty == true) {
-                                          try {
-                                            await AdminService.instance.addCategory(
-                                              adminUserId: currentUserUid,
-                                              name: newCategoryName!,
-                                            );
-                                            if (context.mounted) {
-                                              Navigator.pop(context);
-                                              safeSetState(() {});
-                                            }
-                                          } catch (e) {
-                                            if (!context.mounted) return;
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              SnackBar(
-                                                content: Text(
-                                                  AppLogger.userFacingMessage(
-                                                    e,
-                                                    fallback:
-                                                        'Unable to add the category. Please try again.',
-                                                  ),
-                                                ),
-                                              ),
-                                            );
-                                          }
-                                        }
-                                      },
-                                      child: const Text('Add'),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
+                            onTap: _addCategory,
                           ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 12),
-                    FutureBuilder<List<ShopCategory>>(
-                      future: fetchCategories(),
-                      builder: (context, snapshot) {
-                        final categories = snapshot.data ?? [];
-                        return Wrap(
-                          spacing: 8.0,
-                          runSpacing: 8.0,
-                          children: categories
-                              .map((c) => CategoryChipWidget(
-                                    icon: Icon(Icons.category_rounded, color: FlutterFlowTheme.of(context).secondaryText, size: 16),
-                                    name: c.name,
-                                  ))
-                              .toList(),
-                        );
-                      },
+                    Wrap(
+                      spacing: 8.0,
+                      runSpacing: 8.0,
+                      children: _model.categories
+                          .map((c) => CategoryChipWidget(
+                                icon: Icon(Icons.category_rounded, color: FlutterFlowTheme.of(context).secondaryText, size: 16),
+                                name: c.name,
+                              ))
+                          .toList(),
                     ),
                     const SizedBox(height: 32),
                     Text('Platform Activity', style: FlutterFlowTheme.of(context).titleMedium),
