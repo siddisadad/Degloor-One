@@ -2,6 +2,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/backend/service_marketplace_service.dart';
+import 'package:degloor_one/backend/user_service.dart';
 import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/shared/page_query.dart';
@@ -132,6 +133,10 @@ void main() {
     expect(profile.experienceYears, 5);
     expect(profile.hourlyRate, 200);
     expect(profile.isVerified, isFalse);
+    expect(
+      await UserService.instance.roleFor(GuestAuthUser.guestUid),
+      'service_provider',
+    );
 
     await expectLater(
       ServiceMarketplaceService.instance.register(
@@ -297,6 +302,78 @@ void main() {
     expect(request.photoUrl, isNull);
   });
 
+  test('guest join as provider persists when live providers are empty', () async {
+    AppEnvironment.debugReset();
+    AppEnvironment.debugOverride(
+      flavor: AppFlavor.development,
+      bypassAuth: true,
+      useShowcaseData: false,
+    );
+    AppEnvironment.markFlutterFlowHostLive();
+    addTearDown(() {
+      AppEnvironment.debugReset();
+      AppEnvironment.debugOverride(
+        flavor: AppFlavor.development,
+        bypassAuth: true,
+        useShowcaseData: true,
+      );
+    });
+    expect(kUseShowcaseData, isFalse);
+
+    final categories = await ServiceMarketplaceService.instance.categories();
+    expect(categories.map((row) => row.id), contains('scat-electric'));
+
+    final profile = await ServiceMarketplaceService.instance.register(
+      userId: GuestAuthUser.guestUid,
+      categoryId: 'scat-electric',
+      experienceYears: '5',
+      hourlyRate: '200',
+      bio: 'Fan and wiring repair in Degloor.',
+    );
+    expect(profile, isA<ServiceProviderProfile>());
+    expect(profile.userId, GuestAuthUser.guestUid);
+    expect(profile.id, startsWith('service_providers-'));
+    expect(profile.hourlyRate, 200);
+
+    final listed = await ServiceMarketplaceService.instance.providers();
+    expect(
+      listed.items.map((row) => row.userId),
+      contains(GuestAuthUser.guestUid),
+    );
+    expect(
+      listed.items.where((row) => row.id.startsWith('sp-')),
+      isEmpty,
+    );
+    expect(
+      listed.items
+          .singleWhere((row) => row.userId == GuestAuthUser.guestUid)
+          .displayName,
+      'Guest Customer',
+    );
+
+    final again = await ServiceMarketplaceService.instance.forUser(
+      GuestAuthUser.guestUid,
+    );
+    expect(again!.id, profile.id);
+
+    await expectLater(
+      ServiceMarketplaceService.instance.register(
+        userId: GuestAuthUser.guestUid,
+        categoryId: 'scat-plumb',
+        experienceYears: '2',
+        hourlyRate: '150',
+        bio: 'Second profile',
+      ),
+      throwsA(
+        isA<Exception>().having(
+          (error) => error.toString(),
+          'message',
+          contains('already'),
+        ),
+      ),
+    );
+  });
+
   test('Java write JSON maps to provider profile and request', () {
     final profile = ServiceProviderProfile.fromJson({
       'id': 'sp-ravi',
@@ -328,5 +405,39 @@ void main() {
     expect(request.providerId, 'sp-ravi');
     expect(request.status, 'pending');
     expect(request.createdAt.toUtc().year, 2026);
+  });
+
+  test('live join as provider promotes the guest off Customer', () async {
+    AppEnvironment.debugReset();
+    AppEnvironment.debugOverride(
+      flavor: AppFlavor.development,
+      bypassAuth: true,
+      useShowcaseData: false,
+    );
+    AppEnvironment.markFlutterFlowHostLive();
+    addTearDown(() {
+      AppEnvironment.debugReset();
+      AppEnvironment.debugOverride(
+        flavor: AppFlavor.development,
+        bypassAuth: true,
+        useShowcaseData: true,
+      );
+    });
+    installGuestSession();
+    expect(kUseShowcaseData, isFalse);
+    expect(currentUser?.role, 'customer');
+
+    await ServiceMarketplaceService.instance.register(
+      userId: GuestAuthUser.guestUid,
+      categoryId: 'scat-electric',
+      experienceYears: '5',
+      hourlyRate: '200',
+      bio: 'Fan and wiring repair in Degloor.',
+    );
+    expect(currentUser?.role, 'service_provider');
+    expect(
+      await UserService.instance.roleFor(GuestAuthUser.guestUid),
+      'service_provider',
+    );
   });
 }

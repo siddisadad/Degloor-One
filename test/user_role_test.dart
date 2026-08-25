@@ -12,6 +12,10 @@ void main() {
       {'role': 'business_owner'},
     );
     expect(
+      UserRole.serviceProvider.toUpdateJson(),
+      {'role': 'service_provider'},
+    );
+    expect(
       UserRole.customer.toUpdateJson().keys,
       isNot(contains('id')),
     );
@@ -22,6 +26,22 @@ void main() {
     expect(
       UserRole.customer.toUpdateJson().containsKey('created_at'),
       isFalse,
+    );
+  });
+
+  test('role labels distinguish customer, shop, and service accounts', () {
+    expect(UserRole.parse(null).label, 'Customer');
+    expect(UserRole.parse('customer').isCustomer, isTrue);
+    expect(UserRole.parse('business_owner').label, 'Business owner');
+    expect(UserRole.parse('service_provider').label, 'Service provider');
+    expect(UserRole.parse('admin').label, 'Admin');
+    expect(
+      UserRole.resolve(profile: 'customer', session: 'service_provider').label,
+      'Service provider',
+    );
+    expect(
+      UserRole.resolve(profile: 'business_owner', session: 'customer').label,
+      'Business owner',
     );
   });
 }
