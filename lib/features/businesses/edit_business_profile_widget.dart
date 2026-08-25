@@ -1,5 +1,4 @@
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
-import 'package:degloor_one/backend/business_service.dart';
 import 'package:degloor_one/components/cached_remote_image.dart';
 import 'package:degloor_one/components/degloor_app_bar.dart';
 import 'package:degloor_one/core/error_handler.dart';
@@ -12,7 +11,6 @@ import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
 import 'package:degloor_one/shared/discovery_radius.dart';
 import 'package:degloor_one/shared/shop.dart';
-import 'package:degloor_one/shared/shop_draft.dart';
 import 'package:flutter/material.dart';
 import 'edit_business_profile_model.dart';
 export 'edit_business_profile_model.dart';
@@ -76,59 +74,36 @@ class _EditBusinessProfileWidgetState extends State<EditBusinessProfileWidget> {
   }
 
   Future<void> _updateProfile() async {
-    final name = _model.textFieldModel1.inputTextController?.text.trim();
-    if (name == null || name.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Business Name is required')),
-      );
-      return;
-    }
-
+    if (_isSaving) return;
     setState(() => _isSaving = true);
     try {
-      final sliderVal = _model.sliderModel.sliderValue ??
-          sliderPercentFromRadius(kDefaultDiscoveryRadiusKm);
-      final radiusKm = radiusFromSliderPercent(sliderVal);
-
-      await BusinessService.instance.updateProfile(
+      await _model.save(
         userId: currentUserUid,
         businessId: widget.business.id,
-        draft: ShopDraft.fromProfile(
-          name: name,
-          ownerName: _model.textFieldModel2.inputTextController?.text,
-          description: _model.textFieldModel3.inputTextController?.text,
-          phoneNumber: _model.textFieldModel4.inputTextController?.text,
-          whatsappNumber: _model.switchModel.switchValue == true
-              ? _model.textFieldModel4.inputTextController?.text
-              : _model.textFieldModel5.inputTextController?.text,
-          addressText: _model.textFieldModel6.inputTextController?.text,
-          discoveryRadius: radiusKm,
-          imageUrl: _model.imageUrl,
+      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Profile updated successfully'),
+          backgroundColor: Colors.green,
         ),
       );
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Profile updated successfully'), backgroundColor: Colors.green),
-        );
-        context.safePop();
-      }
+      context.safePop();
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              AppLogger.userFacingMessage(
-                e,
-                fallback: 'Unable to update the shop. Please try again.',
-              ),
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            AppLogger.userFacingMessage(
+              e,
+              fallback: 'Unable to update the shop. Please try again.',
             ),
-            backgroundColor: Colors.red,
           ),
-        );
-      }
+          backgroundColor: Colors.red,
+        ),
+      );
     } finally {
-      setState(() => _isSaving = false);
+      if (mounted) setState(() => _isSaving = false);
     }
   }
 
