@@ -6,9 +6,47 @@ import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+Widget _loginApp() {
+  final router = GoRouter(
+    initialLocation: '/authentication',
+    routes: [
+      GoRoute(
+        path: '/authentication',
+        name: 'Authentication',
+        builder: (_, __) => const AuthenticationWidget(),
+      ),
+      GoRoute(
+        path: '/',
+        name: 'CustomerHome',
+        builder: (_, __) => const Scaffold(body: Text('Customer home')),
+      ),
+      GoRoute(
+        path: '/businessRegistration',
+        name: 'BusinessRegistration',
+        builder: (_, __) => const Scaffold(body: Text('Register Business')),
+      ),
+      GoRoute(
+        path: '/businessDashboard',
+        name: 'BusinessDashboard',
+        builder: (_, __) => const Scaffold(body: Text('Business dashboard')),
+      ),
+      GoRoute(
+        path: '/initialRedirect',
+        name: '_initialize',
+        builder: (_, __) => const Scaffold(body: Text('Initialize')),
+      ),
+    ],
+  );
+  return ChangeNotifierProvider<FFAppState>.value(
+    value: FFAppState.instance,
+    child: MaterialApp.router(routerConfig: router),
+  );
+}
 
 void main() {
   setUpAll(() async {
@@ -93,5 +131,59 @@ void main() {
     );
     expect(find.textContaining('SUPABASE_URL'), findsNothing);
     expect(find.text('Continue as Guest'), findsOneWidget);
+  });
+
+  testWidgets('login shows Customer and Business tabs', (tester) async {
+    await tester.pumpWidget(
+      ChangeNotifierProvider<FFAppState>.value(
+        value: FFAppState.instance,
+        child: const MaterialApp(
+          home: AuthenticationWidget(),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    expect(find.text('Customer'), findsOneWidget);
+    expect(find.text('Business'), findsOneWidget);
+    expect(find.text('Sign in to shop local in Degloor.'), findsOneWidget);
+    expect(find.text('Don\'t have an account? '), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('login-tab-business')));
+    await tester.pump();
+
+    expect(find.text('Sign in to manage your Degloor shop.'), findsOneWidget);
+    expect(find.text('Sign in to shop local in Degloor.'), findsNothing);
+    expect(find.text('Don\'t have a shop yet? '), findsOneWidget);
+  });
+
+  testWidgets('customer guest continues to customer home', (tester) async {
+    await tester.pumpWidget(_loginApp());
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    await tester.ensureVisible(find.text('Continue as Guest'));
+    await tester.tap(find.text('Continue as Guest'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    expect(find.text('Customer home'), findsOneWidget);
+  });
+
+  testWidgets('business guest continues to shop registration', (tester) async {
+    await tester.pumpWidget(_loginApp());
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    await tester.tap(find.byKey(const ValueKey('login-tab-business')));
+    await tester.pump();
+    await tester.ensureVisible(find.text('Continue as Guest'));
+    await tester.tap(find.text('Continue as Guest'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    expect(find.text('Register Business'), findsOneWidget);
+    expect(find.text('Customer home'), findsNothing);
   });
 }
