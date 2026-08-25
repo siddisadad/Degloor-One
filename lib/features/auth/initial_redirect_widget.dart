@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:degloor_one/auth/password_recovery.dart';
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
-import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
-import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/backend/discovery_service.dart';
+import 'package:degloor_one/backend/service_marketplace_service.dart';
 import 'package:degloor_one/core/app_flags.dart';
-
 import 'package:degloor_one/core/error_handler.dart';
+import 'package:degloor_one/features/auth/start_route.dart';
+import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
+import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
+
+export 'start_route.dart';
 
 class InitialRedirectWidget extends StatefulWidget {
   const InitialRedirectWidget({super.key});
@@ -38,46 +41,37 @@ class _InitialRedirectWidgetState extends State<InitialRedirectWidget> {
 
   Future<void> _handleRedirect() async {
     try {
-      if (PasswordRecovery.pending.value) {
-        context.goNamed('ResetPassword');
-        return;
-      }
-
-      if (kBypassAuth) {
-        context.goNamed('CustomerHome');
-        return;
-      }
-
-      if (!loggedIn) {
-        context.goNamed('Authentication');
-        return;
-      }
-
-      // Always fetch latest role from DB to handle role updates (e.g. after registration)
-      // Added timeout to prevent hanging on poor connection
-      final String? role = await getCurrentUserRole().timeout(const Duration(seconds: 10));
+      final role = loggedIn
+          ? await getCurrentUserRole().timeout(const Duration(seconds: 10))
+          : null;
       if (!mounted) return;
 
-      if (role == 'business_owner') {
-        final businesses = await DiscoveryService.instance
-            .ownedBy(currentUserUid)
-            .timeout(const Duration(seconds: 10));
-        if (!mounted) return;
-
-        if (businesses.isEmpty) {
-          context.goNamed('BusinessRegistration');
-        } else {
-          context.goNamed('BusinessDashboard');
-        }
-      } else if (role == 'admin') {
-        context.goNamed('AdminControlPanel');
-      } else {
-        context.goNamed('CustomerHome');
-      }
+      final route = await resolveStartRoute(
+        passwordRecoveryPending: PasswordRecovery.pending.value,
+        loggedIn: loggedIn,
+        bypassAuth: kBypassAuth,
+        role: role,
+        userId: currentUserUid,
+        hasOwnedShop: (id) async {
+          final shops = await DiscoveryService.instance
+              .ownedBy(id)
+              .timeout(const Duration(seconds: 10));
+          return shops.isNotEmpty;
+        },
+        hasProviderProfile: (id) async {
+          final profile = await ServiceMarketplaceService.instance
+              .forUser(id)
+              .timeout(const Duration(seconds: 10));
+          return profile != null;
+        },
+      );
+      if (!mounted) return;
+      context.goNamed(route);
     } catch (e) {
       AppLogger.error('Redirection error', e);
       if (mounted) {
-        setState(() => _errorMessage = 'Failed to load user profile. Please check your connection.');
+        setState(() => _errorMessage =
+            'Failed to load user profile. Please check your connection.');
       }
     }
   }

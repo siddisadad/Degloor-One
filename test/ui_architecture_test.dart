@@ -26,6 +26,14 @@ void main() {
     expect(offenders, isEmpty, reason: offenders.join('\n'));
   });
 
+  test('start route stays off Supabase tables', () {
+    const path = 'lib/features/auth/start_route.dart';
+    final source = File(path).readAsStringSync();
+    expect(source.contains(_barrel), isFalse);
+    expect(source.contains(_table), isFalse);
+    expect(source.contains('data/datasources'), isFalse);
+  });
+
   test('login screen does not look up shops itself', () {
     final source =
         File('lib/features/auth/authentication_widget.dart').readAsStringSync();
