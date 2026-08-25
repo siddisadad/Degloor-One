@@ -51,6 +51,8 @@ class BusinessRegistrationModel
   late TextFieldModel textFieldModel7;
   // Model for TextField.
   late TextFieldModel textFieldModel8;
+  // Model for TextField.
+  late TextFieldModel textFieldModel9;
   // State field(s) for Map Google Map widget.
   LatLng mapGoogleMapsCenter = const LatLng(18.5522, 77.5844);
   final mapGoogleMapsController = Completer<GoogleMapController>();
@@ -182,6 +184,7 @@ class BusinessRegistrationModel
     textFieldModel6 = createModel(context, () => TextFieldModel());
     textFieldModel7 = createModel(context, () => TextFieldModel());
     textFieldModel8 = createModel(context, () => TextFieldModel());
+    textFieldModel9 = createModel(context, () => TextFieldModel());
     buttonModel1 = createModel(context, () => ButtonModel());
     sectionHeaderModel4 = createModel(context, () => SectionHeaderModel());
     sliderModel = createModel(context, () => SliderModel());
@@ -212,6 +215,7 @@ class BusinessRegistrationModel
         ownerName: owner,
         phone: phone,
         categoryId: dropdownValue ?? '',
+        subcategory: textFieldModel9.inputTextController?.text,
         latitude: mapGoogleMapsCenter.latitude,
         longitude: mapGoogleMapsCenter.longitude,
         description: textFieldModel3.inputTextController?.text ?? '',
@@ -241,6 +245,7 @@ class BusinessRegistrationModel
     textFieldModel6.dispose();
     textFieldModel7.dispose();
     textFieldModel8.dispose();
+    textFieldModel9.dispose();
     buttonModel1.dispose();
     sectionHeaderModel4.dispose();
     sliderModel.dispose();

@@ -89,10 +89,8 @@ void main() {
 
     expect(find.text('Welcome back'), findsOneWidget);
     expect(find.text('Continue as Guest'), findsOneWidget);
-    expect(
-      find.text(SupabaseConnection.unreachableMessage),
-      findsNothing,
-    );
+    expect(find.text('Continue with Phone'), findsOneWidget);
+    expect(find.text('Continue with Google'), findsOneWidget);
     expect(find.textContaining('SUPABASE_URL'), findsNothing);
   });
 

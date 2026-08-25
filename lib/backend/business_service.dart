@@ -16,6 +16,8 @@ import 'package:degloor_one/shared/shop_draft.dart';
 import 'package:degloor_one/shared/shop_hours.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 import 'package:degloor_one/shared/user_role.dart';
+import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
+import 'package:degloor_one/backend/whatsapp_service.dart';
 
 class ProfileCompleteness {
   const ProfileCompleteness({
@@ -178,6 +180,27 @@ class BusinessService {
       businessId: businessId,
       ownerId: userId,
       draft: normalized,
+    );
+  }
+
+  Future<void> deleteBusiness({
+    required String userId,
+    required String businessId,
+  }) async {
+    await requireOwnedBusiness(userId: userId, businessId: businessId);
+    await _shops.delete(businessId, ownerId: userId);
+    await authManager.refreshUser();
+  }
+
+  Future<void> contactSupportForVerification(Shop shop) async {
+    final message = 'Hello DEGLOOR ONE Team,\n\n'
+        'I would like to verify my business:\n'
+        'Name: ${shop.name}\n'
+        'ID: ${shop.id}\n'
+        'Please let me know the next steps.';
+    await WhatsAppService.launchWhatsApp(
+      phoneNumber: '+919876543210',
+      message: message,
     );
   }
 

@@ -179,8 +179,11 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
                 GoRoute(
                   name: UserProfileReportsWidget.routeName,
                   path: UserProfileReportsWidget.routePath,
-                  builder: (context, state) =>
-                      const UserProfileReportsWidget(showBack: false),
+                  builder: (context, state) => UserProfileReportsWidget(
+                    showBack: false,
+                    editProfile:
+                        state.uri.queryParameters['editProfile'] == 'true',
+                  ),
                   redirect: (context, state) =>
                       !kBypassAuth && !appStateNotifier.loggedIn
                           ? '/authentication'
@@ -203,7 +206,15 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
           name: UserProfileReportsWidget.stackedRouteName,
           path: UserProfileReportsWidget.stackedRoutePath,
-          builder: (context, params) => const UserProfileReportsWidget(),
+          builder: (context, params) => UserProfileReportsWidget(
+            editProfile: params.getParam<bool>('editProfile', ParamType.bool),
+          ),
+          requireAuth: true,
+        ),
+        FFRoute(
+          name: UserServiceRequestsWidget.routeName,
+          path: UserServiceRequestsWidget.routePath,
+          builder: (context, params) => const UserServiceRequestsWidget(),
           requireAuth: true,
         ),
         FFRoute(

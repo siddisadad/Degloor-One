@@ -24,10 +24,12 @@ class UserProfileReportsWidget extends StatefulWidget {
   const UserProfileReportsWidget({
     super.key,
     this.showBack = true,
+    this.editProfile = false,
   });
 
   /// Pushed profile (Home, order help) shows back. The Profile tab does not.
   final bool showBack;
+  final bool editProfile;
 
   static String routeName = 'UserProfileReports';
   static String routePath = '/userProfileReports';
@@ -61,6 +63,15 @@ class _UserProfileReportsWidgetState extends State<UserProfileReportsWidget> {
       _reloadProfile();
       _model.complaintsFuture =
           ShopService.instance.complaintsForUser(currentUserUid);
+
+      if (widget.editProfile) {
+        WidgetsBinding.instance.addPostFrameCallback((_) async {
+          final profiles = await _model.userProfileFuture;
+          if (mounted) {
+            _editPersonalInfo(profiles?.firstOrNull);
+          }
+        });
+      }
     }
   }
 
@@ -227,6 +238,12 @@ class _UserProfileReportsWidgetState extends State<UserProfileReportsWidget> {
                       ),
                     ),
                     _sectionHeader('Account Settings'),
+                    _settingsTile(
+                      Icons.history_rounded,
+                      'My service requests',
+                      'Track your plumbers, electricians, etc.',
+                      () => context.pushNamed('UserServiceRequests'),
+                    ),
                     _settingsTile(
                       Icons.person_outline_rounded,
                       'Personal Information',

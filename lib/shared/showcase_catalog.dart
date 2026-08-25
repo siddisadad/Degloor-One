@@ -180,6 +180,7 @@ class ShowcaseCatalog {
     required double radiusKm,
     String? searchTerm,
     String? categoryId,
+    String? subcategory,
     bool openNow = false,
     bool verifiedOnly = false,
     double minRating = 0.0,
@@ -194,6 +195,7 @@ class ShowcaseCatalog {
       final distance = _haversineKm(latitude, longitude, lat, lng);
       if (distance > radiusKm) continue;
       if (categoryId != null && raw['category_id'] != categoryId) continue;
+      if (subcategory != null && raw['sub_category'] != subcategory) continue;
       if (verifiedOnly && raw['is_verified'] != true) continue;
       if (openNow && raw['is_open'] != true) continue;
       final rating = (raw['rating'] as num?)?.toDouble() ?? 0;
@@ -472,6 +474,7 @@ class ShowcaseCatalog {
           77.5845,
           4.5,
           'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=800&q=80',
+          subcategory: 'Kirana',
         ),
         _biz(
           bizHotel,
@@ -485,6 +488,7 @@ class ShowcaseCatalog {
           77.5860,
           4.2,
           'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=800&q=80',
+          subcategory: 'Maharashtrian',
         ),
         _biz(
           bizHardware,
@@ -1062,6 +1066,7 @@ class ShowcaseCatalog {
     String image, {
     bool verified = true,
     bool open = true,
+    String? subcategory,
   }) {
     return {
       'id': id,
@@ -1070,6 +1075,7 @@ class ShowcaseCatalog {
       'owner_name': ownerName,
       'description': description,
       'category_id': categoryId,
+      'sub_category': subcategory,
       'city_id': 'city-degloor',
       'address_text': address,
       'whatsapp_number': '+919876543210',

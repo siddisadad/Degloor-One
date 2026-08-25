@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:degloor_one/core/error_handler.dart';
 import 'package:degloor_one/shared/catalog_product.dart';
 import 'package:degloor_one/shared/catalog_product_draft.dart';
+import 'package:degloor_one/shared/catalog_product_stock.dart';
 import 'package:degloor_one/shared/shop.dart';
 import 'manage_catalogue_model.dart';
 export 'manage_catalogue_model.dart';
@@ -189,11 +190,13 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
               ),
               if (_businessCategories.isNotEmpty) ...[
                 const SizedBox(height: 8),
+                Text('Suggestions:', style: DegloorTheme.labelSmall),
+                const SizedBox(height: 4),
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
                   children: [
-                    for (final category in _businessCategories)
+                    for (final category in _businessCategories.take(4))
                       DegloorFilterChip(
                         label: category.name,
                         selected: _model.productCategoryTextController?.text ==
@@ -285,13 +288,68 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
           trackInventory: p.trackInventory ?? false,
           actionLabel: 'Edit',
           onActionPressed: () => _editProduct(p),
-          trailing: IconButton(
-            icon: const Icon(Icons.delete_outline, color: DegloorTheme.error),
-            onPressed: () => _deleteProduct(p.id),
+          trailing: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (p.trackInventory == true)
+                Container(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  decoration: BoxDecoration(
+                    color: DegloorTheme.accent,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _stockQuickBtn(Icons.remove_rounded, () => _quickStock(p, -1)),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        child: Text(
+                          '${p.stockQuantity}',
+                          style: DegloorTheme.bodySmall.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      _stockQuickBtn(Icons.add_rounded, () => _quickStock(p, 1)),
+                    ],
+                  ),
+                ),
+              IconButton(
+                icon: const Icon(Icons.delete_outline, color: DegloorTheme.error, size: 20),
+                onPressed: () => _deleteProduct(p.id),
+                visualDensity: VisualDensity.compact,
+              ),
+            ],
           ),
         );
       },
     );
+  }
+
+  Widget _stockQuickBtn(IconData icon, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.all(4),
+        child: Icon(icon, size: 18, color: DegloorTheme.primary),
+      ),
+    );
+  }
+
+  Future<void> _quickStock(CatalogProduct p, int delta) async {
+    final newQty = (p.stockQuantity ?? 0) + delta;
+    if (newQty < 0) return;
+    
+    try {
+      await BusinessService.instance.updateStock(
+        userId: currentUserUid,
+        productId: p.id,
+        stock: CatalogProductStock(newQty),
+      );
+      await _fetchProducts();
+    } catch (e) {
+      AppLogger.error('Quick stock failed', e);
+    }
   }
 
   Future<void> _deleteProduct(String id) async {

@@ -2,6 +2,7 @@ import 'package:degloor_one/backend/service_marketplace_service.dart';
 import 'package:degloor_one/core/app_flags.dart';
 import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/shared/service_category.dart';
+import 'package:degloor_one/components/category_icon.dart';
 import 'package:degloor_one/components/degloor_app_bar.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/components/modern/modern_category_item.dart';
@@ -93,24 +94,6 @@ class _ServicesWidgetState extends State<ServicesWidget> {
       }
     });
     _loadProviders();
-  }
-
-  Widget getIconFromData(String? iconName) {
-    const color = DegloorTheme.primary;
-    switch (iconName) {
-      case 'electrical_services':
-        return const Icon(Icons.electrical_services_rounded,
-            color: color, size: 24.0);
-      case 'plumbing':
-        return const Icon(Icons.plumbing_rounded, color: color, size: 24.0);
-      case 'construction':
-        return const Icon(Icons.construction_rounded, color: color, size: 24.0);
-      case 'cleaning_services':
-        return const Icon(Icons.cleaning_services_rounded,
-            color: color, size: 24.0);
-      default:
-        return const Icon(Icons.category_rounded, color: color, size: 24.0);
-    }
   }
 
   @override
@@ -205,7 +188,12 @@ class _ServicesWidgetState extends State<ServicesWidget> {
                             ),
                             child: ModernCategoryItem(
                               label: category.name,
-                              icon: getIconFromData(category.iconName),
+                              icon: CategoryIcon(
+                                iconName: category.iconName,
+                                color: isSelected
+                                    ? DegloorTheme.primary
+                                    : DegloorTheme.textSecondary,
+                              ),
                               onTap: () => _onCategorySelected(category.id),
                             ),
                           ),

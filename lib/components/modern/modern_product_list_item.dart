@@ -70,14 +70,21 @@ class ModernProductListItem extends StatelessWidget {
                     width: 90,
                     height: 90,
                     decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.5),
+                      color: Colors.black.withValues(alpha: 0.6),
                       borderRadius: BorderRadius.circular(DegloorTheme.radiusSM),
                     ),
-                    child: const Center(
-                      child: Text(
-                        'OUT OF STOCK',
-                        style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
-                        textAlign: TextAlign.center,
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        child: Text(
+                          'OUT OF\nSTOCK',
+                          style: DegloorTheme.labelSmall.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.5,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
                       ),
                     ),
                   ),
@@ -89,11 +96,42 @@ class ModernProductListItem extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    name,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: DegloorTheme.titleMedium.copyWith(fontSize: 15),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          name,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: DegloorTheme.titleMedium.copyWith(fontSize: 15),
+                        ),
+                      ),
+                      if (inStock &&
+                          trackInventory &&
+                          (stockQuantity ?? 0) > 0 &&
+                          (stockQuantity ?? 0) <= 5)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: DegloorTheme.warning.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(
+                                color:
+                                    DegloorTheme.warning.withValues(alpha: 0.5)),
+                          ),
+                          child: Text(
+                            'LIMITED STOCK',
+                            style: DegloorTheme.labelSmall.copyWith(
+                              color: DegloorTheme.warning,
+                              fontSize: 9,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                   const SizedBox(height: 4),
                   if (description?.isNotEmpty == true)

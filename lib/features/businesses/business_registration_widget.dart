@@ -435,6 +435,23 @@ class _BusinessRegistrationWidgetState
                                 ),
                           ),
                         wrapWithModel(
+                          model: _model.textFieldModel9,
+                          updateCallback: () => safeSetState(() {}),
+                          child: TextFieldWidget(
+                            label: 'Type / Specialty',
+                            labelPresent: true,
+                            helper: 'e.g. Kirana, Hardware, Restaurant',
+                            helperPresent: true,
+                            leadingIconPresent: false,
+                            trailingIconPresent: false,
+                            hint: 'What kind of business is this?',
+                            value: '',
+                            onSubmit: (_) {},
+                            variant: 'outlined',
+                            error: false,
+                          ),
+                        ),
+                        wrapWithModel(
                           model: _model.textFieldModel3,
                           updateCallback: () => safeSetState(() {}),
                           child: TextFieldWidget(

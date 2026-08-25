@@ -14,6 +14,7 @@ class BusinessCardWidget extends StatelessWidget {
     this.status = 'Closed',
     this.verified = false,
     this.isOpen = false,
+    this.subcategory,
   });
 
   final String category;
@@ -24,6 +25,7 @@ class BusinessCardWidget extends StatelessWidget {
   final String status;
   final bool verified;
   final bool isOpen;
+  final String? subcategory;
 
   @override
   Widget build(BuildContext context) {
@@ -124,8 +126,11 @@ class BusinessCardWidget extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        category,
-                        style: DegloorTheme.bodySmall.copyWith(color: DegloorTheme.textSecondary),
+                        subcategory != null && subcategory!.isNotEmpty
+                            ? '$category • $subcategory'
+                            : category,
+                        style: DegloorTheme.bodySmall
+                            .copyWith(color: DegloorTheme.textSecondary),
                       ),
                       const Spacer(),
                       Row(

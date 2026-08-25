@@ -8,6 +8,7 @@ import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
 import 'package:degloor_one/components/cached_remote_image.dart';
+import 'package:degloor_one/core/degloor_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:degloor_one/features/services/service_provider_profile_model.dart';
@@ -128,48 +129,63 @@ class _ServiceProviderProfileWidgetState
                               children: [
                                 Text(
                                   displayName,
-                                  style: FlutterFlowTheme.of(context).headlineMedium,
+                                  style: DegloorTheme.headingLarge,
                                 ),
                                 Text(
                                   provider.categoryName,
-                                  style: FlutterFlowTheme.of(context).titleMedium.override(
-                                        font: GoogleFonts.inter(),
-                                        color: FlutterFlowTheme.of(context).primary,
-                                      ),
+                                  style: DegloorTheme.titleMedium.copyWith(
+                                    color: DegloorTheme.primary,
+                                  ),
                                 ),
                               ],
                             ),
                             if (provider.isVerified)
-                              Icon(
+                              const Icon(
                                 Icons.verified_rounded,
-                                color: FlutterFlowTheme.of(context).primary,
+                                color: DegloorTheme.primary,
                                 size: 32,
                               ),
                           ],
                         ),
                         const SizedBox(height: 24),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            _buildStatItem('Experience', '${provider.experienceYears ?? 0} Years'),
-                            _buildStatItem(
-                              'Hourly Rate',
-                              provider.hourlyRateLabel,
-                            ),
-                          ],
+                        Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: DegloorTheme.cardBackground,
+                            borderRadius:
+                                BorderRadius.circular(DegloorTheme.radiusMD),
+                            border: Border.all(color: DegloorTheme.border),
+                            boxShadow: DegloorTheme.softShadow,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              _buildStatItem('Experience',
+                                  '${provider.experienceYears ?? 0} Years'),
+                              Container(
+                                width: 1,
+                                height: 40,
+                                color: DegloorTheme.border,
+                              ),
+                              _buildStatItem(
+                                'Hourly Rate',
+                                provider.hourlyRateLabel,
+                              ),
+                            ],
+                          ),
                         ),
-                        const Divider(height: 48),
+                        const SizedBox(height: 32),
                         Text(
                           'About',
-                          style: FlutterFlowTheme.of(context).titleLarge,
+                          style: DegloorTheme.titleLarge,
                         ),
                         const SizedBox(height: 12),
                         Text(
                           provider.bio ?? 'No bio provided.',
-                          style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                font: GoogleFonts.inter(),
-                                lineHeight: 1.6,
-                              ),
+                          style: DegloorTheme.bodyMedium.copyWith(
+                            height: 1.6,
+                            color: DegloorTheme.textSecondary,
+                          ),
                         ),
                         const SizedBox(height: 32),
                         FFButtonWidget(
@@ -181,7 +197,8 @@ class _ServiceProviderProfileWidgetState
                               context: context,
                               builder: (context) {
                                 return Padding(
-                                  padding: MediaQuery.viewInsetsOf(context),
+                                  padding:
+                                      MediaQuery.viewInsetsOf(context),
                                   child: RequestServiceSheetWidget(
                                     providerId: provider.id,
                                     providerName: displayName,
@@ -194,13 +211,13 @@ class _ServiceProviderProfileWidgetState
                           options: FFButtonOptions(
                             width: double.infinity,
                             height: 56,
-                            color: FlutterFlowTheme.of(context).primary,
-                            textStyle: FlutterFlowTheme.of(context).titleMedium.override(
-                                  font: GoogleFonts.inter(),
-                                  color: Colors.white,
-                                ),
-                            elevation: 3,
-                            borderRadius: BorderRadius.circular(12),
+                            color: DegloorTheme.primary,
+                            textStyle: DegloorTheme.titleMedium.copyWith(
+                              color: Colors.white,
+                            ),
+                            elevation: 2,
+                            borderRadius: BorderRadius.circular(
+                                DegloorTheme.radiusMD),
                           ),
                         ),
                         const SizedBox(height: 100),
@@ -221,13 +238,11 @@ class _ServiceProviderProfileWidgetState
       children: [
         Text(
           value,
-          style: FlutterFlowTheme.of(context).titleMedium.override(
-                font: GoogleFonts.inter(fontWeight: FontWeight.bold),
-              ),
+          style: DegloorTheme.titleMedium.copyWith(fontWeight: FontWeight.bold),
         ),
         Text(
           label,
-          style: FlutterFlowTheme.of(context).labelSmall,
+          style: DegloorTheme.labelSmall,
         ),
       ],
     );

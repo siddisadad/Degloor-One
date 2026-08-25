@@ -1,3 +1,5 @@
+import 'package:degloor_one/core/app_flags.dart';
+
 /// Fields an owner submits when registering or editing a shop.
 /// Id, createdAt, rating, and verification stay off this type
 /// except the stored unverified insert default.
@@ -10,6 +12,7 @@ class ShopDraft {
     this.whatsappNumber,
     this.addressText,
     this.categoryId,
+    this.subcategory,
     this.latitude,
     this.longitude,
     this.discoveryRadius,
@@ -24,6 +27,7 @@ class ShopDraft {
   final String? whatsappNumber;
   final String? addressText;
   final String? categoryId;
+  final String? subcategory;
   final double? latitude;
   final double? longitude;
   final double? discoveryRadius;
@@ -40,6 +44,7 @@ class ShopDraft {
     required double latitude,
     required double longitude,
     String description = '',
+    String? subcategory,
     String? whatsappNumber,
     String addressText = '',
     double discoveryRadius = 5,
@@ -74,6 +79,7 @@ class ShopDraft {
       whatsappNumber: (whatsappNumber ?? trimmedPhone).trim(),
       addressText: addressText.trim(),
       categoryId: categoryId,
+      subcategory: subcategory?.trim(),
       latitude: latitude,
       longitude: longitude,
       discoveryRadius: discoveryRadius,
@@ -89,6 +95,7 @@ class ShopDraft {
     required String name,
     String? ownerName,
     String? description,
+    String? subcategory,
     String? phoneNumber,
     String? whatsappNumber,
     String? addressText,
@@ -103,6 +110,7 @@ class ShopDraft {
       name: trimmedName,
       ownerName: ownerName?.trim(),
       description: description?.trim(),
+      subcategory: subcategory?.trim(),
       phoneNumber: phoneNumber?.trim(),
       whatsappNumber: whatsappNumber?.trim(),
       addressText: addressText?.trim(),
@@ -149,7 +157,9 @@ class ShopDraft {
       'discovery_radius': discoveryRadius ?? 5,
       'is_verified': false,
       'source': 'owner',
+      if (subcategory != null) 'sub_category': subcategory,
       if (cover != null) 'image_url': cover,
+      if (kUseShowcaseData && photoUrls.isNotEmpty) 'photos': photoUrls,
     };
   }
 
@@ -163,6 +173,7 @@ class ShopDraft {
       'phone_number': phoneNumber,
       'whatsapp_number': whatsappNumber,
       'address_text': addressText,
+      if (subcategory != null) 'sub_category': subcategory,
       if (discoveryRadius != null) 'discovery_radius': discoveryRadius,
       'image_url': imageUrl,
     };

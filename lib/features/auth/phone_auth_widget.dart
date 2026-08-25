@@ -135,7 +135,11 @@ class _PhoneAuthWidgetState extends State<PhoneAuthWidget> {
   }
 
   Future<void> _handleSendOtp() async {
-    final phone = PhoneNumber.normalize(_model.textController.text);
+    var rawPhone = _model.textController.text.trim();
+    if (rawPhone.length == 10 && !rawPhone.startsWith('+')) {
+      rawPhone = '+91$rawPhone';
+    }
+    final phone = PhoneNumber.normalize(rawPhone);
     if (phone == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Enter a valid 10-digit phone number')),

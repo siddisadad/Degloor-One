@@ -1,6 +1,7 @@
 import 'package:degloor_one/backend/supabase/database/tables/service_categories_table.dart';
 import 'package:degloor_one/backend/supabase/database/tables/service_providers_table.dart';
 import 'package:degloor_one/backend/supabase/database/tables/service_requests_table.dart';
+import 'package:degloor_one/shared/marketplace_joins.dart';
 import 'package:degloor_one/shared/service_category.dart';
 import 'package:degloor_one/shared/service_provider_profile.dart';
 import 'package:degloor_one/shared/service_request.dart';
@@ -35,6 +36,9 @@ ServiceProviderProfile serviceProviderProfileFromRow(ServiceProvidersRow row) {
 }
 
 ServiceRequest serviceRequestFromRow(ServiceRequestsRow row) {
+  final providerData = row.data['provider'];
+  final userData = row.data['users'];
+
   return ServiceRequest(
     id: row.id,
     createdAt: row.createdAt,
@@ -43,5 +47,9 @@ ServiceRequest serviceRequestFromRow(ServiceRequestsRow row) {
     description: row.description,
     status: row.status,
     scheduledAt: row.scheduledAt,
+    user: JoinedUser.fromJoin(userData),
+    provider: JoinedUser.fromJoin(providerData is Map
+        ? providerData['users'] ?? providerData
+        : providerData),
   );
 }

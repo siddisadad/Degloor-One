@@ -110,6 +110,23 @@ void main() {
     );
   });
 
+  test('customers can watch their own service requests', () async {
+    final userId = GuestAuthUser.guestUid;
+    await ServiceMarketplaceService.instance.createRequest(
+      userId: userId,
+      providerId: 'sp-ravi',
+      description: 'Request 1',
+      scheduledAt: DateTime.now(),
+    );
+
+    final stream = ServiceMarketplaceService.instance.watchForUser(userId);
+    final list = await stream.first;
+
+    expect(list, isNotEmpty);
+    expect(list.any((r) => r.description == 'Request 1'), isTrue);
+    expect(list.every((r) => r.userId == userId), isTrue);
+  });
+
   test('provider profile lookup joins user and category', () async {
     final provider =
         await ServiceMarketplaceService.instance.providerById('sp-ravi');

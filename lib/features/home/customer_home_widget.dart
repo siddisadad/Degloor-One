@@ -1,4 +1,5 @@
 import 'package:degloor_one/components/cached_remote_image.dart';
+import 'package:degloor_one/components/category_icon.dart';
 import 'package:degloor_one/core/degloor_theme.dart';
 import 'package:degloor_one/components/modern/hero_banner.dart';
 import 'package:degloor_one/components/modern/modern_category_item.dart';
@@ -171,27 +172,6 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
       _model.openNowBusinessesFuture = Future.value([]);
       _model.recommendedProductsFuture = Future.value([]);
     }
-  }
-
-  Widget getIconFromData(String? iconName) {
-    final iconMap = {
-      'shopping_basket_rounded': Icons.shopping_basket_rounded,
-      'restaurant_rounded': Icons.restaurant_rounded,
-      'construction_rounded': Icons.construction_rounded,
-      'bolt_rounded': Icons.bolt_rounded,
-      'medical_services_rounded': Icons.medical_services_rounded,
-      'directions_car_rounded': Icons.directions_car_rounded,
-      'checkroom_rounded': Icons.checkroom_rounded,
-      'content_cut_rounded': Icons.content_cut_rounded,
-      'home_repair_service_rounded': Icons.home_repair_service_rounded,
-      'local_pharmacy_rounded': Icons.local_pharmacy_rounded,
-      'electrical_services_rounded': Icons.electrical_services_rounded,
-      'agriculture_rounded': Icons.agriculture_rounded,
-    };
-
-    return Icon(
-      iconMap[iconName] ?? Icons.category_rounded,
-    );
   }
 
   String get _locationLabel {
@@ -412,7 +392,7 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                       padding: const EdgeInsets.only(right: DegloorTheme.spacingMD),
                       child: ModernCategoryItem(
                         label: cat.name,
-                        icon: getIconFromData(cat.iconName),
+                        icon: CategoryIcon(iconName: cat.iconName),
                         onTap: () => context.pushNamed(
                           'SearchResults',
                           queryParameters: {'categoryId': cat.id},
@@ -485,6 +465,7 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
                     distance: biz.distanceKm != null
                         ? '${biz.distanceKm!.toStringAsFixed(1)} km'
                         : 'Nearby',
+                    subcategory: biz.subcategory,
                     onTap: () => context.pushNamed(
                       'BusinessProfile',
                       queryParameters: {'businessId': biz.id},

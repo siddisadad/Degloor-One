@@ -17,6 +17,7 @@ class JavaDiscoveryRepository implements DiscoveryRepository {
   Future<List<Map<String, dynamic>>> _businessRows({
     String? q,
     String? categoryId,
+    String? subcategory,
     double? lat,
     double? lng,
     double? radiusKm,
@@ -29,6 +30,7 @@ class JavaDiscoveryRepository implements DiscoveryRepository {
     final data = await _client.get('/api/v1/businesses', query: {
       if (q != null && q.isNotEmpty) 'q': q,
       if (categoryId != null && categoryId.isNotEmpty) 'categoryId': categoryId,
+      if (subcategory != null && subcategory.isNotEmpty) 'subcategory': subcategory,
       if (lat != null) 'lat': '$lat',
       if (lng != null) 'lng': '$lng',
       if (radiusKm != null) 'radiusKm': '$radiusKm',
@@ -48,6 +50,7 @@ class JavaDiscoveryRepository implements DiscoveryRepository {
     final rows = await _businessRows(
       q: query.searchTerm,
       categoryId: query.categoryId,
+      subcategory: query.subcategory,
       lat: query.latitude,
       lng: query.longitude,
       radiusKm: query.radiusKm,
