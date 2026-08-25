@@ -1,5 +1,6 @@
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/business_service.dart';
+import 'package:degloor_one/backend/discovery_service.dart';
 import 'package:degloor_one/components/button/button_widget.dart';
 import 'package:degloor_one/components/section_header/section_header_widget.dart';
 import 'package:degloor_one/components/slider/slider_widget.dart';
@@ -10,6 +11,7 @@ import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/form_field_controller.dart';
 import 'package:degloor_one/index.dart';
 import 'package:degloor_one/shared/discovery_radius.dart';
+import 'package:degloor_one/shared/shop_category.dart';
 import 'package:degloor_one/shared/shop_draft.dart';
 import 'business_registration_widget.dart' show BusinessRegistrationWidget;
 import 'package:flutter/material.dart';
@@ -67,6 +69,8 @@ class BusinessRegistrationModel
   String? interiorUrl;
   String? registrationDocUrl;
   RegistrationPhotoSlot? uploadingSlot;
+  List<ShopCategory> categories = [];
+  bool categoriesLoading = false;
 
   String? photoUrl(RegistrationPhotoSlot slot) {
     switch (slot) {
@@ -98,6 +102,27 @@ class BusinessRegistrationModel
         if ((interiorUrl ?? '').isNotEmpty) interiorUrl!,
         if ((registrationDocUrl ?? '').isNotEmpty) registrationDocUrl!,
       ];
+
+  /// Shop categories for the dropdown. The widget only shows the field.
+  Future<void> loadCategories({VoidCallback? onBusyChanged}) async {
+    categoriesLoading = true;
+    onBusyChanged?.call();
+    try {
+      categories = await DiscoveryService.instance.categories();
+      if (categories.isNotEmpty &&
+          (dropdownValue == null || dropdownValue!.isEmpty)) {
+        dropdownValue = categories.first.id;
+      }
+      final selected = dropdownValue;
+      dropdownValueController ??= FormFieldController<String>(selected);
+      if (selected != null) {
+        dropdownValueController?.value = selected;
+      }
+    } finally {
+      categoriesLoading = false;
+      onBusyChanged?.call();
+    }
+  }
 
   /// Gallery pick plus public upload. The widget only shows the tile.
   Future<void> pickPhoto({
