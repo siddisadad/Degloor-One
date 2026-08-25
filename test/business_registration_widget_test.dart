@@ -41,6 +41,48 @@ void main() {
     expect(shops.map((shop) => shop.name), contains('Siddi Kirana'));
   });
 
+  testWidgets('registration photos upload before submit', (tester) async {
+    installGuestSession();
+    late BusinessRegistrationModel model;
+    await tester.pumpWidget(MaterialApp(
+      home: Builder(builder: (context) {
+        model = createModel(context, () => BusinessRegistrationModel());
+        return const SizedBox.shrink();
+      }),
+    ));
+
+    model.textFieldModel1.inputTextController =
+        TextEditingController(text: 'Siddi Kirana');
+    model.textFieldModel2.inputTextController =
+        TextEditingController(text: 'Sadad Siddi');
+    model.textFieldModel4.inputTextController =
+        TextEditingController(text: '9876543210');
+    model.dropdownValue = ShowcaseCatalog.catGrocery;
+
+    await model.uploadPhotoBytes(
+      userId: currentUserUid,
+      slot: RegistrationPhotoSlot.storeFront,
+      bytes: const [1, 2, 3],
+    );
+    await model.uploadPhotoBytes(
+      userId: currentUserUid,
+      slot: RegistrationPhotoSlot.registrationDoc,
+      bytes: const [4, 5, 6],
+    );
+    expect(model.storeFrontUrl, isNotEmpty);
+    expect(model.registrationDocUrl, isNotEmpty);
+
+    expect(await model.submit(userId: currentUserUid), 'BusinessDashboard');
+    final shops =
+        await BusinessService.instance.ownedBy(GuestAuthUser.guestUid);
+    final shop = shops.singleWhere((row) => row.name == 'Siddi Kirana');
+    expect(shop.imageUrl, model.storeFrontUrl);
+    expect(shop.photos, containsAll([
+      model.storeFrontUrl,
+      model.registrationDocUrl,
+    ]));
+  });
+
   testWidgets('registration submit without a session asks the owner to log in',
       (tester) async {
     late BusinessRegistrationModel model;

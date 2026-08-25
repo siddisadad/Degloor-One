@@ -137,6 +137,8 @@ class BusinessService {
       whatsappNumber: draft.whatsappNumber,
       addressText: draft.addressText ?? '',
       discoveryRadius: draft.discoveryRadius ?? 5,
+      imageUrl: draft.imageUrl,
+      photos: draft.photos,
     );
 
     final shop = await _shops.insert(

@@ -3,6 +3,7 @@ import 'package:degloor_one/data/repositories/shop_repository.dart';
 import 'package:degloor_one/shared/shop.dart';
 import 'package:degloor_one/shared/shop_draft.dart';
 import 'package:degloor_one/shared/shop_hours.dart';
+import 'package:meta/meta.dart';
 
 /// Shop access through the Java API. Table rows stay on the server.
 class JavaShopRepository implements ShopRepository {
@@ -29,7 +30,15 @@ class JavaShopRepository implements ShopRepository {
     ];
   }
 
-  Map<String, dynamic> _body(ShopDraft draft) {
+  Map<String, dynamic> _body(ShopDraft draft) => requestBody(draft);
+
+  /// Java create/update payload. Photos stay on the request, not the widget.
+  @visibleForTesting
+  static Map<String, dynamic> requestBody(ShopDraft draft) {
+    final photoUrls = draft.attachedPhotos;
+    final cover = (draft.imageUrl ?? '').trim().isNotEmpty
+        ? draft.imageUrl!.trim()
+        : (photoUrls.isEmpty ? null : photoUrls.first);
     return {
       'name': draft.name,
       if (draft.ownerName != null) 'ownerName': draft.ownerName,
@@ -41,7 +50,8 @@ class JavaShopRepository implements ShopRepository {
       if (draft.latitude != null) 'latitude': draft.latitude,
       if (draft.longitude != null) 'longitude': draft.longitude,
       if (draft.discoveryRadius != null) 'discoveryRadius': draft.discoveryRadius,
-      if (draft.imageUrl != null) 'imageUrl': draft.imageUrl,
+      if (cover != null) 'imageUrl': cover,
+      if (photoUrls.isNotEmpty) 'photos': photoUrls,
     };
   }
 

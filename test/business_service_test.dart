@@ -199,10 +199,20 @@ void main() {
         latitude: 18.55,
         longitude: 77.58,
         addressText: 'Lane 2, Degloor',
+        imageUrl: 'https://cdn/store.jpg',
+        photos: [
+          'https://cdn/store.jpg',
+          'https://cdn/interior.jpg',
+        ],
       ),
     );
     expect(shop.ownerId, ShowcaseCatalog.customer2);
     expect(shop.isVerified, isFalse);
+    expect(shop.imageUrl, 'https://cdn/store.jpg');
+    expect(shop.photos, [
+      'https://cdn/store.jpg',
+      'https://cdn/interior.jpg',
+    ]);
     expect(
       await UserService.instance.roleFor(ShowcaseCatalog.customer2),
       UserRole.businessOwner.value,

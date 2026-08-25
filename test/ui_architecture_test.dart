@@ -46,8 +46,10 @@ void main() {
         .readAsStringSync();
     expect(source.contains('BusinessService'), isFalse);
     expect(source.contains('data/datasources'), isFalse);
+    expect(source.contains('image_picker'), isFalse);
     expect(source.contains('onTap: _isSubmitting ? null : _submitRegistration'),
         isTrue);
+    expect(source.contains('_pickPhoto'), isTrue);
   });
 
   test('web bootstrap does not stop Chrome focus events', () {

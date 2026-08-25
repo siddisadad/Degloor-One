@@ -1,6 +1,7 @@
 import 'package:degloor_one/app_state.dart';
 import 'package:degloor_one/backend/location_service.dart';
 import 'package:degloor_one/components/button/button_widget.dart';
+import 'package:degloor_one/components/cached_remote_image.dart';
 import 'package:degloor_one/components/section_header/section_header_widget.dart';
 import 'package:degloor_one/components/slider/slider_widget.dart';
 import 'package:degloor_one/components/switch_component/switch_component_widget.dart';
@@ -67,6 +68,118 @@ class _BusinessRegistrationWidgetState
     } catch (e) {
       AppLogger.error('Error loading categories', e);
     }
+  }
+
+  Future<void> _pickPhoto(RegistrationPhotoSlot slot) async {
+    try {
+      await _model.pickPhoto(
+        userId: currentUserUid,
+        slot: slot,
+        onBusyChanged: () {
+          if (mounted) setState(() {});
+        },
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            AppLogger.userFacingMessage(
+              e,
+              fallback: 'Unable to upload the photo. Please try again.',
+            ),
+          ),
+          backgroundColor: FlutterFlowTheme.of(context).error,
+        ),
+      );
+    }
+  }
+
+  Widget _photoSlot({
+    required RegistrationPhotoSlot slot,
+    required String label,
+    required IconData icon,
+  }) {
+    final url = _model.photoUrl(slot);
+    final uploading = _model.uploadingSlot == slot;
+    final labelStyle = FlutterFlowTheme.of(context).labelSmall.override(
+          font: GoogleFonts.inter(
+            fontWeight: FlutterFlowTheme.of(context).labelSmall.fontWeight,
+            fontStyle: FlutterFlowTheme.of(context).labelSmall.fontStyle,
+          ),
+          color: FlutterFlowTheme.of(context).secondaryText,
+          letterSpacing: 0.0,
+          fontWeight: FlutterFlowTheme.of(context).labelSmall.fontWeight,
+          fontStyle: FlutterFlowTheme.of(context).labelSmall.fontStyle,
+          lineHeight: 1.2,
+        );
+    return Semantics(
+      button: true,
+      label: label,
+      child: InkWell(
+        onTap: _isSubmitting ? null : () => _pickPhoto(slot),
+        borderRadius: BorderRadius.circular(8.0),
+        child: Container(
+          key: ValueKey('registration-photo-${slot.name}'),
+          width: 110.0,
+          height: 110.0,
+          decoration: BoxDecoration(
+            color: FlutterFlowTheme.of(context).secondaryBackground,
+            borderRadius: BorderRadius.circular(8.0),
+            border: Border.all(
+              color: FlutterFlowTheme.of(context).alternate,
+            ),
+          ),
+          alignment: const AlignmentDirectional(0.0, 0.0),
+          clipBehavior: Clip.antiAlias,
+          child: uploading
+              ? const Center(
+                  child: SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                )
+              : (url != null && url.isNotEmpty)
+                  ? Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        CachedRemoteImage(
+                          url: url,
+                          width: 110,
+                          height: 110,
+                        ),
+                        Align(
+                          alignment: Alignment.bottomCenter,
+                          child: Container(
+                            width: double.infinity,
+                            color: Colors.black54,
+                            padding: const EdgeInsets.symmetric(vertical: 4),
+                            child: Text(
+                              label,
+                              textAlign: TextAlign.center,
+                              style: labelStyle.override(
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    )
+                  : Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          icon,
+                          color: FlutterFlowTheme.of(context).primary,
+                          size: 24.0,
+                        ),
+                        Text(label, style: labelStyle),
+                      ].divide(const SizedBox(height: 4.0)),
+                    ),
+        ),
+      ),
+    );
   }
 
   Future<void> _submitRegistration() async {
@@ -765,165 +878,27 @@ class _BusinessRegistrationWidgetState
                                 lineHeight: 1.5,
                               ),
                         ),
-                        Row(
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
                           children: [
-                            Container(
-                              width: 110.0,
-                              height: 110.0,
-                              decoration: BoxDecoration(
-                                color: FlutterFlowTheme.of(context)
-                                    .secondaryBackground,
-                                borderRadius: BorderRadius.circular(8.0),
-                                border: Border.all(
-                                  color: FlutterFlowTheme.of(context).alternate,
-                                ),
-                              ),
-                              alignment: const AlignmentDirectional(0.0, 0.0),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    Icons.add_a_photo_rounded,
-                                    color: FlutterFlowTheme.of(context).primary,
-                                    size: 24.0,
-                                  ),
-                                  Text(
-                                    'Store Front',
-                                    style: FlutterFlowTheme.of(context)
-                                        .labelSmall
-                                        .override(
-                                          font: GoogleFonts.inter(
-                                            fontWeight:
-                                                FlutterFlowTheme.of(context)
-                                                    .labelSmall
-                                                    .fontWeight,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .labelSmall
-                                                    .fontStyle,
-                                          ),
-                                          color: FlutterFlowTheme.of(context)
-                                              .secondaryText,
-                                          letterSpacing: 0.0,
-                                          fontWeight:
-                                              FlutterFlowTheme.of(context)
-                                                  .labelSmall
-                                                  .fontWeight,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .labelSmall
-                                                  .fontStyle,
-                                          lineHeight: 1.2,
-                                        ),
-                                  ),
-                                ].divide(const SizedBox(height: 4.0)),
-                              ),
+                            _photoSlot(
+                              slot: RegistrationPhotoSlot.storeFront,
+                              label: 'Store Front',
+                              icon: Icons.add_a_photo_rounded,
                             ),
-                            Container(
-                              width: 110.0,
-                              height: 110.0,
-                              decoration: BoxDecoration(
-                                color: FlutterFlowTheme.of(context)
-                                    .secondaryBackground,
-                                borderRadius: BorderRadius.circular(8.0),
-                                border: Border.all(
-                                  color: FlutterFlowTheme.of(context).alternate,
-                                ),
-                              ),
-                              alignment: const AlignmentDirectional(0.0, 0.0),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    Icons.add_photo_alternate_rounded,
-                                    color: FlutterFlowTheme.of(context).primary,
-                                    size: 24.0,
-                                  ),
-                                  Text(
-                                    'Interior',
-                                    style: FlutterFlowTheme.of(context)
-                                        .labelSmall
-                                        .override(
-                                          font: GoogleFonts.inter(
-                                            fontWeight:
-                                                FlutterFlowTheme.of(context)
-                                                    .labelSmall
-                                                    .fontWeight,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .labelSmall
-                                                    .fontStyle,
-                                          ),
-                                          color: FlutterFlowTheme.of(context)
-                                              .secondaryText,
-                                          letterSpacing: 0.0,
-                                          fontWeight:
-                                              FlutterFlowTheme.of(context)
-                                                  .labelSmall
-                                                  .fontWeight,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .labelSmall
-                                                  .fontStyle,
-                                          lineHeight: 1.2,
-                                        ),
-                                  ),
-                                ].divide(const SizedBox(height: 4.0)),
-                              ),
+                            _photoSlot(
+                              slot: RegistrationPhotoSlot.interior,
+                              label: 'Interior',
+                              icon: Icons.add_photo_alternate_rounded,
                             ),
-                            Container(
-                              width: 110.0,
-                              height: 110.0,
-                              decoration: BoxDecoration(
-                                color: FlutterFlowTheme.of(context)
-                                    .secondaryBackground,
-                                borderRadius: BorderRadius.circular(8.0),
-                                border: Border.all(
-                                  color: FlutterFlowTheme.of(context).alternate,
-                                ),
-                              ),
-                              alignment: const AlignmentDirectional(0.0, 0.0),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    Icons.description_rounded,
-                                    color: FlutterFlowTheme.of(context).primary,
-                                    size: 24.0,
-                                  ),
-                                  Text(
-                                    'Reg. Doc',
-                                    style: FlutterFlowTheme.of(context)
-                                        .labelSmall
-                                        .override(
-                                          font: GoogleFonts.inter(
-                                            fontWeight:
-                                                FlutterFlowTheme.of(context)
-                                                    .labelSmall
-                                                    .fontWeight,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .labelSmall
-                                                    .fontStyle,
-                                          ),
-                                          color: FlutterFlowTheme.of(context)
-                                              .secondaryText,
-                                          letterSpacing: 0.0,
-                                          fontWeight:
-                                              FlutterFlowTheme.of(context)
-                                                  .labelSmall
-                                                  .fontWeight,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .labelSmall
-                                                  .fontStyle,
-                                          lineHeight: 1.2,
-                                        ),
-                                  ),
-                                ].divide(const SizedBox(height: 4.0)),
-                              ),
+                            _photoSlot(
+                              slot: RegistrationPhotoSlot.registrationDoc,
+                              label: 'Reg. Doc',
+                              icon: Icons.description_rounded,
                             ),
                           ].divide(const SizedBox(width: 16.0)),
+                        ),
                         ),
                       ].divide(const SizedBox(height: 16.0)),
                     ),
