@@ -40,6 +40,19 @@ void main() {
     expect(source.contains('DiscoveryService'), isFalse);
   });
 
+  test('web bootstrap does not stop Chrome focus events', () {
+    final bootstrap = File('web/flutter_bootstrap.js').readAsStringSync();
+    expect(bootstrap.contains('stopImmediatePropagation('), isFalse);
+    expect(bootstrap.contains('__degloorReleaseLifecycle'), isTrue);
+    final main = File('lib/main.dart').readAsStringSync();
+    final accept = main.indexOf('acceptEarlyLifecycleMessages();');
+    final bind = main.indexOf('WidgetsFlutterBinding.ensureInitialized();');
+    final release = main.indexOf('releaseHeldBrowserLifecycle();');
+    expect(accept, greaterThanOrEqualTo(0));
+    expect(bind, greaterThan(accept));
+    expect(release, greaterThan(bind));
+  });
+
   test('address service and repository interface stay off Supabase', () {
     const paths = [
       'lib/backend/address_service.dart',
