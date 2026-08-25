@@ -95,6 +95,7 @@ void main() {
         isTrue);
     expect(settings.contains('"dart.allowFlutterForcedDebugMode": false'),
         isTrue);
+    expect(settings.contains('"dart.showMainCodeLens": false'), isTrue);
     expect(settings.contains('flutterRunAdditionalArgs'), isFalse);
     final web = File('tool/run_web.sh').readAsStringSync();
     expect(web.contains('-d web-server'), isTrue);

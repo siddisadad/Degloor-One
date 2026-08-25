@@ -3,5 +3,6 @@
   "dart.flutterSelectDeviceWhenConnected": false,
   "dart.flutterRememberSelectedDevice": false,
   "dart.flutterShowWebServerDevice": "always",
-  "dart.allowFlutterForcedDebugMode": false
+  "dart.allowFlutterForcedDebugMode": false,
+  "dart.showMainCodeLens": false
 }
