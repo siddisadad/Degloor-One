@@ -40,6 +40,16 @@ void main() {
     expect(source.contains('DiscoveryService'), isFalse);
   });
 
+  test('business registration does not insert shops itself', () {
+    final source = File(
+            'lib/features/businesses/business_registration_widget.dart')
+        .readAsStringSync();
+    expect(source.contains('BusinessService'), isFalse);
+    expect(source.contains('data/datasources'), isFalse);
+    expect(source.contains('onTap: _isSubmitting ? null : _submitRegistration'),
+        isTrue);
+  });
+
   test('address service and repository interface stay off Supabase', () {
     const paths = [
       'lib/backend/address_service.dart',
