@@ -52,6 +52,19 @@ void main() {
     expect(source.contains('_pickPhoto'), isTrue);
   });
 
+  test('chrome debug keeps the Dart JS context alive', () {
+    final launch = File('.vscode/launch.json').readAsStringSync();
+    expect(launch.contains('--remote-allow-origins=*'), isTrue);
+    expect(launch.contains('--disable-renderer-backgrounding'), isTrue);
+    expect(launch.contains('--disable-backgrounding-occluded-windows'), isTrue);
+    expect(launch.contains('BackForwardCache,Prerender2'), isTrue);
+    final settings = File('.vscode/settings.json').readAsStringSync();
+    expect(settings.contains('--disable-renderer-backgrounding'), isTrue);
+    final run = File('tool/run_chrome.sh').readAsStringSync();
+    expect(run.contains('--disable-renderer-backgrounding'), isTrue);
+    expect(run.contains('dartDevEmbedder.debugger.extensionNames'), isTrue);
+  });
+
   test('web bootstrap does not stop Chrome focus events', () {
     final bootstrap = File('web/flutter_bootstrap.js').readAsStringSync();
     expect(bootstrap.contains('stopImmediatePropagation('), isFalse);
