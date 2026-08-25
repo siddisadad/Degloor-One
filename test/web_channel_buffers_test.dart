@@ -24,4 +24,9 @@ void main() {
     expect(acked, 8);
     ui.channelBuffers.clearListener(kLifecycleChannel);
   });
+
+  test('vm lifecycle hold and release do not throw', () {
+    holdBrowserLifecycle();
+    releaseHeldBrowserLifecycle();
+  });
 }

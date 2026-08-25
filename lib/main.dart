@@ -1,3 +1,4 @@
+import 'package:degloor_one/core/web_channel_buffers.dart';
 import 'package:degloor_one/core/degloor_theme.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
@@ -24,7 +25,6 @@ import 'package:degloor_one/data/datasources/bind_shop_service.dart';
 import 'package:degloor_one/data/datasources/bind_user_service.dart';
 import 'package:degloor_one/shared/app_notification.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
-import 'package:degloor_one/core/web_channel_buffers.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/app_state.dart';
@@ -38,6 +38,7 @@ import 'package:provider/provider.dart';
 void main() async {
   acceptEarlyLifecycleMessages();
   WidgetsFlutterBinding.ensureInitialized();
+  releaseHeldBrowserLifecycle();
   GoRouter.optionURLReflectsImperativeAPIs = true;
   usePathUrlStrategy();
 
