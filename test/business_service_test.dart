@@ -195,6 +195,7 @@ void main() {
       flavor: AppFlavor.development,
       bypassAuth: true,
       useShowcaseData: false,
+      supabaseUrl: 'https://live-project.supabase.co',
     );
     AppEnvironment.markFlutterFlowHostLive();
     addTearDown(() {
@@ -267,7 +268,6 @@ void main() {
     expect(shop.imageUrl, 'https://cdn/store.jpg');
     expect(shop.photos, [
       'https://cdn/store.jpg',
-      'https://cdn/interior.jpg',
     ]);
     expect(
       await UserService.instance.roleFor(ShowcaseCatalog.customer2),

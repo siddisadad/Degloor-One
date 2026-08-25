@@ -39,6 +39,7 @@ class AppEnvironment {
   static AppFlavor? _flavorOverride;
   static bool? _bypassOverride;
   static bool? _showcaseOverride;
+  static String? _supabaseUrlOverride;
   static bool _flutterFlowHostLive = false;
 
   /// Spring Boot API. Empty means Flutter keeps showcase/Supabase fallbacks.
@@ -46,8 +47,8 @@ class AppEnvironment {
 
   static bool get usesJavaBackend => javaApiBaseUrl.isNotEmpty;
 
-  static String get supabaseUrl =>
-      supabaseUrlOverride.isNotEmpty ? supabaseUrlOverride : defaultSupabaseUrl;
+  static String get supabaseUrl => _supabaseUrlOverride ??
+      (supabaseUrlOverride.isNotEmpty ? supabaseUrlOverride : defaultSupabaseUrl);
 
   static String get supabaseAnonKey => supabaseAnonKeyOverride.isNotEmpty
       ? supabaseAnonKeyOverride
@@ -125,10 +126,12 @@ class AppEnvironment {
     AppFlavor? flavor,
     bool? bypassAuth,
     bool? useShowcaseData,
+    String? supabaseUrl,
   }) {
     _flavorOverride = flavor;
     _bypassOverride = bypassAuth;
     _showcaseOverride = useShowcaseData;
+    _supabaseUrlOverride = supabaseUrl;
   }
 
   @visibleForTesting
@@ -136,6 +139,7 @@ class AppEnvironment {
     _flavorOverride = null;
     _bypassOverride = null;
     _showcaseOverride = null;
+    _supabaseUrlOverride = null;
     _flutterFlowHostLive = false;
   }
 }

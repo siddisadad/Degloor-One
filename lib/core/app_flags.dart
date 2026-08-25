@@ -15,9 +15,9 @@ bool get kShouldBlockSupabaseTraffic =>
     kUsesDeadFlutterFlowHost && !AppEnvironment.flutterFlowHostIsLive;
 
 /// Local Degloor catalog. Defaults to false; enable in dev with --dart-define=SHOWCASE_DATA=true
-/// Automatically enabled while the FlutterFlow host is unreachable.
+/// Automatically enabled while the FlutterFlow host is unreachable or retired.
 bool get kUseShowcaseData =>
-    AppEnvironment.useShowcaseData || kShouldBlockSupabaseTraffic;
+    AppEnvironment.useShowcaseData || kUsesDeadFlutterFlowHost;
 
 /// True when the compiled URL still points at the FlutterFlow project.
 bool get kUsesDeadFlutterFlowHost => AppEnvironment.usesDeadFlutterFlowHost;

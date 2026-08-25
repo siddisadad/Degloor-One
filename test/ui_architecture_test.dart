@@ -53,6 +53,23 @@ void main() {
     expect(source.contains('_pickPhoto'), isTrue);
   });
 
+  test('catalogue photo talks to the model, not the picker', () {
+    final source =
+        File('lib/features/catalogue/manage_catalogue_widget.dart')
+            .readAsStringSync();
+    expect(source.contains('image_picker'), isFalse);
+    expect(source.contains('uploadPublicImage'), isFalse);
+    expect(source.contains('_pickImage'), isTrue);
+    expect(source.contains('_addProduct'), isTrue);
+    expect(source.contains('BusinessService'), isTrue);
+    final model =
+        File('lib/features/catalogue/manage_catalogue_model.dart')
+            .readAsStringSync();
+    expect(model.contains('uploadPhotoBytes'), isTrue);
+    expect(model.contains('image_picker'), isTrue);
+    expect(model.contains("folder: 'products'"), isTrue);
+  });
+
   test('edit business profile talks to the model, not the service', () {
     final source = File(
             'lib/features/businesses/edit_business_profile_widget.dart')

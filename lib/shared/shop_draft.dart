@@ -150,7 +150,6 @@ class ShopDraft {
       'is_verified': false,
       'source': 'owner',
       if (cover != null) 'image_url': cover,
-      if (photoUrls.isNotEmpty) 'photos': photoUrls,
     };
   }
 
