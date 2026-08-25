@@ -1,5 +1,6 @@
 import 'package:degloor_one/data/datasources/java_shop_repository.dart';
 import 'package:degloor_one/shared/shop.dart';
+import 'package:degloor_one/shared/shop_draft.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -53,6 +54,29 @@ void main() {
     expect(row.reviewCount, 3);
     expect(row.hours, isNotEmpty);
     expect(row.hours.single.dayOfWeek, 1);
+  });
+
+  test('Java create body includes photos', () {
+    final body = JavaShopRepository.requestBody(
+      ShopDraft.fromRegister(
+        name: 'Kale Kirana',
+        ownerName: 'Priya Kale',
+        phone: '9890000008',
+        categoryId: 'cat-grocery',
+        latitude: 18.55,
+        longitude: 77.58,
+        imageUrl: 'https://cdn/store.jpg',
+        photos: [
+          'https://cdn/store.jpg',
+          'https://cdn/interior.jpg',
+        ],
+      ),
+    );
+    expect(body['imageUrl'], 'https://cdn/store.jpg');
+    expect(body['photos'], [
+      'https://cdn/store.jpg',
+      'https://cdn/interior.jpg',
+    ]);
   });
 
   test('Java shop JSON falls back when createdAt and flags are omitted', () {

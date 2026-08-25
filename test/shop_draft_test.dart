@@ -37,6 +37,30 @@ void main() {
     );
   });
 
+  test('register draft serializes storefront and verification photos', () {
+    final draft = ShopDraft.fromRegister(
+      name: 'Kale Kirana',
+      ownerName: 'Priya Kale',
+      phone: '9890000008',
+      categoryId: 'cat-grocery',
+      latitude: 18.55,
+      longitude: 77.58,
+      imageUrl: 'https://cdn/store.jpg',
+      photos: [
+        'https://cdn/store.jpg',
+        'https://cdn/interior.jpg',
+        'https://cdn/doc.jpg',
+      ],
+    );
+    expect(draft.toInsertJson(ownerId: 'user-1')['image_url'],
+        'https://cdn/store.jpg');
+    expect(draft.toInsertJson(ownerId: 'user-1')['photos'], [
+      'https://cdn/store.jpg',
+      'https://cdn/interior.jpg',
+      'https://cdn/doc.jpg',
+    ]);
+  });
+
   test('whatsapp falls back to phone and rejects empty register fields', () {
     final draft = ShopDraft.fromRegister(
       name: '  Shop  ',

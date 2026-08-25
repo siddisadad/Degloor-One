@@ -14,6 +14,7 @@ class ShopDraft {
     this.longitude,
     this.discoveryRadius,
     this.imageUrl,
+    this.photos,
   });
 
   final String name;
@@ -27,6 +28,7 @@ class ShopDraft {
   final double? longitude;
   final double? discoveryRadius;
   final String? imageUrl;
+  final List<String>? photos;
 
   /// Parse the registration form. Required fields and map coords stay
   /// off the widget.
@@ -41,6 +43,8 @@ class ShopDraft {
     String? whatsappNumber,
     String addressText = '',
     double discoveryRadius = 5,
+    String? imageUrl,
+    List<String>? photos,
   }) {
     final trimmedName = name.trim();
     final trimmedOwner = ownerName.trim();
@@ -57,6 +61,11 @@ class ShopDraft {
         longitude > 180) {
       throw Exception('Please pick a location on the map');
     }
+    final trimmedImage = imageUrl?.trim();
+    final trimmedPhotos = [
+      for (final url in photos ?? const <String>[])
+        if (url.trim().isNotEmpty) url.trim(),
+    ];
     return ShopDraft(
       name: trimmedName,
       ownerName: trimmedOwner,
@@ -68,6 +77,10 @@ class ShopDraft {
       latitude: latitude,
       longitude: longitude,
       discoveryRadius: discoveryRadius,
+      imageUrl: (trimmedImage == null || trimmedImage.isEmpty)
+          ? null
+          : trimmedImage,
+      photos: trimmedPhotos.isEmpty ? null : trimmedPhotos,
     );
   }
 
@@ -98,10 +111,30 @@ class ShopDraft {
     );
   }
 
+  /// Storefront first, then any extra interior / document URLs.
+  List<String> get attachedPhotos {
+    final urls = <String>[];
+    void add(String? url) {
+      final trimmed = (url ?? '').trim();
+      if (trimmed.isEmpty || urls.contains(trimmed)) return;
+      urls.add(trimmed);
+    }
+
+    add(imageUrl);
+    for (final url in photos ?? const <String>[]) {
+      add(url);
+    }
+    return urls;
+  }
+
   /// Table insert only. Never includes id or created_at.
   /// [ownerId] is the signed-in owner. New shops stay unverified,
   /// the same stored default as before.
   Map<String, dynamic> toInsertJson({required String ownerId}) {
+    final photoUrls = attachedPhotos;
+    final cover = (imageUrl ?? '').trim().isNotEmpty
+        ? imageUrl!.trim()
+        : (photoUrls.isEmpty ? null : photoUrls.first);
     return {
       'owner_id': ownerId,
       'name': name,
@@ -116,8 +149,8 @@ class ShopDraft {
       'discovery_radius': discoveryRadius ?? 5,
       'is_verified': false,
       'source': 'owner',
-      if ((imageUrl ?? '').isNotEmpty) 'image_url': imageUrl,
-      if ((imageUrl ?? '').isNotEmpty) 'photos': [imageUrl],
+      if (cover != null) 'image_url': cover,
+      if (photoUrls.isNotEmpty) 'photos': photoUrls,
     };
   }
 

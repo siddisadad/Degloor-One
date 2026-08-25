@@ -13,6 +13,10 @@ import 'package:degloor_one/shared/discovery_radius.dart';
 import 'package:degloor_one/shared/shop_draft.dart';
 import 'business_registration_widget.dart' show BusinessRegistrationWidget;
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+
+/// Photo tiles on the registration form. Upload stays on the model.
+enum RegistrationPhotoSlot { storeFront, interior, registrationDoc }
 
 class BusinessRegistrationModel
     extends FlutterFlowModel<BusinessRegistrationWidget> {
@@ -58,6 +62,86 @@ class BusinessRegistrationModel
   late SectionHeaderModel sectionHeaderModel5;
   // Model for Button.
   late ButtonModel buttonModel2;
+
+  String? storeFrontUrl;
+  String? interiorUrl;
+  String? registrationDocUrl;
+  RegistrationPhotoSlot? uploadingSlot;
+
+  String? photoUrl(RegistrationPhotoSlot slot) {
+    switch (slot) {
+      case RegistrationPhotoSlot.storeFront:
+        return storeFrontUrl;
+      case RegistrationPhotoSlot.interior:
+        return interiorUrl;
+      case RegistrationPhotoSlot.registrationDoc:
+        return registrationDocUrl;
+    }
+  }
+
+  void attachPhoto({
+    required RegistrationPhotoSlot slot,
+    required String url,
+  }) {
+    switch (slot) {
+      case RegistrationPhotoSlot.storeFront:
+        storeFrontUrl = url;
+      case RegistrationPhotoSlot.interior:
+        interiorUrl = url;
+      case RegistrationPhotoSlot.registrationDoc:
+        registrationDocUrl = url;
+    }
+  }
+
+  List<String> get uploadedPhotoUrls => [
+        if ((storeFrontUrl ?? '').isNotEmpty) storeFrontUrl!,
+        if ((interiorUrl ?? '').isNotEmpty) interiorUrl!,
+        if ((registrationDocUrl ?? '').isNotEmpty) registrationDocUrl!,
+      ];
+
+  /// Gallery pick plus public upload. The widget only shows the tile.
+  Future<void> pickPhoto({
+    required String userId,
+    required RegistrationPhotoSlot slot,
+    VoidCallback? onBusyChanged,
+  }) async {
+    final picker = ImagePicker();
+    final image = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 70,
+    );
+    if (image == null) return;
+    await uploadPhotoBytes(
+      userId: userId,
+      slot: slot,
+      bytes: await image.readAsBytes(),
+      onBusyChanged: onBusyChanged,
+    );
+  }
+
+  Future<void> uploadPhotoBytes({
+    required String userId,
+    required RegistrationPhotoSlot slot,
+    required List<int> bytes,
+    VoidCallback? onBusyChanged,
+  }) async {
+    if (userId.isEmpty) {
+      throw Exception('Please login to register a business');
+    }
+    uploadingSlot = slot;
+    onBusyChanged?.call();
+    try {
+      final url = await BusinessService.instance.uploadPublicImage(
+        folder: 'businesses',
+        businessId: userId,
+        bytes: bytes,
+      );
+      attachPhoto(slot: slot, url: url);
+    } finally {
+      uploadingSlot = null;
+      onBusyChanged?.call();
+    }
+  }
 
   @override
   void initState(BuildContext context) {
@@ -110,6 +194,8 @@ class BusinessRegistrationModel
         addressText:
             '${textFieldModel6.inputTextController?.text ?? ''}, ${textFieldModel8.inputTextController?.text ?? ''}, ${textFieldModel7.inputTextController?.text ?? 'Degloor'}',
         discoveryRadius: radiusFromSliderPercent(sliderVal),
+        imageUrl: storeFrontUrl,
+        photos: uploadedPhotoUrls.isEmpty ? null : uploadedPhotoUrls,
       ),
     );
     await authManager.refreshUser();
