@@ -10,7 +10,6 @@ import 'package:degloor_one/shared/product_category.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:degloor_one/core/error_handler.dart';
 import 'package:degloor_one/shared/catalog_product.dart';
 import 'package:degloor_one/shared/catalog_product_draft.dart';
@@ -79,16 +78,26 @@ class _ManageCatalogueWidgetState extends State<ManageCatalogueWidget> {
   }
 
   Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    final img = await picker.pickImage(source: ImageSource.gallery, imageQuality: 70);
-    if (img == null) return;
-    setState(() => _model.isUploading = true);
     try {
-      final bytes = await img.readAsBytes();
-      final url = await BusinessService.instance.uploadPublicImage(folder: 'products', businessId: _business!.id, bytes: bytes);
-      setState(() { _model.uploadedImageUrl = url; _model.isUploading = false; });
+      await _model.pickPhoto(
+        userId: currentUserUid,
+        businessId: _business?.id ?? '',
+        onBusyChanged: () {
+          if (mounted) setState(() {});
+        },
+      );
     } catch (e) {
-      setState(() => _model.isUploading = false);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            AppLogger.userFacingMessage(
+              e,
+              fallback: 'Unable to upload the image. Please try again.',
+            ),
+          ),
+        ),
+      );
     }
   }
 
