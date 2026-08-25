@@ -88,6 +88,10 @@ void main() {
     final settings = File('.vscode/settings.json').readAsStringSync();
     expect(settings.contains('"debug.javascript.autoAttachFilter": "disabled"'),
         isTrue);
+    expect(settings.contains('"dart.flutterShowWebServerDevice": "always"'),
+        isTrue);
+    expect(settings.contains('"dart.flutterRememberSelectedDevice": false'),
+        isTrue);
     expect(settings.contains('flutterRunAdditionalArgs'), isFalse);
     final web = File('tool/run_web.sh').readAsStringSync();
     expect(web.contains('-d web-server'), isTrue);
