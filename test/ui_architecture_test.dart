@@ -53,31 +53,31 @@ void main() {
     expect(source.contains('_pickPhoto'), isTrue);
   });
 
-  test('chrome debug keeps the Dart JS context alive', () {
-    final launch = File('.vscode/launch.json').readAsStringSync();
-    expect(launch.contains('--remote-allow-origins=*'), isTrue);
-    expect(launch.contains('--disable-renderer-backgrounding'), isTrue);
-    expect(launch.contains('--disable-backgrounding-occluded-windows'), isTrue);
-    expect(launch.contains('BackForwardCache,Prerender2'), isTrue);
-    final settings = File('.vscode/settings.json').readAsStringSync();
-    expect(settings.contains('--disable-renderer-backgrounding'), isTrue);
-    expect(settings.contains('"debug.javascript.autoAttachFilter": "disabled"'),
-        isTrue);
+  test('chrome debug flags stay on the opt-in script', () {
     final run = File('tool/run_chrome.sh').readAsStringSync();
+    expect(run.contains('--remote-allow-origins=*'), isTrue);
     expect(run.contains('--disable-renderer-backgrounding'), isTrue);
+    expect(run.contains('--disable-backgrounding-occluded-windows'), isTrue);
+    expect(run.contains('BackForwardCache,Prerender2'), isTrue);
+    expect(run.contains('8090'), isTrue);
     expect(run.contains('dartDevEmbedder.debugger.extensionNames'), isTrue);
   });
 
-  test('default web debug does not attach Chrome AppInspector', () {
+  test('IDE web debug does not attach Chrome AppInspector', () {
     final launch = jsonDecode(File('.vscode/launch.json').readAsStringSync())
         as Map<String, dynamic>;
     final configs = (launch['configurations'] as List).cast<Map>();
-    expect(configs.first['deviceId'], 'web-server');
-    final chrome = configs.firstWhere((row) => row['deviceId'] == 'chrome');
-    final chromeArgs = (chrome['toolArgs'] as List).join(' ');
-    expect(chromeArgs, contains('--web-port'));
-    expect(chromeArgs, contains('8090'));
-    expect(chromeArgs, isNot(contains('8080')));
+    expect(configs, hasLength(1));
+    expect(configs.single['deviceId'], 'web-server');
+    final args = (configs.single['toolArgs'] as List).join(' ');
+    expect(args, contains('--web-port'));
+    expect(args, contains('8080'));
+    expect(File('.vscode/launch.json').readAsStringSync(),
+        isNot(contains('"deviceId": "chrome"')));
+    final settings = File('.vscode/settings.json').readAsStringSync();
+    expect(settings.contains('"debug.javascript.autoAttachFilter": "disabled"'),
+        isTrue);
+    expect(settings.contains('flutterRunAdditionalArgs'), isFalse);
     final web = File('tool/run_web.sh').readAsStringSync();
     expect(web.contains('-d web-server'), isTrue);
     expect(web.contains('dartDevEmbedder.debugger.extensionNames'), isTrue);
