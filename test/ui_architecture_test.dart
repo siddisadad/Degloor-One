@@ -53,7 +53,7 @@ void main() {
     expect(source.contains('_pickPhoto'), isTrue);
   });
 
-  test('edit business profile does not pick images itself', () {
+  test('edit business profile talks to the model, not the service', () {
     final source = File(
             'lib/features/businesses/edit_business_profile_widget.dart')
         .readAsStringSync();
