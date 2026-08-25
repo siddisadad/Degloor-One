@@ -11,7 +11,10 @@
         "--web-hostname",
         "127.0.0.1",
         "--web-browser-flag=--remote-allow-origins=*",
-        "--web-browser-flag=--disable-dev-shm-usage"
+        "--web-browser-flag=--disable-dev-shm-usage",
+        "--web-browser-flag=--disable-renderer-backgrounding",
+        "--web-browser-flag=--disable-backgrounding-occluded-windows",
+        "--web-browser-flag=--disable-features=BackForwardCache,Prerender2"
       ]
     },
     {
