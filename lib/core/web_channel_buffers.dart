@@ -12,12 +12,12 @@ export 'web_lifecycle_hold_stub.dart'
 /// "A message on the flutter/lifecycle channel was discarded".
 const kLifecycleChannel = 'flutter/lifecycle';
 
-/// Hold early lifecycle events and stop the debug discard warning.
+/// Queue early lifecycle events and stop the debug discard warning.
 ///
 /// Call this before [WidgetsFlutterBinding.ensureInitialized], then call
-/// [releaseHeldBrowserLifecycle] after the binding is ready. Do not use
-/// capture-phase `stopImmediatePropagation` in `web/flutter_bootstrap.js` —
-/// that stalls DWDS Debugger.enable.
+/// [releaseHeldBrowserLifecycle] after the binding is ready. Do not wrap
+/// `window.addEventListener` in `web/flutter_bootstrap.js` — dropping
+/// focus/blur races AppInspector's Runtime.evaluate against a dead context.
 void acceptEarlyLifecycleMessages() {
   holdBrowserLifecycle();
   ui.channelBuffers.resize(kLifecycleChannel, 20);
