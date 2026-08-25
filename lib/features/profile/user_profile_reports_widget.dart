@@ -119,7 +119,7 @@ class _UserProfileReportsWidgetState extends State<UserProfileReportsWidget> {
                         future: _model.userProfileFuture,
                         builder: (context, snapshot) {
                           final user = snapshot.data?.firstOrNull;
-                          final name = user?.fullName ?? 'Guest User';
+                          final name = user?.fullName ?? 'Guest Customer';
                           final account = UserRole.resolve(
                             profile: user?.role,
                             session: currentUser?.role,

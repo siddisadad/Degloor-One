@@ -79,6 +79,11 @@ class _ServicesWidgetState extends State<ServicesWidget> {
     }
   }
 
+  Future<void> _openProviderRegistration() async {
+    await context.pushNamed('ServiceProviderRegistration');
+    if (mounted) await _loadProviders();
+  }
+
   void _onCategorySelected(String categoryId) {
     setState(() {
       if (_model.selectedCategoryId == categoryId) {
@@ -131,8 +136,7 @@ class _ServicesWidgetState extends State<ServicesWidget> {
           actions: [
             IconButton(
               tooltip: 'Offer a service',
-              onPressed: () =>
-                  context.pushNamed('ServiceProviderRegistration'),
+              onPressed: _openProviderRegistration,
               icon: const Icon(
                 Icons.add_business_outlined,
                 color: DegloorTheme.primary,
@@ -237,7 +241,7 @@ class _ServicesWidgetState extends State<ServicesWidget> {
                           if (_model.selectedCategoryId != null) {
                             _onCategorySelected(_model.selectedCategoryId!);
                           } else {
-                            context.pushNamed('ServiceProviderRegistration');
+                            _openProviderRegistration();
                           }
                         },
                       );

@@ -1,3 +1,4 @@
+import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/data/repositories/user_repository.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
@@ -9,6 +10,15 @@ class UserService {
       : _repository = repository;
 
   final UserRepository _repository;
+
+  /// Local guest used when live `users` has no row for the guest uid.
+  static const UserProfile guestCustomer = UserProfile(
+    id: GuestAuthUser.guestUid,
+    email: 'guest@local',
+    fullName: 'Guest Customer',
+    role: 'customer',
+    phoneNumber: '+919890000001',
+  );
 
   static UserService? _instance;
 
@@ -31,7 +41,8 @@ class UserService {
       final row = await _repository.byId(userId);
       if (row != null) return row;
     } catch (_) {}
-    return _catalogUser(userId);
+    return _catalogUser(userId) ??
+        (userId == GuestAuthUser.guestUid ? guestCustomer : null);
   }
 
   static UserProfile? _catalogUser(String userId) {
@@ -54,7 +65,10 @@ class UserService {
   Future<List<UserProfile>> byIds(List<String> ids) async {
     final unique = ids.where((id) => id.isNotEmpty).toSet().toList();
     if (unique.isEmpty) return const [];
-    return _repository.byIds(unique);
+    final rows = await _repository.byIds(unique);
+    if (!unique.contains(GuestAuthUser.guestUid)) return rows;
+    if (rows.any((row) => row.id == GuestAuthUser.guestUid)) return rows;
+    return [...rows, guestCustomer];
   }
 
   Future<List<UserProfile>> profile(String userId) async {
