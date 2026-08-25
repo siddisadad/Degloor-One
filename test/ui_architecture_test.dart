@@ -53,6 +53,15 @@ void main() {
     expect(source.contains('_pickPhoto'), isTrue);
   });
 
+  test('shop image upload stays local for guest and the FlutterFlow host', () {
+    final source = File('lib/backend/business_service.dart').readAsStringSync();
+    expect(source.contains('uploadPublicImage'), isTrue);
+    expect(source.contains('kUseShowcaseData'), isTrue);
+    expect(source.contains('kBypassAuth'), isTrue);
+    expect(source.contains('kUsesDeadFlutterFlowHost'), isTrue);
+    expect(source.contains('product-images'), isTrue);
+  });
+
   test('run scripts do not launch Chrome AppInspector', () {
     final chrome = File('tool/run_chrome.sh').readAsStringSync();
     expect(chrome.contains('flutter run -d chrome'), isFalse);
