@@ -1,0 +1,5 @@
+{
+  "dart.flutterRunAdditionalArgs": [
+    "--web-browser-flag=--remote-allow-origins=*"
+  ]
+}
