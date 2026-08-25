@@ -47,6 +47,8 @@ export 'package:degloor_one/features/services/service_provider_profile_widget.da
     show ServiceProviderProfileWidget;
 export 'package:degloor_one/features/services/manage_service_requests_widget.dart'
     show ManageServiceRequestsWidget;
+export 'package:degloor_one/features/services/user_service_requests_widget.dart'
+    show UserServiceRequestsWidget;
 export 'package:degloor_one/features/profile/address_list_widget.dart'
     show AddressListWidget;
 export 'package:degloor_one/features/profile/add_address_widget.dart'

@@ -691,10 +691,17 @@ class _BusinessProfileWidgetState extends State<BusinessProfileWidget> {
                                       ),
                                 ),
                                 Text(
-                                  _model.categoryName ?? 'Local Business',
-                                  style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                  (business.subcategory != null &&
+                                          business.subcategory!.isNotEmpty)
+                                      ? '${_model.categoryName ?? 'Shop'} • ${business.subcategory}'
+                                      : (_model.categoryName ??
+                                          'Local Business'),
+                                  style: FlutterFlowTheme.of(context)
+                                      .bodyMedium
+                                      .override(
                                         font: GoogleFonts.inter(),
-                                        color: FlutterFlowTheme.of(context).secondaryText,
+                                        color: FlutterFlowTheme.of(context)
+                                            .secondaryText,
                                         lineHeight: 1.5,
                                       ),
                                 ),

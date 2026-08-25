@@ -20,4 +20,6 @@ abstract class ShopRepository {
     required String ownerId,
     required ShopDraft draft,
   });
+
+  Future<void> delete(String businessId, {required String ownerId});
 }

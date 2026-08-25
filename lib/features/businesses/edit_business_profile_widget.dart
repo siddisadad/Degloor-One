@@ -1,4 +1,5 @@
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
+import 'package:degloor_one/backend/business_service.dart';
 import 'package:degloor_one/components/cached_remote_image.dart';
 import 'package:degloor_one/components/degloor_app_bar.dart';
 import 'package:degloor_one/core/error_handler.dart';
@@ -107,6 +108,59 @@ class _EditBusinessProfileWidgetState extends State<EditBusinessProfileWidget> {
     }
   }
 
+  Future<void> _deleteBusiness() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Business?'),
+        content: Text(
+          'Are you sure you want to delete ${widget.business.name}? This action is permanent.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(
+              'Delete',
+              style: TextStyle(color: FlutterFlowTheme.of(context).error),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
+    setState(() => _isSaving = true);
+    try {
+      await BusinessService.instance.deleteBusiness(
+        userId: currentUserUid,
+        businessId: widget.business.id,
+      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Business deleted')),
+      );
+      context.goNamed('CustomerHome');
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isSaving = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            AppLogger.userFacingMessage(
+              e,
+              fallback: 'Unable to delete the business. Please try again.',
+            ),
+          ),
+        ),
+      );
+    }
+  }
+
   @override
   void dispose() {
     _model.dispose();
@@ -210,6 +264,18 @@ class _EditBusinessProfileWidgetState extends State<EditBusinessProfileWidget> {
                       variant: 'outlined',
                     ),
                   ),
+                  const SizedBox(height: 16),
+                  wrapWithModel(
+                    model: _model.textFieldModel7,
+                    updateCallback: () => setState(() {}),
+                    child: TextFieldWidget(
+                      label: 'Type / Specialty',
+                      labelPresent: true,
+                      hint: 'e.g. Kirana, Hardware',
+                      value: widget.business.subcategory ?? '',
+                      variant: 'outlined',
+                    ),
+                  ),
                   const SizedBox(height: 24),
                   Text(
                     'Contact Information',
@@ -291,11 +357,48 @@ class _EditBusinessProfileWidgetState extends State<EditBusinessProfileWidget> {
                       width: double.infinity,
                       height: 50,
                       color: FlutterFlowTheme.of(context).primary,
-                      textStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                      textStyle: const TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.bold),
                       elevation: 2,
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
+                  const SizedBox(height: 24),
+                  Divider(color: FlutterFlowTheme.of(context).alternate),
+                  const SizedBox(height: 24),
+                  Text(
+                    'Danger Zone',
+                    style: FlutterFlowTheme.of(context).titleSmall.override(
+                          fontFamily: 'Inter',
+                          color: FlutterFlowTheme.of(context).error,
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Deleting your business will remove it from search and delete all catalog items. This action cannot be undone.',
+                    style: FlutterFlowTheme.of(context).labelSmall,
+                  ),
+                  const SizedBox(height: 16),
+                  FFButtonWidget(
+                    onPressed: _isSaving ? null : _deleteBusiness,
+                    text: 'Delete Business',
+                    options: FFButtonOptions(
+                      width: double.infinity,
+                      height: 48,
+                      color: Colors.transparent,
+                      textStyle: TextStyle(
+                        color: FlutterFlowTheme.of(context).error,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      borderSide: BorderSide(
+                        color: FlutterFlowTheme.of(context).error,
+                        width: 1,
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  const SizedBox(height: 40),
                 ],
               ),
             ),

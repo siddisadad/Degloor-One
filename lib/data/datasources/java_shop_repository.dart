@@ -106,4 +106,9 @@ class JavaShopRepository implements ShopRepository {
   }) async {
     await _client.put('/api/v1/businesses/$businessId', _body(draft));
   }
+
+  @override
+  Future<void> delete(String businessId, {required String ownerId}) async {
+    await _client.delete('/api/v1/businesses/$businessId');
+  }
 }

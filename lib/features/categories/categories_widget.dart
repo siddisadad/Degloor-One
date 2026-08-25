@@ -1,4 +1,5 @@
 import 'package:degloor_one/backend/discovery_service.dart';
+import 'package:degloor_one/components/category_icon.dart';
 import 'package:degloor_one/components/degloor_app_bar.dart';
 import 'package:degloor_one/shared/shop_category.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
@@ -31,30 +32,6 @@ class _CategoriesWidgetState extends State<CategoriesWidget> {
     super.initState();
     _model = createModel(context, () => CategoriesModel());
     _categoriesFuture = DiscoveryService.instance.categories();
-  }
-
-  Widget getIconFromData(String? iconName) {
-    final iconMap = {
-      'shopping_basket_rounded': Icons.shopping_basket_rounded,
-      'restaurant_rounded': Icons.restaurant_rounded,
-      'construction_rounded': Icons.construction_rounded,
-      'bolt_rounded': Icons.bolt_rounded,
-      'medical_services_rounded': Icons.medical_services_rounded,
-      'directions_car_rounded': Icons.directions_car_rounded,
-      'checkroom_rounded': Icons.checkroom_rounded,
-      'content_cut_rounded': Icons.content_cut_rounded,
-      'home_repair_service_rounded': Icons.home_repair_service_rounded,
-      'local_pharmacy_rounded': Icons.local_pharmacy_rounded,
-      'electrical_services_rounded': Icons.electrical_services_rounded,
-      'agriculture_rounded': Icons.agriculture_rounded,
-      'bakery_dining_rounded': Icons.bakery_dining_rounded,
-      'edit_note_rounded': Icons.edit_note_rounded,
-      'phonelink_setup_rounded': Icons.phonelink_setup_rounded,
-      'fitness_center_rounded': Icons.fitness_center_rounded,
-      'coffee_rounded': Icons.coffee_rounded,
-    };
-
-    return Icon(iconMap[iconName] ?? Icons.category_rounded);
   }
 
   @override
@@ -118,7 +95,7 @@ class _CategoriesWidgetState extends State<CategoriesWidget> {
                       final category = categories[index];
                       return ModernCategoryItem(
                         label: category.name,
-                        icon: getIconFromData(category.iconName),
+                        icon: CategoryIcon(iconName: category.iconName),
                         onTap: () => context.pushNamed(
                           'SearchResults',
                           queryParameters: {'categoryId': category.id},

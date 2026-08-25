@@ -96,4 +96,13 @@ class ServiceMarketplaceRepository {
         )
         .map((rows) => rows.map(serviceRequestFromRow).toList());
   }
+
+  Stream<List<ServiceRequest>> watchForUser(String userId) {
+    return ServiceRequestsTable()
+        .stream(
+          primaryKey: 'id',
+          queryFn: (q) => q.eq('user_id', userId),
+        )
+        .map((rows) => rows.map(serviceRequestFromRow).toList());
+  }
 }

@@ -1,3 +1,4 @@
+import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/backend/native_service_bridge.dart';
 import 'package:degloor_one/backend/notification_service.dart';
@@ -217,6 +218,7 @@ class ServiceMarketplaceService {
       }
     }
     _promoteServiceProvider(userId);
+    await authManager.refreshUser();
     return created;
   }
 
@@ -264,6 +266,14 @@ class ServiceMarketplaceService {
       return Stream.fromFuture(_javaInbox(providerId));
     }
     return _repository.watchForProvider(providerId);
+  }
+
+  Stream<List<ServiceRequest>> watchForUser(String userId) {
+    if (JavaApiConfig.enabled) {
+      // Java API current user requests are also in the inbox
+      return Stream.fromFuture(_javaInbox(''));
+    }
+    return _repository.watchForUser(userId);
   }
 
   Future<ServiceRequest> createRequest({

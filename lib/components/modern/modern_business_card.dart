@@ -11,6 +11,7 @@ class ModernBusinessCard extends StatelessWidget {
     required this.rating,
     required this.distance,
     required this.onTap,
+    this.subcategory,
     super.key,
   });
 
@@ -20,6 +21,7 @@ class ModernBusinessCard extends StatelessWidget {
   final double rating;
   final String distance;
   final VoidCallback onTap;
+  final String? subcategory;
 
   @override
   Widget build(BuildContext context) {
@@ -94,7 +96,9 @@ class ModernBusinessCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      category,
+                      subcategory != null && subcategory!.isNotEmpty
+                          ? '$category • $subcategory'
+                          : category,
                       style: DegloorTheme.bodySmall,
                     ),
                   ],

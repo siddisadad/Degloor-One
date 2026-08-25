@@ -180,6 +180,7 @@ class ShowcaseCatalog {
     required double radiusKm,
     String? searchTerm,
     String? categoryId,
+    String? subcategory,
     bool openNow = false,
     bool verifiedOnly = false,
     double minRating = 0.0,
@@ -194,6 +195,7 @@ class ShowcaseCatalog {
       final distance = _haversineKm(latitude, longitude, lat, lng);
       if (distance > radiusKm) continue;
       if (categoryId != null && raw['category_id'] != categoryId) continue;
+      if (subcategory != null && raw['sub_category'] != subcategory) continue;
       if (verifiedOnly && raw['is_verified'] != true) continue;
       if (openNow && raw['is_open'] != true) continue;
       final rating = (raw['rating'] as num?)?.toDouble() ?? 0;
@@ -223,8 +225,33 @@ class ShowcaseCatalog {
         'distance_km': double.parse(distance.toStringAsFixed(2)),
       });
     }
-    matches.sort((a, b) =>
-        (a['distance_km'] as num).compareTo(b['distance_km'] as num));
+
+    if (searchTerm != null && searchTerm.isNotEmpty) {
+      final term = searchTerm.toLowerCase();
+      matches.sort((a, b) {
+        final nameA = (a['name'] ?? '').toString().toLowerCase();
+        final nameB = (b['name'] ?? '').toString().toLowerCase();
+        final subA = (a['sub_category'] ?? '').toString().toLowerCase();
+        final subB = (b['sub_category'] ?? '').toString().toLowerCase();
+
+        // 1. Exact name match
+        final exactA = nameA == term ? 1 : 0;
+        final exactB = nameB == term ? 1 : 0;
+        if (exactA != exactB) return exactB.compareTo(exactA);
+
+        // 2. Exact subcategory match
+        final subMatchA = subA == term ? 1 : 0;
+        final subMatchB = subB == term ? 1 : 0;
+        if (subMatchA != subMatchB) return subMatchB.compareTo(subMatchA);
+
+        // 3. Fallback to distance
+        return (a['distance_km'] as num).compareTo(b['distance_km'] as num);
+      });
+    } else {
+      matches.sort((a, b) =>
+          (a['distance_km'] as num).compareTo(b['distance_km'] as num));
+    }
+
     final sliced = matches.skip(offset).take(limit).toList();
     return sliced;
   }
@@ -472,6 +499,7 @@ class ShowcaseCatalog {
           77.5845,
           4.5,
           'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=800&q=80',
+          subcategory: 'Kirana',
         ),
         _biz(
           bizHotel,
@@ -485,6 +513,7 @@ class ShowcaseCatalog {
           77.5860,
           4.2,
           'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=800&q=80',
+          subcategory: 'Maharashtrian',
         ),
         _biz(
           bizHardware,
@@ -1062,6 +1091,7 @@ class ShowcaseCatalog {
     String image, {
     bool verified = true,
     bool open = true,
+    String? subcategory,
   }) {
     return {
       'id': id,
@@ -1070,6 +1100,7 @@ class ShowcaseCatalog {
       'owner_name': ownerName,
       'description': description,
       'category_id': categoryId,
+      'sub_category': subcategory,
       'city_id': 'city-degloor',
       'address_text': address,
       'whatsapp_number': '+919876543210',

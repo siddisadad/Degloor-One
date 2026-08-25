@@ -14,6 +14,7 @@ class DegloorTheme {
   static const Color textSecondary = Color(0xFF757575);
   static const Color accent = Color(0xFFE3F2FD);
   static const Color success = Color(0xFF4CAF50);
+  static const Color warning = Color(0xFFFF9800);
   static const Color error = Color(0xFFD32F2F);
   static const Color border = Color(0xFFEEEEEE);
 
@@ -66,6 +67,12 @@ class DegloorTheme {
         fontWeight: FontWeight.w600,
         color: textSecondary,
         letterSpacing: 0.5,
+      );
+
+  static TextStyle get labelMedium => GoogleFonts.inter(
+        fontSize: 12,
+        fontWeight: FontWeight.w600,
+        color: textSecondary,
       );
 
   // --- Spacing ---

@@ -12,6 +12,7 @@ class ServiceRequest {
     this.status,
     this.scheduledAt,
     this.user,
+    this.provider,
   });
 
   final String id;
@@ -22,6 +23,7 @@ class ServiceRequest {
   final String? status;
   final DateTime? scheduledAt;
   final JoinedUser? user;
+  final JoinedUser? provider;
 
   /// Joined customer avatar, or null when the request has no photo.
   String? get photoUrl {
@@ -48,6 +50,7 @@ class ServiceRequest {
       scheduledAt: parse(json['scheduledAt']),
       user: JoinedUser.fromJoin(json['user'] ?? json['users']) ??
           JoinedUser.fromJoin(json),
+      provider: JoinedUser.fromJoin(json['provider']),
     );
   }
 }

@@ -4,11 +4,14 @@ import 'package:degloor_one/backend/cart_service.dart';
 import 'package:degloor_one/backend/shop_service.dart';
 import 'package:degloor_one/components/cached_remote_image.dart';
 import 'package:degloor_one/shared/catalog_product.dart';
+import 'package:degloor_one/shared/shop.dart';
 import 'package:degloor_one/components/degloor_app_bar.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/core/degloor_theme.dart';
+import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class ProductDetailWidget extends StatefulWidget {
   const ProductDetailWidget({super.key, required this.productId});
@@ -23,6 +26,7 @@ class ProductDetailWidget extends StatefulWidget {
 
 class _ProductDetailWidgetState extends State<ProductDetailWidget> {
   Future<CatalogProduct?>? _productFuture;
+  Future<Shop?>? _shopFuture;
   int _quantity = 1;
   bool _isAdding = false;
 
@@ -36,6 +40,7 @@ class _ProductDetailWidgetState extends State<ProductDetailWidget> {
     _productFuture =
         ShopService.instance.productById(widget.productId).then((product) {
       if (product != null) {
+        _shopFuture = ShopService.instance.byId(product.businessId);
         unawaited(
           ShopService.instance.trackEvent(
             businessId: product.businessId,
@@ -44,6 +49,7 @@ class _ProductDetailWidgetState extends State<ProductDetailWidget> {
           ),
         );
       }
+      setState(() {});
       return product;
     });
   }
@@ -125,12 +131,56 @@ class _ProductDetailWidgetState extends State<ProductDetailWidget> {
                         children: [
                           Text(product.name, style: DegloorTheme.headingLarge),
                           const SizedBox(height: 8),
-                          Text(
-                            '₹${product.price?.toStringAsFixed(0)}',
-                            style: DegloorTheme.headingMedium.copyWith(
-                              color: DegloorTheme.primary,
-                              fontSize: 24,
-                            ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                '₹${product.price?.toStringAsFixed(0)}',
+                                style: DegloorTheme.headingMedium.copyWith(
+                                  color: DegloorTheme.primary,
+                                  fontSize: 24,
+                                ),
+                              ),
+                              FutureBuilder<Shop?>(
+                                future: _shopFuture,
+                                builder: (context, snapshot) {
+                                  final shop = snapshot.data;
+                                  if (shop == null) return const SizedBox.shrink();
+                                  return InkWell(
+                                    onTap: () => context.pushNamed(
+                                      'BusinessProfile',
+                                      queryParameters: {'businessId': shop.id},
+                                    ),
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 12, vertical: 6),
+                                      decoration: BoxDecoration(
+                                        color: DegloorTheme.accent,
+                                        borderRadius:
+                                            BorderRadius.circular(20),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const Icon(Icons.storefront_rounded,
+                                              size: 14,
+                                              color: DegloorTheme.primary),
+                                          const SizedBox(width: 6),
+                                          Text(
+                                            shop.name,
+                                            style: DegloorTheme.labelMedium
+                                                .copyWith(
+                                              color: DegloorTheme.primary,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
                           ),
                           const SizedBox(height: 16),
                           const Divider(),
@@ -147,21 +197,30 @@ class _ProductDetailWidgetState extends State<ProductDetailWidget> {
                           if (product.trackInventory == true) ...[
                             Row(
                               children: [
-                                const Icon(
+                                Icon(
                                   Icons.inventory_2_outlined,
                                   size: 18,
-                                  color: DegloorTheme.textSecondary,
+                                  color: !inStock
+                                      ? DegloorTheme.error
+                                      : ((product.stockQuantity ?? 0) <= 5
+                                          ? DegloorTheme.warning
+                                          : DegloorTheme.textSecondary),
                                 ),
                                 const SizedBox(width: 8),
                                 Text(
                                   inStock
-                                      ? '${product.stockQuantity} units available'
-                                      : 'Out of stock',
+                                      ? (product.stockQuantity! <= 5
+                                          ? 'ONLY ${product.stockQuantity} LEFT'
+                                          : '${product.stockQuantity} units available')
+                                      : 'OUT OF STOCK',
                                   style: DegloorTheme.bodyMedium.copyWith(
-                                    color: inStock
-                                        ? DegloorTheme.success
-                                        : DegloorTheme.error,
-                                    fontWeight: FontWeight.bold,
+                                    color: !inStock
+                                        ? DegloorTheme.error
+                                        : (product.stockQuantity! <= 5
+                                            ? DegloorTheme.warning
+                                            : DegloorTheme.success),
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: 0.5,
                                   ),
                                 ),
                               ],

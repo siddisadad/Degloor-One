@@ -20,6 +20,7 @@ class DiscoveryRepository {
       radiusKm: query.radiusKm,
       searchTerm: query.searchTerm,
       categoryId: query.categoryId,
+      subcategory: query.subcategory,
       openNow: query.openNow,
       verifiedOnly: query.verifiedOnly,
       minRating: query.minRating,

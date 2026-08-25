@@ -21,6 +21,7 @@ class BusinessesTable extends SupabaseTable<BusinessesRow> {
     required double radiusKm,
     String? searchTerm,
     String? categoryId,
+    String? subcategory,
   }) {
     return {
       'user_lat': latitude,
@@ -28,6 +29,7 @@ class BusinessesTable extends SupabaseTable<BusinessesRow> {
       'radius_meters': radiusKm * 1000,
       if (searchTerm != null && searchTerm.isNotEmpty) 'search_term': searchTerm,
       if (categoryId != null && categoryId.isNotEmpty) 'category_id': categoryId,
+      if (subcategory != null && subcategory.isNotEmpty) 'sub_category': subcategory,
     };
   }
 
@@ -53,9 +55,17 @@ class BusinessesTable extends SupabaseTable<BusinessesRow> {
           LatLng.distanceKm(originLat, originLng, lat, lng).toStringAsFixed(2),
         );
       }
-      filtered = [...filtered]..sort(
-          (a, b) => (a.distanceKm ?? 1e9).compareTo(b.distanceKm ?? 1e9),
-        );
+      filtered = [...filtered]..sort((a, b) {
+          final distA = a.distanceKm ?? 1e9;
+          final distB = b.distanceKm ?? 1e9;
+          // If distance is very close (within 1km), prioritize verified
+          if ((distA - distB).abs() < 1.0) {
+            final verA = a.isVerified == true ? 1 : 0;
+            final verB = b.isVerified == true ? 1 : 0;
+            if (verA != verB) return verB.compareTo(verA);
+          }
+          return distA.compareTo(distB);
+        });
     }
     if (openNow) {
       filtered = filtered.where((row) => row.isOpen == true).toList();
@@ -87,6 +97,7 @@ class BusinessesTable extends SupabaseTable<BusinessesRow> {
     required double radiusKm,
     String? searchTerm,
     String? categoryId,
+    String? subcategory,
     bool openNow = false,
     bool verifiedOnly = false,
     double minRating = 0.0,
@@ -104,6 +115,11 @@ class BusinessesTable extends SupabaseTable<BusinessesRow> {
       if (categoryId != null &&
           categoryId.isNotEmpty &&
           row.categoryId != categoryId) {
+        continue;
+      }
+      if (subcategory != null &&
+          subcategory.isNotEmpty &&
+          row.subcategory != subcategory) {
         continue;
       }
       if (!query.matches([row.name, row.description, row.addressText])) {
@@ -132,6 +148,7 @@ class BusinessesTable extends SupabaseTable<BusinessesRow> {
     required double radiusKm,
     String? searchTerm,
     String? categoryId,
+    String? subcategory,
     bool openNow = false,
     bool verifiedOnly = false,
     double minRating = 0.0,
@@ -146,6 +163,7 @@ class BusinessesTable extends SupabaseTable<BusinessesRow> {
       radiusKm: radiusKm,
       searchTerm: searchTerm,
       categoryId: categoryId,
+      subcategory: subcategory,
       openNow: openNow,
       verifiedOnly: verifiedOnly,
       minRating: minRating,
@@ -160,6 +178,7 @@ class BusinessesTable extends SupabaseTable<BusinessesRow> {
     required double radiusKm,
     String? searchTerm,
     String? categoryId,
+    String? subcategory,
     bool openNow = false,
     bool verifiedOnly = false,
     double minRating = 0.0,
@@ -173,6 +192,7 @@ class BusinessesTable extends SupabaseTable<BusinessesRow> {
         radiusKm: radiusKm,
         searchTerm: searchTerm,
         categoryId: categoryId,
+        subcategory: subcategory,
         openNow: openNow,
         verifiedOnly: verifiedOnly,
         minRating: minRating,
@@ -187,6 +207,7 @@ class BusinessesTable extends SupabaseTable<BusinessesRow> {
         radiusKm: radiusKm,
         searchTerm: searchTerm,
         categoryId: categoryId,
+        subcategory: subcategory,
         openNow: openNow,
         verifiedOnly: verifiedOnly,
         minRating: minRating,
@@ -203,6 +224,7 @@ class BusinessesTable extends SupabaseTable<BusinessesRow> {
           radiusKm: radiusKm,
           searchTerm: searchTerm,
           categoryId: categoryId,
+          subcategory: subcategory,
         ),
       );
       final rows = (response as List?)
@@ -226,6 +248,7 @@ class BusinessesTable extends SupabaseTable<BusinessesRow> {
         radiusKm: radiusKm,
         searchTerm: searchTerm,
         categoryId: categoryId,
+        subcategory: subcategory,
         openNow: openNow,
         verifiedOnly: verifiedOnly,
         minRating: minRating,

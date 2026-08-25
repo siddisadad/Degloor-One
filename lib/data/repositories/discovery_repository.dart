@@ -11,6 +11,7 @@ class DiscoverySearch {
     required this.radiusKm,
     this.searchTerm,
     this.categoryId,
+    this.subcategory,
     this.openNow = false,
     this.verifiedOnly = false,
     this.minRating = 0.0,
@@ -22,6 +23,7 @@ class DiscoverySearch {
   final double radiusKm;
   final String? searchTerm;
   final String? categoryId;
+  final String? subcategory;
   final bool openNow;
   final bool verifiedOnly;
   final double minRating;

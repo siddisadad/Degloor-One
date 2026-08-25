@@ -19,6 +19,8 @@ class EditBusinessProfileModel extends FlutterFlowModel<EditBusinessProfileWidge
   late TextFieldModel textFieldModel2;
   // Model for TextField (Description).
   late TextFieldModel textFieldModel3;
+  // Model for TextField (Subcategory).
+  late TextFieldModel textFieldModel7;
   // Model for TextField (Phone).
   late TextFieldModel textFieldModel4;
   // Model for TextField (WhatsApp).
@@ -86,6 +88,7 @@ class EditBusinessProfileModel extends FlutterFlowModel<EditBusinessProfileWidge
     textFieldModel1 = createModel(context, () => TextFieldModel());
     textFieldModel2 = createModel(context, () => TextFieldModel());
     textFieldModel3 = createModel(context, () => TextFieldModel());
+    textFieldModel7 = createModel(context, () => TextFieldModel());
     textFieldModel4 = createModel(context, () => TextFieldModel());
     textFieldModel5 = createModel(context, () => TextFieldModel());
     switchModel = createModel(context, () => SwitchComponentModel());
@@ -116,6 +119,7 @@ class EditBusinessProfileModel extends FlutterFlowModel<EditBusinessProfileWidge
         name: textFieldModel1.inputTextController?.text ?? '',
         ownerName: textFieldModel2.inputTextController?.text,
         description: textFieldModel3.inputTextController?.text,
+        subcategory: textFieldModel7.inputTextController?.text,
         phoneNumber: phone,
         whatsappNumber: sameWhatsapp
             ? phone
@@ -132,6 +136,7 @@ class EditBusinessProfileModel extends FlutterFlowModel<EditBusinessProfileWidge
     textFieldModel1.dispose();
     textFieldModel2.dispose();
     textFieldModel3.dispose();
+    textFieldModel7.dispose();
     textFieldModel4.dispose();
     textFieldModel5.dispose();
     switchModel.dispose();

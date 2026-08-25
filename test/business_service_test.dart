@@ -268,6 +268,7 @@ void main() {
     expect(shop.imageUrl, 'https://cdn/store.jpg');
     expect(shop.photos, [
       'https://cdn/store.jpg',
+      'https://cdn/interior.jpg',
     ]);
     expect(
       await UserService.instance.roleFor(ShowcaseCatalog.customer2),
@@ -297,6 +298,20 @@ void main() {
     final shop =
         await BusinessService.instance.requireOwned(GuestAuthUser.guestUid);
     expect(shop.name, 'Patil Kirana Plus');
+  });
+
+  test('owner can delete business', () async {
+    final userId = GuestAuthUser.guestUid;
+    final shops = await BusinessService.instance.ownedBy(userId);
+    final target = shops.first.id;
+
+    await BusinessService.instance.deleteBusiness(
+      userId: userId,
+      businessId: target,
+    );
+
+    final remaining = await BusinessService.instance.ownedBy(userId);
+    expect(remaining.map((s) => s.id), isNot(contains(target)));
   });
 
   test('completeness scores filled vs missing shop fields', () {

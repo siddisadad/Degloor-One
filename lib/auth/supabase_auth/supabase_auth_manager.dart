@@ -12,6 +12,9 @@ import 'package:degloor_one/core/api/auth_api.dart';
 import 'package:degloor_one/shared/user_profile_draft.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+import 'package:crypto/crypto.dart';
+import 'dart:convert';
 import 'package:degloor_one/core/error_handler.dart';
 import 'email_auth.dart';
 import 'phone_auth.dart';
@@ -21,7 +24,11 @@ import 'supabase_user_provider.dart';
 export 'package:degloor_one/auth/base_auth_user_provider.dart';
 
 class SupabaseAuthManager extends AuthManager
-    with EmailSignInManager, GoogleSignInManager, PhoneSignInManager {
+    with
+        EmailSignInManager,
+        GoogleSignInManager,
+        AppleSignInManager,
+        PhoneSignInManager {
   @override
   Future signOut() async {
     final signedOut = JavaAuthUser.signedOut();
@@ -218,6 +225,56 @@ class SupabaseAuthManager extends AuthManager
       return null;
     } catch (e) {
       SupabaseConnection.log(e, context: 'Google sign-in');
+      if (!context.mounted) return null;
+      SupabaseConnection.showSnackBar(context, e);
+      return null;
+    }
+  }
+
+  @override
+  Future<BaseAuthUser?> signInWithApple(BuildContext context) async {
+    if (!SupabaseConnection.guard(context)) return null;
+    try {
+      final rawNonce = SupaFlow.client.auth.generateRawNonce();
+      final hashedNonce = sha256.convert(utf8.encode(rawNonce)).toString();
+
+      final credential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+        nonce: hashedNonce,
+      );
+
+      final idToken = credential.identityToken;
+      if (idToken == null) {
+        throw const AuthException(
+          'Could not find ID Token from Apple Credential.',
+        );
+      }
+
+      if (!context.mounted) return null;
+      return await _signInOrCreateAccount(
+        context,
+        () => SupaFlow.client.auth
+            .signInWithIdToken(
+              provider: OAuthProvider.apple,
+              idToken: idToken,
+              nonce: rawNonce,
+            )
+            .then((res) => res.user),
+      );
+    } on AuthException catch (e) {
+      SupabaseConnection.log(e, context: 'Apple sign-in');
+      if (!context.mounted) return null;
+      SupabaseConnection.showSnackBar(context, e, authMessage: e.message);
+      return null;
+    } catch (e) {
+      if (e is SignInWithAppleAuthorizationException &&
+          e.code == AuthorizationErrorCode.canceled) {
+        return null;
+      }
+      SupabaseConnection.log(e, context: 'Apple sign-in');
       if (!context.mounted) return null;
       SupabaseConnection.showSnackBar(context, e);
       return null;

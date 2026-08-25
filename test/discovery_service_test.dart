@@ -65,6 +65,21 @@ void main() {
     );
   });
 
+  test('discovery search can filter by subcategory', () async {
+    final result = await DiscoveryService.instance.search(
+      const DiscoverySearch(
+        latitude: ShowcaseCatalog.degloorLat,
+        longitude: ShowcaseCatalog.degloorLng,
+        radiusKm: 15,
+        categoryId: ShowcaseCatalog.catGrocery,
+        subcategory: 'Kirana',
+      ),
+    );
+    expect(result.items, isNotEmpty);
+    expect(result.items.first.subcategory, 'Kirana');
+    expect(result.items.first.id, ShowcaseCatalog.bizPatil);
+  });
+
   test('master search for milk returns the product and Patil shop', () async {
     final result = await DiscoveryService.instance.masterSearch(
       query: const DiscoverySearch(

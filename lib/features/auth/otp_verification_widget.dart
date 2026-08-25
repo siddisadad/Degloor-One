@@ -207,7 +207,14 @@ class _OtpVerificationWidgetState extends State<OtpVerificationWidget> {
         smsCode: code,
       );
       if (user != null && mounted) {
-        context.goNamed('_initialize');
+        if ((user.displayName ?? '').isEmpty) {
+          context.goNamed(
+            'UserProfileReports',
+            queryParameters: {'editProfile': 'true'},
+          );
+        } else {
+          context.goNamed('_initialize');
+        }
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);

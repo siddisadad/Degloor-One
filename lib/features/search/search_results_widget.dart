@@ -56,6 +56,7 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
   Timer? _debounce;
 
   String? _currentCategoryId;
+  String? _currentSubcategory;
   final Map<String, String> _categoryIdToName = {};
   List<String> _recent = const [];
 
@@ -126,6 +127,7 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
           radiusKm: radius,
           searchTerm: term,
           categoryId: _currentCategoryId,
+          subcategory: _currentSubcategory,
           verifiedOnly: _onlyVerified,
           openNow: _onlyOpen,
           minRating: _minRating4 ? 4.0 : 0.0,
@@ -168,6 +170,17 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
       services: result.services,
       jobs: result.jobs,
     );
+  }
+
+  List<String> get _subcategories {
+    if (_currentCategoryId == null) return [];
+    return _result.shops
+        .map((s) => s.subcategory)
+        .whereType<String>()
+        .where((s) => s.isNotEmpty)
+        .toSet()
+        .toList()
+      ..sort();
   }
 
   @override
@@ -277,6 +290,36 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
                 ),
               ),
             ),
+            if (_currentCategoryId != null && _subcategories.isNotEmpty)
+              Container(
+                color: DegloorTheme.cardBackground,
+                width: double.infinity,
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      DegloorFilterChip(
+                        label: 'All ${_categoryIdToName[_currentCategoryId] ?? 'Types'}',
+                        selected: _currentSubcategory == null,
+                        onTap: () {
+                          setState(() => _currentSubcategory = null);
+                          _runSearch();
+                        },
+                      ),
+                      for (final sub in _subcategories)
+                        DegloorFilterChip(
+                          label: sub,
+                          selected: _currentSubcategory == sub,
+                          onTap: () {
+                            setState(() => _currentSubcategory = sub);
+                            _runSearch();
+                          },
+                        ),
+                    ],
+                  ),
+                ),
+              ),
             Container(
               color: DegloorTheme.cardBackground,
               height: 50,
@@ -359,11 +402,54 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
       if (_searchController.text.trim().isEmpty && _recent.isNotEmpty) {
         return _recentList();
       }
-      return EmptyStateView(
-        icon: Icons.search_off_rounded,
-        title: l10n?.noResultsFound ?? 'No results found',
-        description: l10n?.noResultsDescription ??
-            'Try adjusting your filters or searching for something else',
+      final term = _searchController.text.trim();
+      return ListView(
+        padding: const EdgeInsets.symmetric(vertical: 40),
+        children: [
+          EmptyStateView(
+            icon: Icons.search_off_rounded,
+            title: l10n?.noResultsFound ?? 'No results found',
+            description: l10n?.noResultsDescription ??
+                'Try adjusting your filters or searching for something else',
+          ),
+          if (term.isNotEmpty && _categoryIdToName.isNotEmpty) ...[
+            const SizedBox(height: 32),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Text(
+                'Try browsing these categories',
+                style: DegloorTheme.titleMedium,
+              ),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              height: 44,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                children: [
+                  for (final entry in _categoryIdToName.entries)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: DegloorFilterChip(
+                        label: entry.value,
+                        selected: false,
+                        onTap: () {
+                          setState(() {
+                            _currentCategoryId = entry.key;
+                            _currentSubcategory = null;
+                            _scope = MasterSearchScope.shops;
+                            _searchController.clear();
+                          });
+                          _runSearch();
+                        },
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ],
       );
     }
 
@@ -466,6 +552,7 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
             status: (shop.isOpen ?? false) ? 'Open' : 'Closed',
             verified: shop.isVerified ?? false,
             isOpen: shop.isOpen ?? false,
+            subcategory: shop.subcategory,
           ),
         ),
         const SizedBox(height: 12),

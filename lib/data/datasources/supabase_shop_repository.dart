@@ -49,4 +49,11 @@ class SupabaseShopRepository implements ShopRepository {
       matchingRows: (q) => q.eq('id', businessId).eq('owner_id', ownerId),
     );
   }
+
+  @override
+  Future<void> delete(String businessId, {required String ownerId}) async {
+    await BusinessesTable().delete(
+      matchingRows: (q) => q.eq('id', businessId).eq('owner_id', ownerId),
+    );
+  }
 }

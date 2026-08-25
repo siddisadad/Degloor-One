@@ -1,5 +1,6 @@
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/business_service.dart';
+import 'package:degloor_one/backend/shop_service.dart';
 import 'package:degloor_one/backend/discovery_service.dart';
 import 'package:degloor_one/backend/order_service.dart';
 import 'package:degloor_one/l10n/app_localizations.dart';
@@ -13,6 +14,7 @@ import 'package:degloor_one/flutter_flow/flutter_flow_charts.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_icon_button.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
+import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
 import 'package:degloor_one/core/error_handler.dart';
 import 'package:degloor_one/shared/shop.dart';
 import 'package:flutter/material.dart';
@@ -44,6 +46,7 @@ class _BusinessDashboardWidgetState extends State<BusinessDashboardWidget> {
   int _whatsappClicks = 0;
   int _directionsClicks = 0;
   int _pendingOrders = 0;
+  int _productCount = 0;
   Map<String, int> _dailyCounts = {};
 
   @override
@@ -70,6 +73,7 @@ class _BusinessDashboardWidgetState extends State<BusinessDashboardWidget> {
       final business = businesses.first;
       final insights = await DiscoveryService.instance.insightsFor(business.id);
       final pending = await OrderService.instance.pendingCount(business.id);
+      final catalog = await ShopService.instance.catalog(business.id);
       if (!mounted) return;
 
       setState(() {
@@ -81,6 +85,7 @@ class _BusinessDashboardWidgetState extends State<BusinessDashboardWidget> {
         _directionsClicks = insights.directionsClicks;
         _dailyCounts = insights.dailyCounts;
         _pendingOrders = pending;
+        _productCount = catalog.products.length;
         _isLoading = false;
       });
     } catch (e) {
@@ -93,6 +98,123 @@ class _BusinessDashboardWidgetState extends State<BusinessDashboardWidget> {
 
   ProfileCompleteness get _completeness =>
       BusinessService.completeness(_business);
+
+  Widget _buildVerificationAlert() {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 20),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: FlutterFlowTheme.of(context).warning.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: FlutterFlowTheme.of(context).warning),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.info_outline_rounded,
+                  color: FlutterFlowTheme.of(context).warning, size: 24),
+              const SizedBox(width: 12),
+              Text(
+                'Verification Pending',
+                style: FlutterFlowTheme.of(context).titleSmall.override(
+                      fontFamily: 'Inter',
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Your business is currently visible to you, but customers cannot see it until it is verified by our team.',
+            style: FlutterFlowTheme.of(context).bodySmall,
+          ),
+          const SizedBox(height: 16),
+          FFButtonWidget(
+            onPressed: () =>
+                BusinessService.instance.contactSupportForVerification(_business!),
+            text: 'Contact Admin for Verification',
+            options: FFButtonOptions(
+              width: double.infinity,
+              height: 40,
+              color: FlutterFlowTheme.of(context).warning,
+              textStyle: const TextStyle(
+                  color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNextSteps() {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 24),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: FlutterFlowTheme.of(context).primary.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: FlutterFlowTheme.of(context).primary.withValues(alpha: 0.1)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Complete your setup',
+            style: FlutterFlowTheme.of(context).titleMedium.override(
+                  fontFamily: 'Inter',
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Add items to your catalogue to start receiving orders.',
+            style: FlutterFlowTheme.of(context).bodySmall,
+          ),
+          const SizedBox(height: 20),
+          InkWell(
+            onTap: () => context.pushNamed('ManageCatalogue'),
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: FlutterFlowTheme.of(context).primary,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.add_rounded, color: Colors.white, size: 24),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Add Products',
+                        style: FlutterFlowTheme.of(context).bodyLarge.override(
+                              fontFamily: 'Inter',
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                      Text(
+                        'Customers want to see what you sell!',
+                        style: FlutterFlowTheme.of(context).labelSmall,
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(Icons.chevron_right_rounded,
+                    color: FlutterFlowTheme.of(context).secondaryText),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   void dispose() {
@@ -358,6 +480,9 @@ class _BusinessDashboardWidgetState extends State<BusinessDashboardWidget> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
+                      if (!(_business?.isVerified ?? false))
+                        _buildVerificationAlert(),
+                      if (_productCount == 0) _buildNextSteps(),
                       Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
