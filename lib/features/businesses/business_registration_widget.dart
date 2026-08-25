@@ -12,7 +12,6 @@ import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/form_field_controller.dart';
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
-import 'package:degloor_one/backend/business_service.dart';
 import 'package:degloor_one/backend/discovery_service.dart';
 import 'package:degloor_one/features/home/customer_home_widget.dart';
 import 'package:degloor_one/index.dart';
@@ -22,7 +21,6 @@ import 'package:degloor_one/core/error_handler.dart';
 import 'package:degloor_one/core/google_maps_js.dart';
 import 'package:degloor_one/shared/discovery_radius.dart';
 import 'package:degloor_one/shared/shop_category.dart';
-import 'package:degloor_one/shared/shop_draft.dart';
 import 'business_registration_model.dart';
 export 'business_registration_model.dart';
 
@@ -68,6 +66,39 @@ class _BusinessRegistrationWidgetState
       }
     } catch (e) {
       AppLogger.error('Error loading categories', e);
+    }
+  }
+
+  Future<void> _submitRegistration() async {
+    if (_isSubmitting) return;
+    setState(() => _isSubmitting = true);
+    try {
+      final route = await _model.submit(userId: currentUserUid);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Business submitted for verification!'),
+          backgroundColor: FlutterFlowTheme.of(context).success,
+        ),
+      );
+      context.goNamed(route);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            AppLogger.userFacingMessage(
+              e,
+              fallback: 'Unable to submit the shop. Please try again.',
+            ),
+          ),
+          backgroundColor: FlutterFlowTheme.of(context).error,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
     }
   }
 
@@ -484,9 +515,7 @@ class _BusinessRegistrationWidgetState
                                     controller: _model.mapGoogleMapsController,
                                     onCameraIdle: (latLng) =>
                                         _model.mapGoogleMapsCenter = latLng,
-                                    initialLocation:
-                                        _model.mapGoogleMapsCenter ??=
-                                            const LatLng(18.5522, 77.5844),
+                                    initialLocation: _model.mapGoogleMapsCenter,
                                     markerColor: GoogleMarkerColor.violet,
                                     initialZoom: 15.0,
                                     showZoomControls: false,
@@ -905,137 +934,19 @@ class _BusinessRegistrationWidgetState
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          InkWell(
-                            splashColor: Colors.transparent,
-                            focusColor: Colors.transparent,
-                            hoverColor: Colors.transparent,
-                            highlightColor: Colors.transparent,
-                            onTap: () async {
-                              if (currentUserUid == '') {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: const Text(
-                                        'Please login to register a business'),
-                                    backgroundColor:
-                                        FlutterFlowTheme.of(context).error,
-                                  ),
-                                );
-                                return;
-                              }
-
-                              final name = _model.textFieldModel1
-                                  .inputTextController?.text
-                                  .trim();
-                              final owner = _model.textFieldModel2
-                                  .inputTextController?.text
-                                  .trim();
-                              final phone = _model.textFieldModel4
-                                  .inputTextController?.text
-                                  .trim();
-
-                              if (name == null ||
-                                  name.isEmpty ||
-                                  owner == null ||
-                                  owner.isEmpty ||
-                                  phone == null ||
-                                  phone.isEmpty ||
-                                  _model.dropdownValue == null ||
-                                  _model.mapGoogleMapsCenter == null) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: const Text(
-                                        'Please fill all required fields (Name, Owner, Phone, Category, and Location)'),
-                                    backgroundColor:
-                                        FlutterFlowTheme.of(context).error,
-                                  ),
-                                );
-                                return;
-                              }
-
-                              setState(() => _isSubmitting = true);
-
-                              try {
-                                final sliderVal =
-                                    _model.sliderModel.sliderValue ??
-                                        sliderPercentFromRadius(
-                                            kDefaultDiscoveryRadiusKm);
-                                final radiusKm =
-                                    radiusFromSliderPercent(sliderVal);
-
-                                await BusinessService.instance.register(
-                                  userId: currentUserUid,
-                                  draft: ShopDraft.fromRegister(
-                                    name: name,
-                                    ownerName: owner,
-                                    phone: phone,
-                                    categoryId: _model.dropdownValue!,
-                                    latitude:
-                                        _model.mapGoogleMapsCenter!.latitude,
-                                    longitude:
-                                        _model.mapGoogleMapsCenter!.longitude,
-                                    description: _model.textFieldModel3
-                                            .inputTextController?.text ??
-                                        '',
-                                    whatsappNumber:
-                                        _model.switchModel.switchValue == true
-                                            ? phone
-                                            : _model.textFieldModel5
-                                                .inputTextController?.text,
-                                    addressText:
-                                        '${_model.textFieldModel6.inputTextController?.text ?? ''}, ${_model.textFieldModel8.inputTextController?.text ?? ''}, ${_model.textFieldModel7.inputTextController?.text ?? 'Degloor'}',
-                                    discoveryRadius: radiusKm,
-                                  ),
-                                );
-
-                                // Refresh user to update local role
-                                await authManager.refreshUser();
-
-                                if (!context.mounted) return;
-
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: const Text(
-                                        'Business submitted for verification!'),
-                                    backgroundColor:
-                                        FlutterFlowTheme.of(context).success,
-                                  ),
-                                );
-
-                                context.goNamed('BusinessDashboard');
-                              } catch (e) {
-                                if (!context.mounted) return;
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      AppLogger.userFacingMessage(
-                                        e,
-                                        fallback:
-                                            'Unable to submit the shop. Please try again.',
-                                      ),
-                                    ),
-                                    backgroundColor:
-                                        FlutterFlowTheme.of(context).error,
-                                  ),
-                                );
-                              } finally {
-                                if (mounted) {
-                                  setState(() => _isSubmitting = false);
-                                }
-                              }
-                            },
-                            child: wrapWithModel(
-                              model: _model.buttonModel2,
-                              updateCallback: () => safeSetState(() {}),
-                              child: ButtonWidget(
-                                iconPresent: false,
-                                iconEndPresent: false,
-                                content: 'Submit for Verification',
-                                variant: 'primary',
-                                size: 'large',
-                                fullWidth: true,
-                                loading: _isSubmitting,
-                                disabled: _isSubmitting,
-                              ),
+                          wrapWithModel(
+                            model: _model.buttonModel2,
+                            updateCallback: () => safeSetState(() {}),
+                            child: ButtonWidget(
+                              iconPresent: false,
+                              iconEndPresent: false,
+                              content: 'Submit for Verification',
+                              variant: 'primary',
+                              size: 'large',
+                              fullWidth: true,
+                              loading: _isSubmitting,
+                              disabled: _isSubmitting,
+                              onTap: _isSubmitting ? null : _submitRegistration,
                             ),
                           ),
                           Text(

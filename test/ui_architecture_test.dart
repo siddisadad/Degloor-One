@@ -40,6 +40,16 @@ void main() {
     expect(source.contains('DiscoveryService'), isFalse);
   });
 
+  test('business registration does not insert shops itself', () {
+    final source = File(
+            'lib/features/businesses/business_registration_widget.dart')
+        .readAsStringSync();
+    expect(source.contains('BusinessService'), isFalse);
+    expect(source.contains('data/datasources'), isFalse);
+    expect(source.contains('onTap: _isSubmitting ? null : _submitRegistration'),
+        isTrue);
+  });
+
   test('web bootstrap does not stop Chrome focus events', () {
     final bootstrap = File('web/flutter_bootstrap.js').readAsStringSync();
     expect(bootstrap.contains('stopImmediatePropagation('), isFalse);
