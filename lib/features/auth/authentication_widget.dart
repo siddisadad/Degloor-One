@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
-import 'package:degloor_one/backend/discovery_service.dart';
 import 'package:degloor_one/backend/supabase/supabase_connection.dart';
 import 'package:degloor_one/core/app_flags.dart';
 import 'package:degloor_one/backend/user_service.dart';
@@ -224,7 +223,11 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
                                 onPressed: () {
                                   installGuestSession();
                                   updateAuthUser(currentUser!);
-                                  context.goNamed(_guestDestination);
+                                  if (_model.isBusinessOwner) {
+                                    context.pushNamed(_model.guestRouteName);
+                                  } else {
+                                    context.goNamed(_model.guestRouteName);
+                                  }
                                 },
                                 options: FFButtonOptions(
                                   width: double.infinity,
@@ -332,9 +335,6 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
     );
   }
 
-  String get _guestDestination =>
-      _model.isBusinessOwner ? 'BusinessRegistration' : 'CustomerHome';
-
   Widget _roleTabs() {
     final theme = FlutterFlowTheme.of(context);
     return Container(
@@ -370,33 +370,38 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
   }) {
     final theme = FlutterFlowTheme.of(context);
     return Expanded(
-      child: InkWell(
-        key: key,
-        borderRadius: BorderRadius.circular(12),
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          decoration: BoxDecoration(
-            color: selected ? theme.secondaryBackground : Colors.transparent,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: selected
-                ? [
-                    BoxShadow(
-                      blurRadius: 8,
-                      color: Colors.black.withValues(alpha: 0.06),
-                      offset: const Offset(0, 2),
-                    ),
-                  ]
-                : null,
-          ),
-          child: Text(
-            label,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: selected ? theme.primary : theme.secondaryText,
-              fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-              fontSize: 14,
+      child: Semantics(
+        button: true,
+        selected: selected,
+        label: label,
+        child: InkWell(
+          key: key,
+          borderRadius: BorderRadius.circular(12),
+          onTap: onTap,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            decoration: BoxDecoration(
+              color: selected ? theme.secondaryBackground : Colors.transparent,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: selected
+                  ? [
+                      BoxShadow(
+                        blurRadius: 8,
+                        color: Colors.black.withValues(alpha: 0.06),
+                        offset: const Offset(0, 2),
+                      ),
+                    ]
+                  : null,
+            ),
+            child: Text(
+              label,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: selected ? theme.primary : theme.secondaryText,
+                fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                fontSize: 14,
+              ),
             ),
           ),
         ),
@@ -480,30 +485,8 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
   }
 
   Future<void> _continueAfterAuth() async {
-    if (!_model.isBusinessOwner) {
-      context.goNamed('_initialize');
-      return;
-    }
-    if (kBypassAuth) {
-      context.goNamed('BusinessRegistration');
-      return;
-    }
-    final userId = currentUserUid;
-    if (userId.isEmpty) {
-      context.goNamed('BusinessRegistration');
-      return;
-    }
-    try {
-      final shops = await DiscoveryService.instance
-          .ownedBy(userId)
-          .timeout(const Duration(seconds: 10));
-      if (!mounted) return;
-      context.goNamed(
-        shops.isEmpty ? 'BusinessRegistration' : 'BusinessDashboard',
-      );
-    } catch (_) {
-      if (!mounted) return;
-      context.goNamed('BusinessRegistration');
-    }
+    final route = await _model.routeAfterAuth(bypassAuth: kBypassAuth);
+    if (!mounted) return;
+    context.goNamed(route);
   }
 }
