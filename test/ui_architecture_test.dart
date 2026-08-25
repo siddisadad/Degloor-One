@@ -53,14 +53,14 @@ void main() {
     expect(source.contains('_pickPhoto'), isTrue);
   });
 
-  test('chrome debug flags stay on the opt-in script', () {
-    final run = File('tool/run_chrome.sh').readAsStringSync();
-    expect(run.contains('--remote-allow-origins=*'), isTrue);
-    expect(run.contains('--disable-renderer-backgrounding'), isTrue);
-    expect(run.contains('--disable-backgrounding-occluded-windows'), isTrue);
-    expect(run.contains('BackForwardCache,Prerender2'), isTrue);
-    expect(run.contains('8090'), isTrue);
-    expect(run.contains('dartDevEmbedder.debugger.extensionNames'), isTrue);
+  test('run scripts do not launch Chrome AppInspector', () {
+    final chrome = File('tool/run_chrome.sh').readAsStringSync();
+    expect(chrome.contains('flutter run -d chrome'), isFalse);
+    expect(chrome.contains('run_web.sh'), isTrue);
+    expect(chrome.contains('dartDevEmbedder.debugger.extensionNames'), isTrue);
+    final web = File('tool/run_web.sh').readAsStringSync();
+    expect(web.contains('-d web-server'), isTrue);
+    expect(web.contains('flutter run -d chrome'), isFalse);
   });
 
   test('IDE web debug does not attach Chrome AppInspector', () {
@@ -74,6 +74,8 @@ void main() {
     expect(args, contains('8080'));
     expect(File('.vscode/launch.json').readAsStringSync(),
         isNot(contains('"deviceId": "chrome"')));
+    expect(File('.vscode/launch.json').readAsStringSync(),
+        isNot(contains('-d chrome')));
     final settings = File('.vscode/settings.json').readAsStringSync();
     expect(settings.contains('"debug.javascript.autoAttachFilter": "disabled"'),
         isTrue);
