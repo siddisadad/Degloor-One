@@ -41,6 +41,32 @@ void main() {
     expect(source.contains('DiscoveryService'), isFalse);
   });
 
+  test('login does not create accounts itself', () {
+    final source =
+        File('lib/features/auth/authentication_widget.dart').readAsStringSync();
+    expect(source.contains('Create Account'), isFalse);
+    expect(source.contains('_handleCreateAccount'), isFalse);
+    expect(source.contains('createAccountWithEmail'), isFalse);
+    expect(source.contains("'Sign up'"), isTrue);
+    expect(source.contains("'SignUp'"), isTrue);
+    expect(source.contains('login-sign-up'), isTrue);
+    final signup =
+        File('lib/features/auth/signup_widget.dart').readAsStringSync();
+    expect(signup.contains('createAccountWithEmail'), isTrue);
+    expect(signup.contains('_handleSignUp'), isTrue);
+    expect(signup.contains('DiscoveryService'), isFalse);
+    expect(signup.contains(_barrel), isFalse);
+    final model = File('lib/features/auth/signup_model.dart').readAsStringSync();
+    expect(model.contains('String? validate('), isTrue);
+    expect(model.contains('routeAfterAuth'), isTrue);
+    expect(
+      File('lib/features/auth/auth_continue.dart')
+          .readAsStringSync()
+          .contains('DiscoveryService'),
+      isTrue,
+    );
+  });
+
   test('business registration does not insert shops itself', () {
     final source = File(
             'lib/features/businesses/business_registration_widget.dart')

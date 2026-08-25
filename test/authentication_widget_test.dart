@@ -2,6 +2,7 @@ import 'package:degloor_one/app_state.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/backend/supabase/supabase_connection.dart';
 import 'package:degloor_one/features/auth/authentication_widget.dart';
+import 'package:degloor_one/features/auth/signup_widget.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:flutter/foundation.dart';
@@ -20,6 +21,13 @@ Widget _loginApp({String location = '/authentication'}) {
         path: '/authentication',
         name: 'Authentication',
         builder: (_, __) => const AuthenticationWidget(),
+      ),
+      GoRoute(
+        path: '/signUp',
+        name: 'SignUp',
+        builder: (_, state) => SignUpWidget(
+          role: state.uri.queryParameters['role'],
+        ),
       ),
       GoRoute(
         path: '/',
@@ -159,6 +167,8 @@ void main() {
     expect(find.text('Business'), findsOneWidget);
     expect(find.text('Sign in to shop local in Degloor.'), findsOneWidget);
     expect(find.text('Don\'t have an account? '), findsOneWidget);
+    expect(find.text('Sign up'), findsOneWidget);
+    expect(find.text('Create Account'), findsNothing);
 
     await tester.tap(find.byKey(const ValueKey('login-tab-business')));
     await tester.pump();
@@ -166,6 +176,7 @@ void main() {
     expect(find.text('Sign in to manage your Degloor shop.'), findsOneWidget);
     expect(find.text('Sign in to shop local in Degloor.'), findsNothing);
     expect(find.text('Don\'t have a shop yet? '), findsOneWidget);
+    expect(find.text('Sign up'), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('login-tab-customer')));
     await tester.pump();
@@ -173,6 +184,48 @@ void main() {
     expect(find.text('Sign in to shop local in Degloor.'), findsOneWidget);
     expect(find.text('Sign in to manage your Degloor shop.'), findsNothing);
     expect(find.text('Don\'t have an account? '), findsOneWidget);
+    expect(find.text('Create Account'), findsNothing);
+  });
+
+  testWidgets('sign up page shows the customer form', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(390, 1400));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(_loginApp(location: '/signUp'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    expect(find.text('Welcome back'), findsNothing);
+    expect(find.text('Confirm password'), findsOneWidget);
+    expect(
+      find.text('Create an account to shop local in Degloor.'),
+      findsOneWidget,
+    );
+    expect(find.text('Already have an account? '), findsOneWidget);
+    expect(find.text('Create Account'), findsNothing);
+  });
+
+  testWidgets('business sign up keeps the business tab', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(390, 1400));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(_loginApp());
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    await tester.tap(find.byKey(const ValueKey('login-tab-business')));
+    await tester.pump();
+    await tester.ensureVisible(find.byKey(const ValueKey('login-sign-up')));
+    await tester.tap(find.byKey(const ValueKey('login-sign-up')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    expect(
+      find.text('Create an account to list your Degloor shop.'),
+      findsOneWidget,
+    );
+    expect(
+      find.text('Create an account to shop local in Degloor.'),
+      findsNothing,
+    );
   });
 
   testWidgets('customer guest continues to customer home', (tester) async {

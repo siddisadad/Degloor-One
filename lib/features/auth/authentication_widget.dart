@@ -64,12 +64,7 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        FocusScope.of(context).unfocus();
-        FocusManager.instance.primaryFocus?.unfocus();
-      },
-      child: Scaffold(
+    return Scaffold(
         key: scaffoldKey,
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         body: Container(
@@ -352,10 +347,25 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
                                   : 'Don\'t have an account? ',
                               style: FlutterFlowTheme.of(context).bodyMedium,
                             ),
-                            InkWell(
-                              onTap: _isLoading ? null : _handleCreateAccount,
+                            TextButton(
+                              key: const ValueKey('login-sign-up'),
+                              onPressed: _isLoading
+                                  ? null
+                                  : () => context.pushNamed(
+                                        'SignUp',
+                                        queryParameters: {
+                                          'role': _model.isBusinessOwner
+                                              ? 'business'
+                                              : 'customer',
+                                        },
+                                      ),
+                              style: TextButton.styleFrom(
+                                padding: EdgeInsets.zero,
+                                minimumSize: Size.zero,
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              ),
                               child: Text(
-                                'Create Account',
+                                'Sign up',
                                 style: TextStyle(
                                   color: _isLoading
                                       ? FlutterFlowTheme.of(context)
@@ -398,7 +408,6 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
             ),
           ),
         ),
-      ),
     );
   }
 
@@ -525,27 +534,6 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
     setState(() => _isLoading = true);
     try {
       final user = await authManager.signInWithEmail(context, email, password);
-      if (!mounted) return;
-      if (user != null) {
-        await _continueAfterAuth();
-      }
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
-    }
-  }
-
-  Future<void> _handleCreateAccount() async {
-    final email = _model.textFieldModel1.inputTextController!.text;
-    final password = _model.textFieldModel2.inputTextController!.text;
-    if (email.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Enter email and password first')));
-      return;
-    }
-    setState(() => _isLoading = true);
-    try {
-      final user = await authManager.createAccountWithEmail(
-          context, email, password);
       if (!mounted) return;
       if (user != null) {
         await _continueAfterAuth();
