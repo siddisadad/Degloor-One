@@ -62,6 +62,29 @@ void main() {
     expect(model.contains('DiscoveryService'), isTrue);
   });
 
+  test('admin desk talks to the model, not the service', () {
+    final source =
+        File('lib/features/admin/admin_control_panel_widget.dart')
+            .readAsStringSync();
+    expect(source.contains('AdminService'), isFalse);
+    expect(source.contains('FutureBuilder'), isFalse);
+    expect(source.contains('currentUser?.role == null'), isFalse);
+    expect(source.contains('currentUser?.role != \'admin\''), isFalse);
+    expect(source.contains('_loadDesk'), isTrue);
+    expect(source.contains('_verifyBusiness'), isTrue);
+    expect(source.contains('_resolveComplaint'), isTrue);
+    expect(source.contains('_addCategory'), isTrue);
+    final model =
+        File('lib/features/admin/admin_control_panel_model.dart')
+            .readAsStringSync();
+    expect(model.contains('Future<void> load('), isTrue);
+    expect(model.contains('verifyBusiness'), isTrue);
+    expect(model.contains('resolveComplaint'), isTrue);
+    expect(model.contains('addCategory'), isTrue);
+    expect(model.contains('AdminService'), isTrue);
+    expect(model.contains('requireAdmin'), isFalse);
+  });
+
   test('catalogue photo talks to the model, not the picker', () {
     final source =
         File('lib/features/catalogue/manage_catalogue_widget.dart')
