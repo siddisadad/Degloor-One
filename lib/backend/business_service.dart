@@ -330,6 +330,18 @@ class BusinessService {
     await _catalog.upsertHours(hours, businessId: shop.id);
   }
 
+  /// Guest mode and the FlutterFlow host have no writable `product-images`
+  /// bucket. A live GoTrue probe turns [kUseShowcaseData] off so table reads
+  /// can run, but storage still 400s and the UI shows "Unable to upload the
+  /// image". Keep a local public URL in those cases.
+  static bool get usesLocalPublicImage =>
+      kUseShowcaseData || kBypassAuth || kUsesDeadFlutterFlowHost;
+
+  static String localPublicImageUrl(String path) {
+    return 'https://images.unsplash.com/photo-1542838132-92c53300491e'
+        '?auto=format&fit=crop&w=400&q=80&path=$path';
+  }
+
   Future<String> uploadPublicImage({
     required String folder,
     required String businessId,
@@ -341,9 +353,8 @@ class BusinessService {
     }
     final path =
         '$folder/$businessId/${DateTime.now().microsecondsSinceEpoch}.$extension';
-    if (kUseShowcaseData) {
-      return 'https://images.unsplash.com/photo-1542838132-92c53300491e'
-          '?auto=format&fit=crop&w=400&q=80&path=$path';
+    if (usesLocalPublicImage) {
+      return localPublicImageUrl(path);
     }
     try {
       await SupaFlow.client.storage

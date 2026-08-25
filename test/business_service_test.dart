@@ -188,6 +188,62 @@ void main() {
     expect('${sunday.single['open_time']}', isNot(contains('T')));
   });
 
+  test('public image upload stays local when the FlutterFlow host is live',
+      () async {
+    AppEnvironment.debugReset();
+    AppEnvironment.debugOverride(
+      flavor: AppFlavor.development,
+      bypassAuth: true,
+      useShowcaseData: false,
+    );
+    AppEnvironment.markFlutterFlowHostLive();
+    addTearDown(() {
+      AppEnvironment.debugReset();
+      AppEnvironment.debugOverride(
+        flavor: AppFlavor.development,
+        bypassAuth: true,
+        useShowcaseData: true,
+      );
+    });
+
+    expect(kUseShowcaseData, isFalse);
+    expect(kBypassAuth, isTrue);
+    expect(BusinessService.usesLocalPublicImage, isTrue);
+
+    final first = await BusinessService.instance.uploadPublicImage(
+      folder: 'businesses',
+      businessId: '${GuestAuthUser.guestUid}/storeFront',
+      bytes: const [1, 2, 3],
+    );
+    final second = await BusinessService.instance.uploadPublicImage(
+      folder: 'businesses',
+      businessId: '${GuestAuthUser.guestUid}/registrationDoc',
+      bytes: const [4, 5, 6],
+    );
+    expect(first, contains('unsplash'));
+    expect(second, contains('unsplash'));
+    expect(first, isNot(second));
+    expect(first, contains('storeFront'));
+    expect(second, contains('registrationDoc'));
+  });
+
+  test('empty image bytes are rejected before storage', () async {
+    await expectLater(
+      BusinessService.instance.uploadPublicImage(
+        folder: 'businesses',
+        businessId: GuestAuthUser.guestUid,
+        bytes: const [],
+      ),
+      throwsA(
+        isA<Exception>().having(
+          (error) => error.toString(),
+          'message',
+          contains('Please choose an image'),
+        ),
+      ),
+    );
+  });
+
   test('customer can register an unverified shop', () async {
     final shop = await BusinessService.instance.register(
       userId: ShowcaseCatalog.customer2,
