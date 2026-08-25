@@ -112,8 +112,8 @@ class _BusinessRegistrationWidgetState
                             color: FlutterFlowTheme.of(context).primaryText,
                             size: 24.0,
                           ),
-                          onPressed: () async {
-                            context.goNamed(CustomerHomeWidget.routeName);
+                          onPressed: () {
+                            context.popOrGoNamed(CustomerHomeWidget.routeName);
                           },
                         ),
                         Column(

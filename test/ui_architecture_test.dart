@@ -34,6 +34,12 @@ void main() {
     expect(source.contains('data/datasources'), isFalse);
   });
 
+  test('login screen does not look up shops itself', () {
+    final source =
+        File('lib/features/auth/authentication_widget.dart').readAsStringSync();
+    expect(source.contains('DiscoveryService'), isFalse);
+  });
+
   test('address service and repository interface stay off Supabase', () {
     const paths = [
       'lib/backend/address_service.dart',
