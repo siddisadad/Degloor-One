@@ -340,9 +340,10 @@ class BusinessService {
       throw Exception('Please choose an image');
     }
     final path =
-        '$folder/$businessId/${DateTime.now().millisecondsSinceEpoch}.$extension';
+        '$folder/$businessId/${DateTime.now().microsecondsSinceEpoch}.$extension';
     if (kUseShowcaseData) {
-      return 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=400&q=80';
+      return 'https://images.unsplash.com/photo-1542838132-92c53300491e'
+          '?auto=format&fit=crop&w=400&q=80&path=$path';
     }
     try {
       await SupaFlow.client.storage
