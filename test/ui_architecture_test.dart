@@ -78,6 +78,7 @@ void main() {
     final configs = (launch['configurations'] as List).cast<Map>();
     expect(configs, hasLength(1));
     expect(configs.single['deviceId'], 'web-server');
+    expect(configs.single['noDebug'], isTrue);
     final args = (configs.single['toolArgs'] as List).join(' ');
     expect(args, contains('--web-port'));
     expect(args, contains('8080'));
@@ -91,6 +92,8 @@ void main() {
     expect(settings.contains('"dart.flutterShowWebServerDevice": "always"'),
         isTrue);
     expect(settings.contains('"dart.flutterRememberSelectedDevice": false'),
+        isTrue);
+    expect(settings.contains('"dart.allowFlutterForcedDebugMode": false'),
         isTrue);
     expect(settings.contains('flutterRunAdditionalArgs'), isFalse);
     final web = File('tool/run_web.sh').readAsStringSync();

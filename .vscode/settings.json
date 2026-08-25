@@ -2,5 +2,6 @@
   "debug.javascript.autoAttachFilter": "disabled",
   "dart.flutterSelectDeviceWhenConnected": false,
   "dart.flutterRememberSelectedDevice": false,
-  "dart.flutterShowWebServerDevice": "always"
+  "dart.flutterShowWebServerDevice": "always",
+  "dart.allowFlutterForcedDebugMode": false
 }
