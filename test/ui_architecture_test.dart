@@ -26,6 +26,14 @@ void main() {
     expect(offenders, isEmpty, reason: offenders.join('\n'));
   });
 
+  test('start route stays off Supabase tables', () {
+    const path = 'lib/features/auth/start_route.dart';
+    final source = File(path).readAsStringSync();
+    expect(source.contains(_barrel), isFalse);
+    expect(source.contains(_table), isFalse);
+    expect(source.contains('data/datasources'), isFalse);
+  });
+
   test('address service and repository interface stay off Supabase', () {
     const paths = [
       'lib/backend/address_service.dart',
