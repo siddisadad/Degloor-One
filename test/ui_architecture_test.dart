@@ -77,11 +77,14 @@ void main() {
     final source =
         File('lib/features/home/customer_home_widget.dart').readAsStringSync();
     expect(source.contains('if (recent.isNotEmpty)'), isFalse);
-    expect(source.contains('newestShops'), isTrue);
+    expect(source.contains('newestShops'), isFalse);
+    expect(source.contains('loadNewBusinesses'), isTrue);
     expect(source.contains(_barrel), isFalse);
     final modelFile =
         File('lib/features/home/customer_home_model.dart').readAsStringSync();
     expect(modelFile.contains('List<Shop> newestShops'), isTrue);
+    expect(modelFile.contains('void loadNewBusinesses'), isTrue);
+    expect(modelFile.contains('DiscoveryService'), isTrue);
   });
 
   test('business registration does not insert shops itself', () {

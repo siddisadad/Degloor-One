@@ -159,16 +159,11 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
           )
           .then((page) => page.items);
 
-      _model.newBusinessesFuture = DiscoveryService.instance
-          .search(
-            DiscoverySearch(
-              latitude: userLoc.latitude,
-              longitude: userLoc.longitude,
-              radiusKm: radius,
-              page: const PageQuery(limit: 15),
-            ),
-          )
-          .then((page) => _model.newestShops(page.items));
+      _model.loadNewBusinesses(
+        latitude: userLoc.latitude,
+        longitude: userLoc.longitude,
+        radiusKm: radius,
+      );
 
       _model.recommendedProductsFuture = DiscoveryService.instance
           .searchProducts(
@@ -182,7 +177,7 @@ class _CustomerHomeWidgetState extends State<CustomerHomeWidget> {
           .then((page) => page.items);
     } else {
       _model.openNowBusinessesFuture = Future.value([]);
-      _model.newBusinessesFuture = Future.value([]);
+      _model.loadNewBusinesses(radiusKm: radius);
       _model.recommendedProductsFuture = Future.value([]);
     }
   }

@@ -53,6 +53,7 @@ void main() {
     expect(find.text('Categories'), findsOneWidget);
     expect(find.text('Services'), findsWidgets);
     expect(find.text('Jobs'), findsOneWidget);
+    expect(find.text('New in Degloor'), findsOneWidget);
     expect(find.text('Nearby Businesses'), findsOneWidget);
     expect(find.text('Popular Near You'), findsNothing);
     expect(find.text('Recommended for You'), findsNothing);
@@ -92,5 +93,33 @@ void main() {
       ]).map((shop) => shop.id),
       ['shop-7', 'shop-6', 'shop-5', 'shop-4', 'shop-3'],
     );
+  });
+
+  testWidgets('home model loads new shops from discovery', (tester) async {
+    late CustomerHomeModel model;
+    await tester.pumpWidget(MaterialApp(
+      home: Builder(builder: (context) {
+        model = createModel(context, () => CustomerHomeModel());
+        return const SizedBox.shrink();
+      }),
+    ));
+
+    model.loadNewBusinesses(radiusKm: 5);
+    expect(await model.newBusinessesFuture, isEmpty);
+
+    model.loadNewBusinesses(
+      latitude: ShowcaseCatalog.degloorLat,
+      longitude: ShowcaseCatalog.degloorLng,
+      radiusKm: 5,
+    );
+    final shops = await model.newBusinessesFuture!;
+    expect(shops, isNotEmpty);
+    expect(shops.length, lessThanOrEqualTo(5));
+    for (var i = 1; i < shops.length; i++) {
+      expect(
+        shops[i - 1].createdAt.isBefore(shops[i].createdAt),
+        isFalse,
+      );
+    }
   });
 }
