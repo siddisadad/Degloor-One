@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/core/error_handler.dart';
 
@@ -72,18 +73,38 @@ class SupabaseConnection {
   static bool looksUnreachable(Object error) => AppLogger.isUnreachable(error);
 
   static String messageFor(Object error, {String? authMessage}) {
+    final extracted = _authCopy(error, authMessage);
     if (looksUnreachable(error) ||
-        (authMessage != null && looksUnreachable(authMessage))) {
+        (extracted != null && looksUnreachable(extracted))) {
       return kBypassAuth ? guestUnreachableMessage : unreachableMessage;
     }
-    if (authMessage != null &&
-        authMessage.contains('User already registered')) {
+    if (extracted == null || extracted.isEmpty) {
+      return 'Error: $error';
+    }
+    if (extracted.contains('User already registered')) {
       return 'Error: The email is already in use by a different account';
     }
-    if (authMessage != null && authMessage.trim().isNotEmpty) {
-      return 'Error: $authMessage';
+    if (extracted.toLowerCase().contains('rate limit')) {
+      return 'Please wait a moment before trying again.';
     }
-    return 'Error: $error';
+    return 'Error: $extracted';
+  }
+
+  /// AuthException.message, or the `message:` field dumped in
+  /// `AuthApiException(message: ..., statusCode: ...)`.
+  static String? _authCopy(Object error, String? authMessage) {
+    if (authMessage != null && authMessage.trim().isNotEmpty) {
+      return authMessage.trim();
+    }
+    if (error is AuthException && error.message.trim().isNotEmpty) {
+      return error.message.trim();
+    }
+    final dumped = error.toString();
+    if (!dumped.contains('AuthApiException') &&
+        !dumped.contains('AuthException(')) {
+      return null;
+    }
+    return RegExp(r'message:\s*([^,)]+)').firstMatch(dumped)?.group(1)?.trim();
   }
 
   static void log(Object error, {String context = 'Auth error'}) {
@@ -99,9 +120,11 @@ class SupabaseConnection {
     String? authMessage,
   }) {
     if (!context.mounted) return;
+    final copy = authMessage ??
+        (error is AuthException ? error.message : null);
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(messageFor(error, authMessage: authMessage))),
+      SnackBar(content: Text(messageFor(error, authMessage: copy))),
     );
   }
 }
