@@ -1,5 +1,5 @@
-import '/flutter_flow/flutter_flow_theme.dart';
-import '/flutter_flow/flutter_flow_util.dart';
+import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
+import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'radius_option_model.dart';
@@ -10,11 +10,13 @@ class RadiusOptionWidget extends StatefulWidget {
     super.key,
     String? value,
     bool? selected,
-  })  : this.value = value ?? '2',
-        this.selected = selected ?? false;
+    this.onTap,
+  })  : value = value ?? '10',
+        selected = selected ?? false;
 
   final String value;
   final bool selected;
+  final VoidCallback? onTap;
 
   @override
   State<RadiusOptionWidget> createState() => _RadiusOptionWidgetState();
@@ -44,66 +46,79 @@ class _RadiusOptionWidgetState extends State<RadiusOptionWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 48.0,
-      decoration: BoxDecoration(
-        color: valueOrDefault<Color>(
-          valueOrDefault<bool>(
-            widget.selected,
-            false,
-          )
-              ? FlutterFlowTheme.of(context).primary
-              : FlutterFlowTheme.of(context).secondaryBackground,
-          FlutterFlowTheme.of(context).secondaryBackground,
-        ),
-        borderRadius: BorderRadius.circular(8.0),
-        shape: BoxShape.rectangle,
-        border: Border.all(
+    return InkWell(
+      onTap: widget.onTap,
+      child: Container(
+        height: 48.0,
+        decoration: BoxDecoration(
           color: valueOrDefault<Color>(
             valueOrDefault<bool>(
               widget.selected,
               false,
             )
                 ? FlutterFlowTheme.of(context).primary
-                : FlutterFlowTheme.of(context).alternate,
-            FlutterFlowTheme.of(context).alternate,
+                : FlutterFlowTheme.of(context).secondaryBackground,
+            FlutterFlowTheme.of(context).secondaryBackground,
           ),
-          width: valueOrDefault<double>(
-            valueOrDefault<bool>(
-              widget.selected,
-              false,
-            )
-                ? 1.0
-                : 1.0,
-            1.0,
+          borderRadius: BorderRadius.circular(12.0),
+          boxShadow: widget.selected
+              ? [
+                  BoxShadow(
+                    color: FlutterFlowTheme.of(context)
+                        .primary
+                        .withValues(alpha: 0.22),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
+          border: Border.all(
+            color: valueOrDefault<Color>(
+              valueOrDefault<bool>(
+                widget.selected,
+                false,
+              )
+                  ? FlutterFlowTheme.of(context).primary
+                  : FlutterFlowTheme.of(context).alternate,
+              FlutterFlowTheme.of(context).alternate,
+            ),
+            width: valueOrDefault<double>(
+              valueOrDefault<bool>(
+                widget.selected,
+                false,
+              )
+                  ? 1.0
+                  : 1.0,
+              1.0,
+            ),
           ),
         ),
-      ),
-      alignment: AlignmentDirectional(0.0, 0.0),
-      child: Text(
-        valueOrDefault<String>(
-          '${widget.value} KM',
-          '2 KM',
-        ),
-        style: FlutterFlowTheme.of(context).labelLarge.override(
-              font: GoogleFonts.inter(
+        alignment: const AlignmentDirectional(0.0, 0.0),
+        child: Text(
+          valueOrDefault<String>(
+            '${widget.value} KM',
+            '10 KM',
+          ),
+          style: FlutterFlowTheme.of(context).labelLarge.override(
+                font: GoogleFonts.inter(
+                  fontWeight: FontWeight.w600,
+                  fontStyle: FlutterFlowTheme.of(context).labelLarge.fontStyle,
+                ),
+                color: valueOrDefault<Color>(
+                  valueOrDefault<bool>(
+                    widget.selected,
+                    false,
+                  )
+                      ? FlutterFlowTheme.of(context).onPrimary
+                      : FlutterFlowTheme.of(context).primaryText,
+                  FlutterFlowTheme.of(context).primaryText,
+                ),
+                letterSpacing: 0.0,
                 fontWeight: FontWeight.w600,
                 fontStyle: FlutterFlowTheme.of(context).labelLarge.fontStyle,
+                lineHeight: 1.4,
               ),
-              color: valueOrDefault<Color>(
-                valueOrDefault<bool>(
-                  widget.selected,
-                  false,
-                )
-                    ? FlutterFlowTheme.of(context).onPrimary
-                    : FlutterFlowTheme.of(context).primaryText,
-                FlutterFlowTheme.of(context).primaryText,
-              ),
-              letterSpacing: 0.0,
-              fontWeight: FontWeight.w600,
-              fontStyle: FlutterFlowTheme.of(context).labelLarge.fontStyle,
-              lineHeight: 1.4,
-            ),
+        ),
       ),
     );
   }

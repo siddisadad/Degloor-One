@@ -1,10 +1,26 @@
-import '/backend/supabase/supabase.dart';
-import 'supabase_auth_manager.dart';
+import 'dart:async';
+import 'package:rxdart/rxdart.dart';
 
-export 'supabase_auth_manager.dart';
+import 'package:degloor_one/auth/auth_repository.dart';
+import 'package:degloor_one/auth/java_auth/java_auth_repository.dart';
+import 'package:degloor_one/auth/supabase_auth/supabase_auth_repository.dart';
+import 'package:degloor_one/auth/guest_auth_user.dart';
+import 'package:degloor_one/auth/java_auth_user.dart';
+import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/backend/user_service.dart';
+import 'package:degloor_one/core/api/api_client.dart';
 
-final _authManager = SupabaseAuthManager();
-SupabaseAuthManager get authManager => _authManager;
+export 'package:degloor_one/auth/auth_repository.dart';
+export 'package:degloor_one/auth/base_auth_user_provider.dart';
+
+AuthRepository get authManager => JavaApiConfig.enabled
+    ? JavaAuthRepository()
+    : SupabaseAuthRepository();
+
+extension AuthRepositoryExtensions on AuthRepository {
+  /// Helper to refresh the user from the current instance.
+  Future<void> refresh() => refreshUser();
+}
 
 String get currentUserEmail => currentUser?.email ?? '';
 
@@ -16,14 +32,28 @@ String get currentUserPhoto => currentUser?.photoUrl ?? '';
 
 String get currentPhoneNumber => currentUser?.phoneNumber ?? '';
 
-String get currentJwtToken => _currentJwtToken ?? '';
+String get currentJwtToken {
+  if (JavaApiConfig.enabled) {
+    return JavaApiClient.instance.accessToken ?? '';
+  }
+  return SupaFlow.client.auth.currentSession?.accessToken ?? '';
+}
 
 bool get currentUserEmailVerified => currentUser?.emailVerified ?? false;
 
-/// Create a Stream that listens to the current user's JWT Token.
-String? _currentJwtToken;
-final jwtTokenStream = SupaFlow.client.auth.onAuthStateChange
-    .map(
-      (authState) => _currentJwtToken = authState.session?.accessToken,
-    )
-    .asBroadcastStream();
+Future<String?> getCurrentUserRole() async {
+  if (currentUser is GuestAuthUser) return currentUser?.role;
+  if (currentUser is JavaAuthUser) return currentUser?.role;
+  if (!loggedIn || currentUserUid.length < 10) return null;
+  return UserService.instance.roleFor(currentUserUid);
+}
+
+final jwtTokenStream = JavaApiConfig.enabled
+    ? jwtTokenUpdateStream
+        .startWith(JavaApiClient.instance.accessToken)
+        .asBroadcastStream()
+    : SupaFlow.client.auth.onAuthStateChange
+        .map(
+          (authState) => authState.session?.accessToken,
+        )
+        .asBroadcastStream();

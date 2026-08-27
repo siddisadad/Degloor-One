@@ -1,6 +1,31 @@
 export '../../../flutter_flow/lat_lng.dart';
-export 'package:supabase_flutter/supabase_flutter.dart' hide Provider;
+export 'package:supabase_flutter/supabase_flutter.dart';
 
 export '../supabase.dart';
 export 'row.dart';
 export 'table.dart';
+export 'tables/cities_table.dart';
+export 'tables/business_categories_table.dart';
+export 'tables/businesses_table.dart';
+export 'tables/product_categories_table.dart';
+export 'tables/products_table.dart';
+export 'tables/users_table.dart';
+export 'tables/addresses_table.dart';
+export 'tables/carts_table.dart';
+export 'tables/cart_items_table.dart';
+export 'tables/orders_table.dart';
+export 'tables/order_status_history_table.dart';
+export 'tables/order_items_table.dart';
+export 'tables/reviews_table.dart';
+export 'tables/notifications_table.dart';
+export 'tables/service_categories_table.dart';
+export 'tables/service_providers_table.dart';
+export 'tables/service_requests_table.dart';
+export 'tables/delivery_partners_table.dart';
+export 'tables/delivery_assignments_table.dart';
+export 'tables/business_hours_table.dart';
+export 'tables/complaints_table.dart';
+export 'tables/jobs_table.dart';
+export 'tables/job_applications_table.dart';
+export 'tables/business_analytics_table.dart';
+

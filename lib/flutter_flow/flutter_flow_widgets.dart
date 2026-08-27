@@ -64,7 +64,7 @@ class FFButtonWidget extends StatefulWidget {
 
   final String text;
   final Widget? icon;
-  final IconData? iconData;
+  final dynamic iconData;
   final Function()? onPressed;
   final FFButtonOptions options;
   final bool showLoadingIndicator;
@@ -98,7 +98,7 @@ class _FFButtonWidgetState extends State<FFButtonWidget> {
 
   @override
   Widget build(BuildContext context) {
-    Widget textWidget = loading
+    final Widget textWidget = loading
         ? SizedBox(
             width: widget.options.width == null
                 ? _getTextWidth(text, widget.options.textStyle, maxLines)
@@ -142,7 +142,7 @@ class _FFButtonWidgetState extends State<FFButtonWidget> {
             : () => widget.onPressed!())
         : null;
 
-    ButtonStyle style = ButtonStyle(
+    final ButtonStyle style = ButtonStyle(
       shape: WidgetStateProperty.resolveWith<OutlinedBorder>((states) {
         if (states.contains(WidgetState.hovered) &&
             widget.options.hoverBorderSide != null) {
@@ -210,9 +210,9 @@ class _FFButtonWidgetState extends State<FFButtonWidget> {
     );
 
     if ((widget.icon != null || widget.iconData != null) && !loading) {
-      Widget icon = widget.icon ??
+      final Widget icon = widget.icon ??
           FaIcon(
-            widget.iconData!,
+            widget.iconData as dynamic,
             size: widget.options.iconSize,
             color: widget.options.iconColor,
           );
@@ -273,7 +273,6 @@ class _FFButtonWidgetState extends State<FFButtonWidget> {
 extension _WithoutColorExtension on TextStyle {
   TextStyle withoutColor() => TextStyle(
         inherit: inherit,
-        color: null,
         backgroundColor: backgroundColor,
         fontSize: fontSize,
         fontWeight: fontWeight,
@@ -410,7 +409,7 @@ class _FFFocusIndicatorState extends State<FFFocusIndicator> {
         onTap: widget.onTap,
         onLongPress: widget.onLongPress,
         onDoubleTap: widget.onDoubleTap,
-        child: widget.child!,
+        child: widget.child,
       );
     } else {
       // Child mode without interactions: just use child

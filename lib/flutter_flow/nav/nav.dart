@@ -3,12 +3,15 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '/auth/base_auth_user_provider.dart';
+import 'package:degloor_one/auth/base_auth_user_provider.dart';
 
-import '/flutter_flow/flutter_flow_theme.dart';
-import '/flutter_flow/flutter_flow_util.dart';
-
-import '/index.dart';
+import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
+import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
+import 'package:degloor_one/core/app_flags.dart';
+import 'package:degloor_one/shared/shop.dart';
+import 'package:degloor_one/features/main_scaffold.dart';
+import 'package:degloor_one/features/catalogue/product_detail_widget.dart';
+import 'package:degloor_one/index.dart';
 
 export 'package:go_router/go_router.dart';
 export 'serialization_util.dart';
@@ -72,71 +75,356 @@ class AppStateNotifier extends ChangeNotifier {
 
 GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
       initialLocation: '/',
-      debugLogDiagnostics: true,
       refreshListenable: appStateNotifier,
       navigatorKey: appNavigatorKey,
-      errorBuilder: (context, state) => appStateNotifier.loggedIn
-          ? CustomerHomeWidget()
-          : AuthenticationWidget(),
+      errorBuilder: (context, state) => const InitialRedirectWidget(),
       routes: [
         FFRoute(
           name: '_initialize',
           path: '/',
-          builder: (context, _) => appStateNotifier.loggedIn
-              ? CustomerHomeWidget()
-              : AuthenticationWidget(),
+          builder: (context, _) => const InitialRedirectWidget(),
         ),
         FFRoute(
           name: SplashScreenWidget.routeName,
           path: SplashScreenWidget.routePath,
-          builder: (context, params) => SplashScreenWidget(),
+          builder: (context, params) => const SplashScreenWidget(),
         ),
         FFRoute(
           name: AuthenticationWidget.routeName,
           path: AuthenticationWidget.routePath,
-          builder: (context, params) => AuthenticationWidget(),
+          builder: (context, params) => const AuthenticationWidget(),
         ),
         FFRoute(
-          name: CustomerHomeWidget.routeName,
-          path: CustomerHomeWidget.routePath,
-          builder: (context, params) => CustomerHomeWidget(),
+          name: SignUpWidget.routeName,
+          path: SignUpWidget.routePath,
+          builder: (context, params) => SignUpWidget(
+            role: params.getParam<String>('role', ParamType.string),
+          ),
+        ),
+        FFRoute(
+          name: PhoneAuthWidget.routeName,
+          path: PhoneAuthWidget.routePath,
+          builder: (context, params) => const PhoneAuthWidget(),
+        ),
+        FFRoute(
+          name: ForgotPasswordWidget.routeName,
+          path: ForgotPasswordWidget.routePath,
+          builder: (context, params) => ForgotPasswordWidget(
+            email: params.getParam<String>('email', ParamType.string),
+          ),
+        ),
+        FFRoute(
+          name: ResetPasswordWidget.routeName,
+          path: ResetPasswordWidget.routePath,
+          builder: (context, params) => const ResetPasswordWidget(),
+        ),
+        FFRoute(
+          name: OtpVerificationWidget.routeName,
+          path: OtpVerificationWidget.routePath,
+          builder: (context, params) => OtpVerificationWidget(
+            phone: params.getParam<String>('phone', ParamType.string)!,
+          ),
+        ),
+        FFRoute(
+          name: InitialRedirectWidget.routeName,
+          path: InitialRedirectWidget.routePath,
+          builder: (context, params) => const InitialRedirectWidget(),
+        ),
+        StatefulShellRoute.indexedStack(
+          builder: (context, state, navigationShell) =>
+              MainScaffold(navigationShell: navigationShell),
+          branches: [
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  name: CustomerHomeWidget.routeName,
+                  path: CustomerHomeWidget.routePath,
+                  builder: (context, state) => const CustomerHomeWidget(),
+                ),
+              ],
+            ),
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  name: 'Explore',
+                  path: '/explore',
+                  builder: (context, state) => SearchResultsWidget(
+                    searchTerm: state.uri.queryParameters['searchTerm'],
+                    categoryId: state.uri.queryParameters['categoryId'],
+                    openNow: state.uri.queryParameters['openNow'] == 'true',
+                    showBack: false,
+                  ),
+                ),
+              ],
+            ),
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  name: ServicesWidget.routeName,
+                  path: ServicesWidget.routePath,
+                  builder: (context, state) =>
+                      const ServicesWidget(showBack: false),
+                ),
+              ],
+            ),
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  name: CartWidget.routeName,
+                  path: CartWidget.routePath,
+                  builder: (context, state) =>
+                      const CartWidget(showBack: false),
+                  redirect: (context, state) =>
+                      !kBypassAuth && !appStateNotifier.loggedIn
+                          ? '/authentication'
+                          : null,
+                ),
+              ],
+            ),
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  name: UserProfileReportsWidget.routeName,
+                  path: UserProfileReportsWidget.routePath,
+                  builder: (context, state) => UserProfileReportsWidget(
+                    showBack: false,
+                    editProfile:
+                        state.uri.queryParameters['editProfile'] == 'true',
+                  ),
+                  redirect: (context, state) =>
+                      !kBypassAuth && !appStateNotifier.loggedIn
+                          ? '/authentication'
+                          : null,
+                ),
+              ],
+            ),
+          ],
         ),
         FFRoute(
           name: LocationRadiusSelectorWidget.routeName,
           path: LocationRadiusSelectorWidget.routePath,
-          builder: (context, params) => LocationRadiusSelectorWidget(),
+          builder: (context, params) => const LocationRadiusSelectorWidget(),
+        ),
+        FFRoute(
+          name: ServicesWidget.stackedRouteName,
+          path: ServicesWidget.stackedRoutePath,
+          builder: (context, params) => const ServicesWidget(),
+        ),
+        FFRoute(
+          name: UserProfileReportsWidget.stackedRouteName,
+          path: UserProfileReportsWidget.stackedRoutePath,
+          builder: (context, params) => UserProfileReportsWidget(
+            editProfile: params.getParam<bool>('editProfile', ParamType.bool),
+          ),
+          requireAuth: true,
+        ),
+        FFRoute(
+          name: UserServiceRequestsWidget.routeName,
+          path: UserServiceRequestsWidget.routePath,
+          builder: (context, params) => const UserServiceRequestsWidget(),
+          requireAuth: true,
+        ),
+        FFRoute(
+          name: CartWidget.stackedRouteName,
+          path: CartWidget.stackedRoutePath,
+          builder: (context, params) => const CartWidget(),
+          requireAuth: true,
         ),
         FFRoute(
           name: SearchResultsWidget.routeName,
           path: SearchResultsWidget.routePath,
-          builder: (context, params) => SearchResultsWidget(),
+          builder: (context, params) => SearchResultsWidget(
+            searchTerm: params.getParam<String>('searchTerm', ParamType.string),
+            categoryId: params.getParam<String>('categoryId', ParamType.string),
+            openNow: params.getParam<bool>('openNow', ParamType.bool),
+          ),
+        ),
+        FFRoute(
+          name: CategoriesWidget.routeName,
+          path: CategoriesWidget.routePath,
+          builder: (context, params) => const CategoriesWidget(),
         ),
         FFRoute(
           name: BusinessProfileWidget.routeName,
           path: BusinessProfileWidget.routePath,
-          builder: (context, params) => BusinessProfileWidget(),
+          builder: (context, params) => BusinessProfileWidget(
+            businessId: params.getParam<String>('businessId', ParamType.string),
+          ),
+        ),
+        FFRoute(
+          name: BusinessCatalogueWidget.routeName,
+          path: BusinessCatalogueWidget.routePath,
+          builder: (context, params) => BusinessCatalogueWidget(
+            businessId: params.getParam<String>('businessId', ParamType.string)!,
+          ),
+        ),
+        FFRoute(
+          name: ProductDetailWidget.routeName,
+          path: ProductDetailWidget.routePath,
+          builder: (context, params) => ProductDetailWidget(
+            productId: params.getParam<String>('productId', ParamType.string)!,
+          ),
         ),
         FFRoute(
           name: BusinessRegistrationWidget.routeName,
           path: BusinessRegistrationWidget.routePath,
-          builder: (context, params) => BusinessRegistrationWidget(),
+          builder: (context, params) => const BusinessRegistrationWidget(),
+          requireAuth: true,
         ),
         FFRoute(
           name: BusinessDashboardWidget.routeName,
           path: BusinessDashboardWidget.routePath,
-          builder: (context, params) => BusinessDashboardWidget(),
+          builder: (context, params) => const BusinessDashboardWidget(),
+          requireAuth: true,
+        ),
+        FFRoute(
+          name: BusinessAnalyticsWidget.routeName,
+          path: BusinessAnalyticsWidget.routePath,
+          builder: (context, params) => BusinessAnalyticsWidget(
+            businessId: params.getParam<String>('businessId', ParamType.string)!,
+          ),
+          requireAuth: true,
         ),
         FFRoute(
           name: AdminControlPanelWidget.routeName,
           path: AdminControlPanelWidget.routePath,
-          builder: (context, params) => AdminControlPanelWidget(),
+          builder: (context, params) => const AdminControlPanelWidget(),
+          requireAuth: true,
         ),
         FFRoute(
-          name: UserProfileReportsWidget.routeName,
-          path: UserProfileReportsWidget.routePath,
-          builder: (context, params) => UserProfileReportsWidget(),
-        )
-      ].map((r) => r.toRoute(appStateNotifier)).toList(),
+          name: ManageCatalogueWidget.routeName,
+          path: ManageCatalogueWidget.routePath,
+          builder: (context, params) => const ManageCatalogueWidget(),
+          requireAuth: true,
+        ),
+        FFRoute(
+          name: ManageOrdersWidget.routeName,
+          path: ManageOrdersWidget.routePath,
+          builder: (context, params) => const ManageOrdersWidget(),
+          requireAuth: true,
+        ),
+        FFRoute(
+          name: CustomerOrdersWidget.routeName,
+          path: CustomerOrdersWidget.routePath,
+          builder: (context, params) => const CustomerOrdersWidget(),
+          requireAuth: true,
+        ),
+        FFRoute(
+          name: ManageHoursWidget.routeName,
+          path: ManageHoursWidget.routePath,
+          builder: (context, params) => const ManageHoursWidget(),
+          requireAuth: true,
+        ),
+        FFRoute(
+          name: DeliveryDashboardWidget.routeName,
+          path: DeliveryDashboardWidget.routePath,
+          builder: (context, params) => const DeliveryDashboardWidget(),
+          requireAuth: true,
+        ),
+        FFRoute(
+          name: ServiceProviderProfileWidget.routeName,
+          path: ServiceProviderProfileWidget.routePath,
+          builder: (context, params) => ServiceProviderProfileWidget(
+            providerId:
+                params.getParam<String>('providerId', ParamType.string) ?? '',
+          ),
+        ),
+        FFRoute(
+          name: ServiceProviderRegistrationWidget.routeName,
+          path: ServiceProviderRegistrationWidget.routePath,
+          builder: (context, params) =>
+              const ServiceProviderRegistrationWidget(),
+          requireAuth: true,
+        ),
+        FFRoute(
+          name: ManageServiceRequestsWidget.routeName,
+          path: ManageServiceRequestsWidget.routePath,
+          builder: (context, params) => const ManageServiceRequestsWidget(),
+          requireAuth: true,
+        ),
+        FFRoute(
+          name: NotificationsWidget.routeName,
+          path: NotificationsWidget.routePath,
+          builder: (context, params) => const NotificationsWidget(),
+        ),
+        FFRoute(
+          name: AddressListWidget.routeName,
+          path: AddressListWidget.routePath,
+          builder: (context, params) => const AddressListWidget(),
+          requireAuth: true,
+        ),
+        FFRoute(
+          name: AddAddressWidget.routeName,
+          path: AddAddressWidget.routePath,
+          builder: (context, params) => const AddAddressWidget(),
+          requireAuth: true,
+        ),
+        FFRoute(
+          name: OrderTrackingWidget.routeName,
+          path: OrderTrackingWidget.routePath,
+          builder: (context, params) => OrderTrackingWidget(
+            orderId: params.getParam<String>('orderId', ParamType.string)!,
+          ),
+          requireAuth: true,
+        ),
+        FFRoute(
+          name: OrderSuccessWidget.routeName,
+          path: OrderSuccessWidget.routePath,
+          builder: (context, params) => OrderSuccessWidget(
+            orderId: params.getParam<String>('orderId', ParamType.string),
+          ),
+          requireAuth: true,
+        ),
+        FFRoute(
+          name: EditBusinessProfileWidget.routeName,
+          path: EditBusinessProfileWidget.routePath,
+          builder: (context, params) => EditBusinessProfileWidget(
+            business: Shop.fromParam(
+              params.getParam('business', ParamType.supabaseRow),
+            ),
+          ),
+          requireAuth: true,
+        ),
+        FFRoute(
+          name: JobsMarketplaceWidget.routeName,
+          path: JobsMarketplaceWidget.routePath,
+          builder: (context, params) => const JobsMarketplaceWidget(),
+        ),
+        FFRoute(
+          name: ManageJobsWidget.routeName,
+          path: ManageJobsWidget.routePath,
+          builder: (context, params) => const ManageJobsWidget(),
+          requireAuth: true,
+        ),
+        FFRoute(
+          name: ProfileInfoWidget.helpRouteName,
+          path: ProfileInfoWidget.helpRoutePath,
+          builder: (context, params) => const ProfileInfoWidget(
+            kind: ProfileInfoKind.helpCenter,
+          ),
+        ),
+        FFRoute(
+          name: ProfileInfoWidget.termsRouteName,
+          path: ProfileInfoWidget.termsRoutePath,
+          builder: (context, params) => const ProfileInfoWidget(
+            kind: ProfileInfoKind.termsOfService,
+          ),
+        ),
+        FFRoute(
+          name: ProfileInfoWidget.privacyRouteName,
+          path: ProfileInfoWidget.privacyRoutePath,
+          builder: (context, params) => const ProfileInfoWidget(
+            kind: ProfileInfoKind.privacyPolicy,
+          ),
+        ),
+        FFRoute(
+          name: ProfileInfoWidget.aboutRouteName,
+          path: ProfileInfoWidget.aboutRoutePath,
+          builder: (context, params) => const ProfileInfoWidget(
+            kind: ProfileInfoKind.aboutApp,
+          ),
+        ),
+      ].map<RouteBase>((r) => r is FFRoute ? r.toRoute(appStateNotifier) : r as RouteBase).toList(),
     );
 
 extension NavParamExtensions on Map<String, String?> {
@@ -189,6 +477,14 @@ extension NavigationExtensions on BuildContext {
       pop();
     } else {
       go('/');
+    }
+  }
+
+  void popOrGoNamed(String name) {
+    if (canPop()) {
+      pop();
+    } else {
+      goNamed(name);
     }
   }
 }
@@ -301,7 +597,7 @@ class FFRoute {
             return redirectLocation;
           }
 
-          if (requireAuth && !appStateNotifier.loggedIn) {
+          if (requireAuth && !kBypassAuth && !appStateNotifier.loggedIn) {
             appStateNotifier.setRedirectLocationIfUnset(state.uri.toString());
             return '/authentication';
           }
@@ -372,7 +668,7 @@ class TransitionInfo {
   final Duration duration;
   final Alignment? alignment;
 
-  static TransitionInfo appDefault() => TransitionInfo(hasTransition: false);
+  static TransitionInfo appDefault() => const TransitionInfo(hasTransition: false);
 }
 
 class RootPageContext {

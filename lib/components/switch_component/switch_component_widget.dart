@@ -1,5 +1,5 @@
-import '/flutter_flow/flutter_flow_theme.dart';
-import '/flutter_flow/flutter_flow_util.dart';
+import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
+import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'switch_component_model.dart';
@@ -12,10 +12,10 @@ class SwitchComponentWidget extends StatefulWidget {
     bool? labelPresent,
     String? variant,
     bool? active,
-  })  : this.label = label ?? 'WhatsApp same as mobile',
-        this.labelPresent = labelPresent ?? true,
-        this.variant = variant ?? 'Android',
-        this.active = active ?? true;
+  })  : label = label ?? 'WhatsApp same as mobile',
+        labelPresent = labelPresent ?? true,
+        variant = variant ?? 'Android',
+        active = active ?? true;
 
   final String label;
   final bool labelPresent;
@@ -61,11 +61,9 @@ class _SwitchComponentWidgetState extends State<SwitchComponentWidget> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsetsDirectional.fromSTEB(0.0, 8.0, 0.0, 8.0),
+      padding: const EdgeInsetsDirectional.fromSTEB(0.0, 8.0, 0.0, 8.0),
       child: Row(
         mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           if (valueOrDefault<bool>(
             () {
@@ -189,7 +187,6 @@ class _SwitchComponentWidgetState extends State<SwitchComponentWidget> {
                     16.0,
                   )),
                 ),
-                shape: BoxShape.rectangle,
               ),
               child: Padding(
                 padding: EdgeInsetsDirectional.fromSTEB(
@@ -234,92 +231,89 @@ class _SwitchComponentWidgetState extends State<SwitchComponentWidget> {
                       3.0,
                     )),
                 child: Container(
-                  child: Container(
-                    width: valueOrDefault<double>(
-                      valueOrDefault<String>(
-                                widget.variant,
-                                'Android',
-                              ) ==
-                              'iOS 26+'
-                          ? 39.0
-                          : 26.0,
-                      26.0,
+                  width: valueOrDefault<double>(
+                    valueOrDefault<String>(
+                              widget.variant,
+                              'Android',
+                            ) ==
+                            'iOS 26+'
+                        ? 39.0
+                        : 26.0,
+                    26.0,
+                  ),
+                  height: valueOrDefault<double>(
+                    valueOrDefault<String>(
+                              widget.variant,
+                              'Android',
+                            ) ==
+                            'iOS 26+'
+                        ? 24.0
+                        : 26.0,
+                    26.0,
+                  ),
+                  decoration: BoxDecoration(
+                    color: valueOrDefault<Color>(
+                      () {
+                        if (valueOrDefault<bool>(
+                          widget.active,
+                          true,
+                        )) {
+                          return FlutterFlowTheme.of(context).onPrimary;
+                        } else if (valueOrDefault<String>(
+                              widget.variant,
+                              'Android',
+                            ) ==
+                            'iOS 26+') {
+                          return FlutterFlowTheme.of(context)
+                              .secondaryBackground;
+                        } else {
+                          return FlutterFlowTheme.of(context)
+                              .primaryBackground;
+                        }
+                      }(),
+                      FlutterFlowTheme.of(context).onPrimary,
                     ),
-                    height: valueOrDefault<double>(
-                      valueOrDefault<String>(
-                                widget.variant,
-                                'Android',
-                              ) ==
-                              'iOS 26+'
-                          ? 24.0
-                          : 26.0,
-                      26.0,
-                    ),
-                    decoration: BoxDecoration(
-                      color: valueOrDefault<Color>(
-                        () {
-                          if (valueOrDefault<bool>(
-                            widget.active,
-                            true,
-                          )) {
-                            return FlutterFlowTheme.of(context).onPrimary;
-                          } else if (valueOrDefault<String>(
-                                widget.variant,
-                                'Android',
-                              ) ==
-                              'iOS 26+') {
-                            return FlutterFlowTheme.of(context)
-                                .secondaryBackground;
-                          } else {
-                            return FlutterFlowTheme.of(context)
-                                .primaryBackground;
-                          }
-                        }(),
-                        FlutterFlowTheme.of(context).onPrimary,
-                      ),
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(valueOrDefault<double>(
-                          valueOrDefault<String>(
-                                    widget.variant,
-                                    'Android',
-                                  ) ==
-                                  'iOS 26+'
-                              ? 9999.0
-                              : 13.0,
-                          13.0,
-                        )),
-                        topRight: Radius.circular(valueOrDefault<double>(
-                          valueOrDefault<String>(
-                                    widget.variant,
-                                    'Android',
-                                  ) ==
-                                  'iOS 26+'
-                              ? 9999.0
-                              : 13.0,
-                          13.0,
-                        )),
-                        bottomLeft: Radius.circular(valueOrDefault<double>(
-                          valueOrDefault<String>(
-                                    widget.variant,
-                                    'Android',
-                                  ) ==
-                                  'iOS 26+'
-                              ? 9999.0
-                              : 13.0,
-                          13.0,
-                        )),
-                        bottomRight: Radius.circular(valueOrDefault<double>(
-                          valueOrDefault<String>(
-                                    widget.variant,
-                                    'Android',
-                                  ) ==
-                                  'iOS 26+'
-                              ? 9999.0
-                              : 13.0,
-                          13.0,
-                        )),
-                      ),
-                      shape: BoxShape.rectangle,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(valueOrDefault<double>(
+                        valueOrDefault<String>(
+                                  widget.variant,
+                                  'Android',
+                                ) ==
+                                'iOS 26+'
+                            ? 9999.0
+                            : 13.0,
+                        13.0,
+                      )),
+                      topRight: Radius.circular(valueOrDefault<double>(
+                        valueOrDefault<String>(
+                                  widget.variant,
+                                  'Android',
+                                ) ==
+                                'iOS 26+'
+                            ? 9999.0
+                            : 13.0,
+                        13.0,
+                      )),
+                      bottomLeft: Radius.circular(valueOrDefault<double>(
+                        valueOrDefault<String>(
+                                  widget.variant,
+                                  'Android',
+                                ) ==
+                                'iOS 26+'
+                            ? 9999.0
+                            : 13.0,
+                        13.0,
+                      )),
+                      bottomRight: Radius.circular(valueOrDefault<double>(
+                        valueOrDefault<String>(
+                                  widget.variant,
+                                  'Android',
+                                ) ==
+                                'iOS 26+'
+                            ? 9999.0
+                            : 13.0,
+                        13.0,
+                      )),
                     ),
                   ),
                 ),
@@ -330,30 +324,28 @@ class _SwitchComponentWidgetState extends State<SwitchComponentWidget> {
             true,
           ))
             Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(8.0, 0.0, 0.0, 0.0),
-              child: Container(
-                child: Text(
-                  valueOrDefault<String>(
-                    widget.label,
-                    'WhatsApp same as mobile',
-                  ),
-                  style: FlutterFlowTheme.of(context).bodyMedium.override(
-                        font: GoogleFonts.inter(
-                          fontWeight: FlutterFlowTheme.of(context)
-                              .bodyMedium
-                              .fontWeight,
-                          fontStyle:
-                              FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                        ),
-                        color: FlutterFlowTheme.of(context).primaryText,
-                        letterSpacing: 0.0,
-                        fontWeight:
-                            FlutterFlowTheme.of(context).bodyMedium.fontWeight,
+              padding: const EdgeInsetsDirectional.fromSTEB(8.0, 0.0, 0.0, 0.0),
+              child: Text(
+                valueOrDefault<String>(
+                  widget.label,
+                  'WhatsApp same as mobile',
+                ),
+                style: FlutterFlowTheme.of(context).bodyMedium.override(
+                      font: GoogleFonts.inter(
+                        fontWeight: FlutterFlowTheme.of(context)
+                            .bodyMedium
+                            .fontWeight,
                         fontStyle:
                             FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                        lineHeight: 1.5,
                       ),
-                ),
+                      color: FlutterFlowTheme.of(context).primaryText,
+                      letterSpacing: 0.0,
+                      fontWeight:
+                          FlutterFlowTheme.of(context).bodyMedium.fontWeight,
+                      fontStyle:
+                          FlutterFlowTheme.of(context).bodyMedium.fontStyle,
+                      lineHeight: 1.5,
+                    ),
               ),
             ),
         ],

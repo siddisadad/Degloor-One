@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:degloor_one/core/error_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:from_css_color/from_css_color.dart';
 
@@ -44,7 +45,7 @@ String? serializeParam(
     }
     if (isList) {
       final serializedValues = (param as Iterable)
-          .map((p) => serializeParam(p, paramType, isList: false))
+          .map((p) => serializeParam(p, paramType))
           .where((p) => p != null)
           .map((p) => p!)
           .toList();
@@ -56,31 +57,30 @@ String? serializeParam(
         data = param.toString();
       case ParamType.double:
         data = param.toString();
-      case ParamType.String:
+      case ParamType.string:
         data = param;
       case ParamType.bool:
         data = param ? 'true' : 'false';
-      case ParamType.DateTime:
+      case ParamType.dateTime:
         data = dateTimeToString(param as DateTime);
-      case ParamType.DateTimeRange:
+      case ParamType.dateTimeRange:
         data = dateTimeRangeToString(param as DateTimeRange);
-      case ParamType.LatLng:
+      case ParamType.latLng:
         data = (param as LatLng).serialize();
-      case ParamType.Color:
+      case ParamType.color:
         data = (param as Color).toCssString();
-      case ParamType.FFPlace:
+      case ParamType.ffPlace:
         data = placeToString(param as FFPlace);
-      case ParamType.FFUploadedFile:
+      case ParamType.ffUploadedFile:
         data = uploadedFileToString(param as FFUploadedFile);
-      case ParamType.JSON:
+      case ParamType.json:
         data = json.encode(param);
-
-      default:
+      case ParamType.supabaseRow:
         data = null;
     }
     return data;
   } catch (e) {
-    print('Error serializing parameter: $e');
+    AppLogger.error('Error serializing parameter', e);
     return null;
   }
 }
@@ -173,15 +173,16 @@ FFUploadedFile uploadedFileFromString(String uploadedFileStr) =>
 enum ParamType {
   int,
   double,
-  String,
+  string,
   bool,
-  DateTime,
-  DateTimeRange,
-  LatLng,
-  Color,
-  FFPlace,
-  FFUploadedFile,
-  JSON,
+  dateTime,
+  dateTimeRange,
+  latLng,
+  color,
+  ffPlace,
+  ffUploadedFile,
+  json,
+  supabaseRow,
 }
 
 dynamic deserializeParam<T>(
@@ -199,8 +200,8 @@ dynamic deserializeParam<T>(
         return null;
       }
       return paramValues
-          .where((p) => p is String)
-          .map((p) => p as String)
+          .whereType<String>()
+          .map((p) => p)
           .map((p) => deserializeParam<T>(p, paramType, false))
           .where((p) => p != null)
           .map((p) => p! as T)
@@ -211,30 +212,29 @@ dynamic deserializeParam<T>(
         return int.tryParse(param);
       case ParamType.double:
         return double.tryParse(param);
-      case ParamType.String:
+      case ParamType.string:
         return param;
       case ParamType.bool:
         return param == 'true';
-      case ParamType.DateTime:
+      case ParamType.dateTime:
         return dateTimeFromString(param);
-      case ParamType.DateTimeRange:
+      case ParamType.dateTimeRange:
         return dateTimeRangeFromString(param);
-      case ParamType.LatLng:
+      case ParamType.latLng:
         return latLngFromString(param);
-      case ParamType.Color:
+      case ParamType.color:
         return fromCssColor(param);
-      case ParamType.FFPlace:
+      case ParamType.ffPlace:
         return placeFromString(param);
-      case ParamType.FFUploadedFile:
+      case ParamType.ffUploadedFile:
         return uploadedFileFromString(param);
-      case ParamType.JSON:
+      case ParamType.json:
         return json.decode(param);
-
-      default:
+      case ParamType.supabaseRow:
         return null;
     }
   } catch (e) {
-    print('Error deserializing parameter: $e');
+    AppLogger.error('Error deserializing parameter', e);
     return null;
   }
 }

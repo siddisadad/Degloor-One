@@ -1,377 +1,169 @@
-import '/flutter_flow/flutter_flow_theme.dart';
-import '/flutter_flow/flutter_flow_util.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:degloor_one/components/cached_remote_image.dart';
+import 'package:degloor_one/core/degloor_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'business_card_model.dart';
-export 'business_card_model.dart';
 
-class BusinessCardWidget extends StatefulWidget {
+class BusinessCardWidget extends StatelessWidget {
   const BusinessCardWidget({
     super.key,
-    String? category,
-    String? distance,
-    String? imgDesc,
-    String? name,
-    String? rating,
-    String? status,
-    bool? verified,
-    bool? isOpen,
-  })  : this.category = category ?? 'Hardware & Construction',
-        this.distance = distance ?? '0.8',
-        this.imgDesc = imgDesc ??
-            'https://dimg.dreamflow.cloud/v1/image/hardware%20store%20shelves',
-        this.name = name ?? 'Sharma Hardware & Steel',
-        this.rating = rating ?? '4.8',
-        this.status = status ?? 'Open',
-        this.verified = verified ?? true,
-        this.isOpen = isOpen ?? true;
+    this.category = 'Local Business',
+    this.distance = 'Nearby',
+    this.imgDesc,
+    this.name = 'Business Name',
+    this.rating = '0.0',
+    this.status = 'Closed',
+    this.verified = false,
+    this.isOpen = false,
+    this.subcategory,
+  });
 
   final String category;
   final String distance;
-  final String imgDesc;
+  final String? imgDesc;
   final String name;
   final String rating;
   final String status;
   final bool verified;
   final bool isOpen;
-
-  @override
-  State<BusinessCardWidget> createState() => _BusinessCardWidgetState();
-}
-
-class _BusinessCardWidgetState extends State<BusinessCardWidget> {
-  late BusinessCardModel _model;
-
-  @override
-  void setState(VoidCallback callback) {
-    super.setState(callback);
-    _model.onUpdate();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _model = createModel(context, () => BusinessCardModel());
-  }
-
-  @override
-  void dispose() {
-    _model.maybeDispose();
-
-    super.dispose();
-  }
+  final String? subcategory;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 16.0),
-      child: Container(
-        child: Container(
-          decoration: BoxDecoration(
-            color: FlutterFlowTheme.of(context).secondaryBackground,
-            borderRadius: BorderRadius.circular(12.0),
-            shape: BoxShape.rectangle,
-            border: Border.all(
-              color: FlutterFlowTheme.of(context).alternate,
-              width: 1.0,
-            ),
-          ),
-          child: Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Container(
-              child: Row(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
+    return Container(
+      height: 130,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(DegloorTheme.radiusMD),
+        boxShadow: DegloorTheme.softShadow,
+        border: Border.all(color: DegloorTheme.border),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(DegloorTheme.radiusMD),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // 1. Image
+              Stack(
                 children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8.0),
-                    child: Container(
-                      width: 80.0,
-                      height: 80.0,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8.0),
-                        shape: BoxShape.rectangle,
-                      ),
-                      child: CachedNetworkImage(
-                        fadeInDuration: Duration(milliseconds: 0),
-                        fadeOutDuration: Duration(milliseconds: 0),
-                        imageUrl: valueOrDefault<String>(
-                          widget.imgDesc,
-                          'https://dimg.dreamflow.cloud/v1/image/hardware%20store%20shelves',
+                  imgDesc == null || imgDesc!.isEmpty
+                      ? degloorImageFallback(
+                          width: 110,
+                          height: 130,
+                          icon: Icons.storefront_rounded,
+                        )
+                      : CachedNetworkImage(
+                          imageUrl: imgDesc!,
+                          width: 110,
+                          height: double.infinity,
+                          fit: BoxFit.cover,
+                          memCacheWidth: memCachePx(context, 110),
+                          memCacheHeight: memCachePx(context, 140),
+                          placeholder: (context, url) =>
+                              Container(color: DegloorTheme.accent),
+                          errorWidget: (context, url, error) =>
+                              degloorImageFallback(
+                            width: 110,
+                            height: 130,
+                            icon: Icons.storefront_rounded,
+                          ),
                         ),
-                        width: 80.0,
-                        height: 80.0,
-                        fit: BoxFit.cover,
-                        alignment: Alignment(0.0, 0.0),
+                  if (verified)
+                    Positioned(
+                      top: 6,
+                      left: 6,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: const BoxDecoration(
+                          color: DegloorTheme.primary,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.verified_rounded, color: Colors.white, size: 12),
                       ),
                     ),
-                  ),
-                  Expanded(
-                    flex: 1,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisSize: MainAxisSize.max,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Text(
-                                  valueOrDefault<String>(
-                                    widget.rating,
-                                    '4.8',
-                                  ),
-                                  style: FlutterFlowTheme.of(context)
-                                      .labelSmall
-                                      .override(
-                                        font: GoogleFonts.inter(
-                                          fontWeight:
-                                              FlutterFlowTheme.of(context)
-                                                  .labelSmall
-                                                  .fontWeight,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .labelSmall
-                                                  .fontStyle,
-                                        ),
-                                        color: FlutterFlowTheme.of(context)
-                                            .tertiary,
-                                        letterSpacing: 0.0,
-                                        fontWeight: FlutterFlowTheme.of(context)
-                                            .labelSmall
-                                            .fontWeight,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .labelSmall
-                                            .fontStyle,
-                                        lineHeight: 1.2,
-                                      ),
-                                ),
-                                Icon(
-                                  Icons.star_rounded,
-                                  color: FlutterFlowTheme.of(context).tertiary,
-                                  size: 14.0,
-                                ),
-                              ].divide(SizedBox(width: 4.0)),
-                            ),
-                            if (valueOrDefault<bool>(
-                              widget.verified,
-                              true,
-                            ))
-                              Container(
-                                decoration: BoxDecoration(
-                                  color: Color(0xFFE3F2FD),
-                                  borderRadius: BorderRadius.circular(2.0),
-                                  shape: BoxShape.rectangle,
-                                ),
-                                child: Padding(
-                                  padding: EdgeInsetsDirectional.fromSTEB(
-                                      6.0, 2.0, 6.0, 2.0),
-                                  child: Container(
-                                    child: Text(
-                                      'VERIFIED',
-                                      style: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .override(
-                                            font: GoogleFonts.inter(
-                                              fontWeight: FontWeight.bold,
-                                              fontStyle:
-                                                  FlutterFlowTheme.of(context)
-                                                      .bodyMedium
-                                                      .fontStyle,
-                                            ),
-                                            color: Color(0xFF1976D2),
-                                            fontSize: 10.0,
-                                            letterSpacing: 0.0,
-                                            fontWeight: FontWeight.bold,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .bodyMedium
-                                                    .fontStyle,
-                                            lineHeight: 1.5,
-                                          ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
-                        Text(
-                          valueOrDefault<String>(
-                            widget.name,
-                            'Sharma Hardware & Steel',
-                          ),
-                          maxLines: 1,
-                          style: FlutterFlowTheme.of(context)
-                              .titleMedium
-                              .override(
-                                font: GoogleFonts.inter(
-                                  fontWeight: FlutterFlowTheme.of(context)
-                                      .titleMedium
-                                      .fontWeight,
-                                  fontStyle: FlutterFlowTheme.of(context)
-                                      .titleMedium
-                                      .fontStyle,
-                                ),
-                                color: FlutterFlowTheme.of(context).primaryText,
-                                letterSpacing: 0.0,
-                                fontWeight: FlutterFlowTheme.of(context)
-                                    .titleMedium
-                                    .fontWeight,
-                                fontStyle: FlutterFlowTheme.of(context)
-                                    .titleMedium
-                                    .fontStyle,
-                                lineHeight: 1.4,
-                              ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        Text(
-                          valueOrDefault<String>(
-                            widget.category,
-                            'Hardware & Construction',
-                          ),
-                          style: FlutterFlowTheme.of(context)
-                              .bodySmall
-                              .override(
-                                font: GoogleFonts.inter(
-                                  fontWeight: FlutterFlowTheme.of(context)
-                                      .bodySmall
-                                      .fontWeight,
-                                  fontStyle: FlutterFlowTheme.of(context)
-                                      .bodySmall
-                                      .fontStyle,
-                                ),
-                                color:
-                                    FlutterFlowTheme.of(context).secondaryText,
-                                letterSpacing: 0.0,
-                                fontWeight: FlutterFlowTheme.of(context)
-                                    .bodySmall
-                                    .fontWeight,
-                                fontStyle: FlutterFlowTheme.of(context)
-                                    .bodySmall
-                                    .fontStyle,
-                                lineHeight: 1.5,
-                              ),
-                        ),
-                        Row(
-                          mainAxisSize: MainAxisSize.max,
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.location_on_outlined,
-                                  color: FlutterFlowTheme.of(context)
-                                      .secondaryText,
-                                  size: 14.0,
-                                ),
-                                Text(
-                                  valueOrDefault<String>(
-                                    '${widget.distance} km',
-                                    '0.8 km',
-                                  ),
-                                  style: FlutterFlowTheme.of(context)
-                                      .bodySmall
-                                      .override(
-                                        font: GoogleFonts.inter(
-                                          fontWeight:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodySmall
-                                                  .fontWeight,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodySmall
-                                                  .fontStyle,
-                                        ),
-                                        color: FlutterFlowTheme.of(context)
-                                            .secondaryText,
-                                        letterSpacing: 0.0,
-                                        fontWeight: FlutterFlowTheme.of(context)
-                                            .bodySmall
-                                            .fontWeight,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .bodySmall
-                                            .fontStyle,
-                                        lineHeight: 1.5,
-                                      ),
-                                ),
-                              ].divide(SizedBox(width: 4.0)),
-                            ),
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.schedule_rounded,
-                                  color: FlutterFlowTheme.of(context)
-                                      .secondaryText,
-                                  size: 14.0,
-                                ),
-                                Text(
-                                  valueOrDefault<String>(
-                                    widget.status,
-                                    'Open',
-                                  ),
-                                  style: FlutterFlowTheme.of(context)
-                                      .bodySmall
-                                      .override(
-                                        font: GoogleFonts.inter(
-                                          fontWeight:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodySmall
-                                                  .fontWeight,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodySmall
-                                                  .fontStyle,
-                                        ),
-                                        color: valueOrDefault<Color>(
-                                          valueOrDefault<bool>(
-                                            widget.isOpen,
-                                            true,
-                                          )
-                                              ? FlutterFlowTheme.of(context)
-                                                  .success
-                                              : FlutterFlowTheme.of(context)
-                                                  .error,
-                                          FlutterFlowTheme.of(context).success,
-                                        ),
-                                        letterSpacing: 0.0,
-                                        fontWeight: FlutterFlowTheme.of(context)
-                                            .bodySmall
-                                            .fontWeight,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .bodySmall
-                                            .fontStyle,
-                                        lineHeight: 1.5,
-                                      ),
-                                ),
-                              ].divide(SizedBox(width: 4.0)),
-                            ),
-                          ].divide(SizedBox(width: 16.0)),
-                        ),
-                      ].divide(SizedBox(height: 4.0)),
-                    ),
-                  ),
-                ].divide(SizedBox(width: 16.0)),
+                ],
               ),
-            ),
+
+              // 2. Info
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(DegloorTheme.spacingMD),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: DegloorTheme.titleMedium.copyWith(fontSize: 16),
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: DegloorTheme.accent,
+                              borderRadius: BorderRadius.circular(DegloorTheme.radiusSM),
+                            ),
+                            child: Row(
+                              children: [
+                                Text(
+                                  rating,
+                                  style: DegloorTheme.labelSmall.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: DegloorTheme.primary,
+                                  ),
+                                ),
+                                const SizedBox(width: 2),
+                                const Icon(Icons.star_rounded, color: DegloorTheme.secondary, size: 14),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        subcategory != null && subcategory!.isNotEmpty
+                            ? '$category • $subcategory'
+                            : category,
+                        style: DegloorTheme.bodySmall
+                            .copyWith(color: DegloorTheme.textSecondary),
+                      ),
+                      const Spacer(),
+                      Row(
+                        children: [
+                          const Icon(Icons.location_on_outlined, size: 14, color: DegloorTheme.textSecondary),
+                          const SizedBox(width: 4),
+                          Text(distance, style: DegloorTheme.bodySmall),
+                          const SizedBox(width: 12),
+                          Container(
+                            width: 6,
+                            height: 6,
+                            decoration: BoxDecoration(
+                              color: isOpen ? DegloorTheme.success : DegloorTheme.error,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            isOpen ? 'Open' : 'Closed',
+                            style: DegloorTheme.bodySmall.copyWith(
+                              color: isOpen ? DegloorTheme.success : DegloorTheme.error,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
-      ),
-    );
+      );
   }
 }

@@ -5,13 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:collection/collection.dart';
 import 'package:from_css_color/from_css_color.dart';
-import 'dart:math' show pow, pi, sin;
+import 'dart:math' show pow, pi, sin, cos, sqrt, atan2;
 import 'package:intl/intl.dart';
 import 'package:json_path/json_path.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:url_launcher/url_launcher.dart';
 
 import '../main.dart';
+import '../app_state.dart';
 
 
 export 'lat_lng.dart';
@@ -39,7 +40,7 @@ String dateTimeFormat(String format, DateTime? dateTime, {String? locale}) {
 }
 
 Future launchURL(String url) async {
-  var uri = Uri.parse(url);
+  final uri = Uri.parse(url);
   try {
     await launchUrl(uri);
   } catch (e) {
@@ -159,19 +160,20 @@ T? castToType<T>(dynamic value) {
   if (value == null) {
     return null;
   }
-  switch (T) {
-    case double:
-      // Doubles may be stored as ints in some cases.
+  if (T == double) {
+    if (value is num) {
       return value.toDouble() as T;
-    case int:
-      // Likewise, ints may be stored as doubles. If this is the case
-      // (i.e. no decimal value), return the value as an int.
-      if (value is num && value.toInt() == value) {
-        return value.toInt() as T;
-      }
-      break;
-    default:
-      break;
+    }
+    if (value is String) {
+      return double.tryParse(value) as T?;
+    }
+  } else if (T == int) {
+    if (value is num) {
+      return value.toInt() as T;
+    }
+    if (value is String) {
+      return int.tryParse(value) as T?;
+    }
   }
   return value as T;
 }
@@ -237,7 +239,7 @@ bool responsiveVisibility({
 const kTextValidatorUsernameRegex = r'^[a-zA-Z][a-zA-Z0-9_-]{2,16}$';
 // https://stackoverflow.com/a/201378
 const kTextValidatorEmailRegex =
-    "^(?:[a-zA-Z0-9!#\$%&\'*+/=?^_`{|}~-]+(?:\\.[a-zA-Z0-9!#\$%&\'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?|\\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-zA-Z0-9-]*[a-zA-Z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])\$";
+    "^(?:[a-zA-Z0-9!#\$%&'*+/=?^_`{|}~-]+(?:\\.[a-zA-Z0-9!#\$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?|\\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-zA-Z0-9-]*[a-zA-Z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])\$";
 const kTextValidatorWebsiteRegex =
     r'(https?:\/\/)?(www\.)[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,10}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)|(https?:\/\/)?(www\.)?(?!ww)[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,10}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)';
 
@@ -279,12 +281,12 @@ void showSnackbar(
       content: Row(
         children: [
           if (loading)
-            Padding(
+            const Padding(
               padding: EdgeInsetsDirectional.only(end: 10.0),
-              child: Container(
+              child: SizedBox(
                 height: 20,
                 width: 20,
-                child: const CircularProgressIndicator(
+                child: CircularProgressIndicator(
                   color: Colors.white,
                 ),
               ),
@@ -431,8 +433,8 @@ double computeGradientAlignmentY(double evaluatedAngle) {
 
 extension ListUniqueExt<T> on Iterable<T> {
   List<T> unique(dynamic Function(T) getKey) {
-    var distinctSet = <dynamic>{};
-    var distinctList = <T>[];
+    final distinctSet = <dynamic>{};
+    final distinctList = <T>[];
     for (var item in this) {
       if (distinctSet.add(getKey(item))) {
         distinctList.add(item);
@@ -444,5 +446,35 @@ extension ListUniqueExt<T> on Iterable<T> {
 
 String getCurrentRoute(BuildContext context) =>
     context.mounted ? MyApp.of(context).getRoute() : '';
+String getDistance(double? businessLat, double? businessLng) {
+  if (businessLat == null || businessLng == null) {
+    return 'Nearby';
+  }
+
+  final userLoc = FFAppState.instance.userLocation;
+  if (userLoc == null) return 'Nearby';
+
+  final double refLat = userLoc.latitude;
+  final double refLng = userLoc.longitude;
+
+  // Simple Haversine distance calculation
+  const double earthRadius = 6371; // in km
+  final double dLat = (businessLat - refLat) * (pi / 180);
+  final double dLng = (businessLng - refLng) * (pi / 180);
+
+  final double a = sin(dLat / 2) * sin(dLat / 2) +
+      cos(refLat * (pi / 180)) *
+          cos(businessLat * (pi / 180)) *
+          sin(dLng / 2) *
+          sin(dLng / 2);
+  final double c = 2 * atan2(sqrt(a), sqrt(1 - a));
+  final double distance = earthRadius * c;
+
+  if (distance < 1.0) {
+    return '${(distance * 1000).round()} m';
+  }
+  return '${distance.toStringAsFixed(1)} km';
+}
+
 List<String> getCurrentRouteStack(BuildContext context) =>
     context.mounted ? MyApp.of(context).getRouteStack() : [];

@@ -1,5 +1,5 @@
-import '/flutter_flow/flutter_flow_theme.dart';
-import '/flutter_flow/flutter_flow_util.dart';
+import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
+import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:percent_indicator/percent_indicator.dart';
@@ -19,14 +19,15 @@ class ButtonWidget extends StatefulWidget {
     bool? fullWidth,
     bool? loading,
     bool? disabled,
-  })  : this.iconPresent = iconPresent ?? false,
-        this.iconEndPresent = iconEndPresent ?? false,
-        this.content = content ?? 'Sign In',
-        this.variant = variant ?? 'primary',
-        this.size = size ?? 'small',
-        this.fullWidth = fullWidth ?? true,
-        this.loading = loading ?? false,
-        this.disabled = disabled ?? false;
+    this.onTap,
+  })  : iconPresent = iconPresent ?? false,
+        iconEndPresent = iconEndPresent ?? false,
+        content = content ?? 'Sign In',
+        variant = variant ?? 'primary',
+        size = size ?? 'small',
+        fullWidth = fullWidth ?? true,
+        loading = loading ?? false,
+        disabled = disabled ?? false;
 
   final Widget? icon;
   final bool iconPresent;
@@ -38,6 +39,7 @@ class ButtonWidget extends StatefulWidget {
   final bool fullWidth;
   final bool loading;
   final bool disabled;
+  final Future<void> Function()? onTap;
 
   @override
   State<ButtonWidget> createState() => _ButtonWidgetState();
@@ -67,8 +69,15 @@ class _ButtonWidgetState extends State<ButtonWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Opacity(
-      opacity: valueOrDefault<double>(
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: widget.disabled || widget.onTap == null
+          ? null
+          : () {
+              widget.onTap!();
+            },
+      child: Opacity(
+        opacity: valueOrDefault<double>(
         valueOrDefault<bool>(
           widget.disabled,
           false,
@@ -77,7 +86,7 @@ class _ButtonWidgetState extends State<ButtonWidget> {
             : 1.0,
         1.0,
       ),
-      child: Container(
+        child: Container(
         decoration: BoxDecoration(
           color: valueOrDefault<Color>(
             () {
@@ -193,7 +202,6 @@ class _ButtonWidgetState extends State<ButtonWidget> {
               4.0,
             )),
           ),
-          shape: BoxShape.rectangle,
           border: Border.all(
             color: valueOrDefault<Color>(
               valueOrDefault<String>(
@@ -218,7 +226,7 @@ class _ButtonWidgetState extends State<ButtonWidget> {
           ),
         ),
         child: Stack(
-          alignment: AlignmentDirectional(0.0, 0.0),
+          alignment: const AlignmentDirectional(0.0, 0.0),
           children: [
             Opacity(
               opacity: valueOrDefault<double>(
@@ -314,8 +322,6 @@ class _ButtonWidgetState extends State<ButtonWidget> {
                     )),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     if (valueOrDefault<bool>(
                       widget.iconPresent,
@@ -387,7 +393,7 @@ class _ButtonWidgetState extends State<ButtonWidget> {
                       false,
                     ))
                       widget.iconEnd!,
-                  ].divide(SizedBox(width: 8.0)),
+                  ].divide(const SizedBox(width: 8.0)),
                 ),
               ),
             ),
@@ -401,7 +407,6 @@ class _ButtonWidgetState extends State<ButtonWidget> {
               false,
             ))
               CircularPercentIndicator(
-                percent: 0.0,
                 radius: 7.0,
                 lineWidth: 2.0,
                 animation: true,
@@ -443,6 +448,7 @@ class _ButtonWidgetState extends State<ButtonWidget> {
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }

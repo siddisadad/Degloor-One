@@ -1,0 +1,14 @@
+- [/] Simplify Business Dashboard & Admin Panel
+    - [/] Group actions in `BusinessDashboardWidget` into "Store Management" and "Marketing & Growth"
+    - [ ] Introduce tabbed view/card navigation in `AdminControlPanelWidget`
+- [ ] Improve Location Permission UX
+    - [ ] Create `LocationExplanationDialog` component
+    - [ ] Update `LocationService` with pre-permission checks
+- [ ] Dynamic Profile Completeness
+    - [ ] Implement `_calculateCompleteness()` in `BusinessDashboardWidget`
+    - [ ] Remove `dummy_data.dart`
+- [ ] Optimize Search RPC
+    - [ ] Update `schema.sql` with GIST index and optimized radius search
+- [ ] Standardize Empty/Error States
+    - [ ] Create `EmptyStateView` component
+    - [ ] Integrate into `CustomerHomeWidget` and `SearchResultsWidget`

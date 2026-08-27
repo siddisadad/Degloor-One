@@ -1,19 +1,28 @@
 import 'package:rxdart/rxdart.dart';
 
-import '/backend/supabase/supabase.dart';
-import '../base_auth_user_provider.dart';
+import 'package:degloor_one/auth/guest_auth_user.dart';
+import 'package:degloor_one/auth/java_auth_user.dart';
+import 'package:degloor_one/auth/password_recovery.dart';
+import 'package:degloor_one/backend/supabase/supabase.dart';
+import 'package:degloor_one/backend/user_service.dart';
+import 'package:degloor_one/core/api/api_client.dart';
 
 export '../base_auth_user_provider.dart';
 
-class DegloorDiscoverySupabaseUser extends BaseAuthUser {
-  DegloorDiscoverySupabaseUser(this.user);
+class DegloorOneSupabaseUser extends BaseAuthUser {
+  DegloorOneSupabaseUser(this.user, [this.role]);
   User? user;
+  @override
+  String? role;
+  @override
   bool get loggedIn => user != null;
 
   @override
   AuthUserInfo get authUserInfo => AuthUserInfo(
         uid: user?.id,
         email: user?.email,
+        displayName: user?.userMetadata?['full_name'],
+        photoUrl: user?.userMetadata?['avatar_url'],
         phoneNumber: user?.phone,
       );
 
@@ -23,6 +32,7 @@ class DegloorDiscoverySupabaseUser extends BaseAuthUser {
 
   @override
   Future? updateEmail(String email) async {
+    if (kUsesDeadFlutterFlowHost) return;
     final response =
         await SupaFlow.client.auth.updateUser(UserAttributes(email: email));
     if (response.user != null) {
@@ -32,6 +42,7 @@ class DegloorDiscoverySupabaseUser extends BaseAuthUser {
 
   @override
   Future? updatePassword(String newPassword) async {
+    if (kUsesDeadFlutterFlowHost) return;
     final response = await SupaFlow.client.auth.updateUser(
       UserAttributes(password: newPassword),
     );
@@ -56,9 +67,13 @@ class DegloorDiscoverySupabaseUser extends BaseAuthUser {
 
   @override
   Future refreshUser() async {
-    await SupaFlow.client.auth
-        .refreshSession()
-        .then((_) => user = SupaFlow.client.auth.currentUser);
+    if (kUsesDeadFlutterFlowHost) return;
+    await SupaFlow.client.auth.refreshSession().then((_) async {
+      user = SupaFlow.client.auth.currentUser;
+      if (user != null) {
+        role = await UserService.instance.roleFor(user!.id);
+      }
+    });
   }
 }
 
@@ -66,18 +81,40 @@ class DegloorDiscoverySupabaseUser extends BaseAuthUser {
 /// [SupaFlow.client.auth.onAuthStateChange] does not yield any values until the
 /// user is already authenticated. So we add a default null user to the stream,
 /// if we need to interact with the [currentUser] before logging in.
-Stream<BaseAuthUser> degloorDiscoverySupabaseUserStream() {
+Stream<BaseAuthUser> degloorOneSupabaseUserStream() {
+  if (kBypassAuth) {
+    if (currentUser == null) installGuestSession();
+    return authUserStream.startWith(currentUser!);
+  }
+  if (JavaApiConfig.enabled) {
+    return authUserStream.startWith(
+      currentUser ?? JavaAuthUser.signedOut(),
+    );
+  }
   final supabaseAuthStream = SupaFlow.client.auth.onAuthStateChange.debounce(
       (authState) => authState.event == AuthChangeEvent.tokenRefreshed
-          ? TimerStream(authState, Duration(seconds: 1))
+          ? TimerStream(authState, const Duration(seconds: 1))
           : Stream.value(authState));
-  return (!loggedIn
+  final mainStream = (!loggedIn
           ? Stream<AuthState?>.value(null).concatWith([supabaseAuthStream])
           : supabaseAuthStream)
-      .map<BaseAuthUser>(
-    (authState) {
-      currentUser = DegloorDiscoverySupabaseUser(authState?.session?.user);
-      return currentUser!;
+      .asyncMap<BaseAuthUser>(
+    (authState) async {
+      if (authState?.event == AuthChangeEvent.passwordRecovery) {
+        PasswordRecovery.pending.value = true;
+      }
+      final user = authState?.session?.user;
+      final token = authState?.session?.accessToken;
+      String? role;
+      if (user != null && !kUsesDeadFlutterFlowHost) {
+        role = await UserService.instance.roleFor(user.id);
+      }
+      final authUser = DegloorOneSupabaseUser(user, role);
+      updateAuthUser(authUser);
+      updateJwtToken(token);
+      return authUser;
     },
   );
+
+  return mainStream.mergeWith([authUserStream]);
 }

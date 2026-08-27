@@ -1,4 +1,4 @@
-import '/flutter_flow/flutter_flow_util.dart';
+import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'completeness_card_widget.dart' show CompletenessCardWidget;
 import 'package:flutter/material.dart';
 

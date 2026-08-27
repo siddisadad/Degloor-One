@@ -1,7 +1,6 @@
-import '/flutter_flow/flutter_flow_theme.dart';
-import '/flutter_flow/flutter_flow_util.dart';
+import 'package:degloor_one/core/degloor_theme.dart';
+import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'stat_card_model.dart';
 export 'stat_card_model.dart';
 
@@ -13,10 +12,10 @@ class StatCardWidget extends StatefulWidget {
     String? label,
     String? trend,
     String? value,
-  })  : this.hasTrend = hasTrend ?? true,
-        this.label = label ?? 'Profile Views',
-        this.trend = trend ?? '+12%',
-        this.value = value ?? '1,284';
+  })  : hasTrend = hasTrend ?? true,
+        label = label ?? 'Profile Views',
+        trend = trend ?? '+12%',
+        value = value ?? '1,284';
 
   final bool hasTrend;
   final Widget? icon;
@@ -46,7 +45,6 @@ class _StatCardWidgetState extends State<StatCardWidget> {
   @override
   void dispose() {
     _model.maybeDispose();
-
     super.dispose();
   }
 
@@ -54,106 +52,52 @@ class _StatCardWidgetState extends State<StatCardWidget> {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: FlutterFlowTheme.of(context).secondaryBackground,
-        borderRadius: BorderRadius.circular(12.0),
-        shape: BoxShape.rectangle,
-        border: Border.all(
-          color: FlutterFlowTheme.of(context).alternate,
-          width: 1.0,
-        ),
+        color: DegloorTheme.cardBackground,
+        borderRadius: BorderRadius.circular(DegloorTheme.radiusMD),
+        border: Border.all(color: DegloorTheme.border),
+        boxShadow: DegloorTheme.softShadow,
       ),
       child: Padding(
-        padding: EdgeInsets.all(24.0),
-        child: Container(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  widget.icon!,
-                  if (valueOrDefault<bool>(
-                    widget.hasTrend,
-                    true,
-                  ))
-                    Flexible(
-                      flex: 1,
-                      child: Text(
-                        valueOrDefault<String>(
-                          widget.trend,
-                          '+12%',
-                        ),
-                        maxLines: 1,
-                        style: FlutterFlowTheme.of(context).labelSmall.override(
-                              font: GoogleFonts.inter(
-                                fontWeight: FontWeight.bold,
-                                fontStyle: FlutterFlowTheme.of(context)
-                                    .labelSmall
-                                    .fontStyle,
-                              ),
-                              color: FlutterFlowTheme.of(context).success,
-                              letterSpacing: 0.0,
-                              fontWeight: FontWeight.bold,
-                              fontStyle: FlutterFlowTheme.of(context)
-                                  .labelSmall
-                                  .fontStyle,
-                              lineHeight: 1.2,
-                            ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                ],
-              ),
-              Container(
-                height: 4.0,
-              ),
-              Text(
-                valueOrDefault<String>(
-                  widget.value,
-                  '1,284',
-                ),
-                style: FlutterFlowTheme.of(context).headlineMedium.override(
-                      font: GoogleFonts.inter(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                if (widget.icon != null) widget.icon!,
+                if (widget.hasTrend)
+                  Flexible(
+                    child: Text(
+                      widget.trend,
+                      maxLines: 1,
+                      style: DegloorTheme.labelSmall.copyWith(
+                        color: DegloorTheme.success,
                         fontWeight: FontWeight.bold,
-                        fontStyle: FlutterFlowTheme.of(context)
-                            .headlineMedium
-                            .fontStyle,
                       ),
-                      color: FlutterFlowTheme.of(context).primaryText,
-                      letterSpacing: 0.0,
-                      fontWeight: FontWeight.bold,
-                      fontStyle:
-                          FlutterFlowTheme.of(context).headlineMedium.fontStyle,
-                      lineHeight: 1.3,
+                      overflow: TextOverflow.ellipsis,
                     ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              widget.value,
+              style: DegloorTheme.headingMedium.copyWith(
+                color: DegloorTheme.primary,
+                fontWeight: FontWeight.bold,
               ),
-              Text(
-                valueOrDefault<String>(
-                  widget.label,
-                  'Profile Views',
-                ),
-                style: FlutterFlowTheme.of(context).labelMedium.override(
-                      font: GoogleFonts.inter(
-                        fontWeight:
-                            FlutterFlowTheme.of(context).labelMedium.fontWeight,
-                        fontStyle:
-                            FlutterFlowTheme.of(context).labelMedium.fontStyle,
-                      ),
-                      color: FlutterFlowTheme.of(context).secondaryText,
-                      letterSpacing: 0.0,
-                      fontWeight:
-                          FlutterFlowTheme.of(context).labelMedium.fontWeight,
-                      fontStyle:
-                          FlutterFlowTheme.of(context).labelMedium.fontStyle,
-                      lineHeight: 1.4,
-                    ),
+            ),
+            Text(
+              widget.label,
+              style: DegloorTheme.labelMedium.copyWith(
+                color: DegloorTheme.textSecondary,
               ),
-            ].divide(SizedBox(height: 4.0)),
-          ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
         ),
       ),
     );

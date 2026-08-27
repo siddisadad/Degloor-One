@@ -1,0 +1,31 @@
+# Miscellaneous
+*.zip
+*.txt
+*.artifact.md
+
+# Flutter
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+build/
+
+# Android
+android/local.properties
+android/key.properties
+android/app/src/main/res/raw/google_services.json
+*.keystore
+*.jks
+
+# iOS
+ios/Runner/GoogleService-Info.plist
+ios/Flutter/Generated.xcconfig
+ios/Flutter/flutter_export_environment.sh
+
+# IDE
+.idea/
+*.iml
+.vscode/*
+!.vscode/launch.json
+!.vscode/settings.json

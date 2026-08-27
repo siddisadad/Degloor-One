@@ -1,5 +1,5 @@
-import '/flutter_flow/flutter_flow_theme.dart';
-import '/flutter_flow/flutter_flow_util.dart';
+import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
+import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'action_button_model.dart';
@@ -13,19 +13,18 @@ class ActionButtonWidget extends StatefulWidget {
     Color? color,
     this.icon,
     String? label,
-    String? onTap,
-  })  : this.bg = bg ?? const Color(0x00000000),
-        this.borderColor = borderColor ?? const Color(0x00000000),
-        this.color = color ?? const Color(0x00000000),
-        this.label = label ?? 'Call',
-        this.onTap = onTap ?? 'On Tap';
+    this.onTap,
+  })  : bg = bg ?? const Color(0x00000000),
+        borderColor = borderColor ?? const Color(0x00000000),
+        color = color ?? const Color(0x00000000),
+        label = label ?? 'Call';
 
   final Color bg;
   final Color borderColor;
   final Color color;
   final Widget? icon;
   final String label;
-  final String onTap;
+  final Future<void> Function()? onTap;
 
   @override
   State<ActionButtonWidget> createState() => _ActionButtonWidgetState();
@@ -55,22 +54,21 @@ class _ActionButtonWidgetState extends State<ActionButtonWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: valueOrDefault<Color>(
-          widget.bg,
-          FlutterFlowTheme.of(context).primaryContainer,
+    return InkWell(
+      onTap: widget.onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: valueOrDefault<Color>(
+            widget.bg,
+            FlutterFlowTheme.of(context).primaryContainer,
+          ),
+          borderRadius: BorderRadius.circular(8.0),
         ),
-        borderRadius: BorderRadius.circular(8.0),
-        shape: BoxShape.rectangle,
-      ),
-      child: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Container(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               widget.icon!,
               Text(
@@ -95,7 +93,7 @@ class _ActionButtonWidgetState extends State<ActionButtonWidget> {
                       lineHeight: 1.2,
                     ),
               ),
-            ].divide(SizedBox(height: 4.0)),
+            ].divide(const SizedBox(height: 4.0)),
           ),
         ),
       ),
