@@ -28,11 +28,6 @@ Widget _loginApp({String location = '/authentication'}) {
         ),
       ),
       GoRoute(
-        path: '/phoneAuth',
-        name: 'PhoneAuth',
-        builder: (_, __) => const Scaffold(body: Text('Phone auth')),
-      ),
-      GoRoute(
         path: '/',
         name: 'CustomerHome',
         builder: (_, __) => const Scaffold(body: Text('Customer home')),
