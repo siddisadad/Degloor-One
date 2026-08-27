@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
+import 'package:degloor_one/backend/shop_service.dart';
 import 'package:degloor_one/core/error_handler.dart';
 import 'package:degloor_one/data/repositories/cart_repository.dart';
 import 'package:degloor_one/shared/checkout_line_item.dart';
@@ -41,6 +41,24 @@ class CartAddResult {
       );
 }
 
+enum CartValidationStatus { ok, outOfStock, priceChanged, unavailable }
+
+class CartValidationResult {
+  const CartValidationResult({
+    required this.itemId,
+    required this.status,
+    this.message,
+    this.newPrice,
+  });
+
+  final String itemId;
+  final CartValidationStatus status;
+  final String? message;
+  final double? newPrice;
+
+  bool get isIssue => status != CartValidationStatus.ok;
+}
+
 class CartService {
   CartService({required CartRepository repository}) : _repository = repository;
 
@@ -61,95 +79,23 @@ class CartService {
     _instance = CartService(repository: repository);
   }
 
-  static Future<void> addToCart({
-    required BuildContext context,
+  /// Result-based add. Caller handles UI and potential shop mismatches.
+  static Future<CartAddResult> addToCart({
     required String businessId,
     required String productId,
     int quantity = 1,
+    bool replaceOtherBusiness = false,
   }) async {
     final userId = currentUserUid;
-    if (userId == '') {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(CartAddResult.signedOut.message!)),
-      );
-      return;
-    }
+    if (userId == '') return CartAddResult.signedOut;
 
-    try {
-      var result = await addProduct(
-        userId: userId,
-        businessId: businessId,
-        productId: productId,
-        quantity: quantity,
-      );
-
-      if (result.needsReplacement) {
-        if (!context.mounted) return;
-        final confirm = await showDialog<bool>(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Replace Cart?'),
-            content: const Text(
-              'Your cart contains items from another business. Would you like to clear it and add this item instead?',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: const Text('Cancel'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(context, true),
-                child: const Text('Clear and Add'),
-              ),
-            ],
-          ),
-        );
-
-        if (confirm != true) return;
-        result = await addProduct(
-          userId: userId,
-          businessId: businessId,
-          productId: productId,
-          quantity: quantity,
-          replaceOtherBusiness: true,
-        );
-      }
-
-      if (!context.mounted) return;
-      if (result.added) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(result.message ?? 'Added to cart'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      } else if (result.message != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(result.message!),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } catch (e) {
-      AppLogger.event(
-        'CART_ADD_FAILED',
-        fields: {'user_id': userId, 'product_id': productId},
-        error: e,
-      );
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            AppLogger.userFacingMessage(
-              e,
-              fallback: 'Unable to update the cart. Please try again.',
-            ),
-          ),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
+    return addProduct(
+      userId: userId,
+      businessId: businessId,
+      productId: productId,
+      quantity: quantity,
+      replaceOtherBusiness: replaceOtherBusiness,
+    );
   }
 
   /// Data-only add so tests and UI share the same cart rules.
@@ -173,6 +119,14 @@ class CartService {
         quantity: quantity,
         replaceOtherBusiness: replaceOtherBusiness,
       );
+      // Track analytics for the shop owner
+      ShopService.instance.trackEvent(
+        businessId: businessId,
+        eventType: ShopEvents.addToCart,
+        userId: userId,
+        metadata: {'product_id': productId, 'quantity': quantity},
+      ).catchError((_) {}); // Best effort
+
       return CartAddResult.success;
     } on CartNeedsReplacement {
       return CartAddResult.needsConfirm;
@@ -213,12 +167,59 @@ class CartService {
     return updateQuantity(itemId: itemId, quantity: 0, userId: userId);
   }
 
-  static Future<void> clearCart({String? userId}) async {
+  static Future<void> clearCart({String? userId, String? cartId}) async {
     final uid = userId ?? currentUserUid;
     if (uid.isEmpty) {
       throw Exception('CART_UNAUTHORIZED');
     }
+    // Note: most implementations currently clear the whole user cart.
     await instance._repository.clearCart(userId: uid);
+  }
+
+  /// Real-time health check for cart lines against current catalog state.
+  static Future<List<CartValidationResult>> validateCartItems(
+    List<CartLine> items,
+  ) async {
+    final futures = items.map((item) async {
+      try {
+        final product = await ShopService.instance.productById(item.productId);
+        if (product == null || product.isAvailable == false) {
+          return CartValidationResult(
+            itemId: item.id,
+            status: CartValidationStatus.unavailable,
+            message: '${item.product?.name ?? 'Item'} is no longer available.',
+          );
+        }
+
+        final inStock = (product.trackInventory != true) ||
+            ((product.stockQuantity ?? 0) >= item.quantity);
+
+        if (!inStock) {
+          return CartValidationResult(
+            itemId: item.id,
+            status: CartValidationStatus.outOfStock,
+            message: '${product.name} is out of stock.',
+          );
+        } else if (product.price != item.product?.price) {
+          return CartValidationResult(
+            itemId: item.id,
+            status: CartValidationStatus.priceChanged,
+            message: 'Price for ${product.name} has updated.',
+            newPrice: product.price,
+          );
+        } else {
+          return CartValidationResult(
+            itemId: item.id,
+            status: CartValidationStatus.ok,
+          );
+        }
+      } catch (_) {
+        return CartValidationResult(
+            itemId: item.id, status: CartValidationStatus.ok);
+      }
+    });
+
+    return (await Future.wait(futures)).where((r) => r.isIssue).toList();
   }
 
   static Future<List<ShoppingCart>> cartsForUser(String userId) {

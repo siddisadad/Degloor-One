@@ -1,8 +1,6 @@
 import 'package:flutter/foundation.dart';
 
 import '../database.dart';
-import 'package:degloor_one/backend/supabase/database/tables/businesses_table.dart';
-import 'package:degloor_one/flutter_flow/lat_lng.dart';
 import 'package:degloor_one/shared/search_query.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
@@ -75,9 +73,7 @@ class ProductsTable extends SupabaseTable<ProductsRow> {
       if (!query.matches([product.name, product.description, shop.name])) {
         continue;
       }
-      if (product.distanceKm == null) {
-        product.distanceKm = double.parse(distance.toStringAsFixed(2));
-      }
+      product.distanceKm ??= double.parse(distance.toStringAsFixed(2));
       matches.add(product);
     }
     matches.sort(

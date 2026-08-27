@@ -1,3 +1,4 @@
+import 'dart:developer' as dev;
 import 'package:flutter/foundation.dart';
 import 'package:degloor_one/core/api/api_client.dart';
 
@@ -22,6 +23,9 @@ class AppLogger {
     'FORBIDDEN': 'You do not have permission for this action.',
     'BUSINESS_NOT_VERIFIED': 'This shop is not accepting orders yet.',
     'PRODUCT_UNAVAILABLE': 'This product is no longer available.',
+    'BUSINESS_EXISTS': 'You already have a shop with that name.',
+    'INVALID_LOCATION': 'Please pick a valid location on the map.',
+    'INVALID_RADIUS': 'Please choose a valid discovery radius.',
   };
 
   /// DNS / browser-fetch failures against a missing Supabase host.
@@ -39,25 +43,51 @@ class AppLogger {
         text.contains('authretryablefetchexception') ||
         text.contains('socketexception') ||
         text.contains('connection refused') ||
-        text.contains('network is unreachable');
+        text.contains('network is unreachable') ||
+        text.contains('timeout');
   }
 
-  static void log(String message, {Object? error, StackTrace? stackTrace}) {
-    if (isUnreachable(error)) {
-      debugPrint('DEBUG: $message (Supabase host unreachable)');
-      return;
-    }
+  static void log(
+    String message, {
+    Object? error,
+    StackTrace? stackTrace,
+    int level = 0,
+    String name = 'App',
+  }) {
+    final fullMessage = isUnreachable(error)
+        ? '$message (Supabase host unreachable)'
+        : message;
+
+    dev.log(
+      fullMessage,
+      name: name,
+      level: level,
+      error: error,
+      stackTrace: stackTrace,
+    );
+
     if (kDebugMode) {
-      debugPrint('DEBUG: $message');
-      if (error != null) debugPrint('ERROR: $error');
-      if (stackTrace != null) debugPrint(stackTrace.toString());
-    } else {
-      debugPrint('LOG: $message');
+      final logPrefix = error != null ? 'ERROR' : 'LOG';
+      debugPrint('$logPrefix [$name]: $fullMessage');
+      if (error != null) debugPrint('Details: $error');
+      if (stackTrace != null) debugPrint('Stack trace:\n$stackTrace');
     }
+  }
+
+  static void debug(String message, [Object? error, StackTrace? stackTrace]) {
+    log(message, error: error, stackTrace: stackTrace, level: 500, name: 'DEBUG');
+  }
+
+  static void info(String message, [Object? error, StackTrace? stackTrace]) {
+    log(message, error: error, stackTrace: stackTrace, level: 800, name: 'INFO');
+  }
+
+  static void warn(String message, [Object? error, StackTrace? stackTrace]) {
+    log(message, error: error, stackTrace: stackTrace, level: 900, name: 'WARN');
   }
 
   static void error(String message, [Object? error, StackTrace? stackTrace]) {
-    log(message, error: error, stackTrace: stackTrace);
+    log(message, error: error, stackTrace: stackTrace, level: 1000, name: 'ERROR');
   }
 
   /// Structured developer log. Never show this string in the UI.
@@ -72,7 +102,7 @@ class AppLogger {
       if (error != null && kDebugMode) 'error=$error',
       'timestamp=${DateTime.now().toUtc().toIso8601String()}',
     ];
-    log(parts.join(' '));
+    log(parts.join(' '), name: 'EVENT');
   }
 
   /// Map RPC / PostgREST failures to a short customer sentence.
@@ -84,7 +114,7 @@ class AppLogger {
     if (error is JavaApiException) {
       final mapped = _codes[error.code];
       if (mapped != null) return mapped;
-      if (error.message.length <= 80 &&
+      if (error.message.length <= 250 &&
           !_looksInternal(error.message) &&
           !error.message.contains('{')) {
         return error.message;
@@ -112,9 +142,10 @@ class AppLogger {
     }
     if (_looksInternal(raw)) return fallback;
 
-    final match = RegExp(r'(?:Exception:|ERROR:)\s*(.+)').firstMatch(raw);
+    final match =
+        RegExp(r'(?:Exception:|ERROR:|JavaApiException:)\s*(.+)').firstMatch(raw);
     final cleaned = (match?.group(1) ?? raw).trim();
-    if (cleaned.length <= 80 &&
+    if (cleaned.length <= 250 &&
         !_looksInternal(cleaned) &&
         !cleaned.contains('{')) {
       return cleaned;

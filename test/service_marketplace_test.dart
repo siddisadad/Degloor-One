@@ -11,9 +11,15 @@ import 'package:degloor_one/shared/service_category.dart';
 import 'package:degloor_one/shared/service_provider_profile.dart';
 import 'package:degloor_one/shared/service_request.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
+import 'supabase_initializer.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  setUpAll(() async {
+    await initializeMockSupabase();
+  });
+
   const nativeChannel = MethodChannel('com.deshmukh.degloorone/services');
 
   setUp(ShowcaseCatalog.reset);
@@ -111,7 +117,7 @@ void main() {
   });
 
   test('customers can watch their own service requests', () async {
-    final userId = GuestAuthUser.guestUid;
+    const userId = GuestAuthUser.guestUid;
     await ServiceMarketplaceService.instance.createRequest(
       userId: userId,
       providerId: 'sp-ravi',

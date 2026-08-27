@@ -411,6 +411,13 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           ),
         ),
         FFRoute(
+          name: ProfileInfoWidget.privacyRouteName,
+          path: ProfileInfoWidget.privacyRoutePath,
+          builder: (context, params) => const ProfileInfoWidget(
+            kind: ProfileInfoKind.privacyPolicy,
+          ),
+        ),
+        FFRoute(
           name: ProfileInfoWidget.aboutRouteName,
           path: ProfileInfoWidget.aboutRoutePath,
           builder: (context, params) => const ProfileInfoWidget(

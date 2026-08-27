@@ -47,6 +47,12 @@ class DiscoveryRepository {
     );
   }
 
+  Future<List<CitiesRow>> cities() {
+    return CitiesTable().queryRows(
+      queryFn: (q) => q.order('name', ascending: true),
+    );
+  }
+
   Future<List<UsersRow>> usersByIds(List<String> ids) {
     if (ids.isEmpty) return Future.value(const []);
     return UsersTable().queryRows(

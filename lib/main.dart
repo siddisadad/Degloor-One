@@ -60,9 +60,7 @@ void main() async {
   if (kBypassAuth) {
     installGuestSession();
   }
-  if (appState.userLocation == null) {
-    appState.userLocation = ShowcaseCatalog.degloor;
-  }
+  appState.userLocation ??= ShowcaseCatalog.degloor;
 
   runApp(ChangeNotifierProvider(
     create: (context) => appState,

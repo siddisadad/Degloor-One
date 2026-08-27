@@ -39,11 +39,23 @@ class JavaShopRepository implements ShopRepository {
     final cover = (draft.imageUrl ?? '').trim().isNotEmpty
         ? draft.imageUrl!.trim()
         : (photoUrls.isEmpty ? null : photoUrls.first);
+
+    final catId = draft.categoryId;
+    // Jackson expects a valid UUID string for categoryId.
+    final validCatId = (catId != null &&
+            catId.length > 20 &&
+            catId.contains('-') &&
+            !catId.startsWith('cat-'))
+        ? catId
+        : null;
+
     return {
       'name': draft.name,
       if (draft.ownerName != null) 'ownerName': draft.ownerName,
       if (draft.description != null) 'description': draft.description,
-      if (draft.categoryId != null) 'categoryId': draft.categoryId,
+      if (validCatId != null) 'categoryId': validCatId,
+      if (draft.subcategory != null) 'subCategory': draft.subcategory,
+      'cityId': draft.cityId ?? '30000000-0000-4000-8000-000000000001',
       if (draft.addressText != null) 'addressText': draft.addressText,
       if (draft.whatsappNumber != null) 'whatsappNumber': draft.whatsappNumber,
       if (draft.phoneNumber != null) 'phoneNumber': draft.phoneNumber,
@@ -77,9 +89,8 @@ class JavaShopRepository implements ShopRepository {
   Future<List<Shop>> ownedBy(String userId) async {
     if (userId.isEmpty) return const [];
     final data = await _client.get('/api/v1/businesses/mine');
-    final rows = data is List ? data : const [];
+    final rows = pageItems(data);
     return rows
-        .whereType<Map>()
         .map((row) => fromJson(Map<String, dynamic>.from(row)))
         .where((shop) => shop.ownerId == userId)
         .toList();

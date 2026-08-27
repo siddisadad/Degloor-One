@@ -75,14 +75,29 @@ class JobService {
     if (draft.applicantId.isEmpty) {
       throw Exception('Please sign in to apply');
     }
+    final summary = draft.experienceSummary.trim();
+    if (summary.length < 10) {
+      throw Exception('Please provide a more detailed experience summary (min 10 characters)');
+    }
+
     final normalized = JobApplicationDraft.fromForm(
       jobId: draft.jobId,
       applicantId: draft.applicantId,
-      experienceSummary: draft.experienceSummary,
+      experienceSummary: summary,
     );
     return _repository.apply(normalized);
   }
 
   Future<List<JobApplicant>> applicants(String jobId) =>
       _repository.applicants(jobId);
+
+  Future<void> updateApplicantStatus({
+    required String applicationId,
+    required String status,
+  }) {
+    return _repository.updateApplicantStatus(
+      applicationId: applicationId,
+      status: status,
+    );
+  }
 }

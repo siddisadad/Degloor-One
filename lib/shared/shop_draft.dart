@@ -1,4 +1,3 @@
-import 'package:degloor_one/core/app_flags.dart';
 
 /// Fields an owner submits when registering or editing a shop.
 /// Id, createdAt, rating, and verification stay off this type
@@ -13,6 +12,7 @@ class ShopDraft {
     this.addressText,
     this.categoryId,
     this.subcategory,
+    this.cityId,
     this.latitude,
     this.longitude,
     this.discoveryRadius,
@@ -28,6 +28,7 @@ class ShopDraft {
   final String? addressText;
   final String? categoryId;
   final String? subcategory;
+  final String? cityId;
   final double? latitude;
   final double? longitude;
   final double? discoveryRadius;
@@ -43,6 +44,7 @@ class ShopDraft {
     required String categoryId,
     required double latitude,
     required double longitude,
+    String? cityId,
     String description = '',
     String? subcategory,
     String? whatsappNumber,
@@ -80,6 +82,7 @@ class ShopDraft {
       addressText: addressText.trim(),
       categoryId: categoryId,
       subcategory: subcategory?.trim(),
+      cityId: cityId,
       latitude: latitude,
       longitude: longitude,
       discoveryRadius: discoveryRadius,
@@ -101,6 +104,7 @@ class ShopDraft {
     String? addressText,
     double? discoveryRadius,
     String? imageUrl,
+    String? cityId,
   }) {
     final trimmedName = name.trim();
     if (trimmedName.isEmpty) {
@@ -116,6 +120,7 @@ class ShopDraft {
       addressText: addressText?.trim(),
       discoveryRadius: discoveryRadius,
       imageUrl: imageUrl,
+      cityId: cityId,
     );
   }
 
@@ -152,6 +157,7 @@ class ShopDraft {
       'whatsapp_number': whatsappNumber,
       'address_text': addressText ?? '',
       'category_id': categoryId,
+      if (cityId != null) 'city_id': cityId,
       'latitude': latitude,
       'longitude': longitude,
       'discovery_radius': discoveryRadius ?? 5,
@@ -159,13 +165,14 @@ class ShopDraft {
       'source': 'owner',
       if (subcategory != null) 'sub_category': subcategory,
       if (cover != null) 'image_url': cover,
-      if (kUseShowcaseData && photoUrls.isNotEmpty) 'photos': photoUrls,
+      if (photoUrls.isNotEmpty) 'photos': photoUrls,
     };
   }
 
   /// Owner profile fields only. Never includes id, owner_id,
   /// category_id, coordinates, created_at, or is_verified.
   Map<String, dynamic> toUpdateJson() {
+    final photoUrls = attachedPhotos;
     return {
       'name': name,
       'owner_name': ownerName,
@@ -173,9 +180,11 @@ class ShopDraft {
       'phone_number': phoneNumber,
       'whatsapp_number': whatsappNumber,
       'address_text': addressText,
+      if (cityId != null) 'city_id': cityId,
       if (subcategory != null) 'sub_category': subcategory,
       if (discoveryRadius != null) 'discovery_radius': discoveryRadius,
       'image_url': imageUrl,
+      if (photoUrls.isNotEmpty) 'photos': photoUrls,
     };
   }
 }

@@ -356,7 +356,9 @@ void main() {
     expect(cancelled.isCancelled, isTrue);
     expect(cancelled.showStepper, isFalse);
     expect(cancelled.showDeliveryOtp, isFalse);
-    expect(OrderService.instance.statusLabel(OrderLifecycle.ready), 'Ready');
+    expect(OrderService.instance.statusLabel(OrderLifecycle.ready), 'Ready for pickup');
+    expect(OrderService.instance.statusLabel(OrderLifecycle.outForDelivery), 'Rider is nearby');
+    expect(OrderService.instance.statusLabel(OrderLifecycle.pending), 'Finding Shop');
   });
 
   test('pending count is scoped to the shop and pending status', () async {

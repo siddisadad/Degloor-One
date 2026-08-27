@@ -1,4 +1,3 @@
-import 'package:degloor_one/components/action_tile/action_tile_widget.dart';
 import 'package:degloor_one/components/completeness_card/completeness_card_widget.dart';
 import 'package:degloor_one/components/stat_card/stat_card_widget.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
@@ -10,34 +9,12 @@ class BusinessDashboardModel extends FlutterFlowModel<BusinessDashboardWidget> {
 
   // Model for StatCard.
   late StatCardModel statCardModel1;
-  // Model for StatCard.
   late StatCardModel statCardModel2;
-  // Model for StatCard.
   late StatCardModel statCardModel3;
-  // Model for StatCard.
   late StatCardModel statCardModel4;
+
   // Model for CompletenessCard.
   late CompletenessCardModel completenessCardModel;
-  // Model for ActionTile.
-  late ActionTileModel actionTileModel1;
-  // Model for ActionTile.
-  late ActionTileModel actionTileModel2;
-  // Model for ActionTile.
-  late ActionTileModel actionTileModel3;
-  // Model for ActionTile.
-  late ActionTileModel actionTileModel4;
-  // Model for ActionTile.
-  late ActionTileModel actionTileModel5;
-  // Model for ActionTile.
-  late ActionTileModel actionTileModel6;
-  // Model for ActionTile.
-  late ActionTileModel actionTileModel7;
-  // Model for ActionTile.
-  late ActionTileModel actionTileModel8;
-  // Model for ActionTile.
-  late ActionTileModel actionTileModel9;
-  // Model for ActionTile.
-  late ActionTileModel actionTileModel10;
 
   @override
   void initState(BuildContext context) {
@@ -46,16 +23,6 @@ class BusinessDashboardModel extends FlutterFlowModel<BusinessDashboardWidget> {
     statCardModel3 = createModel(context, () => StatCardModel());
     statCardModel4 = createModel(context, () => StatCardModel());
     completenessCardModel = createModel(context, () => CompletenessCardModel());
-    actionTileModel1 = createModel(context, () => ActionTileModel());
-    actionTileModel2 = createModel(context, () => ActionTileModel());
-    actionTileModel3 = createModel(context, () => ActionTileModel());
-    actionTileModel4 = createModel(context, () => ActionTileModel());
-    actionTileModel5 = createModel(context, () => ActionTileModel());
-    actionTileModel6 = createModel(context, () => ActionTileModel());
-    actionTileModel7 = createModel(context, () => ActionTileModel());
-    actionTileModel8 = createModel(context, () => ActionTileModel());
-    actionTileModel9 = createModel(context, () => ActionTileModel());
-    actionTileModel10 = createModel(context, () => ActionTileModel());
   }
 
   @override
@@ -65,15 +32,5 @@ class BusinessDashboardModel extends FlutterFlowModel<BusinessDashboardWidget> {
     statCardModel3.dispose();
     statCardModel4.dispose();
     completenessCardModel.dispose();
-    actionTileModel1.dispose();
-    actionTileModel2.dispose();
-    actionTileModel3.dispose();
-    actionTileModel4.dispose();
-    actionTileModel5.dispose();
-    actionTileModel6.dispose();
-    actionTileModel7.dispose();
-    actionTileModel8.dispose();
-    actionTileModel9.dispose();
-    actionTileModel10.dispose();
   }
 }

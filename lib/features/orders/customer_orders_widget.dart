@@ -1,6 +1,7 @@
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/discovery_service.dart';
 import 'package:degloor_one/backend/order_service.dart';
+import 'package:degloor_one/shared/order_lifecycle.dart';
 import 'package:degloor_one/components/cached_remote_image.dart';
 import 'package:degloor_one/components/degloor_app_bar.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
@@ -36,6 +37,7 @@ class _CustomerOrdersWidgetState extends State<CustomerOrdersWidget> {
   int _offset = 0;
   int _loadToken = 0;
   static const _pageSize = 20;
+  String _filter = 'active'; // 'active', 'past'
 
   @override
   void initState() {
@@ -72,7 +74,17 @@ class _CustomerOrdersWidgetState extends State<CustomerOrdersWidget> {
         userId,
         page: PageQuery(offset: _offset),
       );
-      final ids = page.items.map((order) => order.businessId).toSet().toList();
+
+      final filteredItems = page.items.where((order) {
+        final status = OrderLifecycle.normalizeStatus(order.status);
+        if (_filter == 'active') {
+          return !OrderLifecycle.isTerminal(status);
+        } else {
+          return OrderLifecycle.isTerminal(status);
+        }
+      }).toList();
+
+      final ids = filteredItems.map((order) => order.businessId).toSet().toList();
       final shops = await DiscoveryService.instance.businessesByIds(ids);
       if (!mounted || token != _loadToken) return;
       setState(() {
@@ -80,9 +92,9 @@ class _CustomerOrdersWidgetState extends State<CustomerOrdersWidget> {
           _model.businesses[shop.id] = shop;
         }
         if (reset) {
-          _orders = page.items;
+          _orders = filteredItems;
         } else {
-          _orders.addAll(page.items);
+          _orders.addAll(filteredItems);
         }
         _offset += _pageSize;
         _hasMore = page.hasMore;
@@ -99,6 +111,127 @@ class _CustomerOrdersWidgetState extends State<CustomerOrdersWidget> {
         });
       }
     }
+  }
+
+  @override
+  void dispose() {
+    _model.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      key: scaffoldKey,
+      backgroundColor: DegloorTheme.background,
+      appBar: degloorAppBar(context, title: 'My Orders'),
+      body: SafeArea(
+        child: Align(
+          alignment: Alignment.topCenter,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 520),
+            child: Column(
+              children: [
+                _buildFilters(),
+                Expanded(
+                  child: _isLoading
+                      ? const Center(
+                          child: CircularProgressIndicator(
+                              color: DegloorTheme.primary),
+                        )
+                      : _orders.isEmpty
+                          ? EmptyStateView(
+                              icon: Icons.receipt_long_rounded,
+                              title: _filter == 'active'
+                                  ? 'No active orders'
+                                  : 'No past orders',
+                              description: _filter == 'active'
+                                  ? 'Your current orders will appear here for tracking.'
+                                  : 'Your completed and cancelled orders will show up here.',
+                              buttonText: _filter == 'active'
+                                  ? 'Start shopping'
+                                  : null,
+                              onTap: _filter == 'active'
+                                  ? () => context.goNamed('CustomerHome')
+                                  : null,
+                            )
+                          : RefreshIndicator(
+                              color: DegloorTheme.primary,
+                              onRefresh: () => _loadPage(reset: true),
+                              child: ListView.separated(
+                                physics: const AlwaysScrollableScrollPhysics(),
+                                padding:
+                                    const EdgeInsets.all(DegloorTheme.spacingMD),
+                                itemCount: _orders.length + (_hasMore ? 1 : 0),
+                                separatorBuilder: (context, index) =>
+                                    const SizedBox(
+                                        height: DegloorTheme.spacingSM),
+                                itemBuilder: (context, index) {
+                                  if (index >= _orders.length) {
+                                    return LoadMoreControl(
+                                      loading: _loadingMore,
+                                      onPressed: () => _loadPage(),
+                                    );
+                                  }
+                                  final order = _orders[index];
+                                  final business =
+                                      _model.businesses[order.businessId];
+                                  return OrderListCard(
+                                    title: business?.name ?? 'Loading shop…',
+                                    orderId: order.id,
+                                    createdAt: order.createdAt,
+                                    totalAmount: order.totalAmount,
+                                    status: order.status,
+                                    leading: _shopThumb(business),
+                                    onTap: () => context.pushNamed(
+                                      'OrderTracking',
+                                      queryParameters: {'orderId': order.id},
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFilters() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: DegloorTheme.spacingMD),
+      child: Row(
+        children: [
+          _filterChip('Active', 'active'),
+          const SizedBox(width: 8),
+          _filterChip('Past Orders', 'past'),
+        ],
+      ),
+    );
+  }
+
+  Widget _filterChip(String label, String value) {
+    final isSelected = _filter == value;
+    return ChoiceChip(
+      label: Text(label),
+      selected: isSelected,
+      onSelected: (selected) {
+        if (selected) {
+          setState(() {
+            _filter = value;
+            _loadPage(reset: true);
+          });
+        }
+      },
+      selectedColor: DegloorTheme.primary,
+      labelStyle: TextStyle(
+        color: isSelected ? Colors.white : DegloorTheme.textPrimary,
+        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+      ),
+    );
   }
 
   Widget _shopThumb(Shop? shop) {
@@ -123,75 +256,6 @@ class _CustomerOrdersWidgetState extends State<CustomerOrdersWidget> {
                 height: 48,
                 placeholderIcon: Icons.storefront_rounded,
               ),
-      ),
-    );
-  }
-
-  @override
-  void dispose() {
-    _model.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      key: scaffoldKey,
-      backgroundColor: DegloorTheme.background,
-      appBar: degloorAppBar(context, title: 'My Orders'),
-      body: SafeArea(
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 520),
-            child: _isLoading
-                ? const Center(
-                    child: CircularProgressIndicator(color: DegloorTheme.primary),
-                  )
-                : _orders.isEmpty
-                    ? EmptyStateView(
-                        icon: Icons.receipt_long_rounded,
-                        title: 'No orders yet',
-                        description:
-                            'Your cart and local shops are ready when you are.',
-                        buttonText: 'Start shopping',
-                        onTap: () => context.goNamed('CustomerHome'),
-                      )
-                    : RefreshIndicator(
-                        color: DegloorTheme.primary,
-                        onRefresh: () => _loadPage(reset: true),
-                        child: ListView.separated(
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          padding: const EdgeInsets.all(DegloorTheme.spacingMD),
-                          itemCount: _orders.length + (_hasMore ? 1 : 0),
-                          separatorBuilder: (context, index) =>
-                              const SizedBox(height: DegloorTheme.spacingSM),
-                          itemBuilder: (context, index) {
-                            if (index >= _orders.length) {
-                              return LoadMoreControl(
-                                loading: _loadingMore,
-                                onPressed: () => _loadPage(),
-                              );
-                            }
-                            final order = _orders[index];
-                            final business = _model.businesses[order.businessId];
-                            return OrderListCard(
-                              title: business?.name ?? 'Loading shop…',
-                              orderId: order.id,
-                              createdAt: order.createdAt,
-                              totalAmount: order.totalAmount,
-                              status: order.status,
-                              leading: _shopThumb(business),
-                              onTap: () => context.pushNamed(
-                                'OrderTracking',
-                                queryParameters: {'orderId': order.id},
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-          ),
-        ),
       ),
     );
   }

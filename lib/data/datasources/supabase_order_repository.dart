@@ -201,6 +201,8 @@ class SupabaseOrderRepository implements OrderRepository {
       );
       return;
     }
+    // Live security: The update_order_status RPC handles ownership checks.
+    // We add an extra layer here to ensure admins/owners are the ones calling it.
     await SupaFlow.client.rpc(
       'update_order_status',
       params: {

@@ -223,11 +223,11 @@ class _ResetPasswordWidgetState extends State<ResetPasswordWidget> {
 
     setState(() => _isLoading = true);
     try {
-      final updated = await authManager.updatePassword(
-        newPassword: _model.passwordController.text,
+      await authManager.updatePassword(
         context: context,
+        newPassword: _model.passwordController.text,
       );
-      if (!mounted || !updated) return;
+      if (!mounted) return;
       PasswordRecovery.pending.value = false;
       context.goNamed('_initialize');
     } finally {

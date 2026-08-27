@@ -24,6 +24,7 @@ class ShopEventSummary {
     required this.whatsappClicks,
     required this.directionsClicks,
     required this.dailyCounts,
+    required this.topProducts,
   });
 
   static const empty = ShopEventSummary(
@@ -32,6 +33,7 @@ class ShopEventSummary {
     whatsappClicks: 0,
     directionsClicks: 0,
     dailyCounts: {},
+    topProducts: [],
   );
 
   final int profileViews;
@@ -39,6 +41,7 @@ class ShopEventSummary {
   final int whatsappClicks;
   final int directionsClicks;
   final Map<String, int> dailyCounts;
+  final List<MapEntry<String, int>> topProducts;
 
   int get inquiries => callClicks + whatsappClicks;
 
@@ -257,6 +260,7 @@ class ShopService {
         ownerId: ownerId,
         businessName: shop.name,
         rating: rating,
+        businessId: businessId,
       );
     }
     await trackEvent(
@@ -320,6 +324,8 @@ class ShopService {
     var whatsappClicks = 0;
     var directionsClicks = 0;
     final dailyCounts = <String, int>{};
+    final productCounts = <String, int>{};
+
     for (final event in events) {
       switch (event.eventType) {
         case ShopEvents.profileView:
@@ -330,6 +336,12 @@ class ShopService {
           whatsappClicks++;
         case ShopEvents.directionsClick:
           directionsClicks++;
+        case ShopEvents.productView:
+        case ShopEvents.addToCart:
+          final productId = event.metadata?['product_id']?.toString();
+          if (productId != null && productId.isNotEmpty) {
+            productCounts[productId] = (productCounts[productId] ?? 0) + 1;
+          }
       }
       try {
         final at = event.createdAt;
@@ -338,12 +350,17 @@ class ShopService {
         dailyCounts[key] = (dailyCounts[key] ?? 0) + 1;
       } catch (_) {}
     }
+
+    final topProducts = productCounts.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+
     return ShopEventSummary(
       profileViews: profileViews,
       callClicks: callClicks,
       whatsappClicks: whatsappClicks,
       directionsClicks: directionsClicks,
       dailyCounts: dailyCounts,
+      topProducts: topProducts.take(10).toList(),
     );
   }
 }

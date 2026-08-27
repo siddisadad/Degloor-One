@@ -131,6 +131,22 @@ class EditBusinessProfileModel extends FlutterFlowModel<EditBusinessProfileWidge
     );
   }
 
+  Future<void> delete({
+    required String userId,
+    required String businessId,
+  }) async {
+    if (userId.isEmpty) {
+      throw Exception('Please login to delete the business');
+    }
+    if (businessId.isEmpty) {
+      throw Exception('Business ID is missing');
+    }
+    await BusinessService.instance.deleteBusiness(
+      userId: userId,
+      businessId: businessId,
+    );
+  }
+
   @override
   void dispose() {
     textFieldModel1.dispose();

@@ -1,6 +1,5 @@
 import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/auth/password_recovery.dart';
-import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/core/app_flags.dart';
 import 'package:degloor_one/features/auth/initial_redirect_widget.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
@@ -112,7 +111,7 @@ void main() {
 
   test('signed-out bypass still opens customer home', () async {
     expect(
-      await _route(loggedIn: false, bypassAuth: true),
+      await _route(loggedIn: false),
       'CustomerHome',
     );
   });
@@ -125,7 +124,7 @@ void main() {
   });
 
   test('customer and unknown roles open customer home', () async {
-    expect(await _route(role: 'customer'), 'CustomerHome');
+    expect(await _route(), 'CustomerHome');
     expect(await _route(role: null), 'CustomerHome');
   });
 
@@ -138,7 +137,7 @@ void main() {
 
   test('shop owner without a shop opens registration', () async {
     expect(
-      await _route(role: 'business_owner', hasShop: false),
+      await _route(role: 'business_owner'),
       'BusinessRegistration',
     );
   });
@@ -152,7 +151,7 @@ void main() {
 
   test('service provider without a profile opens join', () async {
     expect(
-      await _route(role: 'service_provider', hasProvider: false),
+      await _route(role: 'service_provider'),
       'ServiceProviderRegistration',
     );
   });

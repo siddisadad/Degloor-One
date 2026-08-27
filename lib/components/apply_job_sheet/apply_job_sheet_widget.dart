@@ -1,8 +1,8 @@
+import 'package:degloor_one/core/degloor_theme.dart';
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/job_service.dart';
 import 'package:degloor_one/shared/job_application_draft.dart';
 import 'package:degloor_one/core/error_handler.dart';
-import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_model.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
 import 'package:flutter/material.dart';
@@ -53,9 +53,9 @@ class _ApplyJobSheetWidgetState extends State<ApplyJobSheetWidget> {
       padding: MediaQuery.of(context).viewInsets,
       child: Container(
         width: double.infinity,
-        decoration: BoxDecoration(
-          color: FlutterFlowTheme.of(context).secondaryBackground,
-          borderRadius: const BorderRadius.only(
+        decoration: const BoxDecoration(
+          color: DegloorTheme.cardBackground,
+          borderRadius: BorderRadius.only(
             topLeft: Radius.circular(24),
             topRight: Radius.circular(24),
           ),
@@ -76,18 +76,14 @@ class _ApplyJobSheetWidgetState extends State<ApplyJobSheetWidget> {
                       children: [
                         Text(
                           'Apply for Position',
-                          style: FlutterFlowTheme.of(context).headlineSmall.override(
-                                fontFamily: 'Inter',
-                                fontWeight: FontWeight.bold,
-                              ),
+                          style: DegloorTheme.headingMedium,
                         ),
                         Padding(
                           padding: const EdgeInsetsDirectional.fromSTEB(0, 4, 0, 0),
                           child: Text(
                             widget.jobTitle,
-                            style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                  fontFamily: 'Inter',
-                                  color: FlutterFlowTheme.of(context).secondaryText,
+                            style: DegloorTheme.bodyMedium.copyWith(
+                                  color: DegloorTheme.textSecondary,
                                 ),
                           ),
                         ),
@@ -102,9 +98,9 @@ class _ApplyJobSheetWidgetState extends State<ApplyJobSheetWidget> {
                     onTap: () async {
                       Navigator.pop(context);
                     },
-                    child: Icon(
+                    child: const Icon(
                       Icons.close_rounded,
-                      color: FlutterFlowTheme.of(context).secondaryText,
+                      color: DegloorTheme.textSecondary,
                       size: 24,
                     ),
                   ),
@@ -114,8 +110,7 @@ class _ApplyJobSheetWidgetState extends State<ApplyJobSheetWidget> {
                 padding: const EdgeInsetsDirectional.fromSTEB(0, 24, 0, 0),
                 child: Text(
                   'Experience Summary',
-                  style: FlutterFlowTheme.of(context).bodyLarge.override(
-                        fontFamily: 'Inter',
+                  style: DegloorTheme.titleMedium.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
                 ),
@@ -124,9 +119,8 @@ class _ApplyJobSheetWidgetState extends State<ApplyJobSheetWidget> {
                 padding: const EdgeInsetsDirectional.fromSTEB(0, 8, 0, 0),
                 child: Text(
                   'Briefly describe your relevant experience for this role.',
-                  style: FlutterFlowTheme.of(context).bodyMedium.override(
-                        fontFamily: 'Inter',
-                        color: FlutterFlowTheme.of(context).secondaryText,
+                  style: DegloorTheme.bodyMedium.copyWith(
+                        color: DegloorTheme.textSecondary,
                       ),
                 ),
               ),
@@ -138,39 +132,39 @@ class _ApplyJobSheetWidgetState extends State<ApplyJobSheetWidget> {
                   autofocus: true,
                   decoration: InputDecoration(
                     hintText: 'I have 2 years of experience in...',
-                    hintStyle: FlutterFlowTheme.of(context).labelMedium,
+                    hintStyle: DegloorTheme.labelMedium,
                     enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                        color: FlutterFlowTheme.of(context).alternate,
+                      borderSide: const BorderSide(
+                        color: DegloorTheme.border,
                         width: 2,
                       ),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                        color: FlutterFlowTheme.of(context).primary,
+                      borderSide: const BorderSide(
+                        color: DegloorTheme.primary,
                         width: 2,
                       ),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     errorBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                        color: FlutterFlowTheme.of(context).error,
+                      borderSide: const BorderSide(
+                        color: DegloorTheme.error,
                         width: 2,
                       ),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     focusedErrorBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                        color: FlutterFlowTheme.of(context).error,
+                      borderSide: const BorderSide(
+                        color: DegloorTheme.error,
                         width: 2,
                       ),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     filled: true,
-                    fillColor: FlutterFlowTheme.of(context).primaryBackground,
+                    fillColor: DegloorTheme.background,
                   ),
-                  style: FlutterFlowTheme.of(context).bodyMedium,
+                  style: DegloorTheme.bodyMedium,
                   maxLines: 5,
                   validator: _model.experienceControllerValidator.asValidator(context),
                 ),
@@ -179,16 +173,13 @@ class _ApplyJobSheetWidgetState extends State<ApplyJobSheetWidget> {
                 padding: const EdgeInsetsDirectional.fromSTEB(0, 32, 0, 0),
                 child: FFButtonWidget(
                   onPressed: () async {
-                    if (_model.experienceController!.text.isEmpty) {
+                    if (_model.experienceController!.text.trim().length < 10) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
+                        const SnackBar(
                           content: Text(
-                            'Please enter your experience summary',
-                            style: TextStyle(
-                              color: FlutterFlowTheme.of(context).primaryText,
-                            ),
+                            'Please provide a more detailed experience summary (min 10 characters)',
                           ),
-                          backgroundColor: FlutterFlowTheme.of(context).error,
+                          backgroundColor: DegloorTheme.error,
                         ),
                       );
                       return;
@@ -206,14 +197,14 @@ class _ApplyJobSheetWidgetState extends State<ApplyJobSheetWidget> {
                       if (context.mounted) {
                         Navigator.pop(context);
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: const Text(
+                          const SnackBar(
+                            content: Text(
                               'Application submitted successfully!',
                               style: TextStyle(
                                 color: Colors.white,
                               ),
                             ),
-                            backgroundColor: FlutterFlowTheme.of(context).success,
+                            backgroundColor: DegloorTheme.success,
                           ),
                         );
                       }
@@ -231,7 +222,7 @@ class _ApplyJobSheetWidgetState extends State<ApplyJobSheetWidget> {
                                 color: Colors.white,
                               ),
                             ),
-                            backgroundColor: FlutterFlowTheme.of(context).error,
+                            backgroundColor: DegloorTheme.error,
                           ),
                         );
                       }
@@ -243,10 +234,10 @@ class _ApplyJobSheetWidgetState extends State<ApplyJobSheetWidget> {
                     height: 50,
                     padding: const EdgeInsetsDirectional.fromSTEB(0, 0, 0, 0),
                     iconPadding: const EdgeInsetsDirectional.fromSTEB(0, 0, 0, 0),
-                    color: FlutterFlowTheme.of(context).primary,
-                    textStyle: FlutterFlowTheme.of(context).titleSmall.override(
-                          fontFamily: 'Inter',
+                    color: DegloorTheme.primary,
+                    textStyle: const TextStyle(
                           color: Colors.white,
+                          fontWeight: FontWeight.bold,
                         ),
                     elevation: 0,
                     borderSide: const BorderSide(

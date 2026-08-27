@@ -94,7 +94,8 @@ class OrderService {
     );
   }
 
-  String statusLabel(String status) => OrderLifecycle.label(status);
+  String statusLabel(String status, {dynamic l10n}) =>
+      OrderLifecycle.label(status, l10n: l10n);
 
   Future<PageResult<PlacedOrder>> listForUser(
     String userId, {

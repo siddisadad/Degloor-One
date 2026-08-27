@@ -28,4 +28,9 @@ abstract class JobRepository {
   Future<JobApplication> apply(JobApplicationDraft draft);
 
   Future<List<JobApplicant>> applicants(String jobId);
+
+  Future<void> updateApplicantStatus({
+    required String applicationId,
+    required String status,
+  });
 }

@@ -89,4 +89,22 @@ class SupabaseJobRepository implements JobRepository {
   Future<List<JobApplicant>> applicants(String jobId) {
     return _inner.applicants(jobId);
   }
+
+  @override
+  Future<void> updateApplicantStatus({
+    required String applicationId,
+    required String status,
+  }) async {
+    if (kUseShowcaseData) {
+      ShowcaseCatalog.update(
+        'job_applications',
+        {'status': status},
+        ShowcaseQuery()..eq('id', applicationId),
+      );
+      return;
+    }
+    await SupaFlow.client.from('job_applications').update({
+      'status': status,
+    }).eq('id', applicationId);
+  }
 }

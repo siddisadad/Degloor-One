@@ -183,4 +183,194 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get aboutLocation => 'Degloor, Maharashtra';
+
+  @override
+  String get privacyPolicy => 'Privacy Policy';
+
+  @override
+  String get privacyIntro =>
+      'We value your privacy and are committed to protecting your personal data.';
+
+  @override
+  String get statusFindingShop => 'Finding Shop';
+
+  @override
+  String get statusPreparing => 'Preparing';
+
+  @override
+  String get statusReady => 'Ready for pickup';
+
+  @override
+  String get statusShipping => 'On the way';
+
+  @override
+  String get statusRiderNearby => 'Rider is nearby';
+
+  @override
+  String get statusDelivered => 'Delivered';
+
+  @override
+  String get statusCancelled => 'Cancelled';
+
+  @override
+  String get statusPending => 'Pending';
+
+  @override
+  String get statusAccepted => 'Accepted';
+
+  @override
+  String get statusDeclined => 'Declined';
+
+  @override
+  String get statusCompleted => 'Completed';
+
+  @override
+  String get statusApplied => 'Applied';
+
+  @override
+  String get statusShortlisted => 'Shortlisted';
+
+  @override
+  String get statusRejected => 'Rejected';
+
+  @override
+  String get city => 'City';
+
+  @override
+  String get selectCity => 'Select City';
+
+  @override
+  String get retryCities => 'Unable to load cities. Tap to retry.';
+
+  @override
+  String get registerBusiness => 'Register Business';
+
+  @override
+  String get phaseOneDegloorOne => 'Phase 1: DEGLOOR ONE';
+
+  @override
+  String get businessIdentity => 'Business Identity';
+
+  @override
+  String get businessName => 'Business Name';
+
+  @override
+  String get ownerName => 'Owner Name';
+
+  @override
+  String get businessNameHint => 'e.g., Maharashtra Hardware & Steel';
+
+  @override
+  String get ownerNameHint => 'Full legal name of proprietor';
+
+  @override
+  String get primaryCategory => 'Primary Category';
+
+  @override
+  String get selectCategory => 'Select Category';
+
+  @override
+  String get typeSpecialty => 'Type / Specialty';
+
+  @override
+  String get typeSpecialtyHint => 'What kind of business is this?';
+
+  @override
+  String get typeSpecialtyHelper => 'e.g. Kirana, Hardware, Restaurant';
+
+  @override
+  String get businessDescription => 'Business Description';
+
+  @override
+  String get businessDescriptionHint =>
+      'Briefly describe your products or services...';
+
+  @override
+  String get contactDetails => 'Contact Details';
+
+  @override
+  String get mobileNumber => 'Mobile Number';
+
+  @override
+  String get whatsAppNumber => 'WhatsApp Number';
+
+  @override
+  String get whatsAppNumberHint => 'For customer enquiries';
+
+  @override
+  String get whatsAppSameAsMobile => 'WhatsApp same as mobile';
+
+  @override
+  String get locationAndGps => 'Location & GPS';
+
+  @override
+  String get streetAddress => 'Street Address';
+
+  @override
+  String get streetAddressHint => 'Shop No., Building Name, Main Road...';
+
+  @override
+  String get area => 'Area';
+
+  @override
+  String get areaHint => 'e.g., Shivaji Chowk';
+
+  @override
+  String get setGpsCoordinates => 'Set GPS Coordinates';
+
+  @override
+  String get locateMe => 'Locate Me';
+
+  @override
+  String get discoveryReach => 'Discovery Reach';
+
+  @override
+  String get serviceRadius => 'Service Radius';
+
+  @override
+  String get discoveryRadiusKm => 'Discovery Radius (KM)';
+
+  @override
+  String get discoveryDescription =>
+      'How far should customers be able to discover your business?';
+
+  @override
+  String get photosAndVerification => 'Photos & Verification';
+
+  @override
+  String get photoUploadInstruction =>
+      'Upload clear photos of your storefront and interior.';
+
+  @override
+  String get storeFront => 'Store Front';
+
+  @override
+  String get interior => 'Interior';
+
+  @override
+  String get registrationDoc => 'Reg. Doc';
+
+  @override
+  String get submitForVerification => 'Submit for Verification';
+
+  @override
+  String get businessTermsDisclaimer =>
+      'By submitting, you agree to the DEGLOOR ONE Business Terms. Your listing will be reviewed by our local admin team for verification within 24 hours.';
+
+  @override
+  String get pleaseWaitCategories => 'Please wait for categories to load...';
+
+  @override
+  String get unableLoadCategories =>
+      'Unable to load categories. Please check your connection.';
+
+  @override
+  String get unableLoadCategoriesRetry =>
+      'Unable to load categories. Tap to retry.';
+
+  @override
+  String get businessSubmitted => 'Business submitted for verification!';
+
+  @override
+  String get unableSubmitShop => 'Unable to submit the shop. Please try again.';
 }

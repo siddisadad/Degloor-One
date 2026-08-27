@@ -1,3 +1,4 @@
+import 'package:degloor_one/core/degloor_theme.dart';
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/business_service.dart';
 import 'package:degloor_one/backend/job_service.dart';
@@ -8,7 +9,6 @@ import 'package:degloor_one/components/degloor_app_bar.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/components/job_card/job_card_widget.dart';
 import 'package:degloor_one/core/error_handler.dart';
-import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_model.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
 import 'package:flutter/material.dart';
@@ -73,9 +73,9 @@ class _ManageJobsWidgetState extends State<ManageJobsWidget> {
       builder: (context) => Padding(
         padding: MediaQuery.of(context).viewInsets,
         child: Container(
-          decoration: BoxDecoration(
-            color: FlutterFlowTheme.of(context).secondaryBackground,
-            borderRadius: const BorderRadius.only(
+          decoration: const BoxDecoration(
+            color: DegloorTheme.cardBackground,
+            borderRadius: BorderRadius.only(
               topLeft: Radius.circular(24),
               topRight: Radius.circular(24),
             ),
@@ -87,28 +87,33 @@ class _ManageJobsWidgetState extends State<ManageJobsWidget> {
             children: [
               Text(
                 'Post a New Job',
-                style: FlutterFlowTheme.of(context).headlineSmall.override(
-                      fontFamily: 'Inter',
-                      fontWeight: FontWeight.bold,
-                    ),
+                style: DegloorTheme.headingMedium,
               ),
               const SizedBox(height: 24),
               TextField(
                 controller: titleController,
                 decoration: InputDecoration(
                   labelText: 'Job Title',
-                  labelStyle: FlutterFlowTheme.of(context).labelMedium,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  labelStyle: DegloorTheme.labelMedium,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: DegloorTheme.border),
+                  ),
                 ),
+                style: DegloorTheme.bodyMedium,
               ),
               const SizedBox(height: 16),
               TextField(
                 controller: descriptionController,
                 decoration: InputDecoration(
                   labelText: 'Job Description',
-                  labelStyle: FlutterFlowTheme.of(context).labelMedium,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  labelStyle: DegloorTheme.labelMedium,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: DegloorTheme.border),
+                  ),
                 ),
+                style: DegloorTheme.bodyMedium,
                 maxLines: 3,
               ),
               const SizedBox(height: 16),
@@ -116,18 +121,26 @@ class _ManageJobsWidgetState extends State<ManageJobsWidget> {
                 controller: salaryController,
                 decoration: InputDecoration(
                   labelText: 'Salary (e.g. ₹500/day)',
-                  labelStyle: FlutterFlowTheme.of(context).labelMedium,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  labelStyle: DegloorTheme.labelMedium,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: DegloorTheme.border),
+                  ),
                 ),
+                style: DegloorTheme.bodyMedium,
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 initialValue: jobType,
                 decoration: InputDecoration(
                   labelText: 'Job Type',
-                  labelStyle: FlutterFlowTheme.of(context).labelMedium,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  labelStyle: DegloorTheme.labelMedium,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: DegloorTheme.border),
+                  ),
                 ),
+                style: DegloorTheme.bodyMedium,
                 items: ['Full-time', 'Part-time', 'Daily Wage']
                     .map((e) => DropdownMenuItem(value: e, child: Text(e)))
                     .toList(),
@@ -157,9 +170,11 @@ class _ManageJobsWidgetState extends State<ManageJobsWidget> {
                           content: Text(
                             AppLogger.userFacingMessage(
                               e,
-                              fallback: 'Unable to post the job. Please try again.',
+                              fallback:
+                                  'Unable to post the job. Please try again.',
                             ),
                           ),
+                          backgroundColor: DegloorTheme.error,
                         ),
                       );
                     }
@@ -173,11 +188,11 @@ class _ManageJobsWidgetState extends State<ManageJobsWidget> {
                 text: 'Post Job',
                 options: FFButtonOptions(
                   height: 50,
-                  color: FlutterFlowTheme.of(context).primary,
-                  textStyle: FlutterFlowTheme.of(context).titleSmall.override(
-                        fontFamily: 'Inter',
-                        color: Colors.white,
-                      ),
+                  color: DegloorTheme.primary,
+                  textStyle: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
@@ -196,9 +211,9 @@ class _ManageJobsWidgetState extends State<ManageJobsWidget> {
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
         height: MediaQuery.of(context).size.height * 0.75,
-        decoration: BoxDecoration(
-          color: FlutterFlowTheme.of(context).secondaryBackground,
-          borderRadius: const BorderRadius.only(
+        decoration: const BoxDecoration(
+          color: DegloorTheme.cardBackground,
+          borderRadius: BorderRadius.only(
             topLeft: Radius.circular(24),
             topRight: Radius.circular(24),
           ),
@@ -214,8 +229,13 @@ class _ManageJobsWidgetState extends State<ManageJobsWidget> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Applicants', style: FlutterFlowTheme.of(context).headlineSmall.override(fontFamily: 'Inter', fontWeight: FontWeight.bold)),
-                        Text(job.title, style: FlutterFlowTheme.of(context).bodyMedium.override(fontFamily: 'Inter', color: FlutterFlowTheme.of(context).secondaryText)),
+                        Text('Applicants', style: DegloorTheme.headingMedium),
+                        Text(
+                          job.title,
+                          style: DegloorTheme.bodyMedium.copyWith(
+                            color: DegloorTheme.textSecondary,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -236,14 +256,11 @@ class _ManageJobsWidgetState extends State<ManageJobsWidget> {
                   }
                   final apps = snapshot.data ?? [];
                   if (apps.isEmpty) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.people_outline_rounded, size: 48, color: FlutterFlowTheme.of(context).secondaryText),
-                          const SizedBox(height: 16),
-                          Text('No applications yet', style: FlutterFlowTheme.of(context).titleMedium),
-                        ],
+                    return const Center(
+                      child: EmptyStateView(
+                        icon: Icons.people_outline_rounded,
+                        title: 'No applications yet',
+                        description: 'Wait for job seekers to find your post.',
                       ),
                     );
                   }
@@ -251,14 +268,16 @@ class _ManageJobsWidgetState extends State<ManageJobsWidget> {
                   return ListView.separated(
                     padding: const EdgeInsets.all(16),
                     itemCount: apps.length,
-                    separatorBuilder: (context, index) => const SizedBox(height: 12),
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(height: 12),
                     itemBuilder: (context, index) {
                       final app = apps[index];
                       return Container(
                         decoration: BoxDecoration(
-                          color: FlutterFlowTheme.of(context).primaryBackground,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: FlutterFlowTheme.of(context).alternate),
+                          color: DegloorTheme.background,
+                          borderRadius:
+                              BorderRadius.circular(DegloorTheme.radiusMD),
+                          border: Border.all(color: DegloorTheme.border),
                         ),
                         child: Padding(
                           padding: const EdgeInsets.all(16.0),
@@ -266,41 +285,75 @@ class _ManageJobsWidgetState extends State<ManageJobsWidget> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
-                                    app.user?.displayName(fallback: 'Unknown Applicant') ??
+                                    app.user?.displayName(
+                                            fallback: 'Unknown Applicant') ??
                                         'Unknown Applicant',
-                                    style: FlutterFlowTheme.of(context).titleMedium.override(fontFamily: 'Inter', fontWeight: FontWeight.bold),
+                                    style: DegloorTheme.titleMedium,
                                   ),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                    decoration: BoxDecoration(
-                                      color: FlutterFlowTheme.of(context).accent2,
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Text(
-                                      app.status.toUpperCase(),
-                                      style: FlutterFlowTheme.of(context).bodySmall.override(
-                                            fontFamily: 'Inter',
-                                            color: FlutterFlowTheme.of(context).success,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                    ),
-                                  ),
+                                  _statusBadge(app.status),
                                 ],
                               ),
                               const SizedBox(height: 8),
                               Row(
                                 children: [
-                                  Icon(Icons.phone_rounded, size: 14, color: FlutterFlowTheme.of(context).secondaryText),
-                                  const SizedBox(width: 4),
-                                  Text(app.user?.phoneNumber ?? 'N/A', style: FlutterFlowTheme.of(context).bodySmall),
+                                  const Icon(Icons.phone_rounded,
+                                      size: 14,
+                                      color: DegloorTheme.textSecondary),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    app.user?.phoneNumber ?? 'N/A',
+                                    style: DegloorTheme.bodySmall,
+                                  ),
                                 ],
                               ),
                               const SizedBox(height: 12),
-                              Text('Experience Summary:', style: FlutterFlowTheme.of(context).bodySmall.override(fontFamily: 'Inter', fontWeight: FontWeight.bold)),
-                              Text(app.experienceSummary ?? 'No summary provided.', style: FlutterFlowTheme.of(context).bodyMedium),
+                              Text(
+                                'Experience Summary:',
+                                style: DegloorTheme.labelSmall.copyWith(
+                                  color: DegloorTheme.textPrimary,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                app.experienceSummary ??
+                                    'No summary provided.',
+                                style: DegloorTheme.bodyMedium,
+                              ),
+                              const SizedBox(height: 16),
+                              if (app.status == 'applied')
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: OutlinedButton(
+                                        onPressed: () => _updateAppStatus(
+                                            app.id, 'shortlisted'),
+                                        style: OutlinedButton.styleFrom(
+                                          foregroundColor: DegloorTheme.primary,
+                                          side: const BorderSide(
+                                              color: DegloorTheme.primary),
+                                        ),
+                                        child: const Text('Shortlist'),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: OutlinedButton(
+                                        onPressed: () => _updateAppStatus(
+                                            app.id, 'rejected'),
+                                        style: OutlinedButton.styleFrom(
+                                          foregroundColor: DegloorTheme.error,
+                                          side: const BorderSide(
+                                              color: DegloorTheme.error),
+                                        ),
+                                        child: const Text('Reject'),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                             ],
                           ),
                         ),
@@ -316,6 +369,44 @@ class _ManageJobsWidgetState extends State<ManageJobsWidget> {
     );
   }
 
+  Widget _statusBadge(String status) {
+    final color = status == 'rejected'
+        ? DegloorTheme.error
+        : (status == 'applied' ? DegloorTheme.secondary : DegloorTheme.success);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        status.toUpperCase(),
+        style: TextStyle(
+          color: color,
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _updateAppStatus(String id, String status) async {
+    try {
+      await JobService.instance.updateApplicantStatus(
+        applicationId: id,
+        status: status,
+      );
+      if (mounted) setState(() {});
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Update failed: $e')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
@@ -324,7 +415,7 @@ class _ManageJobsWidgetState extends State<ManageJobsWidget> {
     if (_model.businessId == null) {
       return Scaffold(
         appBar: degloorAppBar(context, title: 'Manage Jobs'),
-        backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+        backgroundColor: DegloorTheme.background,
         body: const EmptyStateView(
           icon: Icons.storefront_outlined,
           title: 'No shop yet',
@@ -335,11 +426,11 @@ class _ManageJobsWidgetState extends State<ManageJobsWidget> {
 
     return Scaffold(
       key: scaffoldKey,
-      backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+      backgroundColor: DegloorTheme.background,
       appBar: degloorAppBar(context, title: 'Manage Jobs'),
       floatingActionButton: FloatingActionButton(
         onPressed: _showPostJobDialog,
-        backgroundColor: FlutterFlowTheme.of(context).primary,
+        backgroundColor: DegloorTheme.primary,
         child: const Icon(Icons.add, color: Colors.white),
       ),
       body: Align(

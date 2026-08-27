@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:degloor_one/backend/cart_service.dart';
 import 'package:degloor_one/backend/shop_service.dart';
 import 'package:degloor_one/components/cached_remote_image.dart';
+import 'package:degloor_one/components/cart_conflict_dialog.dart';
 import 'package:degloor_one/shared/catalog_product.dart';
 import 'package:degloor_one/shared/shop.dart';
 import 'package:degloor_one/components/degloor_app_bar.dart';
@@ -11,7 +12,6 @@ import 'package:degloor_one/core/degloor_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class ProductDetailWidget extends StatefulWidget {
   const ProductDetailWidget({super.key, required this.productId});
@@ -52,6 +52,53 @@ class _ProductDetailWidgetState extends State<ProductDetailWidget> {
       setState(() {});
       return product;
     });
+  }
+
+  Future<void> _handleAddToCart(CatalogProduct product) async {
+    setState(() => _isAdding = true);
+    try {
+      var result = await CartService.addToCart(
+        businessId: product.businessId,
+        productId: product.id,
+        quantity: _quantity,
+      );
+
+      if (result.needsReplacement) {
+        final shop = await _shopFuture;
+        if (!mounted) return;
+        final confirm =
+            await CartConflictDialog.show(context, shop?.name ?? 'Shop');
+        if (confirm) {
+          result = await CartService.addToCart(
+            businessId: product.businessId,
+            productId: product.id,
+            quantity: _quantity,
+            replaceOtherBusiness: true,
+          );
+        }
+      }
+
+      if (!mounted) return;
+      if (result.added) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(result.message ?? 'Added to cart'),
+            backgroundColor: DegloorTheme.success,
+          ),
+        );
+      } else if (result.message != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(result.message!),
+            backgroundColor: DegloorTheme.error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isAdding = false);
+      }
+    }
   }
 
   @override
@@ -274,21 +321,7 @@ class _ProductDetailWidgetState extends State<ProductDetailWidget> {
                       child: FFButtonWidget(
                         onPressed: _isAdding || !inStock
                             ? null
-                            : () async {
-                                setState(() => _isAdding = true);
-                                try {
-                                  await CartService.addToCart(
-                                    context: context,
-                                    businessId: product.businessId,
-                                    productId: product.id,
-                                    quantity: _quantity,
-                                  );
-                                } finally {
-                                  if (mounted) {
-                                    setState(() => _isAdding = false);
-                                  }
-                                }
-                              },
+                            : () => _handleAddToCart(product),
                         text: _isAdding ? 'Adding...' : 'Add to Cart',
                         options: FFButtonOptions(
                           height: 54,

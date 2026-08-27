@@ -6,6 +6,7 @@ import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/backend/user_service.dart';
 import 'package:degloor_one/data/repositories/discovery_repository.dart';
 import 'package:degloor_one/shared/catalog_product.dart';
+import 'package:degloor_one/shared/city.dart';
 import 'package:degloor_one/shared/marketplace_joins.dart';
 import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/shared/search_query.dart';
@@ -160,6 +161,10 @@ class DiscoveryService {
     }
     final rows = await _repository.categories();
     return rows;
+  }
+
+  Future<List<City>> cities() async {
+    return _repository.cities();
   }
 
   Future<List<UserProfile>> profile(String userId) =>

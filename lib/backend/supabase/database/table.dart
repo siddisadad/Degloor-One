@@ -1,5 +1,3 @@
-import 'package:flutter/foundation.dart';
-
 import 'database.dart';
 import 'package:degloor_one/core/error_handler.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
@@ -22,7 +20,6 @@ abstract class SupabaseTable<T extends SupabaseDataRow> {
   }
 
   /// Chrome PostgREST payloads are `JSArray` / `Map<dynamic, dynamic>`.
-  @visibleForTesting
   List<T> rowsFromWire(dynamic raw) {
     if (raw is! List) return const [];
     return [
@@ -54,9 +51,9 @@ abstract class SupabaseTable<T extends SupabaseDataRow> {
       // then rejects the live `JSArray`.
       final dynamic query = _applyPage(queryFn(_select()), limit, offset);
       final dynamic raw = await query;
-      return List<T>.from(rowsFromWire(raw));
+      final rows = rowsFromWire(raw);
+      return List<T>.from(rows);
     } catch (e) {
-      AppLogger.error('Supabase queryRows error ($tableName)', e);
       rethrow;
     }
   }
@@ -79,20 +76,23 @@ abstract class SupabaseTable<T extends SupabaseDataRow> {
     }
   }
 
-  Future<T> insert(Map<String, dynamic> data) {
+  Future<T> insert(Map<String, dynamic> data) async {
     if (kUseShowcaseData) {
       return Future.value(createRow(ShowcaseCatalog.insert(tableName, data)));
     }
     try {
-      return SupaFlow.client
+      final dynamic raw = await SupaFlow.client
           .from(tableName)
           .insert(data)
           .select()
           .limit(1)
-          .single()
-          .then((row) => rowFromWire(row)!);
+          .maybeSingle();
+      final row = rowFromWire(raw);
+      if (row == null) {
+        throw Exception('Failed to insert row into $tableName');
+      }
+      return row;
     } catch (e) {
-      AppLogger.error('Supabase insert error ($tableName)', e);
       rethrow;
     }
   }

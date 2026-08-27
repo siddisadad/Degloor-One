@@ -1,4 +1,5 @@
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
+import 'package:degloor_one/l10n/app_localizations.dart';
 import 'package:degloor_one/shared/order_lifecycle.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -44,7 +45,7 @@ class OrderStatusChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(theme.designToken.radius.md),
       ),
       child: Text(
-        OrderLifecycle.label(status),
+        OrderLifecycle.label(status, l10n: AppLocalizations.of(context)),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: theme.labelSmall.override(

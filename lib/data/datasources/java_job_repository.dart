@@ -24,6 +24,7 @@ class JavaJobRepository implements JobRepository {
       id: posting.id,
       title: posting.title.isEmpty ? 'Job Title' : posting.title,
       jobType: posting.jobType.isEmpty ? 'Type' : posting.jobType,
+      createdAt: posting.createdAt,
       salaryRange: posting.salaryRange,
       shop: shop ??
           (posting.locationText == null
@@ -149,5 +150,13 @@ class JavaJobRepository implements JobRepository {
         .whereType<Map>()
         .map((row) => JobApplicant.fromJson(Map<String, dynamic>.from(row)))
         .toList();
+  }
+
+  @override
+  Future<void> updateApplicantStatus({
+    required String applicationId,
+    required String status,
+  }) async {
+    // Java API support for status updates is not yet implemented.
   }
 }

@@ -229,12 +229,34 @@ class _NotificationsWidgetState extends State<NotificationsWidget> {
                           if (!notification.isRead) {
                             _markAsRead(notification.id);
                           }
+                          _handleNotificationTap(notification);
                         },
                       );
                     },
                   ),
       ),
     );
+  }
+
+  void _handleNotificationTap(AppNotification notification) {
+    final type = notification.type;
+    final refId = notification.referenceId;
+
+    if (type == 'order_status' && refId != null) {
+      context.pushNamed(
+        'OrderTracking',
+        queryParameters: {'orderId': refId},
+      );
+    } else if (type == 'service_request') {
+      if (notification.title.toLowerCase().contains('new')) {
+        context.pushNamed('ManageServiceRequests');
+      } else {
+        context.pushNamed('UserServiceRequests');
+      }
+    } else if (type == 'new_review') {
+      // Navigate to Business Dashboard (owner)
+      context.pushNamed('BusinessDashboard');
+    }
   }
 }
 
@@ -250,6 +272,8 @@ class _NotificationTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final unread = !notification.isRead;
+    final icon = _getIcon();
+
     return Material(
       color: unread ? DegloorTheme.accent : DegloorTheme.cardBackground,
       borderRadius: BorderRadius.circular(DegloorTheme.radiusMD),
@@ -260,7 +284,9 @@ class _NotificationTile extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(DegloorTheme.radiusMD),
             border: Border.all(
-              color: unread ? DegloorTheme.primary.withValues(alpha: 0.25) : DegloorTheme.border,
+              color: unread
+                  ? DegloorTheme.primary.withValues(alpha: 0.25)
+                  : DegloorTheme.border,
             ),
             boxShadow: DegloorTheme.softShadow,
           ),
@@ -269,14 +295,19 @@ class _NotificationTile extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                width: 8,
-                height: 8,
-                margin: const EdgeInsets.only(top: 6, right: 10),
+                width: 40,
+                height: 40,
                 decoration: BoxDecoration(
-                  color: unread ? DegloorTheme.secondary : Colors.transparent,
+                  color: unread ? Colors.white : DegloorTheme.background,
                   shape: BoxShape.circle,
                 ),
+                child: Icon(
+                  icon,
+                  color: unread ? DegloorTheme.primary : DegloorTheme.textSecondary,
+                  size: 20,
+                ),
               ),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -289,20 +320,22 @@ class _NotificationTile extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: DegloorTheme.titleMedium.copyWith(
-                              fontWeight: unread ? FontWeight.w700 : FontWeight.w600,
+                              fontWeight:
+                                  unread ? FontWeight.w700 : FontWeight.w600,
                             ),
                           ),
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          dateTimeFormat('MMM d, h:mm a', notification.createdAt),
+                          dateTimeFormat(
+                              'MMM d, h:mm a', notification.createdAt),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: DegloorTheme.bodySmall,
                         ),
                       ],
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 4),
                     Text(
                       notification.message,
                       style: DegloorTheme.bodyMedium.copyWith(
@@ -312,10 +345,35 @@ class _NotificationTile extends StatelessWidget {
                   ],
                 ),
               ),
+              if (unread)
+                Container(
+                  width: 8,
+                  height: 8,
+                  margin: const EdgeInsets.only(top: 6, left: 8),
+                  decoration: const BoxDecoration(
+                    color: DegloorTheme.secondary,
+                    shape: BoxShape.circle,
+                  ),
+                ),
             ],
           ),
         ),
       ),
     );
+  }
+
+  IconData _getIcon() {
+    switch (notification.type) {
+      case 'order_status':
+        return Icons.shopping_bag_rounded;
+      case 'service_request':
+        return Icons.handyman_rounded;
+      case 'new_review':
+        return Icons.star_rounded;
+      case 'promotion':
+        return Icons.local_offer_rounded;
+      default:
+        return Icons.notifications_rounded;
+    }
   }
 }

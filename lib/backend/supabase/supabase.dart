@@ -25,11 +25,7 @@ class BlockedSupabaseHttpClient extends http.BaseClient {
 class SupaFlow {
   SupaFlow._();
 
-  static SupaFlow? _instance;
-  static SupaFlow get instance => _instance ??= SupaFlow._();
-
-  final _supabase = Supabase.instance.client;
-  static SupabaseClient get client => instance._supabase;
+  static SupabaseClient get client => Supabase.instance.client;
 
   static Future initialize() {
     final skip = kShouldBlockSupabaseTraffic;

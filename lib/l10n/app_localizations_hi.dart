@@ -182,4 +182,198 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get aboutLocation => 'देगलूर, महाराष्ट्र';
+
+  @override
+  String get privacyPolicy => 'गोपनीयता नीति';
+
+  @override
+  String get privacyIntro =>
+      'हम आपकी गोपनीयता का सम्मान करते हैं और आपके डेटा की सुरक्षा के लिए प्रतिबद्ध हैं।';
+
+  @override
+  String get statusFindingShop => 'दुकान ढूंढ रहे हैं';
+
+  @override
+  String get statusPreparing => 'तैयार हो रहा है';
+
+  @override
+  String get statusReady => 'पिकअप के लिए तैयार';
+
+  @override
+  String get statusShipping => 'रास्ते में है';
+
+  @override
+  String get statusRiderNearby => 'डिलिवरी पार्टनर पास में है';
+
+  @override
+  String get statusDelivered => 'पहुंच गया';
+
+  @override
+  String get statusCancelled => 'रद्द कर दिया गया';
+
+  @override
+  String get statusPending => 'लंबित';
+
+  @override
+  String get statusAccepted => 'स्वीकृत';
+
+  @override
+  String get statusDeclined => 'अस्वीकृत';
+
+  @override
+  String get statusCompleted => 'पूरा हुआ';
+
+  @override
+  String get statusApplied => 'आवेदन किया';
+
+  @override
+  String get statusShortlisted => 'चयनित';
+
+  @override
+  String get statusRejected => 'अस्वीकृत';
+
+  @override
+  String get city => 'शहर';
+
+  @override
+  String get selectCity => 'शहर चुनें';
+
+  @override
+  String get retryCities =>
+      'शहर लोड करने में असमर्थ। पुन: प्रयास करने के लिए टैप करें।';
+
+  @override
+  String get registerBusiness => 'व्यवसाय रजिस्टर करें';
+
+  @override
+  String get phaseOneDegloorOne => 'चरण 1: DEGLOOR ONE';
+
+  @override
+  String get businessIdentity => 'व्यवसाय की पहचान';
+
+  @override
+  String get businessName => 'व्यवसाय का नाम';
+
+  @override
+  String get ownerName => 'मालिक का नाम';
+
+  @override
+  String get businessNameHint => 'जैसे, महाराष्ट्र हार्डवेयर एंड स्टील';
+
+  @override
+  String get ownerNameHint => 'प्रोपराइटर का पूरा कानूनी नाम';
+
+  @override
+  String get primaryCategory => 'मुख्य श्रेणी';
+
+  @override
+  String get selectCategory => 'श्रेणी चुनें';
+
+  @override
+  String get typeSpecialty => 'प्रकार / विशेषता';
+
+  @override
+  String get typeSpecialtyHint => 'यह किस तरह का व्यवसाय है?';
+
+  @override
+  String get typeSpecialtyHelper => 'जैसे किराना, हार्डवेयर, रेस्टोरेंट';
+
+  @override
+  String get businessDescription => 'व्यवसाय का विवरण';
+
+  @override
+  String get businessDescriptionHint =>
+      'अपने उत्पादों या सेवाओं का संक्षेप में वर्णन करें...';
+
+  @override
+  String get contactDetails => 'संपर्क विवरण';
+
+  @override
+  String get mobileNumber => 'मोबाइल नंबर';
+
+  @override
+  String get whatsAppNumber => 'व्हाट्सएप नंबर';
+
+  @override
+  String get whatsAppNumberHint => 'ग्राहकों की पूछताछ के लिए';
+
+  @override
+  String get whatsAppSameAsMobile => 'व्हाट्सएप मोबाइल के समान ही है';
+
+  @override
+  String get locationAndGps => 'स्थान और जीपीएस';
+
+  @override
+  String get streetAddress => 'पता (गली/मोहल्ला)';
+
+  @override
+  String get streetAddressHint => 'दुकान नंबर, बिल्डिंग का नाम, मुख्य सड़क...';
+
+  @override
+  String get area => 'क्षेत्र';
+
+  @override
+  String get areaHint => 'जैसे, शिवाजी चौक';
+
+  @override
+  String get setGpsCoordinates => 'जीपीएस निर्देशांक सेट करें';
+
+  @override
+  String get locateMe => 'मेरी स्थिति जानें';
+
+  @override
+  String get discoveryReach => 'खोज पहुंच';
+
+  @override
+  String get serviceRadius => 'सेवा का दायरा';
+
+  @override
+  String get discoveryRadiusKm => 'खोज दायरा (KM)';
+
+  @override
+  String get discoveryDescription =>
+      'ग्राहक आपके व्यवसाय को कितनी दूर से खोज सकें?';
+
+  @override
+  String get photosAndVerification => 'फोटो और सत्यापन';
+
+  @override
+  String get photoUploadInstruction =>
+      'अपनी दुकान के सामने और अंदर की स्पष्ट फोटो अपलोड करें।';
+
+  @override
+  String get storeFront => 'दुकान के सामने';
+
+  @override
+  String get interior => 'अंदर का भाग';
+
+  @override
+  String get registrationDoc => 'पंजीकरण दस्तावेज';
+
+  @override
+  String get submitForVerification => 'सत्यापन के लिए भेजें';
+
+  @override
+  String get businessTermsDisclaimer =>
+      'सबमिट करके, आप DEGLOOR ONE की व्यावसायिक शर्तों से सहमत होते हैं। आपकी लिस्टिंग की स्थानीय एडमिन टीम द्वारा 24 घंटों के भीतर समीक्षा की जाएगी।';
+
+  @override
+  String get pleaseWaitCategories =>
+      'कृपया श्रेणियों के लोड होने की प्रतीक्षा करें...';
+
+  @override
+  String get unableLoadCategories =>
+      'श्रेणियाँ लोड करने में असमर्थ। कृपया अपना कनेक्शन जांचें।';
+
+  @override
+  String get unableLoadCategoriesRetry =>
+      'श्रेणियाँ लोड करने में असमर्थ। पुनः प्रयास करने के लिए टैप करें।';
+
+  @override
+  String get businessSubmitted =>
+      'व्यवसाय सत्यापन के लिए सबमिट कर दिया गया है!';
+
+  @override
+  String get unableSubmitShop =>
+      'दुकान सबमिट करने में असमर्थ। कृपया पुनः प्रयास करें।';
 }

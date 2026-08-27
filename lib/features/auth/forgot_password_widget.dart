@@ -232,8 +232,7 @@ class _ForgotPasswordWidgetState extends State<ForgotPasswordWidget> {
         context: context,
         redirectTo: PasswordRecovery.redirectTo(),
       );
-      if (!mounted) return;
-      if (sent) {
+      if (mounted && sent) {
         setState(() => _emailSent = true);
       }
     } finally {

@@ -8,7 +8,6 @@ import 'package:degloor_one/components/degloor_app_bar.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/components/order_status_chip.dart';
 import 'package:degloor_one/backend/whatsapp_service.dart';
-import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
 import 'package:degloor_one/shared/delivery_assignment.dart';
@@ -63,7 +62,7 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
       },
       child: Scaffold(
         key: scaffoldKey,
-        backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+        backgroundColor: DegloorTheme.background,
         appBar: degloorAppBar(context, title: 'Track order'),
         body: StreamBuilder<List<PlacedOrder>>(
           stream: OrderService.instance.watchUserOrder(
@@ -94,152 +93,147 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 520),
                 child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(
-                          child: Text(
-                            'Order #${order.id.substring(0, 8)}',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: FlutterFlowTheme.of(context)
-                                .titleMedium
-                                .override(
-                                  font: GoogleFonts.inter(),
-                                  fontWeight: FontWeight.w800,
-                                ),
-                          ),
-                        ),
-                        OrderStatusChip(status: order.status),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    if (isCancelled)
-                      Container(
-                        width: double.infinity,
-                        margin: const EdgeInsets.only(bottom: 24),
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: FlutterFlowTheme.of(context).error.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(
-                            FlutterFlowTheme.of(context).designToken.radius.lg,
-                          ),
-                          border: Border.all(color: FlutterFlowTheme.of(context).error),
-                        ),
-                        child: Row(
+                        Row(
                           children: [
-                            Icon(Icons.cancel_rounded, color: FlutterFlowTheme.of(context).error),
-                            const SizedBox(width: 12),
                             Expanded(
                               child: Text(
-                                'This order was cancelled.',
-                                style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                      font: GoogleFonts.inter(),
-                                      color: FlutterFlowTheme.of(context).error,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                'Order #${order.id.substring(0, 8)}',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: DegloorTheme.titleMedium.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                ),
                               ),
                             ),
+                            OrderStatusChip(status: order.status),
                           ],
                         ),
-                      ),
-                    if (actions.canCancel)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 16),
-                        child: FFButtonWidget(
-                          onPressed: () async {
-                            try {
-                              await OrderService.instance.cancelOrder(
-                                orderId: order.id,
-                                actorUserId: currentUserUid,
-                                reason: 'Cancelled by customer',
-                              );
-                            } catch (e) {
-                              if (!context.mounted) return;
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    AppLogger.userFacingMessage(
-                                      e,
-                                      fallback:
-                                          'Unable to cancel the order. Please try again.',
+                        const SizedBox(height: 16),
+                        if (isCancelled)
+                          Container(
+                            width: double.infinity,
+                            margin: const EdgeInsets.only(bottom: 24),
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: DegloorTheme.error.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(
+                                DegloorTheme.radiusLG,
+                              ),
+                              border: Border.all(color: DegloorTheme.error),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.cancel_rounded, color: DegloorTheme.error),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    'This order was cancelled.',
+                                    style: DegloorTheme.bodyMedium.copyWith(
+                                      color: DegloorTheme.error,
+                                      fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                  backgroundColor:
-                                      FlutterFlowTheme.of(context).error,
                                 ),
-                              );
-                            }
+                              ],
+                            ),
+                          ),
+                        if (actions.canCancel)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 16),
+                            child: FFButtonWidget(
+                              onPressed: () async {
+                                try {
+                                  await OrderService.instance.cancelOrder(
+                                    orderId: order.id,
+                                    actorUserId: currentUserUid,
+                                    reason: 'Cancelled by customer',
+                                  );
+                                  if (!context.mounted) return;
+                                } catch (e) {
+                                  if (!context.mounted) return;
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        AppLogger.userFacingMessage(
+                                          e,
+                                          fallback:
+                                              'Unable to cancel the order. Please try again.',
+                                        ),
+                                      ),
+                                      backgroundColor: DegloorTheme.error,
+                                    ),
+                                  );
+                                }
+                              },
+                              text: 'Cancel order',
+                              options: FFButtonOptions(
+                                width: double.infinity,
+                                height: 48,
+                                color: DegloorTheme.error,
+                                textStyle: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                        // Status Stepper
+                        if (actions.showStepper) _buildStatusStepper(statusIndex),
+
+                        const SizedBox(height: 32),
+
+                        // OTP is fetched via RPC so partners cannot read it from the orders row.
+                        if (actions.showDeliveryOtp)
+                          FutureBuilder<String?>(
+                            future: OrderService.instance.deliveryOtp(order.id),
+                            builder: (context, otpSnapshot) =>
+                                _buildOtpCard(otpSnapshot.data),
+                          ),
+
+                        const SizedBox(height: 24),
+
+                        // Delivery Partner Info
+                        _buildDeliveryPartnerInfo(order.id),
+
+                        const SizedBox(height: 24),
+
+                        // Business Info
+                        _buildBusinessInfo(order.businessId, order),
+
+                        const SizedBox(height: 24),
+
+                        // Order Summary
+                        _buildOrderSummary(order),
+
+                        const SizedBox(height: 32),
+
+                        FFButtonWidget(
+                          onPressed: () {
+                            context.pushNamed('MyProfile');
                           },
-                          text: 'Cancel order',
+                          text: 'Report an Issue',
                           options: FFButtonOptions(
                             width: double.infinity,
-                            height: 48,
-                            color: FlutterFlowTheme.of(context).error,
+                            height: 50,
+                            color: Colors.transparent,
                             textStyle: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700,
+                              color: DegloorTheme.error,
+                              fontWeight: FontWeight.bold,
                             ),
+                            borderSide: const BorderSide(color: DegloorTheme.error),
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                      ),
-                    // Status Stepper
-                    if (actions.showStepper) _buildStatusStepper(statusIndex),
-
-                    const SizedBox(height: 32),
-
-                    // OTP is fetched via RPC so partners cannot read it from the orders row.
-                    if (actions.showDeliveryOtp)
-                      FutureBuilder<String?>(
-                        future: OrderService.instance.deliveryOtp(order.id),
-                        builder: (context, otpSnapshot) =>
-                            _buildOtpCard(otpSnapshot.data),
-                      ),
-
-                    const SizedBox(height: 24),
-
-                    // Delivery Partner Info
-                    _buildDeliveryPartnerInfo(order.id),
-
-                    const SizedBox(height: 24),
-
-                    // Business Info
-                    _buildBusinessInfo(order.businessId, order),
-
-                    const SizedBox(height: 24),
-
-                    // Order Summary
-                    _buildOrderSummary(order),
-
-                    const SizedBox(height: 32),
-
-                    // Help / Report
-                    FFButtonWidget(
-                      onPressed: () {
-                        context.pushNamed('MyProfile');
-                      },
-                      text: 'Report an Issue',
-                      options: FFButtonOptions(
-                        width: double.infinity,
-                        height: 50,
-                        color: Colors.transparent,
-                        textStyle: TextStyle(
-                          color: FlutterFlowTheme.of(context).error,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        borderSide: BorderSide(color: FlutterFlowTheme.of(context).error),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
               ),
             );
           },
@@ -256,7 +250,7 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
       {'title': 'On the Way', 'desc': 'Rider is delivering your order'},
       {'title': 'Delivered', 'desc': 'Enjoy your purchase!'},
     ];
-    
+
     return Container(
       padding: const EdgeInsets.all(DegloorTheme.spacingMD),
       decoration: BoxDecoration(
@@ -399,8 +393,7 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                     side: BorderSide(
-                        color: FlutterFlowTheme.of(context)
-                            .primary
+                        color: DegloorTheme.primary
                             .withValues(alpha: 0.2)),
                   ),
                   child: Padding(
@@ -409,10 +402,9 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
                       children: [
                         Row(
                           children: [
-                            CircleAvatar(
-                              backgroundColor:
-                                  FlutterFlowTheme.of(context).primary,
-                              child: const Icon(Icons.delivery_dining_rounded,
+                            const CircleAvatar(
+                              backgroundColor: DegloorTheme.primary,
+                              child: Icon(Icons.delivery_dining_rounded,
                                   color: Colors.white),
                             ),
                             const SizedBox(width: 16),
@@ -422,28 +414,25 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
                                 children: [
                                   Text(
                                     user?.fullName ?? 'Delivery Partner',
-                                    style: FlutterFlowTheme.of(context)
-                                        .titleSmall
-                                        .override(
-                                          font: GoogleFonts.inter(),
+                                    style: DegloorTheme.titleSmall.copyWith(
                                           fontWeight: FontWeight.bold,
                                         ),
                                   ),
                                   Text(
                                     'Delivery Partner Assigned',
-                                    style:
-                                        FlutterFlowTheme.of(context).labelSmall,
+                                    style: DegloorTheme.labelSmall,
                                   ),
                                 ],
                               ),
                             ),
                             if (user?.phoneNumber != null && user!.phoneNumber!.trim().isNotEmpty)
                               IconButton(
-                                icon: Icon(
+                                icon: const Icon(
                                   Icons.chat_bubble_rounded,
-                                  color: FlutterFlowTheme.of(context).success,
+                                  color: DegloorTheme.success,
                                 ),
                                 onPressed: () async {
+                                  if (!context.mounted) return;
                                   final opened =
                                       await WhatsAppService.launchWhatsApp(
                                     phoneNumber: user.phoneNumber!.trim(),
@@ -465,24 +454,20 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
                         ),
                         if (partner.currentLatitude != null &&
                             partner.currentLongitude != null)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 12.0),
+                          const Padding(
+                            padding: EdgeInsets.only(top: 12.0),
                             child: Row(
                               children: [
                                 Icon(Icons.location_on_rounded,
                                     size: 16,
-                                    color:
-                                        FlutterFlowTheme.of(context).primary),
-                                const SizedBox(width: 8),
+                                    color: DegloorTheme.primary),
+                                SizedBox(width: 8),
                                 Text(
                                   'Partner is active and tracking.',
-                                  style: FlutterFlowTheme.of(context)
-                                      .bodySmall
-                                      .override(
-                                        font: GoogleFonts.inter(),
-                                        color: FlutterFlowTheme.of(context)
-                                            .primary,
+                                  style: TextStyle(
+                                        color: DegloorTheme.primary,
                                         fontWeight: FontWeight.bold,
+                                        fontSize: 12,
                                       ),
                                 ),
                               ],
@@ -511,7 +496,7 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
-            side: BorderSide(color: FlutterFlowTheme.of(context).alternate),
+            side: const BorderSide(color: DegloorTheme.border),
           ),
           child: Padding(
             padding: const EdgeInsets.all(16.0),
@@ -524,13 +509,11 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
                     height: 60,
                     child: business.imageUrl == null ||
                             business.imageUrl!.isEmpty
-                        ? ColoredBox(
-                            color: FlutterFlowTheme.of(context)
-                                .primary
-                                .withValues(alpha: 0.08),
+                        ? const ColoredBox(
+                            color: DegloorTheme.accent,
                             child: Icon(
                               Icons.storefront_rounded,
-                              color: FlutterFlowTheme.of(context).primary,
+                              color: DegloorTheme.primary,
                             ),
                           )
                         : CachedRemoteImage(
@@ -548,8 +531,7 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
                     children: [
                       Text(
                         business.name,
-                        style: FlutterFlowTheme.of(context).titleSmall.override(
-                          font: GoogleFonts.inter(),
+                        style: DegloorTheme.titleSmall.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -557,7 +539,7 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
                         business.addressText ?? 'Degloor',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: FlutterFlowTheme.of(context).labelSmall,
+                        style: DegloorTheme.labelSmall,
                       ),
                     ],
                   ),
@@ -565,9 +547,9 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
                 Row(
                   children: [
                     IconButton(
-                      icon: Icon(
+                      icon: const Icon(
                         Icons.call_rounded,
-                        color: FlutterFlowTheme.of(context).info,
+                        color: DegloorTheme.primary,
                       ),
                       onPressed: () {
                         if (business.phoneNumber != null && business.phoneNumber!.isNotEmpty) {
@@ -580,9 +562,9 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
                       },
                     ),
                     IconButton(
-                      icon: Icon(
+                      icon: const Icon(
                         Icons.chat_bubble_rounded,
-                        color: FlutterFlowTheme.of(context).success,
+                        color: DegloorTheme.success,
                       ),
                       onPressed: () async {
                         if (business.whatsappNumber != null && business.whatsappNumber!.isNotEmpty) {
@@ -622,8 +604,7 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
       children: [
         Text(
           'Order Summary',
-          style: FlutterFlowTheme.of(context).titleMedium.override(
-                font: GoogleFonts.inter(),
+          style: DegloorTheme.titleMedium.copyWith(
                 fontWeight: FontWeight.bold,
               ),
         ),
@@ -648,14 +629,12 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
                           width: 40,
                           height: 40,
                           child: imageUrl == null || imageUrl.isEmpty
-                              ? ColoredBox(
-                                  color: FlutterFlowTheme.of(context)
-                                      .primary
-                                      .withValues(alpha: 0.08),
+                              ? const ColoredBox(
+                                  color: DegloorTheme.accent,
                                   child: Icon(
                                     Icons.shopping_bag_outlined,
                                     size: 20,
-                                    color: FlutterFlowTheme.of(context).primary,
+                                    color: DegloorTheme.primary,
                                   ),
                                 )
                               : CachedRemoteImage(
@@ -671,11 +650,13 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
                           '${item.quantity}× ${item.product?.name ?? 'Item'}',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
+                          style: DegloorTheme.bodyMedium,
                         ),
                       ),
                       const SizedBox(width: 12),
                       Text(
-                        '₹${item.lineTotal.toStringAsFixed(2)}',
+                        '₹${item.lineTotal.toStringAsFixed(0)}',
+                        style: DegloorTheme.bodyMedium.copyWith(fontWeight: FontWeight.w600),
                       ),
                     ],
                   ),
@@ -688,8 +669,8 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Delivery Fee', style: FlutterFlowTheme.of(context).labelMedium),
-            Text('₹${order.deliveryFee?.toStringAsFixed(2) ?? '0.00'}'),
+            Text('Delivery Fee', style: DegloorTheme.labelSmall),
+            Text('₹${order.deliveryFee?.toStringAsFixed(0) ?? '0'}', style: DegloorTheme.bodyMedium),
           ],
         ),
         const SizedBox(height: 8),
@@ -698,16 +679,14 @@ class _OrderTrackingWidgetState extends State<OrderTrackingWidget> {
           children: [
             Text(
               'Total',
-              style: FlutterFlowTheme.of(context).titleSmall.override(
-                    font: GoogleFonts.inter(),
+              style: DegloorTheme.titleSmall.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
             ),
             Text(
-              '₹${order.totalAmount.toStringAsFixed(2)}',
-              style: FlutterFlowTheme.of(context).titleSmall.override(
-                    font: GoogleFonts.inter(),
-                    color: FlutterFlowTheme.of(context).primary,
+              '₹${order.totalAmount.toStringAsFixed(0)}',
+              style: DegloorTheme.titleSmall.copyWith(
+                    color: DegloorTheme.primary,
                     fontWeight: FontWeight.bold,
                   ),
             ),

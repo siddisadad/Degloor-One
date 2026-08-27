@@ -6,6 +6,7 @@ import 'package:degloor_one/backend/cart_service.dart';
 import 'package:degloor_one/backend/shop_service.dart';
 import 'package:degloor_one/components/degloor_app_bar.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
+import 'package:degloor_one/components/cart_conflict_dialog.dart';
 import 'package:degloor_one/shared/catalog_product.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_icon_button.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
@@ -132,7 +133,9 @@ class _BusinessCatalogueWidgetState extends State<BusinessCatalogueWidget> with 
                 icon: Icon(Icons.shopping_cart_rounded, color: FlutterFlowTheme.of(context).primaryText),
                 onPressed: () async {
                   await context.pushNamed('ShoppingCart');
-                  _fetchCartCount();
+                  if (mounted) {
+                    _fetchCartCount();
+                  }
                 },
               ),
               if (_cartItemCount > 0)
@@ -305,14 +308,7 @@ class _BusinessCatalogueWidgetState extends State<BusinessCatalogueWidget> with 
                           ),
                           if (inStock)
                             ElevatedButton(
-                              onPressed: () async {
-                                await CartService.addToCart(
-                                  context: context,
-                                  businessId: widget.businessId,
-                                  productId: product.id,
-                                );
-                                _fetchCartCount();
-                              },
+                              onPressed: () => _handleAddToCart(product),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: DegloorTheme.primary,
                                 foregroundColor: Colors.white,
@@ -336,5 +332,32 @@ class _BusinessCatalogueWidgetState extends State<BusinessCatalogueWidget> with 
         );
       },
     );
+  }
+
+  Future<void> _handleAddToCart(CatalogProduct product) async {
+    try {
+      var result = await CartService.addToCart(
+        businessId: product.businessId,
+        productId: product.id,
+      );
+
+      if (result.needsReplacement) {
+        if (!mounted || !context.mounted) return;
+        final confirm = await CartConflictDialog.show(context, 'this shop');
+        if (confirm) {
+          result = await CartService.addToCart(
+            businessId: product.businessId,
+            productId: product.id,
+            replaceOtherBusiness: true,
+          );
+        }
+      }
+
+      if (result.added && mounted) {
+        _fetchCartCount();
+      }
+    } catch (e) {
+      AppLogger.error('Add to cart failed', e);
+    }
   }
 }

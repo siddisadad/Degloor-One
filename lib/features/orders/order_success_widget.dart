@@ -1,9 +1,8 @@
+import 'package:degloor_one/core/degloor_theme.dart';
 import 'package:degloor_one/components/brand_mark.dart';
 import 'package:degloor_one/components/degloor_app_bar.dart';
-import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
-import 'package:degloor_one/shared/otp_copy.dart';
 import 'package:flutter/material.dart';
 import 'order_success_model.dart';
 export 'order_success_model.dart';
@@ -40,14 +39,13 @@ class _OrderSuccessWidgetState extends State<OrderSuccessWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = FlutterFlowTheme.of(context);
     return Scaffold(
-      backgroundColor: theme.primaryBackground,
+      backgroundColor: DegloorTheme.background,
       appBar: AppBar(
-        backgroundColor: theme.primaryBackground,
+        backgroundColor: DegloorTheme.background,
         elevation: 0,
         automaticallyImplyLeading: false,
-        leading: degloorBackButton(context, color: theme.primaryText),
+        leading: degloorBackButton(context, color: DegloorTheme.textPrimary),
       ),
       body: SafeArea(
         child: Align(
@@ -65,20 +63,19 @@ class _OrderSuccessWidgetState extends State<OrderSuccessWidget> {
                     width: 112,
                     height: 112,
                     decoration: BoxDecoration(
-                      color: theme.success.withValues(alpha: 0.1),
+                      color: DegloorTheme.success.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(
+                    child: const Icon(
                       Icons.check_circle_rounded,
-                      color: theme.success,
+                      color: DegloorTheme.success,
                       size: 72,
                     ),
                   ),
                   const SizedBox(height: 24),
                   Text(
                     'Order placed',
-                    style: theme.headlineMedium.override(
-                      fontFamily: 'Inter',
+                    style: DegloorTheme.headingLarge.copyWith(
                       fontWeight: FontWeight.w800,
                     ),
                   ),
@@ -86,21 +83,13 @@ class _OrderSuccessWidgetState extends State<OrderSuccessWidget> {
                   Text(
                     'The shop will confirm your cash-on-delivery order. After it ships, Track Order shows a 4-digit delivery OTP — not the 6-digit SMS login code.',
                     textAlign: TextAlign.center,
-                    style: theme.bodyMedium.override(
-                      fontFamily: 'Inter',
-                      color: theme.secondaryText,
-                      lineHeight: 1.45,
+                    style: DegloorTheme.bodyMedium.copyWith(
+                      color: DegloorTheme.textSecondary,
+                      height: 1.45,
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  Text(
-                    OtpCopy.checkoutHint,
-                    textAlign: TextAlign.center,
-                    style: theme.labelSmall.override(
-                      fontFamily: 'Inter',
-                      color: theme.secondaryText,
-                    ),
-                  ),
+                  const SizedBox(height: 20),
+                  _buildDeliveryEstimate(),
                   const SizedBox(height: 28),
                   if (widget.orderId != null)
                     Container(
@@ -109,16 +98,15 @@ class _OrderSuccessWidgetState extends State<OrderSuccessWidget> {
                         vertical: 10,
                       ),
                       decoration: BoxDecoration(
-                        color: theme.secondaryBackground,
+                        color: DegloorTheme.cardBackground,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: theme.alternate),
+                        border: Border.all(color: DegloorTheme.border),
                       ),
                       child: Text(
                         'Order ID: #${widget.orderId!.substring(0, 8).toUpperCase()}',
-                        style: theme.titleSmall.override(
-                          fontFamily: 'Inter',
+                        style: DegloorTheme.titleSmall.copyWith(
                           fontWeight: FontWeight.w700,
-                          color: theme.primaryText,
+                          color: DegloorTheme.textPrimary,
                         ),
                       ),
                     ),
@@ -143,7 +131,7 @@ class _OrderSuccessWidgetState extends State<OrderSuccessWidget> {
                     options: FFButtonOptions(
                       width: double.infinity,
                       height: 50,
-                      color: theme.primary,
+                      color: DegloorTheme.primary,
                       textStyle: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -161,11 +149,11 @@ class _OrderSuccessWidgetState extends State<OrderSuccessWidget> {
                       width: double.infinity,
                       height: 50,
                       color: Colors.transparent,
-                      textStyle: TextStyle(
-                        color: theme.primary,
+                      textStyle: const TextStyle(
+                        color: DegloorTheme.primary,
                         fontWeight: FontWeight.bold,
                       ),
-                      borderSide: BorderSide(color: theme.primary),
+                      borderSide: const BorderSide(color: DegloorTheme.primary),
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
@@ -174,6 +162,39 @@ class _OrderSuccessWidgetState extends State<OrderSuccessWidget> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildDeliveryEstimate() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: DegloorTheme.accent,
+        borderRadius: BorderRadius.circular(DegloorTheme.radiusMD),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.timer_outlined, color: DegloorTheme.primary, size: 20),
+          const SizedBox(width: 12),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'ESTIMATED DELIVERY',
+                style: DegloorTheme.labelSmall,
+              ),
+              Text(
+                '30 - 45 Minutes',
+                style: DegloorTheme.titleMedium.copyWith(
+                  color: DegloorTheme.primary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

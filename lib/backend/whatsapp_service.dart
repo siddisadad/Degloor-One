@@ -2,6 +2,8 @@ import 'package:degloor_one/auth/phone_number.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class WhatsAppService {
+  static const adminSupportNumber = '+919876543210';
+
   static const unableToOpenMessage =
       'Unable to open WhatsApp. Please try again.';
 

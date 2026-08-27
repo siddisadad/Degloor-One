@@ -3,6 +3,7 @@ import 'package:degloor_one/data/datasources/java_shop_insights.dart';
 import 'package:degloor_one/data/datasources/java_shop_repository.dart';
 import 'package:degloor_one/data/repositories/discovery_repository.dart';
 import 'package:degloor_one/shared/catalog_product.dart';
+import 'package:degloor_one/shared/city.dart';
 import 'package:degloor_one/shared/shop.dart';
 import 'package:degloor_one/shared/shop_category.dart';
 import 'package:degloor_one/shared/shop_event.dart';
@@ -73,10 +74,8 @@ class JavaDiscoveryRepository implements DiscoveryRepository {
       if (query.searchTerm != null && query.searchTerm!.isNotEmpty)
         'q': query.searchTerm!,
     });
-    final items = data is Map ? data['items'] : data;
-    final rows = items is List ? items : const [];
+    final rows = JavaShopRepository.pageItems(data);
     return rows
-        .whereType<Map>()
         .map((row) => CatalogProduct.fromJson(Map<String, dynamic>.from(row)))
         .toList();
   }
@@ -84,10 +83,18 @@ class JavaDiscoveryRepository implements DiscoveryRepository {
   @override
   Future<List<ShopCategory>> categories() async {
     final data = await _client.get('/api/v1/categories');
-    final rows = data is List ? data : const [];
+    final rows = JavaShopRepository.pageItems(data);
     return rows
-        .whereType<Map>()
         .map((row) => ShopCategory.fromJson(Map<String, dynamic>.from(row)))
+        .toList();
+  }
+
+  @override
+  Future<List<City>> cities() async {
+    final data = await _client.get('/api/v1/cities');
+    final rows = JavaShopRepository.pageItems(data);
+    return rows
+        .map((row) => City.fromJson(Map<String, dynamic>.from(row)))
         .toList();
   }
 
@@ -116,9 +123,8 @@ class JavaDiscoveryRepository implements DiscoveryRepository {
   Future<List<Shop>> ownedBy(String userId) async {
     if (userId.isEmpty) return const [];
     final data = await _client.get('/api/v1/businesses/mine');
-    final rows = data is List ? data : const [];
+    final rows = JavaShopRepository.pageItems(data);
     return rows
-        .whereType<Map>()
         .map((row) =>
             JavaShopRepository.fromJson(Map<String, dynamic>.from(row)))
         .where((shop) => shop.ownerId == userId)
@@ -129,7 +135,7 @@ class JavaDiscoveryRepository implements DiscoveryRepository {
   Future<int> reviewCount(String businessId) async {
     if (businessId.isEmpty) return 0;
     final data = await _client.get('/api/v1/businesses/$businessId/reviews');
-    final rows = data is List ? data : const [];
+    final rows = JavaShopRepository.pageItems(data);
     return rows.length;
   }
 

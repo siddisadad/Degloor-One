@@ -15,6 +15,7 @@ import 'package:degloor_one/flutter_flow/form_field_controller.dart';
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/features/home/customer_home_widget.dart';
 import 'package:degloor_one/index.dart';
+import 'package:degloor_one/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:degloor_one/core/error_handler.dart';
@@ -46,6 +47,7 @@ class _BusinessRegistrationWidgetState
     super.initState();
     _model = createModel(context, () => BusinessRegistrationModel());
     _loadCategories();
+    _loadCities();
     _model.sliderModel.sliderValue =
         sliderPercentFromRadius(kDefaultDiscoveryRadiusKm);
   }
@@ -65,12 +67,25 @@ class _BusinessRegistrationWidgetState
           content: Text(
             AppLogger.userFacingMessage(
               e,
-              fallback: 'Unable to load categories. Please try again.',
+              fallback: AppLocalizations.of(context)?.unableLoadCategoriesRetry ??
+                  'Unable to load categories. Please try again.',
             ),
           ),
           backgroundColor: FlutterFlowTheme.of(context).error,
         ),
       );
+    }
+  }
+
+  Future<void> _loadCities() async {
+    try {
+      await _model.loadCities(
+        onBusyChanged: () {
+          if (mounted) setState(() {});
+        },
+      );
+    } catch (e) {
+      AppLogger.error('Error loading cities', e);
     }
   }
 
@@ -188,25 +203,57 @@ class _BusinessRegistrationWidgetState
 
   Future<void> _submitRegistration() async {
     if (_isSubmitting) return;
-    setState(() => _isSubmitting = true);
+
+    final l10n = AppLocalizations.of(context);
+
+    if (_model.categoriesLoading) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text(l10n?.pleaseWaitCategories ??
+                'Please wait for categories to load...')),
+      );
+      return;
+    }
+
+    if (_model.categories.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text(l10n?.unableLoadCategories ??
+                'Unable to load categories. Please check your connection.')),
+      );
+      return;
+    }
+
+    setState(() {
+      _isSubmitting = true;
+      _model.nameError = false;
+      _model.ownerError = false;
+      _model.phoneError = false;
+      _model.addressError = false;
+      _model.areaError = false;
+      _model.categoryError = false;
+    });
     try {
       final route = await _model.submit(userId: currentUserUid);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Business submitted for verification!'),
+          content: Text(l10n?.businessSubmitted ??
+              'Business submitted for verification!'),
           backgroundColor: FlutterFlowTheme.of(context).success,
         ),
       );
       context.goNamed(route);
     } catch (e) {
       if (!mounted) return;
+      setState(() {}); // Refresh to show error borders
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
             AppLogger.userFacingMessage(
               e,
-              fallback: 'Unable to submit the shop. Please try again.',
+              fallback: l10n?.unableSubmitShop ??
+                  'Unable to submit the shop. Please try again.',
             ),
           ),
           backgroundColor: FlutterFlowTheme.of(context).error,
@@ -230,7 +277,7 @@ class _BusinessRegistrationWidgetState
   Widget build(BuildContext context) {
     return Scaffold(
       key: scaffoldKey,
-      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: true,
       backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
       body: SingleChildScrollView(
           primary: false,
@@ -264,7 +311,8 @@ class _BusinessRegistrationWidgetState
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Register Business',
+                              AppLocalizations.of(context)?.registerBusiness ??
+                                  'Register Business',
                               style: FlutterFlowTheme.of(context)
                                   .titleLarge
                                   .override(
@@ -283,7 +331,9 @@ class _BusinessRegistrationWidgetState
                                   ),
                             ),
                             Text(
-                              'Phase 1: DEGLOOR ONE',
+                              AppLocalizations.of(context)
+                                      ?.phaseOneDegloorOne ??
+                                  'Phase 1: DEGLOOR ONE',
                               style: FlutterFlowTheme.of(context)
                                   .bodySmall
                                   .override(
@@ -314,9 +364,11 @@ class _BusinessRegistrationWidgetState
                     wrapWithModel(
                       model: _model.sectionHeaderModel1,
                       updateCallback: () => safeSetState(() {}),
-                      child: const SectionHeaderWidget(
+                      child: SectionHeaderWidget(
                         step: '1',
-                        title: 'Business Identity',
+                        title:
+                            AppLocalizations.of(context)?.businessIdentity ??
+                                'Business Identity',
                       ),
                     ),
                     Column(
@@ -327,7 +379,8 @@ class _BusinessRegistrationWidgetState
                           model: _model.textFieldModel1,
                           updateCallback: () => safeSetState(() {}),
                           child: TextFieldWidget(
-                            label: 'Business Name',
+                            label: AppLocalizations.of(context)?.businessName ??
+                                'Business Name',
                             labelPresent: true,
                             helper: '',
                             helperPresent: false,
@@ -338,18 +391,21 @@ class _BusinessRegistrationWidgetState
                             ),
                             leadingIconPresent: true,
                             trailingIconPresent: false,
-                            hint: 'e.g., Maharashtra Hardware & Steel',
+                            hint: AppLocalizations.of(context)
+                                    ?.businessNameHint ??
+                                'e.g., Maharashtra Hardware & Steel',
                             value: '',
                             onSubmit: (_) {},
                             variant: 'outlined',
-                            error: false,
+                            error: _model.nameError,
                           ),
                         ),
                         wrapWithModel(
                           model: _model.textFieldModel2,
                           updateCallback: () => safeSetState(() {}),
                           child: TextFieldWidget(
-                            label: 'Owner Name',
+                            label: AppLocalizations.of(context)?.ownerName ??
+                                'Owner Name',
                             labelPresent: true,
                             helper: '',
                             helperPresent: false,
@@ -360,11 +416,12 @@ class _BusinessRegistrationWidgetState
                             ),
                             leadingIconPresent: true,
                             trailingIconPresent: false,
-                            hint: 'Full legal name of proprietor',
+                            hint: AppLocalizations.of(context)?.ownerNameHint ??
+                                'Full legal name of proprietor',
                             value: '',
                             onSubmit: (_) {},
                             variant: 'outlined',
-                            error: false,
+                            error: _model.ownerError,
                           ),
                         ),
                         if (_model.categoriesLoading)
@@ -376,7 +433,9 @@ class _BusinessRegistrationWidgetState
                           TextButton(
                             onPressed: _isSubmitting ? null : _loadCategories,
                             child: Text(
-                              'Unable to load categories. Tap to retry.',
+                              AppLocalizations.of(context)
+                                      ?.unableLoadCategoriesRetry ??
+                                  'Unable to load categories. Tap to retry.',
                               style: FlutterFlowTheme.of(context)
                                   .bodySmall
                                   .override(
@@ -410,7 +469,9 @@ class _BusinessRegistrationWidgetState
                                   letterSpacing: 0.0,
                                   lineHeight: 1.5,
                                 ),
-                            hintText: 'Select Category',
+                            hintText:
+                                AppLocalizations.of(context)?.selectCategory ??
+                                    'Select Category',
                             icon: Icon(
                               Icons.arrow_drop_down_rounded,
                               color: FlutterFlowTheme.of(context).secondaryText,
@@ -419,13 +480,17 @@ class _BusinessRegistrationWidgetState
                             fillColor: FlutterFlowTheme.of(context)
                                 .secondaryBackground,
                             elevation: 2.0,
-                            borderColor: FlutterFlowTheme.of(context).alternate,
+                            borderColor: _model.categoryError
+                                ? FlutterFlowTheme.of(context).error
+                                : FlutterFlowTheme.of(context).alternate,
                             borderWidth: 1.0,
                             borderRadius: 8.0,
                             margin: const EdgeInsetsDirectional.fromSTEB(
                                 16.0, 0.0, 16.0, 0.0),
                             hidesUnderline: true,
-                            labelText: 'Primary Category',
+                            labelText:
+                                AppLocalizations.of(context)?.primaryCategory ??
+                                    'Primary Category',
                             labelTextStyle: FlutterFlowTheme.of(context)
                                 .labelMedium
                                 .override(
@@ -438,13 +503,18 @@ class _BusinessRegistrationWidgetState
                           model: _model.textFieldModel9,
                           updateCallback: () => safeSetState(() {}),
                           child: TextFieldWidget(
-                            label: 'Type / Specialty',
+                            label: AppLocalizations.of(context)?.typeSpecialty ??
+                                'Type / Specialty',
                             labelPresent: true,
-                            helper: 'e.g. Kirana, Hardware, Restaurant',
+                            helper: AppLocalizations.of(context)
+                                    ?.typeSpecialtyHelper ??
+                                'e.g. Kirana, Hardware, Restaurant',
                             helperPresent: true,
                             leadingIconPresent: false,
                             trailingIconPresent: false,
-                            hint: 'What kind of business is this?',
+                            hint: AppLocalizations.of(context)
+                                    ?.typeSpecialtyHint ??
+                                'What kind of business is this?',
                             value: '',
                             onSubmit: (_) {},
                             variant: 'outlined',
@@ -455,13 +525,16 @@ class _BusinessRegistrationWidgetState
                           model: _model.textFieldModel3,
                           updateCallback: () => safeSetState(() {}),
                           child: TextFieldWidget(
-                            label: 'Business Description',
+                            label: AppLocalizations.of(context)
+                                    ?.businessDescription ??
+                                'Business Description',
                             labelPresent: true,
                             helper: '',
                             helperPresent: false,
                             leadingIconPresent: false,
                             trailingIconPresent: false,
-                            hint:
+                            hint: AppLocalizations.of(context)
+                                    ?.businessDescriptionHint ??
                                 'Briefly describe your products or services...',
                             value: '',
                             onSubmit: (_) {},
@@ -474,9 +547,10 @@ class _BusinessRegistrationWidgetState
                     wrapWithModel(
                       model: _model.sectionHeaderModel2,
                       updateCallback: () => safeSetState(() {}),
-                      child: const SectionHeaderWidget(
+                      child: SectionHeaderWidget(
                         step: '2',
-                        title: 'Contact Details',
+                        title: AppLocalizations.of(context)?.contactDetails ??
+                            'Contact Details',
                       ),
                     ),
                     Column(
@@ -487,7 +561,8 @@ class _BusinessRegistrationWidgetState
                           model: _model.textFieldModel4,
                           updateCallback: () => safeSetState(() {}),
                           child: TextFieldWidget(
-                            label: 'Mobile Number',
+                            label: AppLocalizations.of(context)?.mobileNumber ??
+                                'Mobile Number',
                             labelPresent: true,
                             helper: '',
                             helperPresent: false,
@@ -502,14 +577,16 @@ class _BusinessRegistrationWidgetState
                             value: '',
                             onSubmit: (_) {},
                             variant: 'outlined',
-                            error: false,
+                            error: _model.phoneError,
                           ),
                         ),
                         wrapWithModel(
                           model: _model.textFieldModel5,
                           updateCallback: () => safeSetState(() {}),
                           child: TextFieldWidget(
-                            label: 'WhatsApp Number',
+                            label:
+                                AppLocalizations.of(context)?.whatsAppNumber ??
+                                    'WhatsApp Number',
                             labelPresent: true,
                             helper: '',
                             helperPresent: false,
@@ -520,7 +597,9 @@ class _BusinessRegistrationWidgetState
                             ),
                             leadingIconPresent: true,
                             trailingIconPresent: false,
-                            hint: 'For customer enquiries',
+                            hint: AppLocalizations.of(context)
+                                    ?.whatsAppNumberHint ??
+                                'For customer enquiries',
                             value: '',
                             onSubmit: (_) {},
                             variant: 'outlined',
@@ -530,8 +609,10 @@ class _BusinessRegistrationWidgetState
                         wrapWithModel(
                           model: _model.switchModel,
                           updateCallback: () => safeSetState(() {}),
-                          child: const SwitchComponentWidget(
-                            label: 'WhatsApp same as mobile',
+                          child: SwitchComponentWidget(
+                            label: AppLocalizations.of(context)
+                                    ?.whatsAppSameAsMobile ??
+                                'WhatsApp same as mobile',
                             labelPresent: true,
                             variant: 'Android',
                             active: true,
@@ -542,9 +623,10 @@ class _BusinessRegistrationWidgetState
                     wrapWithModel(
                       model: _model.sectionHeaderModel3,
                       updateCallback: () => safeSetState(() {}),
-                      child: const SectionHeaderWidget(
+                      child: SectionHeaderWidget(
                         step: '3',
-                        title: 'Location & GPS',
+                        title: AppLocalizations.of(context)?.locationAndGps ??
+                            'Location & GPS',
                       ),
                     ),
                     Column(
@@ -555,7 +637,8 @@ class _BusinessRegistrationWidgetState
                           model: _model.textFieldModel6,
                           updateCallback: () => safeSetState(() {}),
                           child: TextFieldWidget(
-                            label: 'Street Address',
+                            label: AppLocalizations.of(context)?.streetAddress ??
+                                'Street Address',
                             labelPresent: true,
                             helper: '',
                             helperPresent: false,
@@ -566,59 +649,122 @@ class _BusinessRegistrationWidgetState
                             ),
                             leadingIconPresent: true,
                             trailingIconPresent: false,
-                            hint: 'Shop No., Building Name, Main Road...',
+                            hint: AppLocalizations.of(context)
+                                    ?.streetAddressHint ??
+                                'Shop No., Building Name, Main Road...',
                             value: '',
                             onSubmit: (_) {},
                             variant: 'outlined',
-                            error: false,
+                            error: _model.addressError,
                           ),
                         ),
                         Row(
                           children: [
-                            SizedBox(
-                              width: 180.0,
-                              child: wrapWithModel(
-                                model: _model.textFieldModel7,
-                                updateCallback: () => safeSetState(() {}),
-                                child: TextFieldWidget(
-                                  label: 'City',
-                                  labelPresent: true,
-                                  helper: '',
-                                  helperPresent: false,
-                                  leadingIconPresent: false,
-                                  trailingIconPresent: false,
-                                  hint: 'Type here...',
-                                  value: 'Degloor',
-                                  onSubmit: (_) {},
-                                  variant: 'outlined',
-                                  error: false,
-                                ),
-                              ),
+                            Expanded(
+                              child: _model.citiesLoading
+                                  ? const Center(
+                                      child: SizedBox(
+                                        height: 48,
+                                        child: LinearProgressIndicator(),
+                                      ),
+                                    )
+                                  : _model.cities.isEmpty
+                                      ? TextButton(
+                                          onPressed: _isSubmitting
+                                              ? null
+                                              : _loadCities,
+                                          child: Text(
+                                            AppLocalizations.of(context)
+                                                    ?.retryCities ??
+                                                'Unable to load cities. Tap to retry.',
+                                            style: FlutterFlowTheme.of(context)
+                                                .bodySmall
+                                                .override(
+                                                  font: GoogleFonts.inter(),
+                                                  color: FlutterFlowTheme.of(
+                                                          context)
+                                                      .error,
+                                                ),
+                                          ),
+                                        )
+                                      : FlutterFlowDropDown<String>(
+                                          key: ValueKey(
+                                            'registration-city-${_model.cities.length}',
+                                          ),
+                                          controller:
+                                              _model.cityValueController ??=
+                                                  FormFieldController<String>(
+                                            _model.cityValue,
+                                          ),
+                                          options: _model.cities
+                                              .map((c) => c.id)
+                                              .toList(),
+                                          optionLabels: _model.cities
+                                              .map((c) => c.name)
+                                              .toList(),
+                                          onChanged: (val) => safeSetState(
+                                              () => _model.cityValue = val),
+                                          width: double.infinity,
+                                          height: 48.0,
+                                          textStyle:
+                                              FlutterFlowTheme.of(context)
+                                                  .bodyMedium
+                                                  .override(
+                                                    font: GoogleFonts.inter(),
+                                                  ),
+                                          hintText: AppLocalizations.of(context)
+                                              ?.selectCity,
+                                          icon: Icon(
+                                            Icons.arrow_drop_down_rounded,
+                                            color: FlutterFlowTheme.of(context)
+                                                .secondaryText,
+                                            size: 24.0,
+                                          ),
+                                          fillColor:
+                                              FlutterFlowTheme.of(context)
+                                                  .secondaryBackground,
+                                          elevation: 2.0,
+                                          borderColor:
+                                              FlutterFlowTheme.of(context)
+                                                  .alternate,
+                                          borderWidth: 1.0,
+                                          borderRadius: 8.0,
+                                          margin: const EdgeInsetsDirectional
+                                              .fromSTEB(16.0, 0.0, 16.0, 0.0),
+                                          hidesUnderline: true,
+                                          labelText: AppLocalizations.of(context)
+                                              ?.city,
+                                          labelTextStyle:
+                                              FlutterFlowTheme.of(context)
+                                                  .labelMedium,
+                                        ),
                             ),
-                            SizedBox(
-                              width: 180.0,
+                            Expanded(
                               child: wrapWithModel(
                                 model: _model.textFieldModel8,
                                 updateCallback: () => safeSetState(() {}),
                                 child: TextFieldWidget(
-                                  label: 'Area',
+                                  label: AppLocalizations.of(context)?.area ??
+                                      'Area',
                                   labelPresent: true,
                                   helper: '',
                                   helperPresent: false,
                                   leadingIconPresent: false,
                                   trailingIconPresent: false,
-                                  hint: 'e.g., Shivaji Chowk',
+                                  hint: AppLocalizations.of(context)?.areaHint ??
+                                      'e.g., Shivaji Chowk',
                                   value: '',
                                   onSubmit: (_) {},
                                   variant: 'outlined',
-                                  error: false,
+                                  error: _model.areaError,
                                 ),
                               ),
                             ),
                           ].divide(const SizedBox(width: 16.0)),
                         ),
                         Text(
-                          'Set GPS Coordinates',
+                          AppLocalizations.of(context)?.setGpsCoordinates ??
+                              'Set GPS Coordinates',
                           style: FlutterFlowTheme.of(context)
                               .labelLarge
                               .override(
@@ -697,7 +843,9 @@ class _BusinessRegistrationWidgetState
                                         ),
                                         iconPresent: true,
                                         iconEndPresent: false,
-                                        content: 'Locate Me',
+                                        content: AppLocalizations.of(context)
+                                                ?.locateMe ??
+                                            'Locate Me',
                                         variant: 'secondary',
                                         size: 'small',
                                         fullWidth: false,
@@ -738,9 +886,10 @@ class _BusinessRegistrationWidgetState
                     wrapWithModel(
                       model: _model.sectionHeaderModel4,
                       updateCallback: () => safeSetState(() {}),
-                      child: const SectionHeaderWidget(
+                      child: SectionHeaderWidget(
                         step: '4',
-                        title: 'Discovery Reach',
+                        title: AppLocalizations.of(context)?.discoveryReach ??
+                            'Discovery Reach',
                       ),
                     ),
                     Column(
@@ -748,7 +897,8 @@ class _BusinessRegistrationWidgetState
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Text(
-                          'Service Radius',
+                          AppLocalizations.of(context)?.serviceRadius ??
+                              'Service Radius',
                           style: FlutterFlowTheme.of(context)
                               .labelLarge
                               .override(
@@ -772,27 +922,24 @@ class _BusinessRegistrationWidgetState
                               ),
                         ),
                         Text(
-                          'How far should customers be able to discover your business?',
+                          AppLocalizations.of(context)?.discoveryDescription ??
+                              'How far should customers be able to discover your business?',
                           style: FlutterFlowTheme.of(context)
                               .bodySmall
                               .override(
                                 font: GoogleFonts.inter(
                                   fontWeight: FlutterFlowTheme.of(context)
-                                      .bodySmall
-                                      .fontWeight,
+                                      .bodySmall.fontWeight,
                                   fontStyle: FlutterFlowTheme.of(context)
-                                      .bodySmall
-                                      .fontStyle,
+                                      .bodySmall.fontStyle,
                                 ),
                                 color:
                                     FlutterFlowTheme.of(context).secondaryText,
                                 letterSpacing: 0.0,
                                 fontWeight: FlutterFlowTheme.of(context)
-                                    .bodySmall
-                                    .fontWeight,
+                                    .bodySmall.fontWeight,
                                 fontStyle: FlutterFlowTheme.of(context)
-                                    .bodySmall
-                                    .fontStyle,
+                                    .bodySmall.fontStyle,
                                 lineHeight: 1.5,
                               ),
                         ),
@@ -800,7 +947,9 @@ class _BusinessRegistrationWidgetState
                           model: _model.sliderModel,
                           updateCallback: () => safeSetState(() {}),
                           child: SliderWidget(
-                            label: 'Discovery Radius (KM)',
+                            label: AppLocalizations.of(context)
+                                    ?.discoveryRadiusKm ??
+                                'Discovery Radius (KM)',
                             labelPresent: true,
                             description: '',
                             descriptionPresent: false,
@@ -878,9 +1027,11 @@ class _BusinessRegistrationWidgetState
                     wrapWithModel(
                       model: _model.sectionHeaderModel5,
                       updateCallback: () => safeSetState(() {}),
-                      child: const SectionHeaderWidget(
+                      child: SectionHeaderWidget(
                         step: '5',
-                        title: 'Photos & Verification',
+                        title: AppLocalizations.of(context)
+                                ?.photosAndVerification ??
+                            'Photos & Verification',
                       ),
                     ),
                     Column(
@@ -888,27 +1039,25 @@ class _BusinessRegistrationWidgetState
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Text(
-                          'Upload clear photos of your storefront and interior.',
+                          AppLocalizations.of(context)
+                                  ?.photoUploadInstruction ??
+                              'Upload clear photos of your storefront and interior.',
                           style: FlutterFlowTheme.of(context)
                               .bodySmall
                               .override(
                                 font: GoogleFonts.inter(
                                   fontWeight: FlutterFlowTheme.of(context)
-                                      .bodySmall
-                                      .fontWeight,
+                                      .bodySmall.fontWeight,
                                   fontStyle: FlutterFlowTheme.of(context)
-                                      .bodySmall
-                                      .fontStyle,
+                                      .bodySmall.fontStyle,
                                 ),
                                 color:
                                     FlutterFlowTheme.of(context).secondaryText,
                                 letterSpacing: 0.0,
                                 fontWeight: FlutterFlowTheme.of(context)
-                                    .bodySmall
-                                    .fontWeight,
+                                    .bodySmall.fontWeight,
                                 fontStyle: FlutterFlowTheme.of(context)
-                                    .bodySmall
-                                    .fontStyle,
+                                    .bodySmall.fontStyle,
                                 lineHeight: 1.5,
                               ),
                         ),
@@ -918,17 +1067,21 @@ class _BusinessRegistrationWidgetState
                           children: [
                             _photoSlot(
                               slot: RegistrationPhotoSlot.storeFront,
-                              label: 'Store Front',
+                              label: AppLocalizations.of(context)?.storeFront ??
+                                  'Store Front',
                               icon: Icons.add_a_photo_rounded,
                             ),
                             _photoSlot(
                               slot: RegistrationPhotoSlot.interior,
-                              label: 'Interior',
+                              label: AppLocalizations.of(context)?.interior ??
+                                  'Interior',
                               icon: Icons.add_photo_alternate_rounded,
                             ),
                             _photoSlot(
                               slot: RegistrationPhotoSlot.registrationDoc,
-                              label: 'Reg. Doc',
+                              label: AppLocalizations.of(context)
+                                      ?.registrationDoc ??
+                                  'Reg. Doc',
                               icon: Icons.description_rounded,
                             ),
                           ].divide(const SizedBox(width: 16.0)),
@@ -949,7 +1102,9 @@ class _BusinessRegistrationWidgetState
                             child: ButtonWidget(
                               iconPresent: false,
                               iconEndPresent: false,
-                              content: 'Submit for Verification',
+                              content: AppLocalizations.of(context)
+                                      ?.submitForVerification ??
+                                  'Submit for Verification',
                               variant: 'primary',
                               size: 'large',
                               fullWidth: true,
@@ -959,7 +1114,9 @@ class _BusinessRegistrationWidgetState
                             ),
                           ),
                           Text(
-                            'By submitting, you agree to the DEGLOOR ONE Business Terms. Your listing will be reviewed by our local admin team for verification within 24 hours.',
+                            AppLocalizations.of(context)
+                                    ?.businessTermsDisclaimer ??
+                                'By submitting, you agree to the DEGLOOR ONE Business Terms. Your listing will be reviewed by our local admin team for verification within 24 hours.',
                             textAlign: TextAlign.center,
                             maxLines: 3,
                             style: FlutterFlowTheme.of(context)
@@ -967,21 +1124,17 @@ class _BusinessRegistrationWidgetState
                                 .override(
                                   font: GoogleFonts.inter(
                                     fontWeight: FlutterFlowTheme.of(context)
-                                        .labelSmall
-                                        .fontWeight,
+                                        .labelSmall.fontWeight,
                                     fontStyle: FlutterFlowTheme.of(context)
-                                        .labelSmall
-                                        .fontStyle,
+                                        .labelSmall.fontStyle,
                                   ),
                                   color: FlutterFlowTheme.of(context)
                                       .secondaryText,
                                   letterSpacing: 0.0,
                                   fontWeight: FlutterFlowTheme.of(context)
-                                      .labelSmall
-                                      .fontWeight,
+                                      .labelSmall.fontWeight,
                                   fontStyle: FlutterFlowTheme.of(context)
-                                      .labelSmall
-                                      .fontStyle,
+                                      .labelSmall.fontStyle,
                                   lineHeight: 1.2,
                                 ),
                           ),

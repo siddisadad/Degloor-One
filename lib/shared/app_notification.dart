@@ -8,6 +8,7 @@ class AppNotification {
     required this.isRead,
     required this.createdAt,
     this.type,
+    this.referenceId,
   });
 
   final String id;
@@ -17,6 +18,7 @@ class AppNotification {
   final bool isRead;
   final DateTime createdAt;
   final String? type;
+  final String? referenceId;
 
   /// Java `NotificationResponse`. [userId] is the signed-in inbox owner.
   factory AppNotification.fromJson(
@@ -34,6 +36,7 @@ class AppNotification {
           ? DateTime.tryParse(created) ?? DateTime.fromMillisecondsSinceEpoch(0)
           : DateTime.fromMillisecondsSinceEpoch(0),
       type: json['type'] as String?,
+      referenceId: (json['referenceId'] ?? json['reference_id']) as String?,
     );
   }
 }

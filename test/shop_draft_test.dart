@@ -140,6 +140,7 @@ void main() {
       'address_text': 'Main Road',
       'discovery_radius': 8,
       'image_url': 'https://img',
+      'photos': ['https://img'],
     });
     expect(
       draft.toUpdateJson().keys,
@@ -163,5 +164,24 @@ void main() {
         ),
       ),
     );
+  });
+
+  test('cityId is serialized when present', () {
+    final registerDraft = ShopDraft.fromRegister(
+      name: 'Shop',
+      ownerName: 'Owner',
+      phone: '9890',
+      categoryId: 'cat-1',
+      latitude: 18.55,
+      longitude: 77.58,
+      cityId: 'city-123',
+    );
+    expect(registerDraft.toInsertJson(ownerId: 'user-1')['city_id'], 'city-123');
+
+    final profileDraft = ShopDraft.fromProfile(
+      name: 'Shop',
+      cityId: 'city-456',
+    );
+    expect(profileDraft.toUpdateJson()['city_id'], 'city-456');
   });
 }

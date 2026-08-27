@@ -25,7 +25,7 @@ void main() {
       ),
     );
 
-    expect(find.text('Out for delivery'), findsOneWidget);
+    expect(find.text('Rider is nearby'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -55,7 +55,7 @@ void main() {
 
     await tester.pumpAndSettle();
     expect(find.textContaining('Order #order-ou'), findsOneWidget);
-    expect(find.text('Out for delivery'), findsOneWidget);
+    expect(find.text('Rider is nearby'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }

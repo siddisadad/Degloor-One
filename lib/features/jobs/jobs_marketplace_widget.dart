@@ -128,7 +128,10 @@ class _JobsMarketplaceWidgetState extends State<JobsMarketplaceWidget> {
             children: [
               Container(
                 width: double.infinity,
-                color: DegloorTheme.cardBackground,
+                decoration: const BoxDecoration(
+                  color: DegloorTheme.cardBackground,
+                  border: Border(bottom: BorderSide(color: DegloorTheme.border)),
+                ),
                 child: Padding(
                   padding: const EdgeInsets.all(DegloorTheme.spacingMD),
                   child: Column(
@@ -185,16 +188,19 @@ class _JobsMarketplaceWidgetState extends State<JobsMarketplaceWidget> {
                               .map((type) {
                             final isSelected =
                                 (_model.jobTypeFilter ?? 'All') == type;
-                            return DegloorFilterChip(
-                              label: type,
-                              selected: isSelected,
-                              onTap: () {
-                                setState(() {
-                                  _model.jobTypeFilter =
-                                      isSelected ? 'All' : type;
-                                });
-                                _loadJobs();
-                              },
+                            return Padding(
+                              padding: const EdgeInsets.only(right: 8.0),
+                              child: DegloorFilterChip(
+                                label: type,
+                                selected: isSelected,
+                                onTap: () {
+                                  setState(() {
+                                    _model.jobTypeFilter =
+                                        isSelected ? 'All' : type;
+                                  });
+                                  _loadJobs();
+                                },
+                              ),
                             );
                           }).toList(),
                         ),

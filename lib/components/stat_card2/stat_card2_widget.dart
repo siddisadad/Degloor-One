@@ -1,7 +1,6 @@
-import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
+import 'package:degloor_one/core/degloor_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'stat_card2_model.dart';
 export 'stat_card2_model.dart';
 
@@ -44,7 +43,6 @@ class _StatCard2WidgetState extends State<StatCard2Widget> {
   @override
   void dispose() {
     _model.maybeDispose();
-
     super.dispose();
   }
 
@@ -52,113 +50,55 @@ class _StatCard2WidgetState extends State<StatCard2Widget> {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: FlutterFlowTheme.of(context).secondaryBackground,
-        borderRadius: BorderRadius.circular(12.0),
-        border: Border.all(
-          color: FlutterFlowTheme.of(context).alternate,
-        ),
+        color: DegloorTheme.cardBackground,
+        borderRadius: BorderRadius.circular(DegloorTheme.radiusMD),
+        border: Border.all(color: DegloorTheme.border),
+        boxShadow: DegloorTheme.softShadow,
       ),
       child: Padding(
-        padding: const EdgeInsets.all(24.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              valueOrDefault<String>(
-                widget.label,
-                'Pending Claims',
-              ),
-              style: FlutterFlowTheme.of(context).labelMedium.override(
-                    font: GoogleFonts.inter(
-                      fontWeight:
-                          FlutterFlowTheme.of(context).labelMedium.fontWeight,
-                      fontStyle:
-                          FlutterFlowTheme.of(context).labelMedium.fontStyle,
-                    ),
-                    color: FlutterFlowTheme.of(context).secondaryText,
-                    letterSpacing: 0.0,
-                    fontWeight:
-                        FlutterFlowTheme.of(context).labelMedium.fontWeight,
-                    fontStyle:
-                        FlutterFlowTheme.of(context).labelMedium.fontStyle,
-                    lineHeight: 1.4,
-                  ),
+              widget.label,
+              style: DegloorTheme.labelMedium,
             ),
+            const SizedBox(height: 8),
             Row(
               children: [
                 Text(
-                  valueOrDefault<String>(
-                    widget.value,
-                    '12',
+                  widget.value,
+                  style: DegloorTheme.headingMedium.copyWith(
+                    fontWeight: FontWeight.bold,
                   ),
-                  style: FlutterFlowTheme.of(context).headlineMedium.override(
-                        font: GoogleFonts.inter(
-                          fontWeight: FontWeight.bold,
-                          fontStyle: FlutterFlowTheme.of(context)
-                              .headlineMedium
-                              .fontStyle,
-                        ),
-                        color: FlutterFlowTheme.of(context).primaryText,
-                        letterSpacing: 0.0,
-                        fontWeight: FontWeight.bold,
-                        fontStyle: FlutterFlowTheme.of(context)
-                            .headlineMedium
-                            .fontStyle,
-                        lineHeight: 1.3,
-                      ),
                 ),
-                Container(
-                  decoration: BoxDecoration(
-                    color: valueOrDefault<Color>(
-                      valueOrDefault<bool>(
-                        widget.isPositive,
-                        false,
-                      )
-                          ? const Color(0xFFE8F5E9)
-                          : const Color(0xFFFFEBEE),
-                      const Color(0xFFFFEBEE),
+                const SizedBox(width: 8),
+                if (widget.trend.isNotEmpty)
+                  Container(
+                    decoration: BoxDecoration(
+                      color: widget.isPositive
+                          ? DegloorTheme.success.withValues(alpha: 0.1)
+                          : DegloorTheme.error.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8.0),
                     ),
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
-                  child: Padding(
-                    padding:
-                        const EdgeInsetsDirectional.fromSTEB(8.0, 4.0, 8.0, 4.0),
-                    child: Text(
-                      valueOrDefault<String>(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      child: Text(
                         widget.trend,
-                        '+3',
+                        style: DegloorTheme.labelSmall.copyWith(
+                          color: widget.isPositive
+                              ? DegloorTheme.success
+                              : DegloorTheme.error,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                      style:
-                          FlutterFlowTheme.of(context).labelSmall.override(
-                                font: GoogleFonts.inter(
-                                  fontWeight: FontWeight.bold,
-                                  fontStyle: FlutterFlowTheme.of(context)
-                                      .labelSmall
-                                      .fontStyle,
-                                ),
-                                color: valueOrDefault<Color>(
-                                  valueOrDefault<bool>(
-                                    widget.isPositive,
-                                    false,
-                                  )
-                                      ? FlutterFlowTheme.of(context).success
-                                      : FlutterFlowTheme.of(context).error,
-                                  FlutterFlowTheme.of(context).error,
-                                ),
-                                letterSpacing: 0.0,
-                                fontWeight: FontWeight.bold,
-                                fontStyle: FlutterFlowTheme.of(context)
-                                    .labelSmall
-                                    .fontStyle,
-                                lineHeight: 1.2,
-                              ),
                     ),
                   ),
-                ),
-              ].divide(const SizedBox(width: 8.0)),
+              ],
             ),
-          ].divide(const SizedBox(height: 4.0)),
+          ],
         ),
       ),
     );

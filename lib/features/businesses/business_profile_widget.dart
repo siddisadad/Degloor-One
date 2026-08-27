@@ -7,7 +7,6 @@ import 'package:degloor_one/shared/shop.dart';
 import 'package:degloor_one/l10n/app_localizations.dart';
 import 'package:degloor_one/components/brand_mark.dart';
 import 'package:degloor_one/components/action_button/action_button_widget.dart';
-import 'package:degloor_one/components/button/button_widget.dart';
 import 'package:degloor_one/components/review_card/review_card_widget.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_icon_button.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';

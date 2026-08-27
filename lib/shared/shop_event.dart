@@ -40,4 +40,5 @@ class ShopEvents {
   static const shareClick = 'SHARE_CLICK';
   static const reviewSubmitted = 'REVIEW_SUBMITTED';
   static const productView = 'PRODUCT_VIEW';
+  static const addToCart = 'ADD_TO_CART';
 }

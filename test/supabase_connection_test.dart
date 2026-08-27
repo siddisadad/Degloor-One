@@ -7,6 +7,19 @@ import 'package:degloor_one/core/error_handler.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
 void main() {
+  setUp(() {
+    AppEnvironment.debugReset();
+    AppEnvironment.debugOverride(
+      flavor: AppFlavor.development,
+      bypassAuth: true,
+      useShowcaseData: false,
+    );
+  });
+
+  tearDown(() {
+    AppEnvironment.debugReset();
+  });
+
   test('default project url is the FlutterFlow host', () {
     expect(kSupabaseUrl, 'https://uhaibenopzyzzuqjawlb.supabase.co');
     expect(kUsesDeadFlutterFlowHost, isTrue);
@@ -20,16 +33,6 @@ void main() {
 
   test('a live GoTrue health probe unblocks table reads on the FlutterFlow host',
       () async {
-    AppEnvironment.debugReset();
-    addTearDown(() {
-      AppEnvironment.debugReset();
-      AppEnvironment.debugOverride(
-        flavor: AppFlavor.development,
-        bypassAuth: true,
-        useShowcaseData: true,
-      );
-    });
-
     expect(kShouldBlockSupabaseTraffic, isTrue);
     expect(kUseShowcaseData, isTrue);
     expect(kBypassAuth, isTrue);
@@ -51,16 +54,6 @@ void main() {
   });
 
   test('a failed health probe keeps the FlutterFlow host blocked', () async {
-    AppEnvironment.debugReset();
-    addTearDown(() {
-      AppEnvironment.debugReset();
-      AppEnvironment.debugOverride(
-        flavor: AppFlavor.development,
-        bypassAuth: true,
-        useShowcaseData: true,
-      );
-    });
-
     final client = MockClient((request) async {
       throw http.ClientException('Failed to fetch', request.url);
     });

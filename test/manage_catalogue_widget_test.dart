@@ -1,7 +1,6 @@
 import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/components/cached_remote_image.dart';
-import 'package:degloor_one/features/catalogue/manage_catalogue_model.dart';
 import 'package:degloor_one/features/catalogue/manage_catalogue_widget.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_model.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
@@ -104,7 +103,7 @@ void main() {
     expect(find.byType(CachedRemoteImage), findsNothing);
     expect(
       tester.getSemantics(find.byKey(const ValueKey('catalogue-product-photo'))),
-      containsSemantics(label: 'Product photo', isButton: true),
+      isSemantics(label: 'Product photo', isButton: true),
     );
   });
 }

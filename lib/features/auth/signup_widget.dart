@@ -335,10 +335,8 @@ class _SignUpWidgetState extends State<SignUpWidget> {
         _model.email,
         _model.password,
       );
-      if (!mounted) return;
-      if (user != null) {
-        await _continueAfterAuth();
-      }
+      if (!mounted || user == null) return;
+      await _continueAfterAuth();
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -351,10 +349,8 @@ class _SignUpWidgetState extends State<SignUpWidget> {
     setState(() => _isLoading = true);
     try {
       final user = await signIn();
-      if (!mounted) return;
-      if (user != null) {
-        await _continueAfterAuth();
-      }
+      if (!mounted || user == null) return;
+      await _continueAfterAuth();
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }

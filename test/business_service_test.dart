@@ -301,7 +301,7 @@ void main() {
   });
 
   test('owner can delete business', () async {
-    final userId = GuestAuthUser.guestUid;
+    const userId = GuestAuthUser.guestUid;
     final shops = await BusinessService.instance.ownedBy(userId);
     final target = shops.first.id;
 

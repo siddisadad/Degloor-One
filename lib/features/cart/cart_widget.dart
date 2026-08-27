@@ -77,9 +77,11 @@ class _CartWidgetState extends State<CartWidget> {
       }
 
       final items = await CartService.itemsForCart(_model.currentCart!.id);
+      final validation = await CartService.validateCartItems(items);
       if (!mounted) return;
       setState(() {
         _model.cartItemsFuture = Future.value(items);
+        _model.validationIssues = validation.where((v) => v.isIssue).toList();
       });
     } catch (e) {
       AppLogger.error('Error fetching cart', e);
@@ -255,9 +257,14 @@ class _CartWidgetState extends State<CartWidget> {
           }
 
           final subtotal = CartService.subtotal(items);
+          const platformFee = 5.0; 
+          final tax = subtotal * 0.05; 
+          final total = subtotal + _model.deliveryFee + platformFee + tax;
 
           return Column(
             children: [
+              if (_model.validationIssues.isNotEmpty)
+                _buildValidationBanner(),
               if (_model.currentBusiness != null)
                 Container(
                   width: double.infinity,
@@ -419,9 +426,16 @@ class _CartWidgetState extends State<CartWidget> {
                     const SizedBox(height: 8),
                     _summaryRow(
                       'Delivery Fee',
-                      _model.deliveryFee == 0 ? 'FREE' : '₹${_model.deliveryFee.toStringAsFixed(0)}',
-                      valueColor: _model.deliveryFee == 0 ? DegloorTheme.success : null,
+                      _model.deliveryFee == 0
+                          ? 'FREE'
+                          : '₹${_model.deliveryFee.toStringAsFixed(0)}',
+                      valueColor:
+                          _model.deliveryFee == 0 ? DegloorTheme.success : null,
                     ),
+                    const SizedBox(height: 8),
+                    _summaryRow('Platform Fee', '₹${platformFee.toStringAsFixed(0)}'),
+                    const SizedBox(height: 8),
+                    _summaryRow('Taxes', '₹${tax.toStringAsFixed(0)}'),
                     const Padding(
                       padding: EdgeInsets.symmetric(vertical: 12),
                       child: Divider(),
@@ -431,8 +445,9 @@ class _CartWidgetState extends State<CartWidget> {
                       children: [
                         Text('Total', style: DegloorTheme.headingMedium),
                         Text(
-                          '₹${(subtotal + _model.deliveryFee).toStringAsFixed(0)}',
-                          style: DegloorTheme.headingMedium.copyWith(color: DegloorTheme.primary, fontSize: 22),
+                          '₹${total.toStringAsFixed(0)}',
+                          style: DegloorTheme.headingMedium.copyWith(
+                              color: DegloorTheme.primary, fontSize: 22),
                         ),
                       ],
                     ),
@@ -468,6 +483,36 @@ class _CartWidgetState extends State<CartWidget> {
             ],
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildValidationBanner() {
+    return Container(
+      width: double.infinity,
+      color: DegloorTheme.error.withValues(alpha: 0.1),
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        children: [
+          for (final issue in _model.validationIssues)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Row(
+                children: [
+                  const Icon(Icons.warning_amber_rounded,
+                      color: DegloorTheme.error, size: 16),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      issue.message ?? 'Item status changed.',
+                      style: DegloorTheme.bodySmall
+                          .copyWith(color: DegloorTheme.error),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
       ),
     );
   }

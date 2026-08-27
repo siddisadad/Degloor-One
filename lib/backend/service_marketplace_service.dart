@@ -327,6 +327,7 @@ class ServiceMarketplaceService {
           title: 'New service request',
           message: 'Someone requested your service in Degloor.',
           type: 'service_request',
+          referenceId: request.id,
         );
       }
       return request;
@@ -476,6 +477,7 @@ class ServiceMarketplaceService {
     NotificationService.notifyServiceRequestUpdate(
       userId: '${request['user_id']}',
       status: nextStatus,
+      requestId: requestId,
     );
   }
 }

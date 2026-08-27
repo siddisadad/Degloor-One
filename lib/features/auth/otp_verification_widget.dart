@@ -201,7 +201,7 @@ class _OtpVerificationWidgetState extends State<OtpVerificationWidget> {
 
     setState(() => _isLoading = true);
     try {
-      final user = await authManager.verifySmsCodeWithPhoneNumber(
+      final user = await authManager.verifySmsCode(
         context: context,
         phoneNumber: widget.phone,
         smsCode: code,

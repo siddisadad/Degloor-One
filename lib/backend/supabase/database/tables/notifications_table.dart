@@ -29,6 +29,9 @@ class NotificationsRow extends SupabaseDataRow {
   String? get type => getField<String>('type');
   set type(String? value) => setField<String>('type', value);
 
+  String? get referenceId => getField<String>('reference_id');
+  set referenceId(String? value) => setField<String>('reference_id', value);
+
   bool get isRead => getField<bool>('is_read')!;
   set isRead(bool value) => setField<bool>('is_read', value);
 

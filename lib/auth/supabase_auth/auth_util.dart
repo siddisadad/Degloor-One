@@ -1,17 +1,26 @@
 import 'dart:async';
 import 'package:rxdart/rxdart.dart';
 
+import 'package:degloor_one/auth/auth_repository.dart';
+import 'package:degloor_one/auth/java_auth/java_auth_repository.dart';
+import 'package:degloor_one/auth/supabase_auth/supabase_auth_repository.dart';
 import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/auth/java_auth_user.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/backend/user_service.dart';
 import 'package:degloor_one/core/api/api_client.dart';
-import 'supabase_auth_manager.dart';
 
-export 'supabase_auth_manager.dart';
+export 'package:degloor_one/auth/auth_repository.dart';
+export 'package:degloor_one/auth/base_auth_user_provider.dart';
 
-final _authManager = SupabaseAuthManager();
-SupabaseAuthManager get authManager => _authManager;
+AuthRepository get authManager => JavaApiConfig.enabled
+    ? JavaAuthRepository()
+    : SupabaseAuthRepository();
+
+extension AuthRepositoryExtensions on AuthRepository {
+  /// Helper to refresh the user from the current instance.
+  Future<void> refresh() => refreshUser();
+}
 
 String get currentUserEmail => currentUser?.email ?? '';
 

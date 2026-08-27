@@ -10,6 +10,7 @@ import 'package:degloor_one/shared/user_profile.dart';
 import 'package:degloor_one/shared/user_profile_draft.dart';
 import 'package:degloor_one/shared/user_role.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'supabase_initializer.dart';
 
 class _EmptyUserRepository implements UserRepository {
   @override
@@ -73,6 +74,10 @@ class _NamedGuestRepository implements UserRepository {
 }
 
 void main() {
+  setUpAll(() async {
+    await initializeMockSupabase();
+  });
+
   setUp(ShowcaseCatalog.reset);
 
   test('guest profile and admin role use the showcase catalog', () async {

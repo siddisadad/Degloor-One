@@ -1,3 +1,4 @@
+import 'package:degloor_one/backend/cart_service.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/shared/join_rows.dart';
 import 'package:degloor_one/shared/saved_address.dart';
@@ -12,6 +13,7 @@ class CartModel extends FlutterFlowModel<CartWidget> {
   // Future to load cart items and addresses
   Future<List<CartLine>>? cartItemsFuture;
   Future<List<SavedAddress>>? addressesFuture;
+  List<CartValidationResult> validationIssues = [];
   ShoppingCart? currentCart;
   Shop? currentBusiness;
   bool isPlacingOrder = false;

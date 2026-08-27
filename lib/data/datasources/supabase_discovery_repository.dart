@@ -3,6 +3,7 @@ import 'package:degloor_one/backend/repositories/discovery_repository.dart'
 import 'package:degloor_one/data/datasources/supabase_shop_maps.dart';
 import 'package:degloor_one/data/repositories/discovery_repository.dart';
 import 'package:degloor_one/shared/catalog_product.dart';
+import 'package:degloor_one/shared/city.dart';
 import 'package:degloor_one/shared/shop.dart';
 import 'package:degloor_one/shared/shop_category.dart';
 import 'package:degloor_one/shared/shop_event.dart';
@@ -29,6 +30,12 @@ class SupabaseDiscoveryRepository implements DiscoveryRepository {
   Future<List<ShopCategory>> categories() async {
     final rows = await _inner.categories();
     return rows.map(shopCategoryFromRow).toList();
+  }
+
+  @override
+  Future<List<City>> cities() async {
+    final rows = await _inner.cities();
+    return rows.map(cityFromRow).toList();
   }
 
   @override

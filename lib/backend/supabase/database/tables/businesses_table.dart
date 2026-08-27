@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 
 import '../database.dart';
-import 'package:degloor_one/flutter_flow/lat_lng.dart';
 import 'package:degloor_one/shared/search_query.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 
@@ -125,9 +124,7 @@ class BusinessesTable extends SupabaseTable<BusinessesRow> {
       if (!query.matches([row.name, row.description, row.addressText])) {
         continue;
       }
-      if (row.distanceKm == null) {
-        row.distanceKm = double.parse(distance.toStringAsFixed(2));
-      }
+      row.distanceKm ??= double.parse(distance.toStringAsFixed(2));
       matches.add(row);
     }
     return applyLiveSearchFilters(

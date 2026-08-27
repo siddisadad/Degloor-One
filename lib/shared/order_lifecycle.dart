@@ -97,24 +97,48 @@ class OrderLifecycle {
     }
   }
 
-  static String label(String status) {
-    switch (normalizeStatus(status)) {
+  static String label(String status, {dynamic l10n}) {
+    final norm = normalizeStatus(status);
+    if (l10n != null) {
+      try {
+        switch (norm) {
+          case pending:
+            return l10n.statusFindingShop;
+          case accepted:
+            return l10n.statusPreparing;
+          case ready:
+            return l10n.statusReady;
+          case shipping:
+            return l10n.statusShipping;
+          case outForDelivery:
+            return l10n.statusRiderNearby;
+          case delivered:
+            return l10n.statusDelivered;
+          case cancelled:
+            return l10n.statusCancelled;
+        }
+      } catch (_) {
+        // Fallback if l10n doesn't have the keys
+      }
+    }
+
+    switch (norm) {
       case pending:
-        return 'Pending';
+        return 'Finding Shop';
       case accepted:
-        return 'Accepted';
+        return 'Preparing';
       case ready:
-        return 'Ready';
+        return 'Ready for pickup';
       case shipping:
         return 'On the way';
       case outForDelivery:
-        return 'Out for delivery';
+        return 'Rider is nearby';
       case delivered:
         return 'Delivered';
       case cancelled:
         return 'Cancelled';
       default:
-        final raw = normalizeStatus(status).replaceAll('_', ' ');
+        final raw = norm.replaceAll('_', ' ');
         if (raw.isEmpty) return raw;
         return raw[0].toUpperCase() + raw.substring(1);
     }

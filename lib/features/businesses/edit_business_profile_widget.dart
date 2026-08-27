@@ -1,5 +1,4 @@
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
-import 'package:degloor_one/backend/business_service.dart';
 import 'package:degloor_one/components/cached_remote_image.dart';
 import 'package:degloor_one/components/degloor_app_bar.dart';
 import 'package:degloor_one/core/error_handler.dart';
@@ -136,7 +135,7 @@ class _EditBusinessProfileWidgetState extends State<EditBusinessProfileWidget> {
 
     setState(() => _isSaving = true);
     try {
-      await BusinessService.instance.deleteBusiness(
+      await _model.delete(
         userId: currentUserUid,
         businessId: widget.business.id,
       );
@@ -393,7 +392,6 @@ class _EditBusinessProfileWidgetState extends State<EditBusinessProfileWidget> {
                       ),
                       borderSide: BorderSide(
                         color: FlutterFlowTheme.of(context).error,
-                        width: 1,
                       ),
                       borderRadius: BorderRadius.circular(12),
                     ),

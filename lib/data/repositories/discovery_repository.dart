@@ -1,3 +1,4 @@
+import 'package:degloor_one/shared/city.dart';
 import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/shared/catalog_product.dart';
 import 'package:degloor_one/shared/shop.dart';
@@ -37,6 +38,8 @@ abstract class DiscoveryRepository {
   Future<List<CatalogProduct>> searchProducts(DiscoverySearch query);
 
   Future<List<ShopCategory>> categories();
+
+  Future<List<City>> cities();
 
   Future<List<Shop>> businessesByIds(List<String> ids);
 

@@ -429,6 +429,372 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Degloor, Maharashtra'**
   String get aboutLocation;
+
+  /// No description provided for @privacyPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get privacyPolicy;
+
+  /// No description provided for @privacyIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'We value your privacy and are committed to protecting your personal data.'**
+  String get privacyIntro;
+
+  /// No description provided for @statusFindingShop.
+  ///
+  /// In en, this message translates to:
+  /// **'Finding Shop'**
+  String get statusFindingShop;
+
+  /// No description provided for @statusPreparing.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing'**
+  String get statusPreparing;
+
+  /// No description provided for @statusReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready for pickup'**
+  String get statusReady;
+
+  /// No description provided for @statusShipping.
+  ///
+  /// In en, this message translates to:
+  /// **'On the way'**
+  String get statusShipping;
+
+  /// No description provided for @statusRiderNearby.
+  ///
+  /// In en, this message translates to:
+  /// **'Rider is nearby'**
+  String get statusRiderNearby;
+
+  /// No description provided for @statusDelivered.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivered'**
+  String get statusDelivered;
+
+  /// No description provided for @statusCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get statusCancelled;
+
+  /// No description provided for @statusPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get statusPending;
+
+  /// No description provided for @statusAccepted.
+  ///
+  /// In en, this message translates to:
+  /// **'Accepted'**
+  String get statusAccepted;
+
+  /// No description provided for @statusDeclined.
+  ///
+  /// In en, this message translates to:
+  /// **'Declined'**
+  String get statusDeclined;
+
+  /// No description provided for @statusCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get statusCompleted;
+
+  /// No description provided for @statusApplied.
+  ///
+  /// In en, this message translates to:
+  /// **'Applied'**
+  String get statusApplied;
+
+  /// No description provided for @statusShortlisted.
+  ///
+  /// In en, this message translates to:
+  /// **'Shortlisted'**
+  String get statusShortlisted;
+
+  /// No description provided for @statusRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected'**
+  String get statusRejected;
+
+  /// No description provided for @city.
+  ///
+  /// In en, this message translates to:
+  /// **'City'**
+  String get city;
+
+  /// No description provided for @selectCity.
+  ///
+  /// In en, this message translates to:
+  /// **'Select City'**
+  String get selectCity;
+
+  /// No description provided for @retryCities.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load cities. Tap to retry.'**
+  String get retryCities;
+
+  /// No description provided for @registerBusiness.
+  ///
+  /// In en, this message translates to:
+  /// **'Register Business'**
+  String get registerBusiness;
+
+  /// No description provided for @phaseOneDegloorOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Phase 1: DEGLOOR ONE'**
+  String get phaseOneDegloorOne;
+
+  /// No description provided for @businessIdentity.
+  ///
+  /// In en, this message translates to:
+  /// **'Business Identity'**
+  String get businessIdentity;
+
+  /// No description provided for @businessName.
+  ///
+  /// In en, this message translates to:
+  /// **'Business Name'**
+  String get businessName;
+
+  /// No description provided for @ownerName.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner Name'**
+  String get ownerName;
+
+  /// No description provided for @businessNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., Maharashtra Hardware & Steel'**
+  String get businessNameHint;
+
+  /// No description provided for @ownerNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Full legal name of proprietor'**
+  String get ownerNameHint;
+
+  /// No description provided for @primaryCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Primary Category'**
+  String get primaryCategory;
+
+  /// No description provided for @selectCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Category'**
+  String get selectCategory;
+
+  /// No description provided for @typeSpecialty.
+  ///
+  /// In en, this message translates to:
+  /// **'Type / Specialty'**
+  String get typeSpecialty;
+
+  /// No description provided for @typeSpecialtyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What kind of business is this?'**
+  String get typeSpecialtyHint;
+
+  /// No description provided for @typeSpecialtyHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Kirana, Hardware, Restaurant'**
+  String get typeSpecialtyHelper;
+
+  /// No description provided for @businessDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Business Description'**
+  String get businessDescription;
+
+  /// No description provided for @businessDescriptionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Briefly describe your products or services...'**
+  String get businessDescriptionHint;
+
+  /// No description provided for @contactDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact Details'**
+  String get contactDetails;
+
+  /// No description provided for @mobileNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile Number'**
+  String get mobileNumber;
+
+  /// No description provided for @whatsAppNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'WhatsApp Number'**
+  String get whatsAppNumber;
+
+  /// No description provided for @whatsAppNumberHint.
+  ///
+  /// In en, this message translates to:
+  /// **'For customer enquiries'**
+  String get whatsAppNumberHint;
+
+  /// No description provided for @whatsAppSameAsMobile.
+  ///
+  /// In en, this message translates to:
+  /// **'WhatsApp same as mobile'**
+  String get whatsAppSameAsMobile;
+
+  /// No description provided for @locationAndGps.
+  ///
+  /// In en, this message translates to:
+  /// **'Location & GPS'**
+  String get locationAndGps;
+
+  /// No description provided for @streetAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Street Address'**
+  String get streetAddress;
+
+  /// No description provided for @streetAddressHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Shop No., Building Name, Main Road...'**
+  String get streetAddressHint;
+
+  /// No description provided for @area.
+  ///
+  /// In en, this message translates to:
+  /// **'Area'**
+  String get area;
+
+  /// No description provided for @areaHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., Shivaji Chowk'**
+  String get areaHint;
+
+  /// No description provided for @setGpsCoordinates.
+  ///
+  /// In en, this message translates to:
+  /// **'Set GPS Coordinates'**
+  String get setGpsCoordinates;
+
+  /// No description provided for @locateMe.
+  ///
+  /// In en, this message translates to:
+  /// **'Locate Me'**
+  String get locateMe;
+
+  /// No description provided for @discoveryReach.
+  ///
+  /// In en, this message translates to:
+  /// **'Discovery Reach'**
+  String get discoveryReach;
+
+  /// No description provided for @serviceRadius.
+  ///
+  /// In en, this message translates to:
+  /// **'Service Radius'**
+  String get serviceRadius;
+
+  /// No description provided for @discoveryRadiusKm.
+  ///
+  /// In en, this message translates to:
+  /// **'Discovery Radius (KM)'**
+  String get discoveryRadiusKm;
+
+  /// No description provided for @discoveryDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'How far should customers be able to discover your business?'**
+  String get discoveryDescription;
+
+  /// No description provided for @photosAndVerification.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos & Verification'**
+  String get photosAndVerification;
+
+  /// No description provided for @photoUploadInstruction.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload clear photos of your storefront and interior.'**
+  String get photoUploadInstruction;
+
+  /// No description provided for @storeFront.
+  ///
+  /// In en, this message translates to:
+  /// **'Store Front'**
+  String get storeFront;
+
+  /// No description provided for @interior.
+  ///
+  /// In en, this message translates to:
+  /// **'Interior'**
+  String get interior;
+
+  /// No description provided for @registrationDoc.
+  ///
+  /// In en, this message translates to:
+  /// **'Reg. Doc'**
+  String get registrationDoc;
+
+  /// No description provided for @submitForVerification.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit for Verification'**
+  String get submitForVerification;
+
+  /// No description provided for @businessTermsDisclaimer.
+  ///
+  /// In en, this message translates to:
+  /// **'By submitting, you agree to the DEGLOOR ONE Business Terms. Your listing will be reviewed by our local admin team for verification within 24 hours.'**
+  String get businessTermsDisclaimer;
+
+  /// No description provided for @pleaseWaitCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Please wait for categories to load...'**
+  String get pleaseWaitCategories;
+
+  /// No description provided for @unableLoadCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load categories. Please check your connection.'**
+  String get unableLoadCategories;
+
+  /// No description provided for @unableLoadCategoriesRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load categories. Tap to retry.'**
+  String get unableLoadCategoriesRetry;
+
+  /// No description provided for @businessSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Business submitted for verification!'**
+  String get businessSubmitted;
+
+  /// No description provided for @unableSubmitShop.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to submit the shop. Please try again.'**
+  String get unableSubmitShop;
 }
 
 class _AppLocalizationsDelegate

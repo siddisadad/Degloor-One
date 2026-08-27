@@ -133,9 +133,11 @@ class BusinessService {
       ownerName: draft.ownerName ?? '',
       phone: draft.phoneNumber ?? '',
       categoryId: draft.categoryId ?? '',
+      cityId: draft.cityId,
       latitude: draft.latitude!,
       longitude: draft.longitude!,
       description: draft.description ?? '',
+      subcategory: draft.subcategory,
       whatsappNumber: draft.whatsappNumber,
       addressText: draft.addressText ?? '',
       discoveryRadius: draft.discoveryRadius ?? 5,
@@ -175,6 +177,7 @@ class BusinessService {
       addressText: draft.addressText,
       discoveryRadius: draft.discoveryRadius,
       imageUrl: draft.imageUrl,
+      cityId: draft.cityId,
     );
     await _shops.update(
       businessId: businessId,

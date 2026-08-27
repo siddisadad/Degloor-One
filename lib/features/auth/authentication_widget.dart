@@ -6,9 +6,9 @@ import 'package:degloor_one/backend/supabase/supabase_connection.dart';
 import 'package:degloor_one/core/app_flags.dart';
 import 'package:degloor_one/backend/user_service.dart';
 import 'package:degloor_one/components/auth_page_header.dart';
-import 'package:degloor_one/components/brand_mark.dart';
 import 'package:degloor_one/components/social_button/social_button_widget.dart';
 import 'package:degloor_one/components/supabase_unreachable_banner.dart';
+import 'package:degloor_one/features/profile/profile_info_widget.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:degloor_one/components/text_field/text_field_widget.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
@@ -258,10 +258,8 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
                                 try {
                                   final user = await authManager
                                       .signInWithGoogle(context);
-                                  if (!context.mounted) return;
-                                  if (user != null) {
-                                    await _continueAfterAuth();
-                                  }
+                                  if (!mounted || user == null) return;
+                                  await _continueAfterAuth();
                                 } finally {
                                   if (mounted) {
                                     setState(() => _isLoading = false);
@@ -287,10 +285,8 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
                                     try {
                                       final user = await authManager
                                           .signInWithApple(context);
-                                      if (!context.mounted) return;
-                                      if (user != null) {
-                                        await _continueAfterAuth();
-                                      }
+                                      if (!mounted || user == null) return;
+                                      await _continueAfterAuth();
                                     } finally {
                                       if (mounted) {
                                         setState(() => _isLoading = false);
@@ -388,6 +384,52 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
                             _buildLang('मराठी', 'mr'),
                             _buildDot(),
                             _buildLang('हिंदी', 'hi'),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            TextButton(
+                              onPressed: () => context.pushNamed(
+                                  ProfileInfoWidget.termsRouteName),
+                              style: TextButton.styleFrom(
+                                padding: EdgeInsets.zero,
+                                minimumSize: Size.zero,
+                                visualDensity: VisualDensity.compact,
+                              ),
+                              child: Text(
+                                'Terms',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: FlutterFlowTheme.of(context).primary,
+                                ),
+                              ),
+                            ),
+                            Text(
+                              ' • ',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color:
+                                    FlutterFlowTheme.of(context).secondaryText,
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () => context.pushNamed(
+                                  ProfileInfoWidget.privacyRouteName),
+                              style: TextButton.styleFrom(
+                                padding: EdgeInsets.zero,
+                                minimumSize: Size.zero,
+                                visualDensity: VisualDensity.compact,
+                              ),
+                              child: Text(
+                                'Privacy',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: FlutterFlowTheme.of(context).primary,
+                                ),
+                              ),
+                            ),
                           ],
                         ),
                         const SizedBox(height: 20),
@@ -534,10 +576,8 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
     setState(() => _isLoading = true);
     try {
       final user = await authManager.signInWithEmail(context, email, password);
-      if (!mounted) return;
-      if (user != null) {
-        await _continueAfterAuth();
-      }
+      if (!mounted || user == null) return;
+      await _continueAfterAuth();
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }

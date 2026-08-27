@@ -10,7 +10,6 @@ import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
 import 'package:degloor_one/components/cached_remote_image.dart';
 import 'package:degloor_one/core/degloor_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:degloor_one/features/services/service_provider_profile_model.dart';
 export 'package:degloor_one/features/services/service_provider_profile_model.dart';
 

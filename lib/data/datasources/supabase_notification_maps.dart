@@ -10,5 +10,6 @@ AppNotification appNotificationFromRow(NotificationsRow row) {
     isRead: row.isRead,
     createdAt: row.createdAt,
     type: row.type,
+    referenceId: row.referenceId,
   );
 }

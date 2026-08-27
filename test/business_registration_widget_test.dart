@@ -5,6 +5,7 @@ import 'package:degloor_one/features/businesses/business_registration_model.dart
 import 'package:degloor_one/flutter_flow/flutter_flow_model.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
 import 'package:degloor_one/shared/user_role.dart';
+import 'package:degloor_one/shared/shop_category.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -31,14 +32,26 @@ void main() {
         TextEditingController(text: 'Sadad Siddi');
     model.textFieldModel4.inputTextController =
         TextEditingController(text: '9876543210');
+    model.textFieldModel6.inputTextController =
+        TextEditingController(text: 'Main Market, Degloor');
+    model.textFieldModel8.inputTextController =
+        TextEditingController(text: 'Shivaji Chowk');
+    model.categories = [
+      const ShopCategory(id: ShowcaseCatalog.catGrocery, name: 'Grocery')
+    ];
     model.dropdownValue = ShowcaseCatalog.catGrocery;
+
+    await model.loadCities();
+    expect(model.cities, isNotEmpty);
+    expect(model.cityValue, 'city-degloor');
 
     expect(await model.submit(userId: currentUserUid), 'BusinessDashboard');
     expect(await getCurrentUserRole(), UserRole.businessOwner.value);
 
     final shops =
         await BusinessService.instance.ownedBy(GuestAuthUser.guestUid);
-    expect(shops.map((shop) => shop.name), contains('Siddi Kirana'));
+    final shop = shops.singleWhere((s) => s.name == 'Siddi Kirana');
+    expect(shop.cityId, 'city-degloor');
   });
 
   testWidgets('registration loads shop categories on the model',
@@ -77,6 +90,13 @@ void main() {
         TextEditingController(text: 'Sadad Siddi');
     model.textFieldModel4.inputTextController =
         TextEditingController(text: '9876543210');
+    model.textFieldModel6.inputTextController =
+        TextEditingController(text: 'Main Market, Degloor');
+    model.textFieldModel8.inputTextController =
+        TextEditingController(text: 'Shivaji Chowk');
+    model.categories = [
+      const ShopCategory(id: ShowcaseCatalog.catGrocery, name: 'Grocery')
+    ];
     model.dropdownValue = ShowcaseCatalog.catGrocery;
 
     await model.uploadPhotoBytes(

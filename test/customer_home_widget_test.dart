@@ -1,5 +1,4 @@
 import 'package:degloor_one/app_state.dart';
-import 'package:degloor_one/features/home/customer_home_model.dart';
 import 'package:degloor_one/features/home/customer_home_widget.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_model.dart';
 import 'package:degloor_one/shared/shop.dart';
@@ -81,9 +80,9 @@ void main() {
     ));
 
     final newest = model.newestShops([
-      _shop('old', DateTime.utc(2024, 1, 1)),
+      _shop('old', DateTime.utc(2024)),
       _shop('new', DateTime.utc(2026, 8, 25)),
-      _shop('mid', DateTime.utc(2025, 6, 1)),
+      _shop('mid', DateTime.utc(2025, 6)),
     ]);
     expect(newest.map((shop) => shop.id), ['new', 'mid', 'old']);
     expect(

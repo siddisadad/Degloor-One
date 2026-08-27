@@ -1,9 +1,10 @@
+import 'package:degloor_one/backend/whatsapp_service.dart';
 import 'package:degloor_one/components/degloor_app_bar.dart';
 import 'package:degloor_one/core/degloor_theme.dart';
 import 'package:degloor_one/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
-enum ProfileInfoKind { helpCenter, termsOfService, aboutApp }
+enum ProfileInfoKind { helpCenter, termsOfService, aboutApp, privacyPolicy }
 
 /// Help Center, Terms of Service, and About App share one scrollable page.
 class ProfileInfoWidget extends StatelessWidget {
@@ -20,6 +21,8 @@ class ProfileInfoWidget extends StatelessWidget {
   static const termsRoutePath = '/termsOfService';
   static const aboutRouteName = 'AboutApp';
   static const aboutRoutePath = '/aboutApp';
+  static const privacyRouteName = 'PrivacyPolicy';
+  static const privacyRoutePath = '/privacyPolicy';
 
   @override
   Widget build(BuildContext context) {
@@ -45,12 +48,62 @@ class ProfileInfoWidget extends StatelessWidget {
           const SizedBox(height: 8),
           Text(copy.locationOrVersion, style: DegloorTheme.bodySmall),
           const SizedBox(height: 24),
+          if (kind == ProfileInfoKind.helpCenter) _buildContactSupport(context),
           for (final section in copy.sections) ...[
             Text(section.heading, style: DegloorTheme.titleMedium),
             const SizedBox(height: 8),
             Text(section.body, style: DegloorTheme.bodyMedium),
             const SizedBox(height: 20),
           ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildContactSupport(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 32),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: DegloorTheme.primary.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(DegloorTheme.radiusMD),
+        border: Border.all(
+          color: DegloorTheme.primary.withValues(alpha: 0.1),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Need direct help?',
+            style: DegloorTheme.titleMedium.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Message our support team on WhatsApp for any issues or queries.',
+            style: DegloorTheme.bodySmall.copyWith(
+              color: DegloorTheme.textSecondary,
+            ),
+          ),
+          const SizedBox(height: 20),
+          ElevatedButton.icon(
+            onPressed: () => WhatsAppService.launchWhatsApp(
+              phoneNumber: WhatsAppService.adminSupportNumber,
+              message: 'Hello Degloor One Support, I need help with...',
+            ),
+            icon: const Icon(Icons.chat_bubble_outline_rounded, size: 18),
+            label: const Text('Contact Support'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: DegloorTheme.success,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(DegloorTheme.radiusSM),
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -103,6 +156,27 @@ class ProfileInfoWidget extends StatelessWidget {
               l10n?.termsContactTitle ?? 'Questions',
               l10n?.termsContactBody ??
                   'If you need a copy of these terms or have a question about DEGLOOR ONE, open Help Center from Profile.',
+            ),
+          ],
+        );
+      case ProfileInfoKind.privacyPolicy:
+        return _InfoCopy(
+          title: l10n?.privacyPolicy ?? 'Privacy Policy',
+          intro: l10n?.privacyIntro ??
+              'We value your privacy and are committed to protecting your personal data.',
+          locationOrVersion: l10n?.aboutLocation ?? 'Degloor, Maharashtra',
+          sections: [
+            const _InfoSection(
+              'Data Collection',
+              'We collect information you provide (name, phone, location) to facilitate marketplace services and deliveries.',
+            ),
+            const _InfoSection(
+              'Third-Party Services',
+              'We may use trusted services like Google Maps and WhatsApp to provide features. Your data is handled securely and not sold to third parties.',
+            ),
+            const _InfoSection(
+              'Your Choices',
+              'You can manage your profile and delete your account data at any time from the app settings.',
             ),
           ],
         );

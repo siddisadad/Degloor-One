@@ -113,6 +113,7 @@ class JobListing {
     required this.id,
     required this.title,
     required this.jobType,
+    required this.createdAt,
     this.salaryRange,
     this.shop,
   });
@@ -120,6 +121,7 @@ class JobListing {
   final String id;
   final String title;
   final String jobType;
+  final DateTime createdAt;
   final String? salaryRange;
   final JoinedShop? shop;
 
@@ -128,6 +130,7 @@ class JobListing {
       id: '${data['id'] ?? ''}',
       title: _text(data['title']) ?? 'Job Title',
       jobType: _text(data['job_type']) ?? 'Type',
+      createdAt: _date(data['created_at']) ?? DateTime.fromMillisecondsSinceEpoch(0),
       salaryRange: _text(data['salary_range']),
       shop: JoinedShop.fromJoin(data['businesses']),
     );

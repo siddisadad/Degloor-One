@@ -1,7 +1,10 @@
+import 'dart:async';
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/delivery_service.dart';
 import 'package:degloor_one/backend/discovery_service.dart';
 import 'package:degloor_one/backend/order_service.dart';
+import 'package:degloor_one/l10n/app_localizations.dart';
+import 'package:degloor_one/shared/order_lifecycle.dart';
 import 'package:degloor_one/shared/page_query.dart';
 import 'package:degloor_one/shared/placed_order.dart';
 import 'package:degloor_one/shared/shop.dart';
@@ -10,13 +13,12 @@ import 'package:degloor_one/components/degloor_app_bar.dart';
 import 'package:degloor_one/components/empty_state_view.dart';
 import 'package:degloor_one/components/load_more_control.dart';
 import 'package:degloor_one/components/order_list_card.dart';
-import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
+import 'package:degloor_one/core/degloor_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:degloor_one/core/error_handler.dart';
-import 'dart:async';
 import 'manage_orders_model.dart';
 export 'manage_orders_model.dart';
 
@@ -32,7 +34,6 @@ class ManageOrdersWidget extends StatefulWidget {
 
 class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
   late ManageOrdersModel _model;
-
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   List<PlacedOrder> _orders = [];
@@ -46,25 +47,24 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
   static const _pageSize = 20;
   Shop? _business;
   StreamSubscription<List<PlacedOrder>>? _ordersSubscription;
+  String _filter = 'active'; // 'active', 'completed', 'cancelled'
 
   @override
   void initState() {
     super.initState();
     _model = createModel(context, () => ManageOrdersModel());
-
     WidgetsBinding.instance.addPostFrameCallback((_) => _fetchData());
   }
 
   Future<void> _fetchData() async {
     final currentUser = currentUserUid;
     if (currentUser == '') {
-      setState(() => _loading = false);
+      if (mounted) setState(() => _loading = false);
       return;
     }
 
     try {
       final businesses = await DiscoveryService.instance.ownedBy(currentUser);
-
       if (businesses.isNotEmpty) {
         _business = businesses.first;
         _listenToOrders();
@@ -106,7 +106,20 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
         business.id,
         page: PageQuery(offset: _offset),
       );
-      for (final order in page.items) {
+
+      final filteredItems = page.items.where((order) {
+        final status = OrderLifecycle.normalizeStatus(order.status);
+        if (_filter == 'active') {
+          return !OrderLifecycle.isTerminal(status);
+        } else if (_filter == 'completed') {
+          return status == OrderLifecycle.delivered;
+        } else if (_filter == 'cancelled') {
+          return status == OrderLifecycle.cancelled;
+        }
+        return true;
+      }).toList();
+
+      for (final order in filteredItems) {
         final id = order.userId;
         if (id.isEmpty) continue;
         final name = order.user?.fullName?.trim();
@@ -118,12 +131,14 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
           _customerPhones[id] = phone;
         }
       }
+
       final existingUserIds = _customerNames.keys.toSet();
-      final newUserIds = page.items
+      final newUserIds = filteredItems
           .map((order) => order.userId)
           .where((id) => id.length > 10 && !existingUserIds.contains(id))
           .toSet()
           .toList();
+
       if (newUserIds.isNotEmpty) {
         final users = await DiscoveryService.instance.usersByIds(newUserIds);
         for (final user in users) {
@@ -133,12 +148,13 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
           }
         }
       }
+
       if (!mounted || token != _loadToken) return;
       setState(() {
         if (reset) {
-          _orders = page.items;
+          _orders = filteredItems;
         } else {
-          _orders.addAll(page.items);
+          _orders.addAll(filteredItems);
         }
         _offset += _pageSize;
         _hasMore = page.hasMore;
@@ -169,9 +185,9 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Order status updated to ${OrderService.instance.statusLabel(newStatus)}',
+              'Order status updated to ${OrderService.instance.statusLabel(newStatus, l10n: AppLocalizations.of(context))}',
             ),
-            backgroundColor: FlutterFlowTheme.of(context).success,
+            backgroundColor: DegloorTheme.success,
           ),
         );
         await _loadPage(reset: true);
@@ -186,7 +202,7 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
                 fallback: 'Unable to update the order. Please try again.',
               ),
             ),
-            backgroundColor: FlutterFlowTheme.of(context).error,
+            backgroundColor: DegloorTheme.error,
           ),
         );
       }
@@ -204,7 +220,6 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = FlutterFlowTheme.of(context);
     return GestureDetector(
       onTap: () {
         FocusScope.of(context).unfocus();
@@ -212,97 +227,133 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
       },
       child: Scaffold(
         key: scaffoldKey,
-        backgroundColor: theme.primaryBackground,
+        backgroundColor: DegloorTheme.background,
         appBar: degloorAppBar(context, title: 'Manage Orders'),
         body: SafeArea(
           child: Align(
             alignment: Alignment.topCenter,
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 520),
-              child: Padding(
-                padding: EdgeInsets.all(theme.designToken.spacing.md),
-                child: Column(
-                  children: [
-                    if (_business == null && !_loading)
-                      const Expanded(
-                        child: EmptyStateView(
-                          icon: Icons.storefront_outlined,
-                          title: 'No shop yet',
-                          description:
-                              'Register your business to accept and fulfill Degloor orders.',
-                        ),
-                      )
-                    else if (_loading && _orders.isEmpty)
-                      Expanded(
-                        child: Center(
-                          child: CircularProgressIndicator(
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(theme.primary),
-                          ),
-                        ),
-                      )
-                    else if (_orders.isEmpty)
-                      const Expanded(
-                        child: EmptyStateView(
-                          icon: Icons.receipt_long_outlined,
-                          title: 'No orders yet',
-                          description:
-                              'New customer orders for your shop will show up here.',
-                        ),
-                      )
-                    else
-                      Expanded(
-                        child: RefreshIndicator(
-                          color: theme.primary,
-                          onRefresh: () => _loadPage(reset: true),
-                          child: ListView.separated(
-                            physics: const AlwaysScrollableScrollPhysics(),
-                            itemCount: _orders.length + (_hasMore ? 1 : 0),
-                            separatorBuilder: (context, index) =>
-                                SizedBox(height: theme.designToken.spacing.sm),
-                            itemBuilder: (context, index) {
-                              if (index >= _orders.length) {
-                                return LoadMoreControl(
-                                  loading: _loadingMore,
-                                  onPressed: () => _loadPage(),
-                                );
-                              }
-                              final order = _orders[index];
-                              final actions = OrderService.instance
-                                  .ownerActions(order.status);
-                              final customerName = order.user?.displayName(
-                                    fallback: 'Unknown Customer',
-                                  ) ??
-                                  _customerNames[order.userId] ??
-                                  'Loading…';
-                              final customerPhone = order.user?.phoneNumber ??
-                                  _customerPhones[order.userId];
-                              return OrderListCard(
-                                title: customerName,
-                                orderId: order.id,
-                                createdAt: order.createdAt,
-                                totalAmount: order.totalAmount,
-                                status: order.status,
-                                subtitle: customerPhone,
-                                footer: !actions.isTerminal
-                                    ? _orderActions(order, actions)
-                                    : _buildInfoRow(
-                                        'Customer',
-                                        customerName,
-                                        phoneNumber: customerPhone,
-                                        orderId: order.id,
-                                      ),
-                              );
-                            },
-                          ),
+              child: Column(
+                children: [
+                  if (_business != null) _buildFilters(),
+                  const SizedBox(height: 12),
+                  if (_business == null && !_loading)
+                    const Expanded(
+                      child: EmptyStateView(
+                        icon: Icons.storefront_outlined,
+                        title: 'No shop yet',
+                        description:
+                            'Register your business to accept and fulfill Degloor orders.',
+                      ),
+                    )
+                  else if (_loading && _orders.isEmpty)
+                    const Expanded(
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          color: DegloorTheme.primary,
                         ),
                       ),
-                  ],
-                ),
+                    )
+                  else if (_orders.isEmpty)
+                    const Expanded(
+                      child: EmptyStateView(
+                        icon: Icons.receipt_long_outlined,
+                        title: 'No orders yet',
+                        description:
+                            'New customer orders for your shop will show up here.',
+                      ),
+                    )
+                  else
+                    Expanded(
+                      child: RefreshIndicator(
+                        color: DegloorTheme.primary,
+                        onRefresh: () => _loadPage(reset: true),
+                        child: ListView.separated(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          itemCount: _orders.length + (_hasMore ? 1 : 0),
+                          separatorBuilder: (context, index) =>
+                              const SizedBox(height: 12),
+                          itemBuilder: (context, index) {
+                            if (index >= _orders.length) {
+                              return LoadMoreControl(
+                                loading: _loadingMore,
+                                onPressed: () => _loadPage(),
+                              );
+                            }
+                            final order = _orders[index];
+                            final actions =
+                                OrderService.instance.ownerActions(order.status);
+                            final customerName = order.user?.displayName(
+                                  fallback: 'Unknown Customer',
+                                ) ??
+                                _customerNames[order.userId] ??
+                                'Loading…';
+                            final customerPhone = order.user?.phoneNumber ??
+                                _customerPhones[order.userId];
+                            return OrderListCard(
+                              title: customerName,
+                              orderId: order.id,
+                              createdAt: order.createdAt,
+                              totalAmount: order.totalAmount,
+                              status: order.status,
+                              subtitle: customerPhone,
+                              footer: !actions.isTerminal
+                                  ? _orderActions(order, actions)
+                                  : _buildInfoRow(
+                                      'Customer',
+                                      customerName,
+                                      phoneNumber: customerPhone,
+                                      orderId: order.id,
+                                    ),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                ],
               ),
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildFilters() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        children: [
+          _filterChip('Active', 'active'),
+          const SizedBox(width: 8),
+          _filterChip('Completed', 'completed'),
+          const SizedBox(width: 8),
+          _filterChip('Cancelled', 'cancelled'),
+        ],
+      ),
+    );
+  }
+
+  Widget _filterChip(String label, String value) {
+    final isSelected = _filter == value;
+    return ChoiceChip(
+      label: Text(label),
+      selected: isSelected,
+      onSelected: (selected) {
+        if (selected) {
+          setState(() {
+            _filter = value;
+            _loadPage(reset: true);
+          });
+        }
+      },
+      selectedColor: DegloorTheme.primary,
+      labelStyle: TextStyle(
+        color: isSelected ? Colors.white : DegloorTheme.textPrimary,
+        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
       ),
     );
   }
@@ -319,7 +370,7 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
           phoneNumber: order.user?.phoneNumber ?? _customerPhones[order.userId],
           orderId: order.id,
         ),
-        SizedBox(height: FlutterFlowTheme.of(context).designToken.spacing.sm),
+        const SizedBox(height: 12),
         Wrap(
           spacing: 8,
           runSpacing: 8,
@@ -329,29 +380,20 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
                 onPressed: () =>
                     _updateOrderStatus(order.id, actions.acceptStatus),
                 text: 'Accept',
-                options: _buttonOptions(
-                  context,
-                  FlutterFlowTheme.of(context).success,
-                ),
+                options: _buttonOptions(context, DegloorTheme.success),
               ),
             if (actions.canMarkReady)
               FFButtonWidget(
                 onPressed: () =>
                     _updateOrderStatus(order.id, actions.readyStatus),
                 text: 'Mark ready',
-                options: _buttonOptions(
-                  context,
-                  FlutterFlowTheme.of(context).primary,
-                ),
+                options: _buttonOptions(context, DegloorTheme.primary),
               ),
             if (actions.canCounterDeliver)
               FFButtonWidget(
                 onPressed: () => _showOtpVerificationDialog(order),
                 text: 'Deliver with OTP',
-                options: _buttonOptions(
-                  context,
-                  FlutterFlowTheme.of(context).secondary,
-                ),
+                options: _buttonOptions(context, DegloorTheme.secondary),
               ),
             if (actions.canCancel)
               FFButtonWidget(
@@ -380,10 +422,7 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
                   }
                 },
                 text: 'Cancel',
-                options: _buttonOptions(
-                  context,
-                  FlutterFlowTheme.of(context).error,
-                ),
+                options: _buttonOptions(context, DegloorTheme.error),
               ),
           ],
         ),
@@ -393,7 +432,6 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
 
   Widget _buildInfoRow(String label, String value,
       {String? phoneNumber, String? orderId}) {
-    final theme = FlutterFlowTheme.of(context);
     final shortId = (orderId != null && orderId.length >= 8)
         ? orderId.substring(0, 8)
         : orderId;
@@ -401,7 +439,7 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
       padding: const EdgeInsets.symmetric(vertical: 2),
       child: Row(
         children: [
-          Text(label, style: theme.labelMedium),
+          Text(label, style: DegloorTheme.labelSmall),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
@@ -409,8 +447,7 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.right,
-              style: theme.bodyMedium.override(
-                font: GoogleFonts.inter(),
+              style: DegloorTheme.bodyMedium.copyWith(
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -425,8 +462,7 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
                     message:
                         'Hello, this is regarding your order #$shortId on DEGLOOR ONE.',
                   );
-                  if (!opened) {
-                    if (!mounted) return;
+                  if (!opened && mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text(WhatsAppService.unableToOpenMessage),
@@ -434,9 +470,9 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
                     );
                   }
                 },
-                child: Icon(
+                child: const Icon(
                   Icons.chat_bubble_outline_rounded,
-                  color: theme.success,
+                  color: DegloorTheme.success,
                   size: 18,
                 ),
               ),
@@ -450,13 +486,12 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
     final otpController = TextEditingController();
     String? errorText;
 
-    final theme = FlutterFlowTheme.of(context);
     final verified = await showDialog<bool>(
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(theme.designToken.radius.lg),
+            borderRadius: BorderRadius.circular(DegloorTheme.radiusLG),
           ),
           title: const Text('Verify delivery OTP'),
           content: Column(
@@ -464,9 +499,8 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
             children: [
               Text(
                 'Ask the customer for the 4-digit code on their tracking screen.',
-                style: theme.bodyMedium.override(
-                  font: GoogleFonts.inter(),
-                  color: theme.secondaryText,
+                style: DegloorTheme.bodyMedium.copyWith(
+                  color: DegloorTheme.textSecondary,
                 ),
               ),
               const SizedBox(height: 16),
@@ -479,16 +513,15 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
                   fontSize: 24,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 8,
-                  color: theme.primary,
+                  color: DegloorTheme.primary,
                 ),
                 decoration: InputDecoration(
                   hintText: '0000',
                   errorText: errorText,
                   filled: true,
-                  fillColor: theme.primary.withValues(alpha: 0.06),
+                  fillColor: DegloorTheme.primary.withValues(alpha: 0.06),
                   border: OutlineInputBorder(
-                    borderRadius:
-                        BorderRadius.circular(theme.designToken.radius.lg),
+                    borderRadius: BorderRadius.circular(DegloorTheme.radiusLG),
                   ),
                 ),
               ),
@@ -501,8 +534,8 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: theme.primary,
-                foregroundColor: theme.onPrimary,
+                backgroundColor: DegloorTheme.primary,
+                foregroundColor: Colors.white,
               ),
               onPressed: () async {
                 try {
@@ -526,9 +559,9 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
 
     if (verified == true && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Order delivered after OTP verification'),
-          backgroundColor: FlutterFlowTheme.of(context).success,
+        const SnackBar(
+          content: Text('Order delivered after OTP verification'),
+          backgroundColor: DegloorTheme.success,
         ),
       );
       await _loadPage(reset: true);
@@ -536,20 +569,18 @@ class _ManageOrdersWidgetState extends State<ManageOrdersWidget> {
   }
 
   FFButtonOptions _buttonOptions(BuildContext context, Color color) {
-    final theme = FlutterFlowTheme.of(context);
     return FFButtonOptions(
       height: 36,
       padding: const EdgeInsets.symmetric(horizontal: 14),
       iconPadding: EdgeInsets.zero,
       color: color,
-      textStyle: theme.titleSmall.override(
-        font: GoogleFonts.inter(),
+      textStyle: const TextStyle(
         color: Colors.white,
         fontSize: 13,
         fontWeight: FontWeight.w700,
       ),
       elevation: 0,
-      borderRadius: BorderRadius.circular(theme.designToken.radius.md),
+      borderRadius: BorderRadius.circular(DegloorTheme.radiusMD),
     );
   }
 }

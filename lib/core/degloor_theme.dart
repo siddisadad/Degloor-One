@@ -44,6 +44,12 @@ class DegloorTheme {
         color: textPrimary,
       );
 
+  static TextStyle get titleSmall => GoogleFonts.inter(
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+        color: textPrimary,
+      );
+
   static TextStyle get bodyLarge => GoogleFonts.inter(
         fontSize: 16,
         fontWeight: FontWeight.w400,

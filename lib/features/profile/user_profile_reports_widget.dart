@@ -302,6 +302,12 @@ class _UserProfileReportsWidgetState extends State<UserProfileReportsWidget> {
                       () => context.pushNamed(ProfileInfoWidget.termsRouteName),
                     ),
                     _settingsTile(
+                      Icons.privacy_tip_outlined,
+                      l10n?.privacyPolicy ?? 'Privacy Policy',
+                      'How we handle your data',
+                      () => context.pushNamed(ProfileInfoWidget.privacyRouteName),
+                    ),
+                    _settingsTile(
                       Icons.info_outline_rounded,
                       l10n?.aboutApp ?? 'About App',
                       l10n?.aboutAppSubtitle ?? 'Version 1.0.0',

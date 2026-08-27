@@ -11,6 +11,7 @@ import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/form_field_controller.dart';
 import 'package:degloor_one/index.dart';
 import 'package:degloor_one/shared/discovery_radius.dart';
+import 'package:degloor_one/shared/city.dart';
 import 'package:degloor_one/shared/shop_category.dart';
 import 'package:degloor_one/shared/shop_draft.dart';
 import 'business_registration_widget.dart' show BusinessRegistrationWidget;
@@ -47,8 +48,9 @@ class BusinessRegistrationModel
   late SectionHeaderModel sectionHeaderModel3;
   // Model for TextField.
   late TextFieldModel textFieldModel6;
-  // Model for TextField.
-  late TextFieldModel textFieldModel7;
+  // State field(s) for Dropdown widget.
+  String? cityValue;
+  FormFieldController<String>? cityValueController;
   // Model for TextField.
   late TextFieldModel textFieldModel8;
   // Model for TextField.
@@ -67,12 +69,21 @@ class BusinessRegistrationModel
   // Model for Button.
   late ButtonModel buttonModel2;
 
+  bool nameError = false;
+  bool ownerError = false;
+  bool categoryError = false;
+  bool phoneError = false;
+  bool addressError = false;
+  bool areaError = false;
+
   String? storeFrontUrl;
   String? interiorUrl;
   String? registrationDocUrl;
   RegistrationPhotoSlot? uploadingSlot;
   List<ShopCategory> categories = [];
+  List<City> cities = [];
   bool categoriesLoading = false;
+  bool citiesLoading = false;
 
   String? photoUrl(RegistrationPhotoSlot slot) {
     switch (slot) {
@@ -122,6 +133,28 @@ class BusinessRegistrationModel
       }
     } finally {
       categoriesLoading = false;
+      onBusyChanged?.call();
+    }
+  }
+
+  Future<void> loadCities({VoidCallback? onBusyChanged}) async {
+    citiesLoading = true;
+    onBusyChanged?.call();
+    try {
+      cities = await DiscoveryService.instance.cities();
+      if (cities.isNotEmpty && (cityValue == null || cityValue!.isEmpty)) {
+        cityValue = cities
+            .firstWhere((c) => c.name.toLowerCase() == 'degloor',
+                orElse: () => cities.first)
+            .id;
+      }
+      final selected = cityValue;
+      cityValueController ??= FormFieldController<String>(selected);
+      if (selected != null) {
+        cityValueController?.value = selected;
+      }
+    } finally {
+      citiesLoading = false;
       onBusyChanged?.call();
     }
   }
@@ -182,7 +215,6 @@ class BusinessRegistrationModel
     switchModel = createModel(context, () => SwitchComponentModel());
     sectionHeaderModel3 = createModel(context, () => SectionHeaderModel());
     textFieldModel6 = createModel(context, () => TextFieldModel());
-    textFieldModel7 = createModel(context, () => TextFieldModel());
     textFieldModel8 = createModel(context, () => TextFieldModel());
     textFieldModel9 = createModel(context, () => TextFieldModel());
     buttonModel1 = createModel(context, () => ButtonModel());
@@ -199,9 +231,33 @@ class BusinessRegistrationModel
     if (userId.isEmpty) {
       throw Exception('Please login to register a business');
     }
+
     final name = textFieldModel1.inputTextController?.text ?? '';
     final owner = textFieldModel2.inputTextController?.text ?? '';
     final phone = textFieldModel4.inputTextController?.text ?? '';
+    final address = textFieldModel6.inputTextController?.text ?? '';
+    final area = textFieldModel8.inputTextController?.text ?? '';
+    final cityName = cities.firstWhere((c) => c.id == cityValue, orElse: () => const City(id: '', name: 'Degloor')).name;
+
+    nameError = name.trim().isEmpty;
+    ownerError = owner.trim().isEmpty;
+    phoneError = phone.trim().isEmpty;
+    addressError = address.trim().isEmpty;
+    areaError = area.trim().isEmpty;
+    categoryError = dropdownValue == null || dropdownValue!.isEmpty;
+
+    if (nameError ||
+        ownerError ||
+        phoneError ||
+        addressError ||
+        areaError ||
+        categoryError) {
+      if (categoryError && categories.isEmpty) {
+        throw Exception('Unable to load categories. Please check your connection.');
+      }
+      throw Exception('Please fill all required fields');
+    }
+
     final sliderVal = sliderModel.sliderValue ??
         sliderPercentFromRadius(kDefaultDiscoveryRadiusKm);
     final sameWhatsapp = switchModel.switchValue ?? true;
@@ -216,12 +272,13 @@ class BusinessRegistrationModel
         phone: phone,
         categoryId: dropdownValue ?? '',
         subcategory: textFieldModel9.inputTextController?.text,
+        cityId: cityValue,
         latitude: mapGoogleMapsCenter.latitude,
         longitude: mapGoogleMapsCenter.longitude,
         description: textFieldModel3.inputTextController?.text ?? '',
         whatsappNumber: whatsapp,
         addressText:
-            '${textFieldModel6.inputTextController?.text ?? ''}, ${textFieldModel8.inputTextController?.text ?? ''}, ${textFieldModel7.inputTextController?.text ?? 'Degloor'}',
+            '${textFieldModel6.inputTextController?.text ?? ''}, ${textFieldModel8.inputTextController?.text ?? ''}, $cityName',
         discoveryRadius: radiusFromSliderPercent(sliderVal),
         imageUrl: storeFrontUrl,
         photos: uploadedPhotoUrls.isEmpty ? null : uploadedPhotoUrls,
@@ -243,7 +300,6 @@ class BusinessRegistrationModel
     switchModel.dispose();
     sectionHeaderModel3.dispose();
     textFieldModel6.dispose();
-    textFieldModel7.dispose();
     textFieldModel8.dispose();
     textFieldModel9.dispose();
     buttonModel1.dispose();

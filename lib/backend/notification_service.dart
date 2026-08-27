@@ -1,3 +1,4 @@
+import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/repositories/notification_repository.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/core/api/api_client.dart';
@@ -78,6 +79,19 @@ class NotificationService {
     return _repository.deleteAll(userId);
   }
 
+  Future<void> updateFcmToken(String token) async {
+    final user = currentUserUid;
+    if (user == '') return;
+    try {
+      if (kUseShowcaseData) return;
+      await SupaFlow.client.from('users').update({
+        'fcm_token': token,
+      }).eq('id', user);
+    } catch (e) {
+      AppLogger.error('Failed to update FCM token', e);
+    }
+  }
+
   Stream<List<AppNotification>> watchForUser(String userId) {
     if (JavaApiConfig.enabled) {
       return Stream.fromFuture(
@@ -94,6 +108,7 @@ class NotificationService {
     required String title,
     required String message,
     String? type,
+    String? referenceId,
   }) async {
     try {
       if (kUseShowcaseData) {
@@ -102,6 +117,7 @@ class NotificationService {
           'title': title,
           'message': message,
           'type': type ?? 'general',
+          'reference_id': referenceId,
           'is_read': false,
           'created_at': DateTime.now().toIso8601String(),
         });
@@ -119,6 +135,7 @@ class NotificationService {
     required String title,
     required String message,
     String? type,
+    String? referenceId,
   }) async {
     if (userId.isEmpty) {
       throw Exception('Missing recipient');
@@ -129,6 +146,7 @@ class NotificationService {
         title: title,
         message: message,
         type: type,
+        referenceId: referenceId,
       );
       return;
     }
@@ -139,6 +157,7 @@ class NotificationService {
         'p_title': title,
         'p_message': message,
         'p_type': type ?? 'general',
+        'p_reference_id': referenceId,
       },
     );
   }
@@ -154,6 +173,7 @@ class NotificationService {
       title: 'Order Updated',
       message: 'Your order #$shortId is now $status.',
       type: 'order_status',
+      referenceId: orderId,
     );
   }
 
@@ -161,24 +181,28 @@ class NotificationService {
     required String ownerId,
     required String businessName,
     required int rating,
+    String? businessId,
   }) async {
     await sendNotification(
       userId: ownerId,
       title: 'New Review!',
       message: 'Someone left a $rating-star review for $businessName.',
       type: 'new_review',
+      referenceId: businessId,
     );
   }
 
   static Future<void> notifyServiceRequestUpdate({
     required String userId,
     required String status,
+    String? requestId,
   }) async {
     await sendNotification(
       userId: userId,
       title: 'Service Request Update',
       message: 'Your service request is now $status.',
       type: 'service_request',
+      referenceId: requestId,
     );
   }
 }
