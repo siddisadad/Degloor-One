@@ -1,5 +1,4 @@
 import 'package:degloor_one/auth/password_recovery.dart';
-import 'package:degloor_one/components/social_button/social_button_widget.dart';
 import 'package:degloor_one/components/text_field/text_field_widget.dart';
 import 'package:degloor_one/features/auth/auth_continue.dart' as auth_continue;
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
@@ -12,16 +11,12 @@ class SignUpModel extends FlutterFlowModel<SignUpWidget> {
   late TextFieldModel emailModel;
   late TextFieldModel passwordModel;
   late TextFieldModel confirmModel;
-  late SocialButtonModel socialButtonModel;
-  late SocialButtonModel appleButtonModel;
 
   @override
   void initState(BuildContext context) {
     emailModel = createModel(context, () => TextFieldModel());
     passwordModel = createModel(context, () => TextFieldModel());
     confirmModel = createModel(context, () => TextFieldModel());
-    socialButtonModel = createModel(context, () => SocialButtonModel());
-    appleButtonModel = createModel(context, () => SocialButtonModel());
   }
 
   String get email => emailModel.inputTextController?.text.trim() ?? '';
@@ -51,7 +46,5 @@ class SignUpModel extends FlutterFlowModel<SignUpWidget> {
     emailModel.dispose();
     passwordModel.dispose();
     confirmModel.dispose();
-    socialButtonModel.dispose();
-    appleButtonModel.dispose();
   }
 }

@@ -1,6 +1,5 @@
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/components/auth_page_header.dart';
-import 'package:degloor_one/components/social_button/social_button_widget.dart';
 import 'package:degloor_one/components/supabase_unreachable_banner.dart';
 import 'package:degloor_one/components/text_field/text_field_widget.dart';
 import 'package:degloor_one/core/app_flags.dart';
@@ -9,7 +8,6 @@ import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'signup_model.dart';
 export 'signup_model.dart';
 
@@ -142,79 +140,6 @@ class _SignUpWidgetState extends State<SignUpWidget> {
                     borderRadius: BorderRadius.circular(14),
                   ),
                 ),
-                const SizedBox(height: 16),
-                FFButtonWidget(
-                  text: 'Continue with Phone',
-                  onPressed:
-                      _isLoading ? null : () => context.pushNamed('PhoneAuth'),
-                  options: FFButtonOptions(
-                    width: double.infinity,
-                    height: 54,
-                    color: Colors.transparent,
-                    textStyle: TextStyle(
-                      color: FlutterFlowTheme.of(context).primary,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    borderSide: BorderSide(
-                      color: FlutterFlowTheme.of(context).primary,
-                      width: 2,
-                    ),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Divider(
-                        color: FlutterFlowTheme.of(context).alternate,
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text(
-                        'OR',
-                        style: FlutterFlowTheme.of(context).labelSmall,
-                      ),
-                    ),
-                    Expanded(
-                      child: Divider(
-                        color: FlutterFlowTheme.of(context).alternate,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                wrapWithModel(
-                  model: _model.socialButtonModel,
-                  updateCallback: () => setState(() {}),
-                  child: SocialButtonWidget(
-                    icon: const FaIcon(
-                      FontAwesomeIcons.google,
-                      size: 18,
-                    ),
-                    label: 'Continue with Google',
-                    onTap: () => _continueWithProvider(
-                      () => authManager.signInWithGoogle(context),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                wrapWithModel(
-                  model: _model.appleButtonModel,
-                  updateCallback: () => setState(() {}),
-                  child: SocialButtonWidget(
-                    icon: const FaIcon(
-                      FontAwesomeIcons.apple,
-                      size: 20,
-                    ),
-                    label: 'Continue with Apple',
-                    onTap: () => _continueWithProvider(
-                      () => authManager.signInWithApple(context),
-                    ),
-                  ),
-                ),
                 const SizedBox(height: 32),
                 Center(
                   child: Wrap(
@@ -335,20 +260,6 @@ class _SignUpWidgetState extends State<SignUpWidget> {
         _model.email,
         _model.password,
       );
-      if (!mounted || user == null) return;
-      await _continueAfterAuth();
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
-    }
-  }
-
-  Future<void> _continueWithProvider(
-    Future<Object?> Function() signIn,
-  ) async {
-    if (_isLoading) return;
-    setState(() => _isLoading = true);
-    try {
-      final user = await signIn();
       if (!mounted || user == null) return;
       await _continueAfterAuth();
     } finally {
