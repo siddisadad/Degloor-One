@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:degloor_one/auth/auth_send_rate_limit.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/core/error_handler.dart';
 
@@ -72,16 +73,57 @@ class SupabaseConnection {
   static bool looksUnreachable(Object error) => AppLogger.isUnreachable(error);
 
   static String messageFor(Object error, {String? authMessage}) {
+    final extracted = _authCopy(error, authMessage);
     if (looksUnreachable(error) ||
-        (authMessage != null && looksUnreachable(authMessage))) {
+        (extracted != null && looksUnreachable(extracted))) {
       return kBypassAuth ? guestUnreachableMessage : unreachableMessage;
     }
-    if (authMessage != null &&
-        authMessage.contains('User already registered')) {
+    final rateLimit = AuthSendRateLimit.tryUserMessage(
+      error,
+      authMessage: extracted,
+    );
+    if (rateLimit != null) return rateLimit;
+    if (extracted == null || extracted.isEmpty) {
+      return _fallbackCopy(error);
+    }
+    if (extracted.contains('User already registered')) {
       return 'Error: The email is already in use by a different account';
     }
+    if (_looksLikeAuthDump(extracted)) {
+      return 'Something went wrong. Please try again.';
+    }
+    return 'Error: $extracted';
+  }
+
+  /// [AuthException.message], or the `message:` field dumped in
+  /// `AuthApiException(message: ..., statusCode: 429, code: ...)`.
+  static String? _authCopy(Object error, String? authMessage) {
     if (authMessage != null && authMessage.trim().isNotEmpty) {
-      return 'Error: $authMessage';
+      return authMessage.trim();
+    }
+    if (error is AuthException && error.message.trim().isNotEmpty) {
+      return error.message.trim();
+    }
+    return _messageFromDump(error.toString());
+  }
+
+  static String? _messageFromDump(String dumped) {
+    if (!_looksLikeAuthDump(dumped)) return null;
+    return RegExp(r'message:\s*(.+?)(?:,\s*statusCode:|,\s*code:|$)')
+        .firstMatch(dumped)
+        ?.group(1)
+        ?.trim();
+  }
+
+  static bool _looksLikeAuthDump(String text) {
+    return text.contains('AuthApiException') ||
+        text.contains('AuthException(') ||
+        text.contains('AuthException ');
+  }
+
+  static String _fallbackCopy(Object error) {
+    if (_looksLikeAuthDump(error.toString())) {
+      return 'Something went wrong. Please try again.';
     }
     return 'Error: $error';
   }
@@ -99,9 +141,11 @@ class SupabaseConnection {
     String? authMessage,
   }) {
     if (!context.mounted) return;
+    final copy = authMessage ??
+        (error is AuthException ? error.message : null);
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(messageFor(error, authMessage: authMessage))),
+      SnackBar(content: Text(messageFor(error, authMessage: copy))),
     );
   }
 }

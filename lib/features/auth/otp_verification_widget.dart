@@ -1,5 +1,4 @@
-import 'dart:async';
-
+import 'package:degloor_one/auth/auth_send_rate_limit.dart';
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/supabase/supabase_connection.dart';
 import 'package:degloor_one/components/auth_page_header.dart';
@@ -31,38 +30,24 @@ class OtpVerificationWidget extends StatefulWidget {
 class _OtpVerificationWidgetState extends State<OtpVerificationWidget> {
   late OtpVerificationModel _model;
   final scaffoldKey = GlobalKey<ScaffoldState>();
+  late final AuthResendCooldown _resendCooldown;
   bool _isLoading = false;
-  int _resendInSeconds = 30;
-  Timer? _resendTimer;
 
   @override
   void initState() {
     super.initState();
     _model = createModel(context, () => OtpVerificationModel());
-    _startResendCooldown(notify: false);
-  }
-
-  void _startResendCooldown({bool notify = true}) {
-    _resendTimer?.cancel();
-    _resendInSeconds = 30;
-    if (notify && mounted) setState(() {});
-    _resendTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (!mounted) {
-        timer.cancel();
-        return;
-      }
-      if (_resendInSeconds <= 1) {
-        timer.cancel();
-        setState(() => _resendInSeconds = 0);
-      } else {
-        setState(() => _resendInSeconds -= 1);
-      }
-    });
+    _resendCooldown = AuthResendCooldown(
+      onTick: () {
+        if (mounted) setState(() {});
+      },
+    );
+    _resendCooldown.start(notify: false);
   }
 
   @override
   void dispose() {
-    _resendTimer?.cancel();
+    _resendCooldown.dispose();
     _model.dispose();
     super.dispose();
   }
@@ -166,13 +151,13 @@ class _OtpVerificationWidgetState extends State<OtpVerificationWidget> {
                 Center(
                   child: TextButton(
                     onPressed: _isLoading ||
-                            _resendInSeconds > 0 ||
+                            _resendCooldown.isActive ||
                             SupabaseConnection.shouldSkipAuthRequest
                         ? null
                         : _handleResend,
                     child: Text(
-                      _resendInSeconds > 0
-                          ? 'Resend code in ${_resendInSeconds}s'
+                      _resendCooldown.isActive
+                          ? 'Resend code in ${_resendCooldown.remainingSeconds}s'
                           : 'Resend Code',
                       style: TextStyle(
                         color: FlutterFlowTheme.of(context).primary,
@@ -229,7 +214,7 @@ class _OtpVerificationWidgetState extends State<OtpVerificationWidget> {
         phoneNumber: widget.phone,
         onCodeSent: (_) {
           if (!mounted) return;
-          _startResendCooldown();
+          _resendCooldown.start();
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Code resent successfully')),
           );
