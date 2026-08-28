@@ -5,6 +5,7 @@ import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/backend/supabase/supabase_connection.dart';
 import 'package:degloor_one/core/error_handler.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() {
   setUp(() {
@@ -356,6 +357,33 @@ void main() {
         authMessage: 'Invalid login credentials',
       ),
       'Error: Invalid login credentials',
+    );
+  });
+
+  test('AuthApiException dump does not reach the customer', () {
+    const dumped =
+        'AuthApiException(message: email rate limit exceeded, statusCode: 429, code: over_email_send_rate_limit)';
+    expect(
+      SupabaseConnection.messageFor(Exception(dumped)),
+      'Please wait a moment before trying again.',
+    );
+    expect(
+      SupabaseConnection.messageFor(Exception(dumped)),
+      isNot(contains('AuthApiException')),
+    );
+    expect(
+      SupabaseConnection.messageFor(
+        Exception(
+          'AuthApiException(message: Invalid login credentials, statusCode: 400, code: invalid_credentials)',
+        ),
+      ),
+      'Error: Invalid login credentials',
+    );
+    expect(
+      SupabaseConnection.messageFor(
+        const AuthException('User already registered'),
+      ),
+      'Error: The email is already in use by a different account',
     );
   });
 
