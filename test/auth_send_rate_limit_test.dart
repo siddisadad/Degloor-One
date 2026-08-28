@@ -1,6 +1,5 @@
 import 'package:degloor_one/auth/auth_send_rate_limit.dart';
 import 'package:degloor_one/core/api/api_client.dart';
-import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -54,24 +53,23 @@ void main() {
     );
   });
 
-  test('AuthResendCooldown counts down without shortening a longer wait', () {
-    fakeAsync((async) {
-      var ticks = 0;
-      final cooldown = AuthResendCooldown(onTick: () => ticks++);
-      cooldown.start(seconds: 3);
-      expect(cooldown.remainingSeconds, 3);
-      expect(cooldown.isActive, isTrue);
-      cooldown.extendTo(2);
-      expect(cooldown.remainingSeconds, 3);
-      async.elapse(const Duration(seconds: 1));
-      expect(cooldown.remainingSeconds, 2);
-      cooldown.extendTo(4);
-      expect(cooldown.remainingSeconds, 4);
-      async.elapse(const Duration(seconds: 4));
-      expect(cooldown.remainingSeconds, 0);
-      expect(cooldown.isActive, isFalse);
-      expect(ticks, greaterThan(1));
-      cooldown.dispose();
-    });
+  testWidgets('AuthResendCooldown counts down without shortening a longer wait',
+      (tester) async {
+    var ticks = 0;
+    final cooldown = AuthResendCooldown(onTick: () => ticks++);
+    addTearDown(cooldown.dispose);
+    cooldown.start(seconds: 3);
+    expect(cooldown.remainingSeconds, 3);
+    expect(cooldown.isActive, isTrue);
+    cooldown.extendTo(2);
+    expect(cooldown.remainingSeconds, 3);
+    await tester.pump(const Duration(seconds: 1));
+    expect(cooldown.remainingSeconds, 2);
+    cooldown.extendTo(4);
+    expect(cooldown.remainingSeconds, 4);
+    await tester.pump(const Duration(seconds: 4));
+    expect(cooldown.remainingSeconds, 0);
+    expect(cooldown.isActive, isFalse);
+    expect(ticks, greaterThan(1));
   });
 }
