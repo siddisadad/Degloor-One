@@ -45,14 +45,18 @@ class JavaAuthRepository implements AuthRepository {
 
   @override
   Future<BaseAuthUser?> signInWithGoogle(BuildContext context) async {
-    throw UnimplementedError(
-        'Google sign-in is not implemented for Java backend yet.');
+    if (context.mounted) {
+      _showError(context, Exception('Google sign-in is not available yet.'));
+    }
+    return null;
   }
 
   @override
   Future<BaseAuthUser?> signInWithApple(BuildContext context) async {
-    throw UnimplementedError(
-        'Apple sign-in is not implemented for Java backend yet.');
+    if (context.mounted) {
+      _showError(context, Exception('Apple sign-in is not available yet.'));
+    }
+    return null;
   }
 
   @override
@@ -61,8 +65,9 @@ class JavaAuthRepository implements AuthRepository {
     required String phoneNumber,
     required void Function(BuildContext) onCodeSent,
   }) async {
-    throw UnimplementedError(
-        'Phone auth is not implemented for Java backend yet.');
+    if (context.mounted) {
+      _showError(context, Exception('Phone sign-in is not available yet.'));
+    }
   }
 
   @override
@@ -71,8 +76,10 @@ class JavaAuthRepository implements AuthRepository {
     required String smsCode,
     String? phoneNumber,
   }) async {
-    throw UnimplementedError(
-        'Phone auth is not implemented for Java backend yet.');
+    if (context.mounted) {
+      _showError(context, Exception('Phone sign-in is not available yet.'));
+    }
+    return null;
   }
 
   @override
@@ -147,6 +154,9 @@ class JavaAuthRepository implements AuthRepository {
     String message = 'An unexpected error occurred';
     if (error is JavaApiException) {
       message = error.message;
+    } else {
+      final raw = error.toString();
+      message = raw.startsWith('Exception: ') ? raw.substring(11) : raw;
     }
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Error: $message')),
