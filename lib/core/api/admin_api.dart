@@ -30,11 +30,17 @@ class AdminApi {
   }
 
   static Future<List<Map<String, dynamic>>> categories() async {
-    final rows = await _http.get('/api/v1/categories');
+    final rows = await _http.get('/api/v1/admin/categories');
     final list = rows is List ? rows : const [];
     return [
       for (final row in list.whereType<Map>()) Map<String, dynamic>.from(row),
     ];
+  }
+
+  static Future<Map<String, dynamic>> createCategory(String name) async {
+    return Map<String, dynamic>.from(
+      await _http.post('/api/v1/admin/categories', {'name': name}) as Map,
+    );
   }
 
   static Future<Map<String, dynamic>> verifyBusiness(

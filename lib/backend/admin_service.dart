@@ -195,6 +195,19 @@ class AdminService {
     if (trimmed.isEmpty) {
       throw Exception('Please enter a category name');
     }
+    if (JavaApiConfig.enabled) {
+      try {
+        return ShopCategory.fromJson(await AdminApi.createCategory(trimmed));
+      } on JavaApiException catch (error) {
+        if (error.code == 'CATEGORY_EXISTS' || error.code.contains('409')) {
+          throw Exception('That category already exists');
+        }
+        if (error.code == 'INVALID_NAME') {
+          throw Exception('Please enter a category name');
+        }
+        rethrow;
+      }
+    }
     final existing = await _repository.businessCategories();
     for (final category in existing) {
       if (category.name.toLowerCase() == trimmed.toLowerCase()) {
