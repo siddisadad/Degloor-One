@@ -82,8 +82,8 @@ class NotificationService {
   Future<void> updateFcmToken(String token) async {
     final user = currentUserUid;
     if (user == '') return;
+    if (JavaApiConfig.enabled || kUseShowcaseData) return;
     try {
-      if (kUseShowcaseData) return;
       await SupaFlow.client.from('users').update({
         'fcm_token': token,
       }).eq('id', user);

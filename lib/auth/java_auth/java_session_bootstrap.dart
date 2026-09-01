@@ -1,4 +1,5 @@
 import 'package:degloor_one/auth/base_auth_user_provider.dart';
+import 'package:degloor_one/auth/java_auth/java_session_lifecycle.dart';
 import 'package:degloor_one/auth/java_auth/java_session_store.dart';
 import 'package:degloor_one/auth/java_auth_user.dart';
 import 'package:degloor_one/core/api/api_client.dart';
@@ -12,10 +13,7 @@ Future<BaseAuthUser> restoreJavaAuthSession() async {
 
   final stored = await JavaSessionStore.load();
   if (stored == null) {
-    final signedOut = JavaAuthUser.signedOut();
-    updateAuthUser(signedOut);
-    updateJwtToken(null);
-    return signedOut;
+    return clearJavaSession(clearPersisted: false);
   }
 
   final client = JavaApiClient.instance;
@@ -23,32 +21,18 @@ Future<BaseAuthUser> restoreJavaAuthSession() async {
   client.refreshToken = stored.refreshToken;
 
   try {
-    return await _emitUser(JavaAuthUser.fromJson(await AuthApi.me()));
-  } on JavaApiException {
+    return await emitJavaUser(JavaAuthUser.fromJson(await AuthApi.me()));
+  } on JavaApiException catch (error) {
+    if (!isJavaAuthFailure(error)) {
+      return markJavaSessionUnavailable();
+    }
     try {
       await AuthApi.refresh();
-      return await _emitUser(JavaAuthUser.fromJson(await AuthApi.me()));
+      return await emitJavaUser(JavaAuthUser.fromJson(await AuthApi.me()));
     } catch (_) {
-      await _clearSession();
-      return JavaAuthUser.signedOut();
+      return clearJavaSession();
     }
   } catch (_) {
-    await _clearSession();
-    return JavaAuthUser.signedOut();
+    return markJavaSessionUnavailable();
   }
-}
-
-Future<BaseAuthUser> _emitUser(JavaAuthUser user) async {
-  updateAuthUser(user);
-  updateJwtToken(JavaApiClient.instance.accessToken);
-  return user;
-}
-
-Future<void> _clearSession() async {
-  JavaApiClient.instance.accessToken = null;
-  JavaApiClient.instance.refreshToken = null;
-  await JavaSessionStore.clear();
-  final signedOut = JavaAuthUser.signedOut();
-  updateAuthUser(signedOut);
-  updateJwtToken(null);
 }

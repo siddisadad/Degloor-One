@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:degloor_one/auth/java_auth/java_session_lifecycle.dart';
 import 'package:degloor_one/auth/java_auth/java_session_store.dart';
 import 'package:degloor_one/core/app_environment.dart';
 import 'package:http/http.dart' as http;
@@ -178,9 +179,7 @@ class JavaApiClient {
         }
         return ok;
       }
-      accessToken = null;
-      refreshToken = null;
-      await JavaSessionStore.clear();
+      await clearJavaSession();
       return false;
     } catch (_) {
       return false;
