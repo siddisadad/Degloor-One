@@ -129,7 +129,8 @@ class NotificationService {
     }
   }
 
-  /// Admin-only notify. Live path uses admin_notify_user().
+  /// Admin-only notify. Live Supabase path uses admin_notify_user().
+  /// Java admin actions notify recipients on the server.
   static Future<void> adminNotify({
     required String userId,
     required String title,
@@ -139,6 +140,9 @@ class NotificationService {
   }) async {
     if (userId.isEmpty) {
       throw Exception('Missing recipient');
+    }
+    if (JavaApiConfig.enabled) {
+      return;
     }
     if (kUseShowcaseData) {
       await sendNotification(

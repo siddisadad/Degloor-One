@@ -11,6 +11,7 @@ import com.degloor.one.common.security.CurrentUser;
 import com.degloor.one.common.security.Roles;
 import com.degloor.one.delivery.entity.DeliveryPartner;
 import com.degloor.one.delivery.repository.DeliveryPartnerRepository;
+import com.degloor.one.notification.service.NotificationService;
 import com.degloor.one.order.repository.ShopOrderRepository;
 import com.degloor.one.product.entity.Product;
 import com.degloor.one.product.repository.ProductRepository;
@@ -34,6 +35,7 @@ public class AdminService {
     private final ShopOrderRepository orders;
     private final DeliveryPartnerRepository partners;
     private final ComplaintRepository complaints;
+    private final NotificationService notifications;
 
     public AdminService(
             UserRepository users,
@@ -42,7 +44,8 @@ public class AdminService {
             ProductRepository products,
             ShopOrderRepository orders,
             DeliveryPartnerRepository partners,
-            ComplaintRepository complaints
+            ComplaintRepository complaints,
+            NotificationService notifications
     ) {
         this.users = users;
         this.businesses = businesses;
@@ -51,6 +54,7 @@ public class AdminService {
         this.orders = orders;
         this.partners = partners;
         this.complaints = complaints;
+        this.notifications = notifications;
     }
 
     private void requireAdmin() {
@@ -116,7 +120,16 @@ public class AdminService {
         Business b = businesses.findById(id)
                 .orElseThrow(() -> BusinessException.notFound("BUSINESS_NOT_FOUND", "Business not found"));
         b.setVerified(verified);
-        return businesses.save(b);
+        Business saved = businesses.save(b);
+        if (verified && saved.getOwnerId() != null) {
+            notifications.notifyQuietly(
+                    saved.getOwnerId(),
+                    "Business Verified!",
+                    "Your business \"" + saved.getName() + "\" has been verified and is now live.",
+                    "business_verified"
+            );
+        }
+        return saved;
     }
 
     @Transactional
@@ -138,7 +151,16 @@ public class AdminService {
             throw BusinessException.badRequest("INVALID_STATUS", "Unknown complaint status");
         }
         c.setStatus(next);
-        return complaints.save(c);
+        Complaint saved = complaints.save(c);
+        if ("resolved".equals(next) && saved.getUserId() != null) {
+            notifications.notifyQuietly(
+                    saved.getUserId(),
+                    "Complaint Resolved",
+                    "Your complaint regarding \"" + saved.getSubject() + "\" has been resolved.",
+                    "complaint_resolved"
+            );
+        }
+        return saved;
     }
 
     public Map<String, Object> reports() {
