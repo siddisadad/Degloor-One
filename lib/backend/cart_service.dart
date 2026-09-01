@@ -215,7 +215,11 @@ class CartService {
         }
       } catch (_) {
         return CartValidationResult(
-            itemId: item.id, status: CartValidationStatus.ok);
+          itemId: item.id,
+          status: CartValidationStatus.unavailable,
+          message:
+              '${item.product?.name ?? 'Item'} could not be verified. Pull to refresh.',
+        );
       }
     });
 
@@ -240,6 +244,13 @@ class CartService {
     }
     return total;
   }
+
+  /// Matches server checkout: subtotal + delivery fee (no client-side tax/fees).
+  static double checkoutTotal({
+    required double subtotal,
+    required double deliveryFee,
+  }) =>
+      subtotal + deliveryFee;
 
   /// Checkout payload. Prices stay off the wire; the server / catalog wins.
   static List<CheckoutLineItem> checkoutItems(List<CartLine> items) {

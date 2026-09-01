@@ -55,4 +55,11 @@ void main() {
     expect(results, hasLength(1));
     expect(results.first.status, CartValidationStatus.unavailable);
   });
+
+  test('checkoutTotal matches server pricing (subtotal + delivery only)', () {
+    expect(
+      CartService.checkoutTotal(subtotal: 250, deliveryFee: 30),
+      280,
+    );
+  });
 }
