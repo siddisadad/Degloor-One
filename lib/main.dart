@@ -134,9 +134,10 @@ class MyAppState extends State<MyApp> {
         ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
       final notification = latest.first;
 
-      // Only show if it's brand new (e.g. created in the last 10 seconds)
+      // Only show if it's brand new (wider window when polling the Java API).
       final now = DateTime.now();
-      if (now.difference(notification.createdAt).inSeconds < 10 &&
+      final freshSeconds = JavaApiConfig.enabled ? 20 : 10;
+      if (now.difference(notification.createdAt).inSeconds < freshSeconds &&
           !notification.isRead) {
         _showGlobalNotification(notification);
       }

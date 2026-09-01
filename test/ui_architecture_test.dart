@@ -541,6 +541,30 @@ void main() {
     expect(body.contains('_repository.deleteAll'), isTrue);
   });
 
+  test('Java watch streams poll instead of a single future', () {
+    final paths = {
+      'lib/backend/notification_service.dart':
+          'javaPollingStream',
+      'lib/data/datasources/java_order_repository.dart':
+          'javaPollingStream',
+      'lib/backend/service_marketplace_service.dart':
+          'javaPollingStream',
+    };
+    for (final entry in paths.entries) {
+      final source = File(entry.key).readAsStringSync();
+      expect(
+        source.contains(entry.value),
+        isTrue,
+        reason: '${entry.key} should use ${entry.value}',
+      );
+      expect(
+        source.contains('Stream.fromFuture'),
+        isFalse,
+        reason: '${entry.key} should not use Stream.fromFuture',
+      );
+    }
+  });
+
   test('delivery leftover domain types stay off Supabase tables', () {
     const paths = [
       'lib/shared/delivery_assignment.dart',

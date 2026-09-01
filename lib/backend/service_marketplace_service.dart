@@ -7,6 +7,7 @@ import 'package:degloor_one/backend/supabase/database/showcase_query.dart';
 import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/core/api/api_client.dart';
 import 'package:degloor_one/core/api/marketplace_api.dart';
+import 'package:degloor_one/core/java_polling_stream.dart';
 import 'package:degloor_one/data/datasources/supabase_marketplace_maps.dart';
 import 'package:degloor_one/shared/marketplace_joins.dart';
 import 'package:degloor_one/shared/page_query.dart';
@@ -263,7 +264,10 @@ class ServiceMarketplaceService {
 
   Stream<List<ServiceRequest>> watchForProvider(String providerId) {
     if (JavaApiConfig.enabled) {
-      return Stream.fromFuture(_javaInbox(providerId));
+      return javaPollingStream(
+        () => _javaInbox(providerId),
+        interval: const Duration(seconds: 15),
+      );
     }
     return _repository.watchForProvider(providerId);
   }
@@ -271,7 +275,10 @@ class ServiceMarketplaceService {
   Stream<List<ServiceRequest>> watchForUser(String userId) {
     if (JavaApiConfig.enabled) {
       // Java API current user requests are also in the inbox
-      return Stream.fromFuture(_javaInbox(''));
+      return javaPollingStream(
+        () => _javaInbox(''),
+        interval: const Duration(seconds: 15),
+      );
     }
     return _repository.watchForUser(userId);
   }
