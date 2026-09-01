@@ -5,7 +5,6 @@ import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/backend/supabase/supabase_connection.dart';
 import 'package:degloor_one/core/error_handler.dart';
 import 'package:degloor_one/shared/showcase_catalog.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() {
   setUp(() {
@@ -362,14 +361,37 @@ void main() {
 
   test('AuthApiException dump does not reach the customer', () {
     const dumped =
-        'AuthApiException(message: email rate limit exceeded, statusCode: 429, code: over_email_send_rate_limit)';
+        'AuthApiException (message: For security purposes, you can only request this after 47 seconds., '
+        'statusCode: 429, code: over_email_send_rate_limit)';
     expect(
       SupabaseConnection.messageFor(Exception(dumped)),
-      'Please wait a moment before trying again.',
+      'Please wait 47 seconds before trying again.',
     );
     expect(
       SupabaseConnection.messageFor(Exception(dumped)),
       isNot(contains('AuthApiException')),
+    );
+    expect(
+      SupabaseConnection.messageFor(Exception(dumped)),
+      isNot(contains('over_email_send_rate_limit')),
+    );
+    expect(
+      SupabaseConnection.messageFor(
+        const AuthException(
+          'For security purposes, you can only request this after 47 seconds.',
+          statusCode: '429',
+          code: 'over_email_send_rate_limit',
+        ),
+      ),
+      'Please wait 47 seconds before trying again.',
+    );
+    expect(
+      SupabaseConnection.messageFor(
+        Exception(
+          'AuthApiException(message: email rate limit exceeded, statusCode: 429, code: over_email_send_rate_limit)',
+        ),
+      ),
+      'Please wait a moment before trying again.',
     );
     expect(
       SupabaseConnection.messageFor(

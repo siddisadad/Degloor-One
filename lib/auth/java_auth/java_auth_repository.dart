@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:degloor_one/auth/auth_repository.dart';
+import 'package:degloor_one/auth/auth_send_rate_limit.dart';
 import 'package:degloor_one/auth/base_auth_user_provider.dart';
 import 'package:degloor_one/auth/java_auth_user.dart';
 import 'package:degloor_one/core/api/api_client.dart';
@@ -143,6 +144,13 @@ class JavaAuthRepository implements AuthRepository {
   }
 
   void _showError(BuildContext context, Object error) {
+    final rateLimit = AuthSendRateLimit.tryUserMessage(error);
+    if (rateLimit != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(rateLimit)),
+      );
+      return;
+    }
     String message = 'An unexpected error occurred';
     if (error is JavaApiException) {
       message = error.message;
