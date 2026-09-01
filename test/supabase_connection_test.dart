@@ -359,6 +359,56 @@ void main() {
     );
   });
 
+  test('AuthApiException dump does not reach the customer', () {
+    const dumped =
+        'AuthApiException (message: For security purposes, you can only request this after 47 seconds., '
+        'statusCode: 429, code: over_email_send_rate_limit)';
+    expect(
+      SupabaseConnection.messageFor(Exception(dumped)),
+      'Please wait 47 seconds before trying again.',
+    );
+    expect(
+      SupabaseConnection.messageFor(Exception(dumped)),
+      isNot(contains('AuthApiException')),
+    );
+    expect(
+      SupabaseConnection.messageFor(Exception(dumped)),
+      isNot(contains('over_email_send_rate_limit')),
+    );
+    expect(
+      SupabaseConnection.messageFor(
+        const AuthException(
+          'For security purposes, you can only request this after 47 seconds.',
+          statusCode: '429',
+          code: 'over_email_send_rate_limit',
+        ),
+      ),
+      'Please wait 47 seconds before trying again.',
+    );
+    expect(
+      SupabaseConnection.messageFor(
+        Exception(
+          'AuthApiException(message: email rate limit exceeded, statusCode: 429, code: over_email_send_rate_limit)',
+        ),
+      ),
+      'Please wait a moment before trying again.',
+    );
+    expect(
+      SupabaseConnection.messageFor(
+        Exception(
+          'AuthApiException(message: Invalid login credentials, statusCode: 400, code: invalid_credentials)',
+        ),
+      ),
+      'Error: Invalid login credentials',
+    );
+    expect(
+      SupabaseConnection.messageFor(
+        const AuthException('User already registered'),
+      ),
+      'Error: The email is already in use by a different account',
+    );
+  });
+
   test('AuthRetryableFetchException message is treated as unreachable', () {
     const fetch =
         'ClientException: Failed to fetch, uri=https://uhaibenopzyzzuqjawlb.supabase.co/auth/v1/token?grant_type=password';

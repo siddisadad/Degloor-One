@@ -296,7 +296,11 @@ class SupabaseAuthRepository implements AuthRepository {
       return await _handleAuthUser(user);
     } catch (e) {
       if (context.mounted) {
-        SupabaseConnection.showSnackBar(context, e);
+        SupabaseConnection.showSnackBar(
+          context,
+          e,
+          authMessage: e is AuthException ? e.message : null,
+        );
       }
       return null;
     }

@@ -28,11 +28,6 @@ Widget _loginApp({String location = '/authentication'}) {
         ),
       ),
       GoRoute(
-        path: '/phoneAuth',
-        name: 'PhoneAuth',
-        builder: (_, __) => const Scaffold(body: Text('Phone auth')),
-      ),
-      GoRoute(
         path: '/',
         name: 'CustomerHome',
         builder: (_, __) => const Scaffold(body: Text('Customer home')),
@@ -205,24 +200,9 @@ void main() {
     );
     expect(find.text('Already have an account? '), findsOneWidget);
     expect(find.text('Create Account'), findsNothing);
-    expect(find.text('Continue with Phone'), findsOneWidget);
-    expect(find.text('Continue with Google'), findsOneWidget);
-    expect(find.text('Continue with Apple'), findsOneWidget);
-  });
-
-  testWidgets('sign up continue with phone opens phone auth', (tester) async {
-    await tester.binding.setSurfaceSize(const Size(390, 1400));
-    addTearDown(() => tester.binding.setSurfaceSize(null));
-    await tester.pumpWidget(_loginApp(location: '/signUp'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 50));
-
-    await tester.ensureVisible(find.text('Continue with Phone'));
-    await tester.tap(find.text('Continue with Phone'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 50));
-
-    expect(find.text('Phone auth'), findsOneWidget);
+    expect(find.text('Continue with Phone'), findsNothing);
+    expect(find.text('Continue with Google'), findsNothing);
+    expect(find.text('Continue with Apple'), findsNothing);
   });
 
   testWidgets('business sign up keeps the business tab', (tester) async {
