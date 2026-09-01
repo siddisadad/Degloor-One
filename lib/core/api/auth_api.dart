@@ -1,3 +1,4 @@
+import 'package:degloor_one/auth/java_auth/java_session_lifecycle.dart';
 import 'package:degloor_one/auth/java_auth/java_session_store.dart';
 import 'package:degloor_one/core/api/api_client.dart';
 
@@ -41,10 +42,10 @@ class AuthApi {
   static Future<void> logout() async {
     try {
       await _http.post('/api/v1/auth/logout');
+    } catch (_) {
+      // Best effort. Local session is cleared regardless.
     } finally {
-      _http.accessToken = null;
-      _http.refreshToken = null;
-      await JavaSessionStore.clear();
+      await clearJavaSession();
     }
   }
 

@@ -1,4 +1,5 @@
 import 'package:degloor_one/auth/base_auth_user_provider.dart';
+import 'package:degloor_one/auth/java_auth/java_session_lifecycle.dart';
 import 'package:degloor_one/core/api/api_client.dart';
 import 'package:degloor_one/core/api/auth_api.dart';
 
@@ -74,12 +75,10 @@ class JavaAuthUser extends BaseAuthUser {
     if (id.isEmpty) return;
     try {
       await AuthApi.refresh();
-      apply(JavaAuthUser.fromJson(await AuthApi.me()));
-      updateAuthUser(this);
+      await emitJavaUser(JavaAuthUser.fromJson(await AuthApi.me()));
     } on JavaApiException catch (error) {
-      if (error.code == 'INVALID_REFRESH' ||
-          error.code == 'UNAUTHORIZED' ||
-          error.code == 'HTTP_401') {
+      if (isJavaAuthFailure(error)) {
+        await clearJavaSession();
         return;
       }
       rethrow;

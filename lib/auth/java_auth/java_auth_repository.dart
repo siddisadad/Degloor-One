@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:degloor_one/auth/auth_repository.dart';
 import 'package:degloor_one/auth/auth_send_rate_limit.dart';
 import 'package:degloor_one/auth/base_auth_user_provider.dart';
+import 'package:degloor_one/auth/java_auth/java_session_lifecycle.dart';
 import 'package:degloor_one/auth/java_auth_user.dart';
 import 'package:degloor_one/core/api/api_client.dart';
 import 'package:degloor_one/core/api/auth_api.dart';
@@ -85,10 +86,6 @@ class JavaAuthRepository implements AuthRepository {
   @override
   Future<void> signOut() async {
     await AuthApi.logout();
-    final signedOut = JavaAuthUser.signedOut();
-    updateAuthUser(signedOut);
-    updateJwtToken(null);
-    AppStateNotifier.instance.update(signedOut);
   }
 
   @override
@@ -137,9 +134,7 @@ class JavaAuthRepository implements AuthRepository {
 
   BaseAuthUser _handleTokenResponse(Map<String, dynamic> response) {
     final user = JavaAuthUser.fromTokenResponse(response);
-    updateAuthUser(user);
-    updateJwtToken(JavaApiClient.instance.accessToken);
-    AppStateNotifier.instance.update(user);
+    emitJavaUser(user);
     return user;
   }
 
