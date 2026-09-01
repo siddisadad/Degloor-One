@@ -40,7 +40,7 @@ Controllers call services. Services call Spring Data repositories. Search, count
 
 ## Tests
 
-This environment has no Docker daemon for Testcontainers. Tests use H2 (`MODE=PostgreSQL`).
+This environment has no Docker daemon for Testcontainers. Tests use H2 (`MODE=PostgreSQL`) via the `test` profile in `src/main/resources/application-test.yml`.
 
 ```bash
 mvn test
