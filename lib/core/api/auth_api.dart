@@ -1,3 +1,4 @@
+import 'package:degloor_one/auth/java_auth/java_session_store.dart';
 import 'package:degloor_one/core/api/api_client.dart';
 
 class AuthApi {
@@ -43,6 +44,7 @@ class AuthApi {
     } finally {
       _http.accessToken = null;
       _http.refreshToken = null;
+      await JavaSessionStore.clear();
     }
   }
 
@@ -55,6 +57,10 @@ class AuthApi {
     final data = Map<String, dynamic>.from(await future as Map);
     _http.accessToken = data['accessToken'] as String?;
     _http.refreshToken = data['refreshToken'] as String?;
+    await JavaSessionStore.save(
+      accessToken: _http.accessToken,
+      refreshToken: _http.refreshToken,
+    );
     return data;
   }
 }

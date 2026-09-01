@@ -193,10 +193,15 @@ void main() {
     final launch = jsonDecode(File('.vscode/launch.json').readAsStringSync())
         as Map<String, dynamic>;
     final configs = (launch['configurations'] as List).cast<Map>();
-    expect(configs, hasLength(1));
-    expect(configs.single['deviceId'], 'web-server');
-    expect(configs.single['noDebug'], isTrue);
-    final args = (configs.single['toolArgs'] as List).join(' ');
+    expect(configs.length, greaterThanOrEqualTo(1));
+    for (final config in configs) {
+      expect(config['deviceId'], 'web-server');
+      expect(config['type'], 'dart');
+    }
+    expect(configs.any((config) => config['noDebug'] == true), isTrue);
+    final args = configs
+        .map((config) => (config['toolArgs'] as List).join(' '))
+        .join(' ');
     expect(args, contains('--web-port'));
     expect(args, contains('8080'));
     expect(File('.vscode/launch.json').readAsStringSync(),

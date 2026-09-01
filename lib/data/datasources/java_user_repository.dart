@@ -86,6 +86,6 @@ class JavaUserRepository implements UserRepository {
 
   @override
   Future<void> probe() async {
-    await _me();
+    await _client.probeHealth();
   }
 }

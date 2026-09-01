@@ -1,4 +1,5 @@
 import 'package:degloor_one/core/app_environment.dart';
+import 'package:degloor_one/core/api/api_client.dart';
 
 export 'package:degloor_one/core/app_environment.dart'
     show AppEnvironment, AppFlavor;
@@ -6,7 +7,9 @@ export 'package:degloor_one/core/app_environment.dart'
 /// Guest mode. Defaults to false; enable in dev with --dart-define=BYPASS_AUTH=true
 /// Automatically enabled when pointing to the retired FlutterFlow host.
 /// Strictly disabled in staging and production.
+/// Disabled when the Java API is the live backend.
 bool get kBypassAuth =>
+    !JavaApiConfig.enabled &&
     AppEnvironment.allowsDemoExtras &&
     (AppEnvironment.bypassAuth || AppEnvironment.usesDeadFlutterFlowHost);
 
@@ -19,7 +22,9 @@ bool get kShouldBlockSupabaseTraffic =>
 /// Local Degloor catalog. Defaults to false; enable in dev with --dart-define=SHOWCASE_DATA=true
 /// Automatically enabled while the FlutterFlow host is unreachable or retired.
 /// Strictly disabled in staging and production.
+/// Disabled when the Java API is the live backend.
 bool get kUseShowcaseData =>
+    !JavaApiConfig.enabled &&
     AppEnvironment.allowsDemoExtras &&
     (AppEnvironment.useShowcaseData ||
         (kUsesDeadFlutterFlowHost && !AppEnvironment.flutterFlowHostIsLive));

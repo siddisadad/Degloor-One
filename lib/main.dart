@@ -8,7 +8,9 @@ import 'package:degloor_one/l10n/app_localizations.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 
 import 'auth/guest_auth_user.dart';
+import 'auth/java_auth/java_session_bootstrap.dart';
 import 'auth/password_recovery.dart';
+import 'package:degloor_one/core/api/api_client.dart';
 import 'auth/supabase_auth/supabase_user_provider.dart';
 import 'auth/supabase_auth/auth_util.dart';
 
@@ -52,6 +54,10 @@ void main() async {
   bindCartService();
   bindOrderService();
   bindDeliveryService();
+
+  if (JavaApiConfig.enabled) {
+    await restoreJavaAuthSession();
+  }
 
   await FlutterFlowTheme.initialize();
 

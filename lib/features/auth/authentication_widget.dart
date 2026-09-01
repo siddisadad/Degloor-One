@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:degloor_one/auth/guest_auth_user.dart';
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/supabase/supabase_connection.dart';
+import 'package:degloor_one/core/api/api_client.dart';
 import 'package:degloor_one/core/app_flags.dart';
 import 'package:degloor_one/backend/user_service.dart';
 import 'package:degloor_one/components/auth_page_header.dart';
@@ -39,13 +40,15 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
   void initState() {
     super.initState();
     _model = createModel(context, () => AuthenticationModel());
-    if (!SupabaseConnection.shouldSkipAuthRequest) {
+    if (!SupabaseConnection.shouldSkipAuthRequest || JavaApiConfig.enabled) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _probeServer());
     }
   }
 
   Future<void> _probeServer() async {
-    if (SupabaseConnection.shouldSkipAuthRequest) return;
+    if (SupabaseConnection.shouldSkipAuthRequest && !JavaApiConfig.enabled) {
+      return;
+    }
     try {
       await UserService.instance.probeReachable();
     } catch (e) {
