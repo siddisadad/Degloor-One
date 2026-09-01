@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:degloor_one/auth/auth_repository.dart';
+import 'package:degloor_one/auth/auth_send_rate_limit.dart';
 import 'package:degloor_one/auth/base_auth_user_provider.dart';
 import 'package:degloor_one/auth/java_auth_user.dart';
 import 'package:degloor_one/core/api/api_client.dart';
@@ -44,14 +45,18 @@ class JavaAuthRepository implements AuthRepository {
 
   @override
   Future<BaseAuthUser?> signInWithGoogle(BuildContext context) async {
-    throw UnimplementedError(
-        'Google sign-in is not implemented for Java backend yet.');
+    if (context.mounted) {
+      _showError(context, Exception('Google sign-in is not available yet.'));
+    }
+    return null;
   }
 
   @override
   Future<BaseAuthUser?> signInWithApple(BuildContext context) async {
-    throw UnimplementedError(
-        'Apple sign-in is not implemented for Java backend yet.');
+    if (context.mounted) {
+      _showError(context, Exception('Apple sign-in is not available yet.'));
+    }
+    return null;
   }
 
   @override
@@ -60,8 +65,9 @@ class JavaAuthRepository implements AuthRepository {
     required String phoneNumber,
     required void Function(BuildContext) onCodeSent,
   }) async {
-    throw UnimplementedError(
-        'Phone auth is not implemented for Java backend yet.');
+    if (context.mounted) {
+      _showError(context, Exception('Phone sign-in is not available yet.'));
+    }
   }
 
   @override
@@ -70,8 +76,10 @@ class JavaAuthRepository implements AuthRepository {
     required String smsCode,
     String? phoneNumber,
   }) async {
-    throw UnimplementedError(
-        'Phone auth is not implemented for Java backend yet.');
+    if (context.mounted) {
+      _showError(context, Exception('Phone sign-in is not available yet.'));
+    }
+    return null;
   }
 
   @override
@@ -136,9 +144,19 @@ class JavaAuthRepository implements AuthRepository {
   }
 
   void _showError(BuildContext context, Object error) {
+    final rateLimit = AuthSendRateLimit.tryUserMessage(error);
+    if (rateLimit != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(rateLimit)),
+      );
+      return;
+    }
     String message = 'An unexpected error occurred';
     if (error is JavaApiException) {
       message = error.message;
+    } else {
+      final raw = error.toString();
+      message = raw.startsWith('Exception: ') ? raw.substring(11) : raw;
     }
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Error: $message')),

@@ -54,10 +54,11 @@ void main() {
         File('lib/features/auth/signup_widget.dart').readAsStringSync();
     expect(signup.contains('createAccountWithEmail'), isTrue);
     expect(signup.contains('_handleSignUp'), isTrue);
-    expect(signup.contains('Continue with Phone'), isTrue);
-    expect(signup.contains("'PhoneAuth'"), isTrue);
-    expect(signup.contains('Continue with Apple'), isTrue);
-    expect(signup.contains('signInWithApple'), isTrue);
+    expect(signup.contains('Continue with Phone'), isFalse);
+    expect(signup.contains('Continue with Google'), isFalse);
+    expect(signup.contains('Continue with Apple'), isFalse);
+    expect(signup.contains('signInWithApple'), isFalse);
+    expect(signup.contains('signInWithGoogle'), isFalse);
     expect(signup.contains('FocusManager.instance.primaryFocus?.unfocus()'),
         isFalse);
     expect(signup.contains('DiscoveryService'), isFalse);

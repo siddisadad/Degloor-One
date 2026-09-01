@@ -373,4 +373,129 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get unableSubmitShop => 'Unable to submit the shop. Please try again.';
+
+  @override
+  String get welcomeBack => 'Welcome back';
+
+  @override
+  String get signInSubtitleCustomer => 'Sign in to shop local in Degloor.';
+
+  @override
+  String get signInSubtitleBusiness => 'Sign in to manage your Degloor shop.';
+
+  @override
+  String get emailOrPhone => 'Email or Phone';
+
+  @override
+  String get enterCredentials => 'Enter your credentials';
+
+  @override
+  String get password => 'Password';
+
+  @override
+  String get enterPassword => 'Enter your password';
+
+  @override
+  String get forgotPasswordQuestion => 'Forgot Password?';
+
+  @override
+  String get signIn => 'Sign In';
+
+  @override
+  String get continueWithPhone => 'Continue with Phone';
+
+  @override
+  String get or => 'OR';
+
+  @override
+  String get continueWithGoogle => 'Continue with Google';
+
+  @override
+  String get continueWithApple => 'Continue with Apple';
+
+  @override
+  String get continueAsGuest => 'Continue as Guest';
+
+  @override
+  String get noShopYet => 'Don\'t have a shop yet? ';
+
+  @override
+  String get noAccountYet => 'Don\'t have an account? ';
+
+  @override
+  String get signUp => 'Sign up';
+
+  @override
+  String get terms => 'Terms';
+
+  @override
+  String get privacy => 'Privacy';
+
+  @override
+  String get enterCredentialsError => 'Please enter credentials';
+
+  @override
+  String get forgotPasswordSubtitle =>
+      'Enter the email on your account. We will send a link to set a new password.';
+
+  @override
+  String get email => 'Email';
+
+  @override
+  String get emailHint => 'you@example.com';
+
+  @override
+  String get sendResetLink => 'Send reset link';
+
+  @override
+  String get checkEmail => 'Check your email';
+
+  @override
+  String checkEmailSubtitle(Object email) {
+    return 'If an account exists for $email, you will receive a reset link shortly. Open it on this device to choose a new password.';
+  }
+
+  @override
+  String get backToSignIn => 'Back to sign in';
+
+  @override
+  String get resendLink => 'Resend link';
+
+  @override
+  String get enterValidEmail => 'Enter a valid email address';
+
+  @override
+  String get setNewPassword => 'Set a new password';
+
+  @override
+  String get setNewPasswordSubtitle =>
+      'Choose a password with at least 6 characters.';
+
+  @override
+  String get newPassword => 'New password';
+
+  @override
+  String get confirmPassword => 'Confirm password';
+
+  @override
+  String get confirmPasswordHint => 'Re-enter your password';
+
+  @override
+  String get updatePassword => 'Update password';
+
+  @override
+  String get saving => 'Saving...';
+
+  @override
+  String get linkExpired => 'Link expired';
+
+  @override
+  String get linkExpiredSubtitle =>
+      'This reset link is invalid or has already been used. Request a new one to continue.';
+
+  @override
+  String get requestNewLink => 'Request a new link';
+
+  @override
+  String get passwordUpdated => 'Password updated successfully';
 }

@@ -1,3 +1,4 @@
+import 'package:degloor_one/auth/auth_send_rate_limit.dart';
 import 'package:degloor_one/auth/password_recovery.dart';
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/supabase/supabase_connection.dart';
@@ -29,6 +30,7 @@ class ForgotPasswordWidget extends StatefulWidget {
 class _ForgotPasswordWidgetState extends State<ForgotPasswordWidget> {
   late ForgotPasswordModel _model;
   final scaffoldKey = GlobalKey<ScaffoldState>();
+  late final AuthResendCooldown _resendCooldown;
   bool _isLoading = false;
   bool _emailSent = false;
 
@@ -36,6 +38,11 @@ class _ForgotPasswordWidgetState extends State<ForgotPasswordWidget> {
   void initState() {
     super.initState();
     _model = createModel(context, () => ForgotPasswordModel());
+    _resendCooldown = AuthResendCooldown(
+      onTick: () {
+        if (mounted) setState(() {});
+      },
+    );
     final initialEmail = widget.email?.trim() ?? '';
     if (initialEmail.isNotEmpty) {
       _model.emailController.text = initialEmail;
@@ -44,6 +51,7 @@ class _ForgotPasswordWidgetState extends State<ForgotPasswordWidget> {
 
   @override
   void dispose() {
+    _resendCooldown.dispose();
     _model.dispose();
     super.dispose();
   }
@@ -192,10 +200,14 @@ class _ForgotPasswordWidgetState extends State<ForgotPasswordWidget> {
         ),
         const SizedBox(height: 12),
         FFButtonWidget(
-          onPressed: _isLoading || SupabaseConnection.shouldSkipAuthRequest
+          onPressed: _isLoading ||
+                  _resendCooldown.isActive ||
+                  SupabaseConnection.shouldSkipAuthRequest
               ? null
               : _handleSendReset,
-          text: 'Resend link',
+          text: _resendCooldown.isActive
+              ? 'Resend in ${_resendCooldown.remainingSeconds}s'
+              : 'Resend link',
           options: FFButtonOptions(
             width: double.infinity,
             height: 54,
@@ -234,6 +246,7 @@ class _ForgotPasswordWidgetState extends State<ForgotPasswordWidget> {
       );
       if (mounted && sent) {
         setState(() => _emailSent = true);
+        _resendCooldown.start();
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);

@@ -13,9 +13,17 @@ import 'package:degloor_one/core/api/api_client.dart';
 export 'package:degloor_one/auth/auth_repository.dart';
 export 'package:degloor_one/auth/base_auth_user_provider.dart';
 
-AuthRepository get authManager => JavaApiConfig.enabled
-    ? JavaAuthRepository()
-    : SupabaseAuthRepository();
+AuthRepository? _authManager;
+bool? _authManagerIsJava;
+
+AuthRepository get authManager {
+  final java = JavaApiConfig.enabled;
+  if (_authManager == null || _authManagerIsJava != java) {
+    _authManager = java ? JavaAuthRepository() : SupabaseAuthRepository();
+    _authManagerIsJava = java;
+  }
+  return _authManager!;
+}
 
 extension AuthRepositoryExtensions on AuthRepository {
   /// Helper to refresh the user from the current instance.
