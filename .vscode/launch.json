@@ -2,6 +2,23 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "DEGLOOR ONE (Java API)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "deviceId": "web-server",
+      "noDebug": true,
+      "toolArgs": [
+        "--dart-define=APP_ENV=development",
+        "--dart-define=JAVA_API_BASE_URL=http://127.0.0.1:8080",
+        "--web-hostname",
+        "127.0.0.1",
+        "--web-port",
+        "8081",
+        "--no-web-resources-cdn"
+      ]
+    },
+    {
       "name": "DEGLOOR ONE (web-server)",
       "request": "launch",
       "type": "dart",

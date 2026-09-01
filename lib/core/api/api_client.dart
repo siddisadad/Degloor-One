@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:degloor_one/auth/java_auth/java_session_store.dart';
 import 'package:degloor_one/core/app_environment.dart';
 import 'package:http/http.dart' as http;
 
@@ -71,6 +72,48 @@ class JavaApiClient {
         ));
   }
 
+  /// Unauthenticated Spring Boot health probe for the login screen.
+  Future<void> probeHealth({
+    Duration timeout = const Duration(seconds: 4),
+    http.Client? client,
+  }) async {
+    final httpClient = client ?? http.Client();
+    try {
+      final response = await httpClient
+          .get(
+            uri('/actuator/health'),
+            headers: const {'Accept': 'application/json'},
+          )
+          .timeout(timeout);
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        throw JavaApiException(
+          'UNREACHABLE',
+          'Cannot reach the Degloor One server. Please try again.',
+        );
+      }
+      if (response.body.isEmpty) return;
+      final decoded = jsonDecode(response.body);
+      if (decoded is Map && decoded['status'] == 'UP') return;
+      if (decoded is Map && decoded['status'] != null) {
+        throw JavaApiException(
+          'UNREACHABLE',
+          'Cannot reach the Degloor One server. Please try again.',
+        );
+      }
+    } on JavaApiException {
+      rethrow;
+    } catch (_) {
+      throw JavaApiException(
+        'UNREACHABLE',
+        'Cannot reach the Degloor One server. Please try again.',
+      );
+    } finally {
+      if (client == null) {
+        httpClient.close();
+      }
+    }
+  }
+
   Future<dynamic> _send(
     Future<http.Response> Function() send, {
     String? path,
@@ -126,10 +169,18 @@ class JavaApiClient {
         final data = Map<String, dynamic>.from(decoded['data'] as Map);
         accessToken = data['accessToken'] as String?;
         refreshToken = data['refreshToken'] as String?;
-        return accessToken != null && accessToken!.isNotEmpty;
+        final ok = accessToken != null && accessToken!.isNotEmpty;
+        if (ok) {
+          await JavaSessionStore.save(
+            accessToken: accessToken,
+            refreshToken: refreshToken,
+          );
+        }
+        return ok;
       }
       accessToken = null;
       refreshToken = null;
+      await JavaSessionStore.clear();
       return false;
     } catch (_) {
       return false;
