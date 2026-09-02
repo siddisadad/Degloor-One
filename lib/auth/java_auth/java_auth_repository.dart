@@ -5,6 +5,7 @@ import 'package:degloor_one/auth/auth_send_rate_limit.dart';
 import 'package:degloor_one/auth/base_auth_user_provider.dart';
 import 'package:degloor_one/auth/java_auth/java_session_lifecycle.dart';
 import 'package:degloor_one/auth/java_auth_user.dart';
+import 'package:degloor_one/auth/password_recovery.dart';
 import 'package:degloor_one/core/api/api_client.dart';
 import 'package:degloor_one/core/api/auth_api.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
@@ -115,8 +116,19 @@ class JavaAuthRepository implements AuthRepository {
     required BuildContext context,
     String? redirectTo,
   }) async {
-    // Implement Java password reset if available
-    return false;
+    try {
+      final response = await AuthApi.forgotPassword(email: email);
+      final token = response['resetToken'] as String?;
+      if (token != null && token.isNotEmpty) {
+        PasswordRecovery.beginWithToken(token);
+      }
+      return true;
+    } catch (e) {
+      if (context.mounted) {
+        _showError(context, e);
+      }
+      return false;
+    }
   }
 
   @override
@@ -124,7 +136,24 @@ class JavaAuthRepository implements AuthRepository {
     required String newPassword,
     required BuildContext context,
   }) async {
-    // Implement Java password update if available
+    try {
+      final token = PasswordRecovery.resetToken;
+      if (token != null && token.isNotEmpty) {
+        await AuthApi.resetPassword(token: token, newPassword: newPassword);
+      } else {
+        await AuthApi.changePassword(newPassword: newPassword);
+      }
+      PasswordRecovery.clear();
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Password updated successfully')),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        _showError(context, e);
+      }
+    }
   }
 
   @override

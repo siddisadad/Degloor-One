@@ -54,6 +54,35 @@ class AuthApi {
     return Map<String, dynamic>.from(data as Map);
   }
 
+  /// Returns an optional [resetToken] on non-production Java profiles (no SMTP yet).
+  static Future<Map<String, dynamic>> forgotPassword({required String email}) async {
+    final data = await _http.post('/api/v1/auth/forgot-password', {
+      'email': email,
+    });
+    if (data is Map) {
+      return Map<String, dynamic>.from(data);
+    }
+    return const {};
+  }
+
+  static Future<Map<String, dynamic>> resetPassword({
+    required String token,
+    required String newPassword,
+  }) {
+    return _store(_http.post('/api/v1/auth/reset-password', {
+      'token': token,
+      'newPassword': newPassword,
+    }));
+  }
+
+  static Future<Map<String, dynamic>> changePassword({
+    required String newPassword,
+  }) {
+    return _store(_http.post('/api/v1/auth/change-password', {
+      'newPassword': newPassword,
+    }));
+  }
+
   static Future<Map<String, dynamic>> _store(Future<dynamic> future) async {
     final data = Map<String, dynamic>.from(await future as Map);
     _http.accessToken = data['accessToken'] as String?;

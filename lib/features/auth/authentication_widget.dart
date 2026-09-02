@@ -209,96 +209,98 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
                               ),
                             ),
                             const SizedBox(height: 16),
-                            FFButtonWidget(
-                              text: 'Continue with Phone',
-                              onPressed: () => context.pushNamed('PhoneAuth'),
-                              options: FFButtonOptions(
-                                width: double.infinity,
-                                height: 54,
-                                color: Colors.transparent,
-                                textStyle: TextStyle(
-                                  color: FlutterFlowTheme.of(context).primary,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                                borderSide: BorderSide(
-                                  color: FlutterFlowTheme.of(context).primary,
-                                  width: 2,
-                                ),
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-                            ),
-                            const SizedBox(height: 24),
-                            Row(
-                              children: [
-                                Expanded(
-                                    child: Divider(
-                                        color: FlutterFlowTheme.of(context)
-                                            .alternate)),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 16),
-                                  child: Text('OR',
-                                      style: FlutterFlowTheme.of(context)
-                                          .labelSmall),
-                                ),
-                                Expanded(
-                                    child: Divider(
-                                        color: FlutterFlowTheme.of(context)
-                                            .alternate)),
-                              ],
-                            ),
-                            const SizedBox(height: 24),
-                            SocialButtonWidget(
-                              icon: const FaIcon(
-                                FontAwesomeIcons.google,
-                                size: 18,
-                              ),
-                              label: 'Continue with Google',
-                              onTap: () async {
-                                if (_isLoading) return;
-                                setState(() => _isLoading = true);
-                                try {
-                                  final user = await authManager
-                                      .signInWithGoogle(context);
-                                  if (!mounted || user == null) return;
-                                  await _continueAfterAuth();
-                                } finally {
-                                  if (mounted) {
-                                    setState(() => _isLoading = false);
-                                  }
-                                }
-                              },
-                            ),
-                            if (Theme.of(context).platform ==
-                                    TargetPlatform.iOS ||
-                                Theme.of(context).platform ==
-                                    TargetPlatform.macOS)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 12.0),
-                                child: SocialButtonWidget(
-                                  icon: const FaIcon(
-                                    FontAwesomeIcons.apple,
-                                    size: 20,
+                            if (!JavaApiConfig.enabled) ...[
+                              FFButtonWidget(
+                                text: 'Continue with Phone',
+                                onPressed: () => context.pushNamed('PhoneAuth'),
+                                options: FFButtonOptions(
+                                  width: double.infinity,
+                                  height: 54,
+                                  color: Colors.transparent,
+                                  textStyle: TextStyle(
+                                    color: FlutterFlowTheme.of(context).primary,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
                                   ),
-                                  label: 'Continue with Apple',
-                                  onTap: () async {
-                                    if (_isLoading) return;
-                                    setState(() => _isLoading = true);
-                                    try {
-                                      final user = await authManager
-                                          .signInWithApple(context);
-                                      if (!mounted || user == null) return;
-                                      await _continueAfterAuth();
-                                    } finally {
-                                      if (mounted) {
-                                        setState(() => _isLoading = false);
-                                      }
-                                    }
-                                  },
+                                  borderSide: BorderSide(
+                                    color: FlutterFlowTheme.of(context).primary,
+                                    width: 2,
+                                  ),
+                                  borderRadius: BorderRadius.circular(14),
                                 ),
                               ),
-                            const SizedBox(height: 24),
+                              const SizedBox(height: 24),
+                              Row(
+                                children: [
+                                  Expanded(
+                                      child: Divider(
+                                          color: FlutterFlowTheme.of(context)
+                                              .alternate)),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 16),
+                                    child: Text('OR',
+                                        style: FlutterFlowTheme.of(context)
+                                            .labelSmall),
+                                  ),
+                                  Expanded(
+                                      child: Divider(
+                                          color: FlutterFlowTheme.of(context)
+                                              .alternate)),
+                                ],
+                              ),
+                              const SizedBox(height: 24),
+                              SocialButtonWidget(
+                                icon: const FaIcon(
+                                  FontAwesomeIcons.google,
+                                  size: 18,
+                                ),
+                                label: 'Continue with Google',
+                                onTap: () async {
+                                  if (_isLoading) return;
+                                  setState(() => _isLoading = true);
+                                  try {
+                                    final user = await authManager
+                                        .signInWithGoogle(context);
+                                    if (!mounted || user == null) return;
+                                    await _continueAfterAuth();
+                                  } finally {
+                                    if (mounted) {
+                                      setState(() => _isLoading = false);
+                                    }
+                                  }
+                                },
+                              ),
+                              if (Theme.of(context).platform ==
+                                      TargetPlatform.iOS ||
+                                  Theme.of(context).platform ==
+                                      TargetPlatform.macOS)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 12.0),
+                                  child: SocialButtonWidget(
+                                    icon: const FaIcon(
+                                      FontAwesomeIcons.apple,
+                                      size: 20,
+                                    ),
+                                    label: 'Continue with Apple',
+                                    onTap: () async {
+                                      if (_isLoading) return;
+                                      setState(() => _isLoading = true);
+                                      try {
+                                        final user = await authManager
+                                            .signInWithApple(context);
+                                        if (!mounted || user == null) return;
+                                        await _continueAfterAuth();
+                                      } finally {
+                                        if (mounted) {
+                                          setState(() => _isLoading = false);
+                                        }
+                                      }
+                                    },
+                                  ),
+                                ),
+                              const SizedBox(height: 24),
+                            ],
                             if (kBypassAuth || _serverWarning != null)
                               Padding(
                                 padding: const EdgeInsets.only(bottom: 12.0),

@@ -35,6 +35,33 @@ public class AuthController {
         return ApiResponse.ok(authService.refresh(request.refreshToken()));
     }
 
+    @PostMapping("/forgot-password")
+    public ApiResponse<AuthDtos.ForgotPasswordResponse> forgotPassword(
+            @Valid @RequestBody AuthDtos.ForgotPasswordRequest request
+    ) {
+        return ApiResponse.ok(
+                authService.forgotPassword(request.email()),
+                "If an account exists for that email, a reset link will be sent"
+        );
+    }
+
+    @PostMapping("/reset-password")
+    public ApiResponse<AuthDtos.TokenResponse> resetPassword(
+            @Valid @RequestBody AuthDtos.ResetPasswordRequest request
+    ) {
+        return ApiResponse.ok(authService.resetPassword(request), "Password updated");
+    }
+
+    @PostMapping("/change-password")
+    public ApiResponse<AuthDtos.TokenResponse> changePassword(
+            @Valid @RequestBody AuthDtos.ChangePasswordRequest request
+    ) {
+        return ApiResponse.ok(
+                authService.changePassword(CurrentUser.require(), request),
+                "Password updated"
+        );
+    }
+
     @PostMapping("/logout")
     public ApiResponse<Void> logout() {
         authService.logout(CurrentUser.require());
