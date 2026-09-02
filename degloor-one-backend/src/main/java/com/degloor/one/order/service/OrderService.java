@@ -100,7 +100,7 @@ public class OrderService {
             throw BusinessException.badRequest("INVALID_LOCATION", "Shop location is missing");
         }
 
-        Map<UUID, Product> catalog = products.findAllById(
+        Map<UUID, Product> catalog = products.findAllByIdForUpdate(
                         items.stream().map(CartItem::getProductId).toList())
                 .stream()
                 .collect(Collectors.toMap(Product::getId, Function.identity()));
@@ -247,7 +247,7 @@ public class OrderService {
 
     private void restoreStock(ShopOrder order) {
         List<OrderItem> lines = orderItems.findByOrderId(order.getId());
-        Map<UUID, Product> catalog = products.findAllById(
+        Map<UUID, Product> catalog = products.findAllByIdForUpdate(
                         lines.stream().map(OrderItem::getProductId).toList())
                 .stream()
                 .collect(Collectors.toMap(Product::getId, Function.identity()));

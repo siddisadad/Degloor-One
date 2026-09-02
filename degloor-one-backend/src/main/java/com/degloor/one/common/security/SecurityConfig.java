@@ -24,14 +24,20 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 @EnableMethodSecurity
-@EnableConfigurationProperties({JwtProperties.class, OtpProperties.class, CorsProperties.class})
+@EnableConfigurationProperties({JwtProperties.class, OtpProperties.class, CorsProperties.class, SwaggerProperties.class})
 public class SecurityConfig {
     private final JwtAuthFilter jwtAuthFilter;
     private final CorsProperties corsProperties;
+    private final SwaggerProperties swaggerProperties;
 
-    public SecurityConfig(JwtAuthFilter jwtAuthFilter, CorsProperties corsProperties) {
+    public SecurityConfig(
+            JwtAuthFilter jwtAuthFilter,
+            CorsProperties corsProperties,
+            SwaggerProperties swaggerProperties
+    ) {
         this.jwtAuthFilter = jwtAuthFilter;
         this.corsProperties = corsProperties;
+        this.swaggerProperties = swaggerProperties;
     }
 
     @Bean
@@ -55,9 +61,12 @@ public class SecurityConfig {
                         .accessDeniedHandler((request, response, denied) ->
                                 writeAuthError(response, HttpServletResponse.SC_FORBIDDEN, "FORBIDDEN",
                                         "You do not have permission for this action")))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/actuator/health", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-                        .requestMatchers("/api/v1/auth/register", "/api/v1/auth/login", "/api/v1/auth/refresh").permitAll()
+                .authorizeHttpRequests(auth -> {
+                    auth.requestMatchers("/actuator/health").permitAll();
+                    if (swaggerProperties.isEnabled()) {
+                        auth.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll();
+                    }
+                    auth.requestMatchers("/api/v1/auth/register", "/api/v1/auth/login", "/api/v1/auth/refresh").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/businesses/mine").authenticated()
                         .requestMatchers(HttpMethod.GET,
                                 "/api/v1/businesses",
@@ -79,9 +88,9 @@ public class SecurityConfig {
                                 "/api/v1/services/providers/*",
                                 "/api/v1/reviews",
                                 "/api/v1/reviews/*").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/v1/analytics/events").permitAll()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
-                        .anyRequest().authenticated())
+                        .anyRequest().authenticated();
+                })
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
