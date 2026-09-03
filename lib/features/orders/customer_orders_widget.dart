@@ -18,7 +18,12 @@ import 'customer_orders_model.dart';
 export 'customer_orders_model.dart';
 
 class CustomerOrdersWidget extends StatefulWidget {
-  const CustomerOrdersWidget({super.key});
+  const CustomerOrdersWidget({
+    this.showBack = true,
+    super.key,
+  });
+
+  final bool showBack;
 
   static String routeName = 'CustomerOrders';
   static String routePath = '/customerOrders';
@@ -124,7 +129,7 @@ class _CustomerOrdersWidgetState extends State<CustomerOrdersWidget> {
     return Scaffold(
       key: scaffoldKey,
       backgroundColor: DegloorTheme.background,
-      appBar: degloorAppBar(context, title: 'My Orders'),
+      appBar: degloorAppBar(context, title: 'My Orders', showBack: widget.showBack),
       body: SafeArea(
         child: Align(
           alignment: Alignment.topCenter,

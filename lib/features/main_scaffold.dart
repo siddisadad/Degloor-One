@@ -45,14 +45,14 @@ class MainScaffold extends StatelessWidget {
               label: l10n?.explore ?? 'Explore',
             ),
             BottomNavigationBarItem(
-              icon: const Icon(Icons.handyman_outlined),
-              activeIcon: const Icon(Icons.handyman_rounded),
-              label: l10n?.services ?? 'Services',
-            ),
-            BottomNavigationBarItem(
               icon: const Icon(Icons.shopping_cart_outlined),
               activeIcon: const Icon(Icons.shopping_cart_rounded),
               label: l10n?.cart ?? 'Cart',
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.receipt_long_outlined),
+              activeIcon: const Icon(Icons.receipt_long_rounded),
+              label: l10n?.manageOrders ?? 'Orders',
             ),
             BottomNavigationBarItem(
               icon: const Icon(Icons.person_outline_rounded),

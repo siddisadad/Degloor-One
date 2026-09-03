@@ -51,10 +51,11 @@ class _ActionTileWidgetState extends State<ActionTileWidget> {
       child: Container(
         decoration: BoxDecoration(
           color: FlutterFlowTheme.of(context).secondaryBackground,
-          borderRadius: BorderRadius.circular(12.0),
+          borderRadius: BorderRadius.circular(16.0),
           border: Border.all(
             color: FlutterFlowTheme.of(context).alternate,
           ),
+          boxShadow: [FlutterFlowTheme.of(context).designToken.shadow.xs],
         ),
         child: Padding(
           padding: const EdgeInsets.all(16.0),

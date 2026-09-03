@@ -1,0 +1,6 @@
+# Sample key.properties configuration for signed production builds
+# Copy this file to android/key.properties and update the values with your actual keystore credentials.
+storePassword=YOUR_STORE_PASSWORD
+keyPassword=YOUR_KEY_PASSWORD
+keyAlias=YOUR_KEY_ALIAS
+storeFile=upload-keystore.jks

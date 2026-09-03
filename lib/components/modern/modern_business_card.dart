@@ -26,85 +26,101 @@ class ModernBusinessCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 220,
+      width: 230,
       margin: const EdgeInsets.only(right: DegloorTheme.spacingMD),
-      child: InkWell(
-        onTap: onTap,
+      child: Material(
+        color: Colors.white,
         borderRadius: BorderRadius.circular(DegloorTheme.radiusMD),
-        child: Card(
-          margin: EdgeInsets.zero,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ClipRRect(
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(DegloorTheme.radiusMD),
-                ),
-                child: imageUrl == null || imageUrl!.isEmpty
-                    ? degloorImageFallback(
-                        width: double.infinity,
-                        height: 120,
-                        icon: Icons.storefront_rounded,
-                      )
-                    : CachedNetworkImage(
-                        imageUrl: imageUrl!,
-                        height: 120,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                        memCacheWidth: memCachePx(context, 220),
-                        memCacheHeight: memCachePx(context, 120),
-                        placeholder: (context, url) => Container(
-                          color: DegloorTheme.accent,
-                          height: 120,
-                        ),
-                        errorWidget: (context, url, error) =>
-                            degloorImageFallback(
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(DegloorTheme.radiusMD),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(DegloorTheme.radiusMD),
+              border: Border.all(color: DegloorTheme.border),
+              boxShadow: DegloorTheme.softShadow,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ClipRRect(
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(DegloorTheme.radiusMD),
+                  ),
+                  child: imageUrl == null || imageUrl!.isEmpty
+                      ? degloorImageFallback(
                           width: double.infinity,
-                          height: 120,
+                          height: 100,
                           icon: Icons.storefront_rounded,
-                        ),
-                      ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(DegloorTheme.spacingSM),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: DegloorTheme.titleMedium,
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        const Icon(Icons.star_rounded, color: DegloorTheme.secondary, size: 16),
-                        const SizedBox(width: 4),
-                        Text(
-                          rating.toStringAsFixed(1),
-                          style: DegloorTheme.bodySmall.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: DegloorTheme.textPrimary,
+                        )
+                      : CachedNetworkImage(
+                          imageUrl: imageUrl!,
+                          height: 100,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          memCacheWidth: memCachePx(context, 230),
+                          memCacheHeight: memCachePx(context, 100),
+                          placeholder: (context, url) => Container(
+                            color: DegloorTheme.accent,
+                            height: 100,
+                          ),
+                          errorWidget: (context, url, error) =>
+                              degloorImageFallback(
+                            width: double.infinity,
+                            height: 100,
+                            icon: Icons.storefront_rounded,
                           ),
                         ),
-                        const SizedBox(width: 8),
-                        Text('•', style: DegloorTheme.bodySmall),
-                        const SizedBox(width: 8),
-                        Text(distance, style: DegloorTheme.bodySmall),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      subcategory != null && subcategory!.isNotEmpty
-                          ? '$category • $subcategory'
-                          : category,
-                      style: DegloorTheme.bodySmall,
-                    ),
-                  ],
                 ),
-              ),
-            ],
+                Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: DegloorTheme.titleMedium.copyWith(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          const Icon(Icons.star_rounded, color: DegloorTheme.secondary, size: 16),
+                          const SizedBox(width: 4),
+                          Text(
+                            rating.toStringAsFixed(1),
+                            style: DegloorTheme.bodySmall.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: DegloorTheme.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Text('•', style: DegloorTheme.bodySmall),
+                          const SizedBox(width: 6),
+                          Text(distance, style: DegloorTheme.bodySmall),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        subcategory != null && subcategory!.isNotEmpty
+                            ? '$category • $subcategory'
+                            : category,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: DegloorTheme.bodySmall.copyWith(
+                          color: DegloorTheme.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

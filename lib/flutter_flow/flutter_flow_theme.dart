@@ -172,20 +172,20 @@ class LightModeTheme extends FlutterFlowTheme {
 
   late Color primary = const Color(0xFF0D2B5C);
   late Color secondary = const Color(0xFFFF9800);
-  late Color tertiary = const Color(0xFFC4836A);
-  late Color alternate = const Color(0xFFEEEEEE);
-  late Color primaryText = const Color(0xFF1A1A1A);
-  late Color secondaryText = const Color(0xFF757575);
+  late Color tertiary = const Color(0xFFFF7A00);
+  late Color alternate = const Color(0xFFEEF2F6);
+  late Color primaryText = const Color(0xFF111827);
+  late Color secondaryText = const Color(0xFF6B7280);
   late Color primaryBackground = const Color(0xFFF8F9FB);
   late Color secondaryBackground = const Color(0xFFFFFFFF);
-  late Color accent1 = const Color(0x4C4B39EF);
-  late Color accent2 = const Color(0x4D39D2C0);
-  late Color accent3 = const Color(0xFFBDBDBD);
+  late Color accent1 = const Color(0x1A0D2B5C);
+  late Color accent2 = const Color(0x1AFF9800);
+  late Color accent3 = const Color(0xFF9CA3AF);
   late Color accent4 = const Color(0xCCFFFFFF);
-  late Color success = const Color(0xFF4A6741);
-  late Color warning = const Color(0xFFD6A350);
-  late Color error = const Color(0xFFB33A3A);
-  late Color info = const Color(0xFF7C9CB4);
+  late Color success = const Color(0xFF10B981);
+  late Color warning = const Color(0xFFF59E0B);
+  late Color error = const Color(0xFFEF4444);
+  late Color info = const Color(0xFF3B82F6);
 
   late Color onPrimary = const Color(0xFFFFFFFF);
   late Color primaryContainer = const Color(0x1A0D2B5C);
@@ -464,10 +464,10 @@ class FFSpacing {
 class FFRadius {
   const FFRadius();
   double get none => 0.0;
-  double get xs => 2.0;
-  double get sm => 4.0;
-  double get md => 8.0;
-  double get lg => 12.0;
+  double get xs => 4.0;
+  double get sm => 8.0;
+  double get md => 12.0;
+  double get lg => 16.0;
   double get xl => 16.0;
   double get xxl => 24.0;
   double get full => 9999.0;
@@ -480,28 +480,28 @@ class FFShadows {
       color: Color(0x00000000));
   BoxShadow get xs => const BoxShadow(
       blurRadius: 2.0,
-      color: Color(0x0D000000),
+      color: Color(0x05000000),
       offset: Offset(0.0, 1.0));
   BoxShadow get sm => const BoxShadow(
       blurRadius: 4.0,
-      color: Color(0x0D000000),
+      color: Color(0x06000000),
       offset: Offset(0.0, 2.0));
   BoxShadow get md => const BoxShadow(
       blurRadius: 8.0,
-      color: Color(0x1A000000),
-      offset: Offset(0.0, 4.0));
+      color: Color(0x0A000000),
+      offset: Offset(0.0, 2.0));
   BoxShadow get lg => const BoxShadow(
-      blurRadius: 16.0,
-      color: Color(0x1A000000),
-      offset: Offset(0.0, 8.0));
+      blurRadius: 12.0,
+      color: Color(0x0D000000),
+      offset: Offset(0.0, 4.0));
   BoxShadow get xl => const BoxShadow(
-      blurRadius: 24.0,
-      color: Color(0x26000000),
-      offset: Offset(0.0, 12.0));
+      blurRadius: 16.0,
+      color: Color(0x10000000),
+      offset: Offset(0.0, 6.0));
   BoxShadow get xxl => const BoxShadow(
-      blurRadius: 32.0,
-      color: Color(0x26000000),
-      offset: Offset(0.0, 16.0));
+      blurRadius: 24.0,
+      color: Color(0x14000000),
+      offset: Offset(0.0, 8.0));
 }
 
 extension TextStyleHelper on TextStyle {

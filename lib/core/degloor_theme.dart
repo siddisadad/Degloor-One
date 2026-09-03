@@ -6,21 +6,22 @@ class DegloorTheme {
   DegloorTheme._();
 
   // --- Colors ---
-  static const Color primary = Color(0xFF0D2B5C); // Deep Blue
-  static const Color secondary = Color(0xFFFF9800); // Orange
-  static const Color background = Color(0xFFF8F9FB); // Very Light Neutral
-  static const Color cardBackground = Colors.white;
-  static const Color textPrimary = Color(0xFF1A1A1A);
-  static const Color textSecondary = Color(0xFF757575);
-  static const Color accent = Color(0xFFE3F2FD);
-  static const Color success = Color(0xFF4CAF50);
-  static const Color warning = Color(0xFFFF9800);
-  static const Color error = Color(0xFFD32F2F);
-  static const Color border = Color(0xFFEEEEEE);
+  static const Color primary = Color(0xFF0D2B5C); // Deep Navy Primary
+  static const Color secondary = Color(0xFFFF9800); // Orange Accent
+  static const Color accentOrange = Color(0xFFFF7A00); // Vibrant Orange
+  static const Color background = Color(0xFFF8F9FB); // Light Neutral Background
+  static const Color cardBackground = Colors.white; // Pure White Cards
+  static const Color textPrimary = Color(0xFF111827); // High-contrast primary text
+  static const Color textSecondary = Color(0xFF6B7280); // Neutral secondary text
+  static const Color accent = Color(0xFFEBF3FC); // Subtle Navy Tint
+  static const Color success = Color(0xFF10B981);
+  static const Color warning = Color(0xFFF59E0B);
+  static const Color error = Color(0xFFEF4444);
+  static const Color border = Color(0xFFEEF2F6);
 
   // --- Typography ---
   static TextStyle get headingLarge => GoogleFonts.inter(
-        fontSize: 24,
+        fontSize: 26,
         fontWeight: FontWeight.w800,
         color: textPrimary,
         letterSpacing: -0.5,
@@ -30,11 +31,12 @@ class DegloorTheme {
         fontSize: 20,
         fontWeight: FontWeight.w700,
         color: textPrimary,
+        letterSpacing: -0.3,
       );
 
   static TextStyle get titleLarge => GoogleFonts.inter(
         fontSize: 18,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w700,
         color: textPrimary,
       );
 
@@ -90,24 +92,24 @@ class DegloorTheme {
 
   // --- Radius ---
   static const double radiusSM = 8.0;
-  static const double radiusMD = 14.0;
-  static const double radiusLG = 18.0;
+  static const double radiusMD = 16.0; // Standard 16px Card Radius
+  static const double radiusLG = 20.0;
   static const double radiusXL = 24.0;
 
   // --- Shadows ---
-  static List<BoxShadow> get cardShadow => [
+  static List<BoxShadow> get cardShadow => const [
         BoxShadow(
-          color: Colors.black.withValues(alpha: 0.04),
-          blurRadius: 10,
-          offset: const Offset(0, 4),
+          color: Color(0x0A000000), // Minimal shadow
+          blurRadius: 8,
+          offset: Offset(0, 2),
         ),
       ];
 
-  static List<BoxShadow> get softShadow => [
+  static List<BoxShadow> get softShadow => const [
         BoxShadow(
-          color: Colors.black.withValues(alpha: 0.02),
+          color: Color(0x06000000), // Ultra-minimal shadow
           blurRadius: 4,
-          offset: const Offset(0, 2),
+          offset: Offset(0, 2),
         ),
       ];
 

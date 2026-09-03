@@ -51,10 +51,11 @@ class _CompletenessCardWidgetState extends State<CompletenessCardWidget> {
     return Container(
       decoration: BoxDecoration(
         color: FlutterFlowTheme.of(context).secondaryBackground,
-        borderRadius: BorderRadius.circular(12.0),
+        borderRadius: BorderRadius.circular(16.0),
         border: Border.all(
           color: FlutterFlowTheme.of(context).alternate,
         ),
+        boxShadow: [FlutterFlowTheme.of(context).designToken.shadow.xs],
       ),
       child: Padding(
         padding: const EdgeInsets.all(24.0),

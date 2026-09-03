@@ -160,20 +160,24 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
             StatefulShellBranch(
               routes: [
                 GoRoute(
-                  name: ServicesWidget.routeName,
-                  path: ServicesWidget.routePath,
+                  name: CartWidget.routeName,
+                  path: CartWidget.routePath,
                   builder: (context, state) =>
-                      const ServicesWidget(showBack: false),
+                      const CartWidget(showBack: false),
+                  redirect: (context, state) =>
+                      !kBypassAuth && !appStateNotifier.loggedIn
+                          ? '/authentication'
+                          : null,
                 ),
               ],
             ),
             StatefulShellBranch(
               routes: [
                 GoRoute(
-                  name: CartWidget.routeName,
-                  path: CartWidget.routePath,
+                  name: CustomerOrdersWidget.routeName,
+                  path: CustomerOrdersWidget.routePath,
                   builder: (context, state) =>
-                      const CartWidget(showBack: false),
+                      const CustomerOrdersWidget(showBack: false),
                   redirect: (context, state) =>
                       !kBypassAuth && !appStateNotifier.loggedIn
                           ? '/authentication'
@@ -204,6 +208,11 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           name: LocationRadiusSelectorWidget.routeName,
           path: LocationRadiusSelectorWidget.routePath,
           builder: (context, params) => const LocationRadiusSelectorWidget(),
+        ),
+        FFRoute(
+          name: ServicesWidget.routeName,
+          path: ServicesWidget.routePath,
+          builder: (context, params) => const ServicesWidget(),
         ),
         FFRoute(
           name: ServicesWidget.stackedRouteName,
@@ -301,12 +310,6 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           name: ManageOrdersWidget.routeName,
           path: ManageOrdersWidget.routePath,
           builder: (context, params) => const ManageOrdersWidget(),
-          requireAuth: true,
-        ),
-        FFRoute(
-          name: CustomerOrdersWidget.routeName,
-          path: CustomerOrdersWidget.routePath,
-          builder: (context, params) => const CustomerOrdersWidget(),
           requireAuth: true,
         ),
         FFRoute(

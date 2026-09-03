@@ -15,52 +15,75 @@ class HeroBanner extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: DegloorTheme.spacingMD),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [DegloorTheme.primary, Color(0xFF1E5299)],
+          colors: [DegloorTheme.primary, Color(0xFF143B7A)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(DegloorTheme.radiusLG),
+        borderRadius: BorderRadius.circular(DegloorTheme.radiusMD),
+        boxShadow: DegloorTheme.softShadow,
       ),
       child: Stack(
         children: [
+          Positioned(
+            right: -20,
+            bottom: -20,
+            child: Container(
+              width: 140,
+              height: 140,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withValues(alpha: 0.05),
+              ),
+            ),
+          ),
           Padding(
-            padding: const EdgeInsets.all(DegloorTheme.spacingMD),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Everything local,\nin one app.',
-                  style: GoogleFonts.inter(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.w800,
-                    height: 1.15,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                ElevatedButton(
-                  onPressed: onExplore,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: DegloorTheme.secondary,
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    visualDensity: VisualDensity.compact,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(DegloorTheme.radiusSM),
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 8,
+            padding: const EdgeInsets.symmetric(
+              horizontal: DegloorTheme.spacingMD + 4,
+              vertical: DegloorTheme.spacingSM,
+            ),
+            child: SingleChildScrollView(
+              physics: const NeverScrollableScrollPhysics(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Everything local,\nin one app.',
+                    style: GoogleFonts.inter(
+                      color: Colors.white,
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                      height: 1.15,
+                      letterSpacing: -0.3,
                     ),
                   ),
-                  child: const Text(
-                    'Explore Now',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                  const SizedBox(height: 8),
+                  ElevatedButton(
+                    onPressed: onExplore,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: DegloorTheme.secondary,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      visualDensity: VisualDensity.compact,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(DegloorTheme.radiusSM + 2),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 22,
+                        vertical: 10,
+                      ),
+                    ),
+                    child: const Text(
+                      'Explore Now',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],
