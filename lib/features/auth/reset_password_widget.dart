@@ -3,6 +3,7 @@ import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/supabase/supabase_connection.dart';
 import 'package:degloor_one/components/auth_page_header.dart';
 import 'package:degloor_one/components/supabase_unreachable_banner.dart';
+import 'package:degloor_one/core/api/api_client.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_icon_button.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
@@ -26,6 +27,9 @@ class _ResetPasswordWidgetState extends State<ResetPasswordWidget> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
   bool _isLoading = false;
 
+  bool get _authBlocked =>
+      SupabaseConnection.shouldSkipAuthRequest && !JavaApiConfig.enabled;
+
   bool get _canSetPassword => PasswordRecovery.pending.value || loggedIn;
 
   @override
@@ -33,6 +37,13 @@ class _ResetPasswordWidgetState extends State<ResetPasswordWidget> {
     super.initState();
     _model = createModel(context, () => ResetPasswordModel());
     PasswordRecovery.pending.addListener(_onRecoveryChanged);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final token = GoRouterState.of(context).uri.queryParameters['token'];
+      if (token != null && token.isNotEmpty) {
+        PasswordRecovery.beginWithToken(token);
+      }
+    });
   }
 
   void _onRecoveryChanged() {
@@ -144,9 +155,7 @@ class _ResetPasswordWidgetState extends State<ResetPasswordWidget> {
           ),
           const SizedBox(height: 32),
           FFButtonWidget(
-            onPressed: _isLoading || SupabaseConnection.shouldSkipAuthRequest
-                ? null
-                : _handleSave,
+            onPressed: _isLoading || _authBlocked ? null : _handleSave,
             text: _isLoading ? 'Saving...' : 'Update password',
             options: FFButtonOptions(
               width: double.infinity,
@@ -228,7 +237,7 @@ class _ResetPasswordWidgetState extends State<ResetPasswordWidget> {
         newPassword: _model.passwordController.text,
       );
       if (!mounted) return;
-      PasswordRecovery.pending.value = false;
+      PasswordRecovery.clear();
       context.goNamed('_initialize');
     } finally {
       if (mounted) setState(() => _isLoading = false);

@@ -20,4 +20,14 @@ void main() {
     );
     expect(PasswordRecovery.validateNewPassword('secret1', 'secret1'), isNull);
   });
+
+  test('beginWithToken arms recovery and clear resets it', () {
+    PasswordRecovery.clear();
+    PasswordRecovery.beginWithToken('  abc123  ');
+    expect(PasswordRecovery.pending.value, isTrue);
+    expect(PasswordRecovery.resetToken, 'abc123');
+    PasswordRecovery.clear();
+    expect(PasswordRecovery.pending.value, isFalse);
+    expect(PasswordRecovery.resetToken, isNull);
+  });
 }

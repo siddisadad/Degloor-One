@@ -595,6 +595,22 @@ void main() {
     expect(source.contains(_table), isFalse);
   });
 
+  test('Java password reset is wired through AuthApi', () {
+    final repo =
+        File('lib/auth/java_auth/java_auth_repository.dart').readAsStringSync();
+    expect(repo.contains('AuthApi.forgotPassword'), isTrue);
+    expect(repo.contains('AuthApi.resetPassword'), isTrue);
+    expect(repo.contains('AuthApi.changePassword'), isTrue);
+    expect(repo.contains('PasswordRecovery.beginWithToken'), isTrue);
+    final api = File('lib/core/api/auth_api.dart').readAsStringSync();
+    expect(api.contains('/api/v1/auth/forgot-password'), isTrue);
+    expect(api.contains('/api/v1/auth/reset-password'), isTrue);
+    expect(api.contains('/api/v1/auth/change-password'), isTrue);
+    final auth = File('lib/features/auth/authentication_widget.dart')
+        .readAsStringSync();
+    expect(auth.contains('if (!JavaApiConfig.enabled)'), isTrue);
+  });
+
   test('shop leftover domain types stay off Supabase tables', () {
     const paths = [
       'lib/shared/shop.dart',

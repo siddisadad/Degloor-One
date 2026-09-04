@@ -4,6 +4,7 @@ import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/supabase/supabase_connection.dart';
 import 'package:degloor_one/components/auth_page_header.dart';
 import 'package:degloor_one/components/supabase_unreachable_banner.dart';
+import 'package:degloor_one/core/api/api_client.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_icon_button.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_theme.dart';
 import 'package:degloor_one/flutter_flow/flutter_flow_util.dart';
@@ -33,6 +34,9 @@ class _ForgotPasswordWidgetState extends State<ForgotPasswordWidget> {
   late final AuthResendCooldown _resendCooldown;
   bool _isLoading = false;
   bool _emailSent = false;
+
+  bool get _authBlocked =>
+      SupabaseConnection.shouldSkipAuthRequest && !JavaApiConfig.enabled;
 
   @override
   void initState() {
@@ -136,9 +140,7 @@ class _ForgotPasswordWidgetState extends State<ForgotPasswordWidget> {
         ),
         const SizedBox(height: 32),
         FFButtonWidget(
-          onPressed: _isLoading || SupabaseConnection.shouldSkipAuthRequest
-              ? null
-              : _handleSendReset,
+          onPressed: _isLoading || _authBlocked ? null : _handleSendReset,
           text: _isLoading ? 'Sending...' : 'Send reset link',
           options: FFButtonOptions(
             width: double.infinity,
@@ -202,7 +204,7 @@ class _ForgotPasswordWidgetState extends State<ForgotPasswordWidget> {
         FFButtonWidget(
           onPressed: _isLoading ||
                   _resendCooldown.isActive ||
-                  SupabaseConnection.shouldSkipAuthRequest
+                  _authBlocked
               ? null
               : _handleSendReset,
           text: _resendCooldown.isActive
@@ -245,6 +247,11 @@ class _ForgotPasswordWidgetState extends State<ForgotPasswordWidget> {
         redirectTo: PasswordRecovery.redirectTo(),
       );
       if (mounted && sent) {
+        if (PasswordRecovery.pending.value &&
+            PasswordRecovery.resetToken != null) {
+          context.goNamed('ResetPassword');
+          return;
+        }
         setState(() => _emailSent = true);
         _resendCooldown.start();
       }
