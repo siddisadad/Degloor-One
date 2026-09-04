@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:degloor_one/auth/java_auth/java_session_lifecycle.dart';
 import 'package:degloor_one/core/api/api_client.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -24,5 +26,14 @@ void main() {
       isJavaAuthFailure(JavaApiException('UNREACHABLE', 'Offline')),
       isFalse,
     );
+  });
+
+  test('token refresh catch path marks the session unavailable', () {
+    final source = File('lib/core/api/api_client.dart').readAsStringSync();
+    final refresh = source.split('Future<bool> _tryRefresh()').last;
+    final catchBody = refresh.split('catch (_) {').last.split('} finally').first;
+    expect(catchBody, contains('markJavaSessionUnavailable()'));
+    expect(catchBody, isNot(contains('clearJavaSession()')));
+    expect(source, contains('await clearJavaSession();'));
   });
 }
