@@ -182,6 +182,10 @@ class JavaApiClient {
       await clearJavaSession();
       return false;
     } catch (_) {
+      // Network / parse failures are transient: keep persisted JWTs for the
+      // next cold start, but drop the zombie logged-in UI so callers stop
+      // retrying with a dead access token.
+      await markJavaSessionUnavailable();
       return false;
     } finally {
       _refreshing = false;
