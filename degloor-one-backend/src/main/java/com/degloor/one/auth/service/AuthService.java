@@ -71,7 +71,13 @@ public class AuthService {
     public AuthDtos.TokenResponse refresh(String refreshToken) {
         RefreshToken stored = refreshTokens.findByTokenHash(hash(refreshToken))
                 .orElseThrow(() -> BusinessException.unauthorized("INVALID_REFRESH", "Please sign in again"));
-        if (stored.isRevoked() || stored.getExpiresAt().isBefore(Instant.now())) {
+        if (stored.isRevoked()) {
+            // Reuse of a rotated refresh token is treated as theft: revoke the
+            // whole session family so an attacker's newer token dies too.
+            refreshTokens.deleteByUser(stored.getUser());
+            throw BusinessException.unauthorized("INVALID_REFRESH", "Please sign in again");
+        }
+        if (stored.getExpiresAt().isBefore(Instant.now())) {
             throw BusinessException.unauthorized("INVALID_REFRESH", "Please sign in again");
         }
         stored.setRevoked(true);
