@@ -167,6 +167,14 @@ class CheckoutSecurityTest {
         mvc.perform(get("/api/v1/admin/users"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
+        mvc.perform(post("/api/v1/analytics/events")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(Map.of(
+                                "businessId", "11111111-1111-4111-8111-111111111111",
+                                "eventType", "view"
+                        ))))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
         mvc.perform(get("/api/v1/jobs")).andExpect(status().isOk());
         mvc.perform(get("/api/v1/businesses")).andExpect(status().isOk());
     }
