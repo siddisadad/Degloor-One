@@ -18,6 +18,7 @@ import 'package:degloor_one/shared/showcase_catalog.dart';
 import 'package:degloor_one/shared/user_role.dart';
 import 'package:degloor_one/auth/supabase_auth/auth_util.dart';
 import 'package:degloor_one/backend/whatsapp_service.dart';
+import 'package:degloor_one/core/api/api_client.dart';
 
 class ProfileCompleteness {
   const ProfileCompleteness({
@@ -356,12 +357,15 @@ class BusinessService {
     await _catalog.upsertHours(hours, businessId: shop.id);
   }
 
-  /// Guest mode and the FlutterFlow host have no writable `product-images`
-  /// bucket. A live GoTrue probe turns [kUseShowcaseData] off so table reads
-  /// can run, but storage still 400s and the UI shows "Unable to upload the
-  /// image". Keep a local public URL in those cases.
+  /// Guest mode, the FlutterFlow host, and the Java API have no writable
+  /// `product-images` bucket. Showcase/guest/dead-host paths avoid Supabase
+  /// storage 400s. Java stores whatever URL string the client sends (v1 has no
+  /// object-storage endpoint), so uploads return a stable placeholder URL.
   static bool get usesLocalPublicImage =>
-      kUseShowcaseData || kBypassAuth || kUsesDeadFlutterFlowHost;
+      kUseShowcaseData ||
+      kBypassAuth ||
+      kUsesDeadFlutterFlowHost ||
+      JavaApiConfig.enabled;
 
   static String localPublicImageUrl(String path) {
     return 'https://images.unsplash.com/photo-1542838132-92c53300491e'

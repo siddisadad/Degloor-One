@@ -170,12 +170,14 @@ void main() {
     expect(model.contains('Future<void> save('), isTrue);
   });
 
-  test('shop image upload stays local for guest and the FlutterFlow host', () {
+  test('shop image upload stays local for guest, FlutterFlow host, and Java API',
+      () {
     final source = File('lib/backend/business_service.dart').readAsStringSync();
     expect(source.contains('uploadPublicImage'), isTrue);
     expect(source.contains('kUseShowcaseData'), isTrue);
     expect(source.contains('kBypassAuth'), isTrue);
     expect(source.contains('kUsesDeadFlutterFlowHost'), isTrue);
+    expect(source.contains('JavaApiConfig.enabled'), isTrue);
     expect(source.contains('product-images'), isTrue);
   });
 
