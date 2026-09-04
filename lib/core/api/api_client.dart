@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:degloor_one/auth/java_auth/java_session_lifecycle.dart';
 import 'package:degloor_one/auth/java_auth/java_session_store.dart';
 import 'package:degloor_one/core/app_environment.dart';
+import 'package:degloor_one/core/async_coalesce.dart';
 import 'package:http/http.dart' as http;
 
 class JavaApiException implements Exception {
@@ -26,7 +28,7 @@ class JavaApiClient {
 
   String? accessToken;
   String? refreshToken;
-  bool _refreshing = false;
+  Completer<bool>? _refreshCompleter;
 
   static bool get enabled => AppEnvironment.usesJavaBackend;
 
@@ -149,10 +151,17 @@ class JavaApiClient {
     return decoded;
   }
 
-  Future<bool> _tryRefresh() async {
+  Future<bool> _tryRefresh() {
+    return coalesceInFlight<bool>(
+      inFlight: _refreshCompleter,
+      setInFlight: (completer) => _refreshCompleter = completer,
+      action: _refreshTokens,
+    );
+  }
+
+  Future<bool> _refreshTokens() async {
     final token = refreshToken;
-    if (_refreshing || token == null || token.isEmpty) return false;
-    _refreshing = true;
+    if (token == null || token.isEmpty) return false;
     try {
       final response = await http.post(
         uri('/api/v1/auth/refresh'),
@@ -182,9 +191,11 @@ class JavaApiClient {
       await clearJavaSession();
       return false;
     } catch (_) {
+      // Network / parse failures are transient: keep persisted JWTs for the
+      // next cold start, but drop the zombie logged-in UI so callers stop
+      // retrying with a dead access token.
+      await markJavaSessionUnavailable();
       return false;
-    } finally {
-      _refreshing = false;
     }
   }
 }
