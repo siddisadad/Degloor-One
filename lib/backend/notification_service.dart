@@ -4,6 +4,7 @@ import 'package:degloor_one/backend/supabase/supabase.dart';
 import 'package:degloor_one/core/api/api_client.dart';
 import 'package:degloor_one/core/api/notification_api.dart';
 import 'package:degloor_one/core/error_handler.dart';
+import 'package:degloor_one/core/java_polling_stream.dart';
 import 'package:degloor_one/data/datasources/supabase_notification_maps.dart';
 import 'package:degloor_one/shared/app_notification.dart';
 import 'package:degloor_one/shared/page_query.dart';
@@ -94,8 +95,9 @@ class NotificationService {
 
   Stream<List<AppNotification>> watchForUser(String userId) {
     if (JavaApiConfig.enabled) {
-      return Stream.fromFuture(
-        listForUser(userId).then((page) => page.items),
+      return javaPollingStream(
+        () => listForUser(userId).then((page) => page.items),
+        interval: const Duration(seconds: 8),
       );
     }
     return _repository

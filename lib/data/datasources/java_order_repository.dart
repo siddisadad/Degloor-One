@@ -1,5 +1,6 @@
 import 'package:degloor_one/core/api/api_client.dart';
 import 'package:degloor_one/core/api/order_api.dart';
+import 'package:degloor_one/core/java_polling_stream.dart';
 import 'package:degloor_one/data/repositories/order_repository.dart';
 import 'package:degloor_one/shared/checkout_line_item.dart';
 import 'package:degloor_one/shared/join_rows.dart';
@@ -135,8 +136,9 @@ class JavaOrderRepository implements OrderRepository {
 
   @override
   Stream<List<PlacedOrder>> watchBusiness(String businessId) {
-    return Stream.fromFuture(
-      forBusiness(businessId).then((page) => page.items),
+    return javaPollingStream(
+      () => forBusiness(businessId).then((page) => page.items),
+      interval: const Duration(seconds: 12),
     );
   }
 
@@ -145,10 +147,11 @@ class JavaOrderRepository implements OrderRepository {
     required String orderId,
     required String userId,
   }) {
-    return Stream.fromFuture(
-      forCustomer(orderId: orderId, userId: userId).then(
+    return javaPollingStream(
+      () => forCustomer(orderId: orderId, userId: userId).then(
         (order) => order == null ? const <PlacedOrder>[] : [order],
       ),
+      interval: const Duration(seconds: 8),
     );
   }
 
